@@ -45,3 +45,8 @@ mechanical work to haiku; content voice never below opus. Consequence: `CLAUDE.m
 
 **D-009 · (pending) · Rendering: vanilla canvas vs PixiJS.**
 Proposed: vanilla canvas; switch only on measured failure at Phase 2. Decide at Phase 1 start.
+
+**D-010 · 2026-09-16 · "Occupancy" is the internal name only.**
+Josh: keep it for the repo, docs and briefs; the public-facing name is **TODO** and must be
+chosen before Phase 3 exit (the share image and OG copy carry it — R-11). Until then no
+user-visible string uses "Occupancy". Consequence: Q-2 reworded; Phase 3 gets the item.

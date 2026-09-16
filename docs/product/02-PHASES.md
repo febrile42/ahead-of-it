@@ -61,8 +61,10 @@ Deliverables
 - Custom tileset and sprites replacing stock, against the locked list. (A, brief from M with reference screenshots)
 - First-party analytics decision executed (Q-5). (S)
 - Copy pass on every panel in final voice. (M)
+- **TODO: public-facing name chosen (D-010, Q-2)** and applied to title, share image, OG. (J decides, M applies)
 
 Exit criteria
+- Public-facing name decided; "Occupancy" appears in no served string.
 - Share image renders correctly in iMessage, Slack, LinkedIn, X previews (H checks).
 - J approves final art and copy.
 

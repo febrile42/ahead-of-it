@@ -1,6 +1,6 @@
 # 00 — Vision
 
-**Working title:** Occupancy (a facilities word and a headcount word).
+**Internal name:** Occupancy (a facilities word and a headcount word). Public-facing name: **TODO** (D-010).
 **URL:** resume.joshgister.com
 **Owner:** Joshua Gister. **Author of this doc:** Claude (Opus), acting as PM, 2026-09-16.
 
