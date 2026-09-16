@@ -33,7 +33,7 @@ Deliverables
 - Hotspots + panel (R-04, R-05). Static gag markers (no animation). (S)
 - Punch list (R-14) generated from the same data. (S)
 - Phone-first layout at 390px (R-20). (S, reviewed by M on a real phone screenshot)
-- No-third-party test (R-21). (S)
+- No-third-party test (R-21) and the employer-name build check (R-33, D-014). (S)
 
 Exit criteria
 - All seven bands render with every gag placed and clickable at 390px.

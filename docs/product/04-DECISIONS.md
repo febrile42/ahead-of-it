@@ -61,3 +61,11 @@ panel describes the automation function's scope (E-03) and stops there. Conseque
 **D-013 · 2026-09-16 · The +33% capacity and the campus fiber are separate claims.**
 the previous employer' +33% was WAN capacity (E-11); the nine buildings were linked by private
 fiber (E-23). G5.1 uses E-23 only. Never attach the percentage to the fiber.
+
+**D-014 · 2026-09-16 · The current employer is never named on the site.**
+Josh: don't name the current employer; it's findable on LinkedIn by anyone curious. Served content uses
+one fixed descriptor — **"a $3B+ clean-energy company"** on first mention in a panel,
+"the company" after — and never the name, the logo, or the domain. City names and years
+may stay: Josh accepts that the combination is identifying; the rule is about not
+*saying* it. the previous employer is named (assumption A-1, reversible). A build-time check
+fails CI if the string appears in the output (R-33). Internal docs may use the name freely.

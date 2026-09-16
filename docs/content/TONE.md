@@ -28,6 +28,9 @@ Two registers, kept strictly apart.
      to an `E-xx`.
   4. **Fixed looks like** — one sentence describing the built-state object. This is the
      line that makes the switch legible.
+- **Employer descriptor (D-014):** the current employer is never named. First mention in a
+  panel: *"a $3B+ clean-energy company"*; thereafter *"the company"*. the previous employer is
+  named as on the resume. Cities and years are fine.
 - No adjectives about Josh. "Transformational" is banned. The receipt does the work.
 - Numbers are written as on the resume; do not round up, do not add precision that isn't
   there. "$500,000+" not "half a million". "99.96%+" not "four nines".
@@ -43,7 +46,7 @@ Two registers, kept strictly apart.
 >
 > **When it hits:** band 4, usually triggered by the biggest deal you've had so far.
 >
-> **The receipt:** At [company], I hired an Information Security Manager and stood up the
+> **The receipt:** In 2023, at a $3B+ clean-energy company, I hired an Information Security Manager and stood up the
 > policy framework, audit-readiness and cross-department compliance workflows, targeting
 > ISO 27001 and SOC 2 inside 18–24 months, and added a Security Analyst two years later. `[E-04: 2023 / 2025 — headcount that year pending Q-10]`
 >

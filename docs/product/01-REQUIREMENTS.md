@@ -42,7 +42,7 @@ Change any of these by writing a `04-DECISIONS.md` entry first.
 | R-30 | Every receipt in panel copy is traceable to an `E-xx` in `EVIDENCE.md`, which cites a resume line or carries Josh's explicit confirmation. Unconfirmed receipts do not ship. |
 | R-31 | Bands state their confidence honestly ("companies around this size usually…"); copy never predicts a specific visitor's future. |
 | R-32 | Tone per `TONE.md`: failures are systemic, workers are never the joke, panel text is dry and precise. |
-| R-33 | Josh's current employer is referenced only in ways he has approved (see `05-OPEN-QUESTIONS.md` Q-1). |
+| R-33 | The current employer is **never named** in served content — not the name, logo or domain (D-014). Panels use the fixed descriptor in `TONE.md`. A build-time check greps the build output for the name (case-insensitive) and fails CI on a hit. the previous employer may be named. |
 
 ## Non-goals
 

@@ -19,7 +19,8 @@ ground) · **the finance corner** (first floor) · **the conference room** (glas
 floor) · **the roof** (power, solar) · **the top floor** (exec meeting, appears band 6) ·
 **outside** (street, truck, second building, other cities).
 
-Total: 25 gags + 1 ambient, + 1 proposed (G5.6). Cap is 28 (G-02). G7.4 cut (D-011).
+**Naming (D-014):** these notes say "the current employer" freely; *panel copy never does* — it uses the
+descriptor in `TONE.md`. Total: 25 gags + 1 ambient, + 1 proposed (G5.6). Cap is 28 (G-02). G7.4 cut (D-011).
 
 ---
 
