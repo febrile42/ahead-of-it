@@ -45,7 +45,7 @@ Two registers, kept strictly apart.
 >
 > **The receipt:** At [company], I hired an Information Security Manager and stood up the
 > policy framework, audit-readiness and cross-department compliance workflows, targeting
-> ISO 27001 and SOC 2 inside 18–24 months. `[E-04 — JOSH: year and headcount at start]`
+> ISO 27001 and SOC 2 inside 18–24 months, and added a Security Analyst two years later. `[E-04: 2023 / 2025 — headcount that year pending Q-10]`
 >
 > **Fixed looks like:** the auditor is let in. There's a desk with a name on it whose job
 > this is.

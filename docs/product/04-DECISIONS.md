@@ -50,3 +50,14 @@ Proposed: vanilla canvas; switch only on measured failure at Phase 2. Decide at 
 Josh: keep it for the repo, docs and briefs; the public-facing name is **TODO** and must be
 chosen before Phase 3 exit (the share image and OG copy carry it — R-11). Until then no
 user-visible string uses "Occupancy". Consequence: Q-2 reworded; Phase 3 gets the item.
+
+**D-011 · 2026-09-16 · The engagement-survey ranking does not appear on the site.**
+Josh: "leave this fact for resume." G7.4 is cut, E-15 is `withheld`. Do not re-ask.
+
+**D-012 · 2026-09-16 · Onboarding is described, never quantified.**
+No before/after time-to-provision measure exists (E-21) and none will be implied. G3.1's
+panel describes the automation function's scope (E-03) and stops there. Consequence of R-30.
+
+**D-013 · 2026-09-16 · The +33% capacity and the campus fiber are separate claims.**
+the previous employer' +33% was WAN capacity (E-11); the nine buildings were linked by private
+fiber (E-23). G5.1 uses E-23 only. Never attach the percentage to the fiber.
