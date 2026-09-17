@@ -42,8 +42,8 @@ is *today*, just barely; its receipts are the current ones (AI governance, KM, t
 | 2022 | Hired Systems & Automation Engineer; **automation function starts**. Hire: Support (2). **Lawrence** office opens; Boston expands to a 4th floor. |
 | 2023 | Hired **InfoSec Manager**; cybersecurity function starts. Hired **Network Engineer**; network function starts. Hire: Support (1). **Leadership layers introduced.** **Austin, NYC, DC** offices open — three in one year. |
 | 2024 | $500,000+ savings via renegotiation, renewals, licensing audits (resume). **Major SaaS-portfolio work.** |
-| 2025 | Hire: Security Analyst. |
-| 2026 | Internal transfer in: **Business Librarian** — knowledge management. |
+| 2025 | Hire: Security Analyst. **AI governance starts** with the introduction of ChatGPT to the whole organisation. |
+| 2026 | Internal transfer in: **Business Librarian** — knowledge management. **Glean** rolled out; **Claude** mid-year. |
 | now | 29 teleconference rooms across Boston, Chicago, NYC, DC, Lawrence. Six offices: those five plus **Austin** (no VC rooms). 750+ people (resume). |
 
 ## Current employer — tooling and vendors (confirmed)

@@ -19,7 +19,7 @@ Round 1 answered 2026-09-16. Remaining asks are in **bold**.
 | E-09 | the previous employer: NetApp + data centralisation 2012 (before: workstations, portable drives, consumer NAS); VMware 2013; Commvault + DR 2015 | Resume + TIMELINE | confirmed | G5.3 G5.6 |
 | E-10 | the previous employer: VoIP 2011, −33% communication costs, remote + call-center teams | Resume + TIMELINE 2011 | confirmed | G5.4 |
 | E-11 | the previous employer: ~40% network/telecom/hosting cost reduction; +33% **WAN** capacity; $200M org, 300+ employees, nine-building campus; two new 200k+ sq ft facilities | Resume + TIMELINE | confirmed — note: capacity claim is WAN, not the fiber | G5.2 G6.3 |
-| E-12 | Enterprise AI adoption and governance: tool evaluation, vendor mgmt, usage policies, cost governance | Resume | resume — **[JOSH: year it started]** (Q-22); one citable improvement is parked | G7.1 |
+| E-12 | Enterprise AI adoption and governance: tool evaluation, vendor mgmt, usage policies, cost governance. **Started 2025** with ChatGPT introduced to the whole org; Glean rolled out 2026; Claude mid-2026 | Resume + Josh (Q-22) | confirmed; one citable improvement is parked | G7.1 (G7.4 note) |
 | E-13 | Reports to SVP Product & Technology; key contributor to strategic planning | Resume | resume | G7.2 |
 | E-14 | Incubated Software Dev (2018, 3 devs + 1 PM via team extension) → handed off 2019. Incubated Product (2020, Director of Product title, 2 PMs) → handed off 2021 | TIMELINE | confirmed | G7.3 |
 | E-15 | Engagement survey ranking | — | **withheld** (Josh: keep for the resume) | G7.4 — **cut** (D-011) |

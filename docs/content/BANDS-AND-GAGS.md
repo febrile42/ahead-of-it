@@ -17,7 +17,7 @@ screen; this band's items are full-size, earlier ones quieter.
 | **610** | 2023 | ~610 | The auditor, the Wi-Fi, the org chart, three offices in a year |
 | **750** | 2024+ | ~750 | The portfolio, the renewals, the robot, the chair, the library |
 
-**Changes from v4:** every `[JOSH: year]` resolved but one (G7.1, Q-22). G2.3 → 80 (Palo
+**Changes from v4:** every `[JOSH: year]` resolved (G7.1: 2025). G2.3 → 80 (Palo
 Alto 2018). G5.1 → 150 with a VPN receipt (E-27) — Chicago opened and was linked in 2019.
 G5.5 merged into G2.4 at 220 (same joke under offices-only). G3.3 → 610 (layers 2023).
 G6.4 → 490 (Lawrence + Boston 4th floor 2022); G6.3 → 610 (Austin/NYC/DC 2023). G6.1 and
@@ -276,13 +276,15 @@ argument ends.
 - **Where:** finance corner.
 - **Receipt:** E-07 (2024).
 
-### G7.1 · The unvetted robot *(`[JOSH: year AI governance started]` — Q-22)*
+### G7.1 · The unvetted robot
 - **Already:** the robot's badge reads `APPROVED`; it wears a tiny policy document as a
   lanyard; documents pass through a small gate first; the company card is back in Finance.
 - **Without:** a cheerful robot wandering the floor, badge `UNVETTED`, happily eating a
   stack of `CONFIDENTIAL` documents while another worker hands it the company card.
 - **Where:** sales pit, open floor.
-- **Receipt:** E-12 (evaluation, vendor management, usage policies, cost governance).
+- **Receipt:** E-12 — governance started 2025 *with* the org-wide rollout of ChatGPT, i.e.
+  the tool and the policy arrived together rather than the policy chasing the tool; Glean
+  2026; Claude mid-2026. That sequencing is the "Already" line.
 
 ### G7.2 · The empty chair
 - **Already:** the chair is occupied — **the only place Josh appears, sitting in a
@@ -298,7 +300,9 @@ argument ends.
 - **Without:** a worker holding `HOW TO DO THE THING (v3?)`, asking a colleague, who points
   at a third, who points at a padlocked filing cabinet; a wiki icon with cobwebs.
 - **Where:** first-floor corridor, near the org chart.
-- **Receipt:** E-26.
+- **Receipt:** E-26. Note: Glean (enterprise search) rolled out 2026 alongside the
+  librarian — the built state's `LIBRARY` desk can plausibly have a search box on it;
+  confirm before drawing (E-12).
 
 ---
 
@@ -310,5 +314,4 @@ At night one window lights up; a sprite in pyjamas at a laptop. In the built sta
 G5.6 (fold into G5.1) · G6.4 (fold into G6.3) · G2.3 · G6.1.
 
 ## Still wanted from Josh
-Q-22 (AI governance year), Q-23 (a second gag for 220?), and the two or three stories you
-still tell people.
+Q-23 (a second gag for 220?), and the two or three stories you still tell people.
