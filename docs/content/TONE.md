@@ -19,6 +19,14 @@ Two registers, kept strictly apart.
 
 - Second person, present tense, addressed to the visitor's company: "Around this size,
   the first enterprise customer asks for a SOC 2 report." Never "I did X" as the opener.
+- **The strip** (R-04a) carries year · headcount · descriptor for every panel, so prose
+  need not repeat them — but the Already still states the year and headcount in words
+  where they are the point.
+- **Vary the prevention opener.** Not "at this size" every time: "by now", "by 150",
+  "around now", "the week after you sign the lease", "with a second office". Put the reader
+  in it — "your", "you" — in at least half of them.
+- **The Already names a choice, not a purchase.** "I chose not to have a server room"
+  beats "I deployed M365". Where the sources give an alternative, say what it was.
 - Structure, always in this order (D-021):
   1. **Already built** — the lead. Year, headcount, what Josh did, the number. Past tense;
      first person allowed here and only here. Every number traces to an `E-xx`. This is

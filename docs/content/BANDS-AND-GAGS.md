@@ -15,7 +15,7 @@ screen; this band's items are full-size, earlier ones quieter.
 | **360** | 2021 | ~360 | The handoff; the campus receipts (phones, servers, data) |
 | **490** | 2022 | ~490 | Onboarding automated; the badge that works |
 | **610** | 2023 | ~610 | The auditor, the Wi-Fi, the org chart, three offices in a year |
-| **750** | 2024+ | ~750 | The portfolio, the renewals, the robot, the chair, the library |
+| **750** | 2024+ | ~650→750 | The portfolio, the renewals, the robot, the chair, the library |
 
 **Changes from v4:** every `[JOSH: year]` resolved (G7.1: 2025). G2.3 → 80 (Palo
 Alto 2018). G5.1 → 150 with a VPN receipt (E-27) — Chicago opened and was linked in 2019.
