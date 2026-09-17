@@ -114,3 +114,10 @@ confirmation (Q-15). Not applied to any served string yet.
 Josh: "Drop the previous employer — keep the companies generic. The details live in my real
 resume or LinkedIn." Assumption A-1 reversed. Descriptors in `TONE.md`; the CI check greps
 for both names.
+
+**D-020 (amended) · 2026-09-16 · Research result reframes the art question.**
+Stock packs under $100 cover the building and generic furniture (~35% of gags), not the
+gag-defining props, which exist in no pack because they are bespoke by definition. Plan:
+Phase 1 builds on the ~$27 pixel_Salvaje pair (after Josh re-verifies the licence on the
+live page and buys it — money and purchase are his actions) with placeholder props; the
+prop question is Q-19. The single most-reused missing prop is the badge reader (three bands).
