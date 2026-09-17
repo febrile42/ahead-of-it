@@ -129,3 +129,16 @@ but the argument is *what Josh had already built by the time the company was the
 Consequences are structural (default state, band definition, panel order, share copy) and
 are proposed under Q-20 rather than applied silently. Supersedes the "what breaks next"
 framing in 00-VISION principle 1 and the Q-15 name candidates built on it.
+
+**D-022 · 2026-09-16 · Default state is built; the "without" state is the share.**
+Josh: "for a resume it feels ok to illustrate what Josh has done — and keep the humor for
+what makes the recruiter share it with friends. We want to encourage people to toggle to
+see the gags." So: the visitor lands on the calm, built building; the toggle to "without"
+is prominent and nudged (R-06a); the share image is the *without* state with the credential
+as caption. Supersedes R-06's original default.
+
+**D-023 · 2026-09-16 · Bands are Josh's real headcounts.**
+80 · 150 · 220 · 360 · 490 · 610 · 750 (2018–2024+). The visitor's number snaps to the
+nearest. Every band has receipts by construction; Q-14 is dissolved — each gag sits where
+its receipt happened. Gag IDs (G1.1 …) are kept stable and no longer encode the band.
+Supersedes D-002's round-number bands (still seven).

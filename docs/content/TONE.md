@@ -19,15 +19,16 @@ Two registers, kept strictly apart.
 
 - Second person, present tense, addressed to the visitor's company: "Around this size,
   the first enterprise customer asks for a SOC 2 report." Never "I did X" as the opener.
-- Structure, always in this order:
-  1. **What this is** — one or two sentences, plain, no jargon the reader has to look up.
-  2. **When it hits** — the band, and the typical trigger. Honest confidence: "usually",
-     "around", "the first time someone asks". Never "you will".
-  3. **The receipt** — where Josh hit it: company (per Q-1), year, headcount, what he did,
-     the number. Past tense, first person allowed here and only here. Every number traces
-     to an `E-xx`.
-  4. **Fixed looks like** — one sentence describing the built-state object. This is the
-     line that makes the switch legible.
+- Structure, always in this order (D-021):
+  1. **Already built** — the lead. Year, headcount, what Josh did, the number. Past tense;
+     first person allowed here and only here. Every number traces to an `E-xx`. This is
+     the line that makes the built-state object legible.
+  2. **What it prevented** — the gag, in one or two plain sentences, addressed to the
+     visitor's company: "Around this size, the first enterprise customer asks for a SOC 2
+     report." Honest confidence: "usually", "around". Never "you will".
+  3. **Worth it later** — where a later receipt exists (six offices on the 2018 identity
+     decision; 29 rooms on the first two), one sentence. Where none exists, omit — do not
+     manufacture a payoff.
 - **Employer descriptors (D-014, amended): neither company is named.** Fixed phrases,
   first mention in a panel → thereafter:
   - current: *"a $3B+ clean-energy company"* → *"the company"*
@@ -40,22 +41,27 @@ Two registers, kept strictly apart.
 - Length: ≤ 110 words per panel. A recruiter is on a phone.
 - One contact link at the bottom of every panel (R-12). No CTA copy beyond "Talk to Josh".
 
-## Sample panel (voice reference) — G4.1, the auditor at the door
+## Sample panel (voice reference) — G4.1, the auditor at the door · band 610 / 2023
 
-> **The first compliance request.**
-> Around 200 people, an enterprise prospect's procurement team asks for a SOC 2 report or
-> an ISO 27001 certificate before they'll sign. Nobody asked at 100. There is no program,
-> no policy set, no one whose job it is — and the honest answer is "no".
+> **A security function, before the auditor arrived.**
+> In 2023, at ~600 people, I hired an Information Security Manager and stood up the policy
+> framework, audit readiness and cross-department compliance workflows, targeting ISO 27001
+> and SOC 2 inside 18–24 months. A Security Analyst followed in 2025. `[E-04]`
 >
-> **When it hits:** band 4, usually triggered by the biggest deal you've had so far.
+> **What it prevented:** around this size an enterprise prospect's procurement team asks
+> for a SOC 2 report before they'll sign, and the honest answer — with no program and no
+> one whose job it is — is "no". The deal dies in procurement, not in the budget.
 >
-> **The receipt:** In 2023, at a $3B+ clean-energy company, I hired an Information Security Manager and stood up the
-> policy framework, audit-readiness and cross-department compliance workflows, targeting
-> ISO 27001 and SOC 2 inside 18–24 months, and added a Security Analyst two years later. `[E-04: 2023 / 2025 — headcount that year pending Q-10]`
->
-> **Fixed looks like:** the auditor is let in. There's a desk with a name on it whose job
-> this is.
+> **Worth it later:** the second audit is cheaper than the first. `[JOSH: only if true —
+> otherwise omit this beat]`
 >
 > Talk to Josh →
 
-(102 words. Note the word "transformational" appears nowhere.)
+(98 words. "Transformational" appears nowhere.)
+
+## Toggle and share copy (D-022)
+
+- Toggle, built → without: **"See it without him"**. Without → built: **"What he'd already built"**.
+- Nudge (once, after the first slider move): *"Now see what this looks like without him."*
+- Share caption: *"By the time the company was your size, Josh had already fixed this."*
+- OG title: *At Your Scale — Josh Gister's résumé* (name pending Q-15).

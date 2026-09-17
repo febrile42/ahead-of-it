@@ -29,22 +29,23 @@ Deliverables
 - Content pipeline: `docs/content/*.md` → `content/gags.json` with schema validation. (S build, H validate)
 - Tileset + sprite manifest from a CC0/licensed isometric pack, with licence file. (H inventory, S integrate)
 - Building assembler: band → tile grid → canvas. Static per band. (S)
-- Slider (R-01) snapping to bands; band readout. (S)
-- Hotspots + panel (R-04, R-05). Static gag markers (no animation). (S)
-- Punch list (R-14) generated from the same data. (S)
+- Slider (R-01) snapping to Josh's headcount bands; year-labelled ticks; readout. (S)
+- Both states static per band (built default, without on toggle — R-02/R-03/R-06). Hotspots + panel in D-021 order (R-04, R-05). (S)
+- Checklist (R-14) generated from the same data. (S)
 - Phone-first layout at 390px (R-20). (S, reviewed by M on a real phone screenshot)
 - No-third-party test (R-21), the employer-name build check (R-33, D-014), and `noindex` (R-16). (S)
 - **Art research brief (D-020):** what < $100 buys in commercially-licensed isometric/pixel office packs; gaps against the gag list. (S researches, H tabulates, M decides)
 
 Exit criteria
 - All seven bands render with every gag placed and clickable at 390px.
-- A stranger can identify what each gag *is* from the picture alone (M runs a 5-person hallway test with screenshots; ≥ 4/5 per gag or the gag is redrawn).
+- A stranger can identify what each gag *is* from the picture alone (M runs a 5-person hallway test with without-state screenshots; ≥ 4/5 per gag or the gag is redrawn).
+- **Toggle discoverability:** in the same hallway test, ≥ 4/5 people find and flip "without" within 20 seconds unprompted (R-06a). If not, the nudge is redesigned before Phase 2.
 - Staging preview URL works; nothing served outside the build output.
 
 ## Phase 2 — The switch and the workers
 
 Deliverables
-- Built state for every band (R-06, R-07). (S, copy by M)
+- Toggle + nudge (R-06, R-06a, R-07) polished; **band-crossing moment**: when the slider crosses into a band, the new threat briefly appears *already handled* (Q-20 item 5). (S, copy by M)
 - Animated workers, state poses, calmer built-state cycle (R-08). (S; H slices sheets)
 - `prefers-reduced-motion` (R-24). (S)
 - Performance budget met (R-23). (S measures, M signs)

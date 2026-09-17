@@ -1,400 +1,310 @@
-# Bands and gags — DRAFT v3 (Q-1..Q-13 applied, 2026-09-16)
+# Bands and gags — DRAFT v4 (prevention thesis, headcount bands · 2026-09-16)
 
-Seven bands. The slider snaps between them; the readout shows the band's range. Each gag
-has: **See** (what the pixels show) · **Where** (placement in the building) · **Is** (the
-real problem, for the panel) · **Built** (what replaces it when the switch flips) ·
-**Receipt** (`E-xx` from `EVIDENCE.md`). Gags marked **HELD** need a Josh answer before
-they can ship. Panel copy is drafted after this list is approved; the voice is in
-`TONE.md`.
+**Thesis (D-021):** the building shows what Josh had *already* built at the visitor's size.
+The gags are the "without" state (D-022) — one toggle away, and the reason anyone shares it.
 
-Anchors in Josh's history, so bands align to real receipts (`TIMELINE.md`):
-- **~80 people, 2018** — the current employer day one. Band 2. Confirmed.
-- **~150, 2019** — Intune, security training, Salesforce admin, Dev handed off. Band 3.
-- **~220, 2020** — Product incubated, VC rooms expand. Band 4.
-- **300+ people, nine buildings** — the previous employer (2011–2017). Band 5.
-- **~360–490, 2021–22** — Product handed off; Automation function starts. Band 5.
-- **~610–700, 2023–25** — InfoSec, Network Engineer, $500K, Security Analyst. Band 6.
-- **~750, six offices, 29 VC rooms in five cities** — the current employer today. Band 7.
+**Bands (D-023)** are Josh's real headcounts, one per year. The slider snaps to the nearest:
 
-The building's fixed geography, used by every band: **the closet** (back corner, ground
-floor) · **the front door** (badge reader lives here) · **the sales pit** (open floor,
-ground) · **the finance corner** (first floor) · **the conference room** (glass, first
-floor) · **the roof** (power, solar) · **the top floor** (exec meeting, appears band 6) ·
-**outside** (street, truck, second building, other cities).
+| Band | Year | Total people | Story |
+|---|---|---|---|
+| **80** | 2018 | ~80 | As found. Day one. |
+| **150** | 2019 | ~150 | Endpoints, training, the first system of record, the first handoff |
+| **220** | 2020 | ~220 | Rooms in every city; a second layer of leadership |
+| **360** | 2021 | ~360 | The second office — and the campus receipts (300+, 2011–15) |
+| **490** | 2022 | ~490 | Automation; the office-opening playbook |
+| **610** | 2023 | ~610 | Security and network become functions; the renewal audit |
+| **750** | 2024+ | ~750 | Governance, knowledge, the chair at the table |
 
-**Naming (D-014):** these notes say "the current employer" and "the previous employer" freely; *panel copy
-never does* — it uses the descriptors in `TONE.md`. **Topology (D-015):** many offices only.
+Each gag has: **Already** (the built-state object and the receipt — this leads the panel) ·
+**Without** (what the pixels show when toggled) · **Where** · **Receipt** (`E-xx`). Gag IDs are
+stable from v1–v3 and no longer encode the band. `[JOSH: year]` marks a receipt whose year
+we need to place it honestly (Q-21); those gags are placed provisionally.
 
-**Placement rule:** a gag sits in the band where the *visitor's* problem typically appears.
-Its receipt states the real year and headcount. Where Josh's receipt is from a larger
-company than the band, the panel says so plainly — see Q-14 for the two cases.
+**Naming (D-014):** these notes name both companies; panel copy never does (`TONE.md`).
+Fixed geography: the closet · front door · sales pit · finance corner · conference room ·
+first-floor corridor · top floor (from 610) · outside (street, inset office, map from 490).
 
-Total: 25 gags + 1 ambient, + 2 proposed (G5.6, G7.4). Cap is 28 (G-02).
+Total: 26 gags (incl. G5.6 and G7.4, both proposed) + 1 ambient. Cap 28 (G-02). ≤ 5 per band.
 
 ---
 
-## Band 1 · 25–60 · *Before the function*
+## 80 · 2018 · *As found*
 
-Four desks become twelve. One floor. The company has never had an IT person and doesn't
-think it needs one yet. the current employer was already ~80 when Josh arrived, so this band is what the
-*day before* looked like, inferred from what he found; it exists so the visitor can find
-their past.
+One floor, then two, and a move from ~9k to ~22k sq ft in the same year. This band's
+"without" state is not hypothetical: it is what Josh walked into. Five gags, all 2018.
 
 ### G1.1 · The closet
-- **See:** the "server room" is a supply closet. A router on a shelf next to the paper
-  towels, a box fan pointed at it, a nest of cables. A worker opens the door and a cable
-  falls out.
+- **Already:** a small, boring rack with a label maker used on it — and it is *small*
+  because identity went to the cloud on day one, so every later office is cheap.
+- **Without:** the "server room" is a supply closet: router beside the paper towels, a box
+  fan pointed at it, a cable falls out when the door opens.
 - **Where:** the closet.
-- **Is:** consumer-grade gear, no rack, no cooling, no separation from the cleaning
-  supplies. It works until the day it doesn't, and that day is a Monday.
-- **Built:** a real, small, boring rack. Managed switch, proper APs, a label maker has been
-  used. Cloud identity means the rack is *small* — this is the day-one decision that made
-  every later office cheap.
-- **Receipt:** E-01.
+- **Receipt:** E-01 (cloud-first M365/Azure identity from day one, 2018, ~80). *Worth it
+  later:* six offices, zero server rooms (E-05).
 
 ### G1.2 · Password post-its
-- **See:** a yellow sticky note on every monitor. One worker is peeling a note off a
-  colleague's screen to log in.
+- **Already:** a tiny padlock on each monitor; a worker taps a phone to log in (SSO + MFA).
+- **Without:** a yellow sticky note on every monitor; a worker peeling a colleague's off
+  to log in. Offboarding is "hope".
 - **Where:** the sales pit, every desk.
-- **Is:** no identity provider. Shared logins, personal Gmail forwarding, the offboarding
-  process is "hope".
-- **Built:** the notes are gone. A tiny padlock icon on each monitor (SSO + MFA). One
-  worker taps a phone to log in.
 - **Receipt:** E-01.
 
-### G1.3 · The founder's credit card
-- **See:** laptops arriving in an online-retailer box, delivered to the CEO's desk; the CEO
-  is signing for it while on a call.
-- **Where:** front door → the corner office.
-- **Is:** procurement is a personal card and a spreadsheet nobody updates. No asset
-  register, no standard build, no idea what's on what.
-- **Built:** a small IT desk near the door with a shelf of identical laptops, each with a
-  tag.
-- **Receipt:** E-24 (confirmed: laptops on credit cards). Ships.
-
----
-
-## Band 2 · 60–120 · *The developer who became IT*
-
-Two floors. Thirty desks, then sixty. This is the band the current employer's IT function was born in —
-~80 people, 2018, one Support hire, and a move from ~9k to ~22k sq ft in the same year.
-Somebody technical has become IT by accident and it is costing the company that person's
-real job.
-
 ### G2.1 · The queue at DEV
-- **See:** a desk whose monitor reads `DEV`. Six people in a line behind it, one holding a
-  laptop over their head like a broken appliance. The developer's own screen is a half-
-  finished pull request.
-- **Where:** the sales pit, the desk nearest the closet.
-- **Is:** the engineer who "knows computers" is the helpdesk, the admin, and the on-call.
-  The visible cost is a queue; the real cost is engineering velocity.
-- **Built:** the queue is gone. A two-person support desk with an SLA board (`Open: 3 ·
-  Avg: 1h`), and the developer's screen is code again.
-- **Receipt:** E-02, E-22 (confirmed: first Support hire 2018 at ~80). Ships with the date.
+- **Already:** a support desk near the door with an SLA board (`Open: 3 · Avg: 1h`); the
+  developer's screen is code again.
+- **Without:** a desk whose monitor reads `DEV`, six people in line behind it, one holding a
+  laptop over their head like a broken appliance; the developer's own screen is a
+  half-finished pull request.
+- **Where:** the sales pit, nearest the closet.
+- **Receipt:** E-22 (first Support hire, 2018, ~80). The visible cost was a queue; the
+  real cost was engineering velocity.
 
 ### G2.2 · The ceiling cable
-- **See:** an ethernet cable running along the floor between desks, held down with tape
-  and a small yellow `CAUTION` sign. A worker steps over it every few seconds.
+- **Already:** cabling in the ceiling, a patch panel in the (now real) closet — the 2018
+  build-out and move, 9k → 22k sq ft.
+- **Without:** an ethernet cable taped along the floor between desks with a small yellow
+  `CAUTION` sign; a worker steps over it every few seconds.
 - **Where:** the sales pit, floor.
-- **Is:** no structured cabling; the network is whatever reached. The next office move
-  repeats this at scale unless someone plans for it.
-- **Built:** the cable retracts into the ceiling. A patch panel appears in the (now real)
-  closet. The caution sign is gone.
-- **Receipt:** E-05 — specifically the 2018 build-out and move from ~9k to ~22k sq ft at
-  ~80 people, which is exactly this band. Strong receipt.
-
-### G2.3 · The guest Wi-Fi is the Wi-Fi
-- **See:** a visitor with a `VISITOR` sticker on a sofa by the front door, laptop glowing;
-  a dotted line from their laptop to the closet and every desk.
-- **Where:** front door lobby.
-- **Is:** one flat network. Guests, printers, the finance PC and the CEO's laptop are all
-  neighbours.
-- **Built:** the dotted line stops at a small firewall box in the closet. The visitor still
-  has Wi-Fi; it just goes nowhere interesting.
-- **Receipt:** E-06 (confirmed: Palo Alto NGFW at the edge — the box is a Palo Alto). Ships.
+- **Receipt:** E-05 (2018 office build and move). *Worth it later:* the same playbook ran
+  five more times (G6.3).
 
 ### G2.4 · The dongle meeting
-- **See:** four people huddled around one laptop, pointed at a wall-mounted TV with a
-  dangling dongle. A fifth person on the screen is a frozen face.
+- **Already:** a proper room — camera bar, a small touch panel, everyone seated, the remote
+  face is moving. Two rooms, 2018.
+- **Without:** four people huddled around one laptop pointed at a wall TV with a dangling
+  dongle; a fifth person on screen is a frozen face.
 - **Where:** the conference room.
-- **Is:** no AV standard. Every meeting starts with ten minutes of cables.
-- **Built:** a proper room: camera bar, a small touch panel, everyone sitting down, the
-  remote face is moving.
-- **Receipt:** E-05, E-25 (confirmed: 2 rooms in 2018 → 29 across five cities). The panel
-  receipt is "two rooms, then twenty-nine." Ships.
+- **Receipt:** E-25 (first two VC rooms, 2018). *Worth it later:* 29 rooms in five cities
+  (G5.5).
 
 ---
 
-## Band 3 · 120–200 · *The onboarding wall*
+## 150 · 2019 · *Endpoints, training, a system of record, the first handoff*
 
-Three floors. Hiring is now the company's main activity, and every new person exposes the
-absence of a system.
-
-### G3.1 · The empty desk
-- **See:** a new hire sitting at a bare desk with their coat still on. Above their head a
-  wall calendar flips pages. A `WELCOME!` balloon slowly deflates.
-- **Where:** the sales pit, front row.
-- **Is:** onboarding takes weeks because it is a person, not a process. Accounts are
-  created by hand, laptops ordered when someone remembers.
-- **Built:** the desk has a laptop, a badge and a coffee. The calendar shows one page.
-- **Receipt:** E-03 (confirmed: Systems & Automation Engineer 2022; SSO/SCIM, JML,
-  provisioning). **No before/after number exists and none will be implied** (E-21). The
-  panel describes the function; it does not quantify it.
-  ⚠️ **Placement mismatch (Q-14):** the receipt is from ~490 people (2022); this band is
-  120–200. The *problem* belongs here; the *fix* came later in Josh's case.
+Three floors. Hiring is the company's main activity. Every new laptop and every new hire
+exposes the absence of a system — so the systems arrive this year.
 
 ### G3.2 · The shopping cart
-- **See:** a supermarket trolley full of laptops parked by the closet. No one knows whose
-  they are. One has a sticky note: `DAVE? (LEFT 2023)`.
-- **Where:** beside the closet.
-- **Is:** no asset management, no endpoint management. Offboarding returns a laptop to a
-  trolley and the data on it to fate.
-- **Built:** the trolley is a shelf; each laptop has a tag and a small green light
-  (managed, encrypted, wipeable).
-- **Receipt:** E-19 (confirmed: Intune 2019 for Windows + mobile; Jamf and Zebra later). Ships.
-
-### G3.3 · The org chart with one box
-- **See:** a wall poster of the org chart. Every department is a tree; IT is one box, off
-  to the side, with a dotted line to Finance. The box has one very tired sprite in it.
-- **Where:** first-floor corridor wall.
-- **Is:** IT is a single point of failure reporting into whoever signs the invoices. No
-  leadership layer, no on-call rotation, no succession.
-- **Built:** the box becomes a small tree — Infrastructure, Security, Support — and the
-  line goes to Technology, not Finance.
-- **Receipt:** E-02, E-13.
-
-### G3.A · The 3:47am window *(ambient, all bands, R-13)*
-- **See:** at night, one window lights up; a sprite in pyjamas at a laptop. In the built
-  state a *different* window lights up each night — it's a rotation.
-- **Receipt:** none needed; decorative.
-
----
-
-## Band 4 · 200–300 · *The auditor at the door*
-
-Four floors. The first enterprise customers. The company's problems stop being internal.
-
-### G4.1 · The auditor turned away
-- **See:** a figure in a suit with a clipboard labelled `AUDITOR` at the front door; the
-  door is shut. In the sales pit, a worker's `$` thought-bubble fades to grey.
-- **Where:** front door + sales pit (two-part gag; both must be visible).
-- **Is:** the first SOC 2 / ISO 27001 request, from procurement, on the biggest deal so
-  far. No program, no policies, nobody whose job it is.
-- **Built:** the door is open, a handshake, and a first-floor desk with a nameplate
-  (`InfoSec`) and a binder.
-- **Receipt:** E-04 (confirmed: InfoSec Manager 2023; Security Analyst 2025). Still want the
-  *trigger* for the "when it hits" line — nice-to-have, not blocking.
-  ⚠️ **Placement mismatch (Q-14):** the receipt is from ~610 people (2023); this band is
-  200–300. Same question as G3.1.
+- **Already:** a shelf of identical laptops, each tagged, each with a small green light
+  (managed, encrypted, wipeable). Intune, 2019.
+- **Without:** a supermarket trolley of laptops parked by the closet, one with a sticky
+  note `DAVE? (LEFT 2023)`; a new laptop arriving in a retailer box to the CEO's desk,
+  bought on a credit card *(folds in v1's G1.3)*.
+- **Where:** beside the closet; front door → corner office.
+- **Receipt:** E-19 (Intune for Windows + mobile, 2019; Jamf and Zebra later), E-24
+  (credit-card procurement before).
 
 ### G4.2 · The fish
-- **See:** a fishing line dangles from the ceiling in front of a worker's monitor with an
-  envelope on the hook. The worker is reaching for it.
-- **Where:** finance corner (the CFO's inbox is the target, always).
-- **Is:** phishing, and no email security or awareness training between the attacker and
-  the wire transfer.
-- **Built:** the hook comes down and hits a small shield; the fish swims off. The worker
-  has a `REPORT` button on screen.
-- **Receipt:** E-20 (confirmed: annual security training from 2019, at ~150 — earlier than
-  this band; fine, the panel says so). Framed as training + reporting unless Josh names a
-  tool. Ships.
+- **Already:** the hook comes down and hits a small shield; the fish swims off; the worker
+  has a `REPORT` button on screen. Annual security training from 2019.
+- **Without:** a fishing line dangles from the ceiling in front of the finance worker's
+  monitor with an envelope on the hook; the worker is reaching for it.
+- **Where:** finance corner (the CFO's inbox is always the target).
+- **Receipt:** E-20. Framed as training + reporting unless Josh names a tool.
 
 ### G4.3 · Two CRMs
-- **See:** two workers back-to-back at adjacent desks, each with a spreadsheet titled
-  `CUSTOMERS (real)`. A third worker between them holding both printouts, looking from one
-  to the other.
+- **Already:** one screen; a pipeline flowing between `CRM → ERP → HRIS` icons; the person
+  in the middle is sitting down. A Salesforce Admin hired 2019.
+- **Without:** two workers back-to-back, each with a spreadsheet titled `CUSTOMERS (real)`;
+  a third between them holding both printouts, looking from one to the other.
 - **Where:** sales pit / finance corner boundary.
-- **Is:** departments bought their own systems. Sales, Finance and Ops each have a source
-  of truth, and month-end is a reconciliation project.
-- **Built:** one screen, a pipeline flowing between `CRM → ERP → HRIS` icons; the middle
-  worker is sitting down.
-- **Receipt:** E-08.
+- **Receipt:** E-08 (portfolio: Salesforce, NetSuite, HRIS/HCM, Procore, P6), Salesforce
+  Admin 2019 (TIMELINE).
+
+### G2.3 · The guest Wi-Fi is the Wi-Fi *(provisional — `[JOSH: year the Palo Alto edge went in]`)*
+- **Already:** the dotted line from the visitor's laptop stops at a small firewall box in
+  the closet. The visitor still has Wi-Fi; it just goes nowhere interesting.
+- **Without:** a visitor with a `VISITOR` sticker on the lobby sofa, laptop glowing, a
+  dotted line from it to the closet and every desk.
+- **Where:** front-door lobby.
+- **Receipt:** E-06 (Palo Alto NGFW at the edge). Moves to whichever band the year says.
 
 ---
 
-## Band 5 · 300–500 · *The second office*
+## 220 · 2020 · *Rooms in every city; a second layer*
 
-The company outgrows one building. The slider adds an inset: a smaller building in another
-city, with a dotted line to HQ. (D-015: offices only. Josh's campus receipts still apply —
-the problems are identical, only the building count differs, and the panel says "campus"
-where that's the truth.) Receipts here: Product handed off (2021, ~360), Automation
-function (2022, ~490), and the the previous employer campus work (2011–2015, 300+).
-
-### G5.1 · The overnight envelope *(reframed for offices-only — Q-17)*
-- **See:** a worker at HQ's front door handing a courier a padded envelope with a hard
-  drive-shaped bulge; in the inset office, a worker waiting at *their* front door, looking
-  at a watch. A dotted line between the buildings with a tiny truck moving along it.
-- **Where:** outside, both front doors, and the line between.
-- **Is:** no site-to-site link, no shared storage. The network between offices is a
-  courier account.
-- **Built:** the dotted line becomes a solid blinking link; the truck is gone; both
-  workers are at desks.
-- **Receipt:** E-23 (private fiber between the campus buildings, 2010s). Cross-site
-  connectivity at the six offices is **not** on the resume — the panel cites the campus
-  only unless Josh adds a receipt. **Not** E-11 (WAN capacity). Ships.
-
-### G5.2 · Phones in the air
-- **See:** a cluster of workers on the far side of the second building holding phones up,
-  one standing on a chair. A consumer router blinks sadly on a filing cabinet.
-- **Where:** second building, far wing.
-- **Is:** Wi-Fi dead zones; coverage is whatever someone bought at a shop.
-- **Built:** ceiling APs at regular intervals; everyone sitting.
-- **Receipt:** E-06 (confirmed: Ruckus and Extreme WAPs). E-11 for the campus scale only. Ships.
-
-### G5.3 · The second fan
-- **See:** the closet again, now with *two* box fans, a `DO NOT TURN OFF` sign, and a
-  tower PC with a hand-written `MAIN SERVER` label. A worker touches it and everyone
-  freezes.
-- **Where:** the closet (callback to G1.1).
-- **Is:** physical servers with no redundancy and no tested restore. Backups are a hope
-  with a schedule.
-- **Built:** a real rack, a small `VIRTUALISED` badge, and a second small icon offsite
-  (DR). No fans.
-- **Receipt:** E-09 (confirmed: VMware 2013; Commvault + DR 2015). Ships.
-
-### G5.4 · The phone bill
-- **See:** a worker at a desk phone feeding coins into it. Behind them, a wall of desk
-  phones with cords tangled into a single knot that goes into the closet.
-- **Where:** sales pit / call-center row.
-- **Is:** legacy telecom, per-line cost, no flexibility for remote or a call center.
-- **Built:** headsets, no cords, a `−33%` receipt taped to the wall.
-- **Receipt:** E-10.
+Four floors. The year everyone went home. The VC rooms multiply; a Director of Product
+title and a first real reporting layer appear.
 
 ### G5.5 · The frozen face
-- **See:** the inset building in another city; a video wall between the two buildings
-  shows a pixelated frozen face mid-sentence. A worker on each side is waving.
+- **Already:** the inset office in another city and HQ share the same kit; the video wall
+  between them shows a moving face; the wave is returned.
+- **Without:** a pixelated face frozen mid-sentence on the wall between two cities; a
+  worker on each side waving.
 - **Where:** conference rooms in both buildings.
-- **Is:** two sites, no collaboration standard. Every cross-office meeting is a lottery.
-- **Built:** both rooms have the same kit; the face is moving; the wave is returned.
-- **Receipt:** E-01, E-05, E-25 (2 rooms in 2018 → 29 across five cities; Austin has none). Ships.
+- **Receipt:** E-25 (rooms expanded dramatically through covid → 29 across Boston,
+  Chicago, NYC, DC, Lawrence; Austin has none), E-01.
 
-### G5.6 · Data everywhere *(PROPOSED — see Q-13, reframed)*
-- **See:** a worker walking between buildings with a *stack of external hard drives* (a
-  cousin of the USB courier), and on desks throughout, little labelled drives: `FINAL`,
-  `FINAL2`, `FINAL-real`. One worker is looking under a desk for a drive.
-- **Where:** everywhere, second building especially.
-- **Is:** company data lives on whichever machine made it. No shared storage, no single
-  copy, no backup that anyone has tested.
-- **Built:** the drives are gone; a single storage icon in the (real) closet; the
-  under-desk worker is sitting up.
-- **Receipt:** E-09 (NetApp + centralisation of company data, 2012). This is a real thing
-  Josh did that the v1 draft missed. If accepted, total becomes 26 + ambient; still ≤ 28.
-  Possible fold: merge into G5.1 (the courier carries drives *and* a USB stick) if band 5
-  is over budget on art.
+### G3.3 · The org chart with one box *(provisional — `[JOSH: year leadership layers were introduced]`)*
+- **Already:** the wall poster's IT box is a small tree — Infrastructure, Security,
+  Support — and its line goes to Technology, not Finance.
+- **Without:** every department is a tree; IT is one box off to the side, dotted line to
+  Finance, one very tired sprite in it.
+- **Where:** first-floor corridor wall.
+- **Receipt:** E-02 (leadership layers; 11 staff), E-13. 2020's "+1 report" is the first
+  visible layer; confirm.
+
+### G6.1 · SaaS balloons *(provisional — `[JOSH: year the portfolio work started]`)*
+- **Already:** a handful of shared balloons, tethered; a small `PORTFOLIO` board in the
+  corridor.
+- **Without:** a different logo balloon over every head, two that are *almost* the same,
+  balloons drifting up into the ceiling. Nobody knows what the company pays for, twice.
+- **Where:** everywhere.
+- **Receipt:** E-08.
 
 ---
 
-## Band 6 · 500–750 · *Sprawl*
+## 360 · 2021 · *The second office — and the campus*
 
-Five floors, more sites. Growth is 15–30% a year and every department has solved its own
-problems in its own way. The top floor appears.
+Five floors and an inset office. Product is handed off. And because this is the size of
+the campus company (300+, nine buildings), the 2011–2015 receipts land here: the panel
+says "at the campus" and means it.
 
-### G6.1 · SaaS balloons
-- **See:** every worker has a balloon over their head with a different little logo on it.
-  Two workers with balloons that are *almost* the same logo. Balloons keep drifting up
-  into the ceiling.
-- **Where:** everywhere.
-- **Is:** shadow IT. Nobody knows what the company is paying for, twice.
-- **Built:** the balloons converge into a handful of shared ones, tethered. A small
-  `PORTFOLIO` board in the corridor.
-- **Receipt:** E-08.
+### G7.3 · Ten hats
+- **Already:** five hats on five heads. `DEV` walked off to its own floor in 2019;
+  `PRODUCT` walks off now, 2021. The original manager has one hat.
+- **Without:** one IT manager wearing a stack of hats labelled `INFRA` `SEC` `SUPPORT`
+  `DEV` `PRODUCT`, walking carefully. The person who built the functions is the
+  bottleneck on all of them.
+- **Where:** first-floor corridor.
+- **Receipt:** E-14 (Dev incubated 2018 → handed off 2019; Product incubated 2020 → handed
+  off 2021). The two hats can literally leave two bands apart.
 
-### G6.2 · The renewal avalanche
-- **See:** the finance corner buried under a slope of paper; each sheet has a logo and a
-  date. A hand sticks out holding a pen. A sheet on top reads `AUTO-RENEWED`.
-- **Where:** finance corner.
-- **Is:** contracts nobody owns, renewals nobody negotiates, licences nobody audits.
-- **Built:** the pile is a tidy calendar on the wall; the finance worker is upright;
-  a framed receipt on the wall reads `$500,000+ · 2024`.
-- **Receipt:** E-07.
+### G5.4 · The phone bill
+- **Already:** headsets, no cords, a `−33%` receipt taped to the wall. VoIP, 2011, the campus.
+- **Without:** a worker feeding coins into a desk phone; a wall of desk phones with cords
+  tangled into one knot that runs into the closet.
+- **Where:** sales pit / call-centre row.
+- **Receipt:** E-10.
 
-### G6.3 · The moving truck
-- **See:** outside, a moving truck at a brand-new, empty building shell (`100,000 SQ FT`
-  on a banner). One worker stands in the doorway holding a single ethernet cable and
-  looking up.
-- **Where:** outside, new site.
-- **Is:** a new office with no IT plan. Cabling, access control, intrusion detection and AV
-  are somebody's problem three weeks before move-in.
-- **Built:** the shell has cable trays, a badge reader, a camera dome, a conference room
-  with a camera bar — and the worker has a clipboard with everything ticked.
-- **Receipt:** E-05, E-11.
+### G5.3 · The second fan
+- **Already:** a real rack with a small `VIRTUALISED` badge and a second small icon offsite
+  (DR). No fans. VMware 2013; Commvault + DR 2015, the campus.
+- **Without:** the closet again — *two* box fans, a `DO NOT TURN OFF` sign, a tower PC
+  hand-labelled `MAIN SERVER`; a worker touches it and everyone freezes.
+- **Where:** the closet (callback to G1.1).
+- **Receipt:** E-09.
 
-### G6.4 · The badge that doesn't
-- **See:** a worker tapping a badge at a door that stays shut; next to it, another door
-  propped open with an office chair.
-- **Where:** front door of the second building.
-- **Is:** physical access is ad-hoc: keys, a propped door, a fob system nobody administers.
-  Offboarding doesn't reach the doors.
-- **Built:** the badge reader goes green; the chair is a chair again; a tiny camera dome
-  over the door.
+### G5.1 · The overnight envelope
+- **Already:** a solid, blinking link between the buildings; both workers at desks.
+  Private fiber between nine buildings, the campus.
+- **Without:** a worker at HQ's door handing a courier a padded envelope with a hard-drive
+  bulge; in the inset office a worker at *their* door checking a watch; a tiny truck moving
+  along the dotted line between.
+- **Where:** outside, both front doors, and the line between.
+- **Receipt:** E-23 only. *Not* E-11 (WAN capacity). No cross-office receipt exists for
+  the current company — panel cites the campus unless Josh adds one (Q-17).
+
+### G5.6 · Data everywhere *(PROPOSED — Q-13)*
+- **Already:** a single storage icon in the (real) closet; the under-desk worker sitting up.
+  NetApp and centralisation of company data, 2012, the campus.
+- **Without:** labelled drives on every desk — `FINAL`, `FINAL2`, `FINAL-real`; a worker
+  hunting under a desk for one.
+- **Where:** everywhere, inset office especially.
+- **Receipt:** E-09 (2012). Fold option: the envelope in G5.1 contains *the only copy*.
+
+---
+
+## 490 · 2022 · *Automation; the office-opening playbook*
+
+Six floors; the map appears with its first pins. A Systems & Automation Engineer starts a
+function. Offices open on a pattern.
+
+### G3.1 · The empty desk
+- **Already:** the new hire's desk has a laptop, a badge and a coffee; the calendar shows
+  one page. Joiner/mover/leaver automation, SSO/SCIM, provisioning — 2022.
+- **Without:** a new hire sitting at a bare desk with their coat on; a wall calendar above
+  them flipping pages; a `WELCOME!` balloon slowly deflating.
+- **Where:** the sales pit, front row.
+- **Receipt:** E-03. **Described, never quantified** (D-012).
+
+### G6.3 · The moving truck *(provisional — `[JOSH: opening year of each office]`)*
+- **Already:** the new shell has cable trays, a badge reader, a camera dome and a room with
+  a camera bar; the worker in the doorway holds a clipboard with everything ticked.
+- **Without:** outside, a moving truck at an empty building shell (`100,000 SQ FT` on a
+  banner); one worker in the doorway holding a single ethernet cable, looking up.
+- **Where:** outside, new pin on the map.
+- **Receipt:** E-05 (six offices: cabling, access, intrusion detection, AV), E-11 (two
+  200k sq ft facilities, the campus). Lands in whichever bands the opening years say.
+
+### G6.4 · The badge that doesn't *(provisional — same years as G6.3)*
+- **Already:** the reader goes green; the chair is a chair again; a small camera dome over
+  the door. Offboarding reaches the doors.
+- **Without:** a worker tapping a badge at a door that stays shut; the next door propped
+  open with an office chair.
+- **Where:** front door of the inset office.
 - **Receipt:** E-05.
 
 ---
 
-## Band 7 · 750–1,000+ · *Scale and governance*
+## 610 · 2023 · *Security and network become functions*
 
-The full campus or the full map. Six floors. The company is big enough that its problems
-are now about judgment, not equipment. The top floor is where the argument ends.
+The top floor appears. Two hires start two functions; the following year the renewal audit.
 
-### G7.1 · The unvetted robot
-- **See:** a cheerful little robot wandering the floor with a badge reading `UNVETTED`.
-  A worker is feeding it a stack of documents labelled `CONFIDENTIAL`; the robot is
-  happily eating them. Another worker is handing it the company card.
-- **Where:** sales pit, open floor.
-- **Is:** AI tools adopted by everyone and governed by no one. Data leaves; costs arrive;
-  nobody evaluated anything.
-- **Built:** the robot's badge reads `APPROVED`; it wears a tiny policy document like a
-  lanyard; the documents go through a small gate first; the card is back in Finance.
-- **Receipt:** E-12 (resume). Still want the year and one concrete improvement — the panel
-  can ship on the resume line alone. Ships.
+### G4.1 · The auditor at the door
+- **Already:** the door is open, a handshake, a first-floor desk with an `InfoSec`
+  nameplate and a binder. InfoSec Manager 2023; Security Analyst 2025.
+- **Without:** a suit with a clipboard labelled `AUDITOR` at a shut front door; in the sales
+  pit a worker's `$` thought-bubble fades to grey.
+- **Where:** front door + sales pit (two-part; both visible).
+- **Receipt:** E-04. Sample panel in `TONE.md`. Trigger still wanted (parked).
 
-### G7.2 · The empty chair
-- **See:** top floor, glass room, an exec meeting. Six chairs, five people, a whiteboard
-  reading `NEXT 3 YEARS`. One chair is empty; its nameplate reads `TECHNOLOGY`.
-- **Where:** top floor.
-- **Is:** no technology voice in strategic planning. Decisions are made and IT finds out
-  in the change request.
-- **Built:** the chair is occupied. (This is the *only* place Josh appears, and he is
-  sitting in a meeting — D-007.) Below, the floor runs without him.
-- **Receipt:** E-13.
+### G5.2 · Phones in the air
+- **Already:** ceiling APs at regular intervals; everyone seated. Ruckus/Extreme wireless,
+  Cisco core; a Network Engineer starts the function, 2023.
+- **Without:** a cluster of workers in the far wing holding phones up, one standing on a
+  chair; a consumer router blinking sadly on a filing cabinet.
+- **Where:** inset office, far wing.
+- **Receipt:** E-06. (The gear may predate the hire — panel cites the function's start.)
 
-### G7.3 · Ten hats
-- **See:** one IT manager wearing a stack of hats labelled `INFRA` `SEC` `SUPPORT` `DEV`
-  `PRODUCT`, walking carefully.
-- **Where:** first-floor corridor.
-- **Is:** functions that were incubated inside IT and never handed off. The person who
-  built them is now the bottleneck on all of them.
-- **Built:** the hats are on five different heads. Two of them (`DEV`, `PRODUCT`) walk off
-  toward their own floor. The original manager has one hat.
-- **Receipt:** E-02, E-14 (confirmed: Dev incubated 2018 → handed off 2019; Product
-  incubated 2020 → handed off 2021). Two hats walk off, two years apart — the animation
-  can literally stagger them. Ships.
-
-### ~~G7.4 · The board on the wall~~ — CUT (D-011)
-Josh: the engagement-survey ranking stays on the paper resume and off the site.
-
-### G7.4 · Where's the procedure? *(PROPOSED — Q-17; reuses the freed number)*
-- **See:** a worker holding a printed page titled `HOW TO DO THE THING (v3?)`, asking a
-  colleague, who points at a third colleague, who points at a filing cabinet with a
-  padlock. Behind them, a wiki icon with cobwebs.
-- **Where:** first-floor corridor, near the org chart.
-- **Is:** at this size the company's real procedures live in people's heads and in
-  seven versions of a document. Every departure takes knowledge with it; every new hire
-  re-derives it.
-- **Built:** one worker at a desk with a `LIBRARY` sign; the wiki icon is clean; the
-  page in the first worker's hand says `v1 · current`.
-- **Receipt:** E-26 (Business Librarian, knowledge management, 2026 — ~750, exactly this
-  band). A real, current, slightly unusual thing to have done; that's why it's a gag.
+### G6.2 · The renewal avalanche
+- **Already:** a tidy renewal calendar on the wall; the finance worker upright; a framed
+  receipt reading `$500,000+ · 2024`.
+- **Without:** the finance corner buried under a slope of paper, each sheet a logo and a
+  date, a hand with a pen sticking out, top sheet `AUTO-RENEWED`.
+- **Where:** finance corner.
+- **Receipt:** E-07 (2024, ~650 → snaps here).
 
 ---
 
-## Trim candidates if we're over budget on art
+## 750 · 2024+ · *Governance, knowledge, the chair*
 
-In order: G5.6 (if accepted, fold into G5.1), G1.3 (band 1 works with two gags), G5.5
-(could fold into G2.4 at scale), G3.2.
+The full map: six pins. Employees plateau at ~500 while contractors grow — the problems are
+now about judgment, not equipment. The top floor is where the argument ends.
 
-## Questions this draft raises for Josh
+### G7.1 · The unvetted robot *(`[JOSH: year AI governance started]`)*
+- **Already:** the robot's badge reads `APPROVED`; it wears a tiny policy document as a
+  lanyard; documents pass through a small gate first; the company card is back in Finance.
+- **Without:** a cheerful robot wandering the floor, badge `UNVETTED`, happily eating a
+  stack of `CONFIDENTIAL` documents while another worker hands it the company card.
+- **Where:** sales pit, open floor.
+- **Receipt:** E-12 (evaluation, vendor management, usage policies, cost governance).
 
-See `05-OPEN-QUESTIONS.md` Q-13, Q-14, Q-17. And still: two or three gags from your own
-history that are *missing* — the thing that actually went wrong that you still tell people
-about. Those beat anything I inferred.
+### G7.2 · The empty chair
+- **Already:** the chair is occupied — **the only place Josh appears, sitting in a
+  meeting** (D-007). Below, the floor runs without him.
+- **Without:** top floor, glass room, whiteboard `NEXT 3 YEARS`, six chairs, five people;
+  the empty chair's nameplate reads `TECHNOLOGY`.
+- **Where:** top floor.
+- **Receipt:** E-13.
+
+### G7.4 · Where's the procedure? *(PROPOSED — Q-17)*
+- **Already:** one worker at a desk with a `LIBRARY` sign; the wiki icon is clean; the page
+  in the first worker's hand says `v1 · current`. A Business Librarian, 2026.
+- **Without:** a worker holding `HOW TO DO THE THING (v3?)`, asking a colleague, who points
+  at a third, who points at a padlocked filing cabinet; a wiki icon with cobwebs.
+- **Where:** first-floor corridor, near the org chart.
+- **Receipt:** E-26.
+
+---
+
+## G3.A · The 3:47am window *(ambient, all bands, R-13)*
+At night one window lights up; a sprite in pyjamas at a laptop. In the built state a
+*different* window lights each night — it's a rotation. No receipt needed.
+
+## Trim order if art runs over
+G5.6 (fold into G5.1) · G6.4 (fold into G6.3) · G2.3 · G6.1.
+
+## Still wanted from Josh
+Q-21 years (firewall, leadership layers, portfolio work, each office opening, AI
+governance); Q-13, Q-17 yes/no; and the two or three stories you still tell people.
