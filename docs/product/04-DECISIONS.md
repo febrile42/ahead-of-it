@@ -69,3 +69,48 @@ one fixed descriptor — **"a $3B+ clean-energy company"** on first mention in a
 may stay: Josh accepts that the combination is identifying; the rule is about not
 *saying* it. the previous employer is named (assumption A-1, reversible). A build-time check
 fails CI if the string appears in the output (R-33). Internal docs may use the name freely.
+
+**D-015 · 2026-09-16 · Many offices only. No campus topology.**
+Josh: "the analogy for a campus is close enough to self-evident to avoid the double work.
+If we have to choose, many offices is always preferred." R-09 is removed; R-10 drops the
+`topo` parameter; band 5 becomes *The second office* with an inset in another city. G5.1
+is reframed (Q-17). the previous employer receipts still apply — the problems are the same,
+the building count isn't.
+
+**D-016 · 2026-09-16 · First-party Umami with a modest event set.**
+Via the existing `/u/*` proxy pattern (Worker `umami-proxy`), same as joshgister.com. Events:
+`band_change`, `gag_open`, `switch_flip`, `punchlist_download`, `share_image`,
+`contact_click`. Nothing identifying, no headcount value recorded (N-05 stands: we log
+*that* the band changed, not *to what*). R-21 still holds — the proxy is first-party.
+
+**D-017 · 2026-09-16 · No solar roof.**
+Josh: not worth adding a roof for the nod; reconsider only if the chosen art already has a
+roof that can flip. Dropped from R-xx; Q-9 closed.
+
+**D-018 · 2026-09-16 · `noindex` at launch; publicity is a separate gate.**
+The site ships unlisted (meta robots noindex, no sitemap, not linked from joshgister.com).
+Before making it discoverable or linking it, a deliberate pass on professionalism and how
+much of the resume is exposed. Added to Phase 4 as a gate that Josh opens explicitly.
+The share image carries the URL regardless — unlisted, not secret.
+
+**D-019 · 2026-09-16 · Contact = LinkedIn + crawler-obfuscated email. No form, no calendar, no PDF.**
+R-12 updated. Email is assembled client-side (never a plain `mailto:` in the HTML source);
+LinkedIn is a plain link. N-04 stands and the PDF is not linked at all.
+
+**D-020 · 2026-09-16 · Art: stock preferred; investigate what < $100 buys.**
+Phase 3 custom-art line becomes a Phase 1 research brief: survey commercially-licensed
+isometric office / pixel-office packs under $100 (itch.io, Kenney, GameDev Market,
+CraftPix), report licence terms, tile/sprite counts and gaps against the gag list. Decide
+after. Commissioning is off the table unless research finds nothing usable.
+
+**D-010 (amended) · 2026-09-16 · Public-name candidates.**
+Josh proposes **"What Breaks Next"** (primary) and **"Load Bearing"** (alternative).
+Mastermind recommendation: *What Breaks Next* — it is a promise to the visitor, it names the
+mechanic, and it is already the share text. *Load Bearing* is the better title and the
+worse first impression: it means nothing to a recruiter until explained. Awaiting Josh's
+confirmation (Q-15). Not applied to any served string yet.
+
+**D-014 (amended) · 2026-09-16 · Neither employer is named.**
+Josh: "Drop the previous employer — keep the companies generic. The details live in my real
+resume or LinkedIn." Assumption A-1 reversed. Descriptors in `TONE.md`; the CI check greps
+for both names.

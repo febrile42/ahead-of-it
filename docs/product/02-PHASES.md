@@ -33,7 +33,8 @@ Deliverables
 - Hotspots + panel (R-04, R-05). Static gag markers (no animation). (S)
 - Punch list (R-14) generated from the same data. (S)
 - Phone-first layout at 390px (R-20). (S, reviewed by M on a real phone screenshot)
-- No-third-party test (R-21) and the employer-name build check (R-33, D-014). (S)
+- No-third-party test (R-21), the employer-name build check (R-33, D-014), and `noindex` (R-16). (S)
+- **Art research brief (D-020):** what < $100 buys in commercially-licensed isometric/pixel office packs; gaps against the gag list. (S researches, H tabulates, M decides)
 
 Exit criteria
 - All seven bands render with every gag placed and clickable at 390px.
@@ -45,7 +46,6 @@ Exit criteria
 Deliverables
 - Built state for every band (R-06, R-07). (S, copy by M)
 - Animated workers, state poses, calmer built-state cycle (R-08). (S; H slices sheets)
-- Topology fork (R-09). (S)
 - `prefers-reduced-motion` (R-24). (S)
 - Performance budget met (R-23). (S measures, M signs)
 
@@ -57,8 +57,8 @@ Exit criteria
 ## Phase 3 — Share, polish, custom art
 
 Deliverables
-- URL state (R-10), share image + OG (R-11), refinement checkboxes (R-15), day/night (R-13). (S)
-- Custom tileset and sprites replacing stock, against the locked list. (A, brief from M with reference screenshots)
+- URL state (R-10), share image + OG (R-11), refinement checkboxes (R-15), day/night (R-13), analytics events (R-17, D-016). (S)
+- Art per D-020: the pack chosen in Phase 1, with gap-fill sprites only if the research showed they are needed. Commissioning only if nothing usable was found.
 - First-party analytics decision executed (Q-5). (S)
 - Copy pass on every panel in final voice. (M)
 - **TODO: public-facing name chosen (D-010, Q-2)** and applied to title, share image, OG. (J decides, M applies)
@@ -66,11 +66,14 @@ Deliverables
 Exit criteria
 - Public-facing name decided; "Occupancy" appears in no served string.
 - Share image renders correctly in iMessage, Slack, LinkedIn, X previews (H checks).
+- Public-facing name applied (D-010).
 - J approves final art and copy.
+- Six-pin map (Boston, Chicago, NYC, DC, Lawrence, Austin) at band 6+.
 
 ## Phase 4 — Launch
 
 - GitHub remote (J approves), `main` promotion with merge commit, production deploy, smoke test.
+- **Publicity gate (D-018):** ships `noindex`, unlinked. Making it discoverable or linking from joshgister.com requires a deliberate professionalism / resume-exposure review that J opens explicitly. Not part of launch.
 - DNS: `resume.joshgister.com` moves from lime's `000-default` placeholder (`A 45.33.69.96`) to the Worker custom domain. **J approves the cutover explicitly.** Note in joshgister `CLAUDE.md` that the placeholder can be retired.
 - Post-launch: one week of first-party numbers against `00-VISION.md` success section, then a retro entry in `04-DECISIONS.md`.
 

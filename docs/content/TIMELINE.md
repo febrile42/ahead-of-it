@@ -15,6 +15,24 @@ where stated; see Q-10 for the per-year headcount we still need to place receipt
 
 ## Current employer — a $3B+ clean-energy company, Boston MA
 
+Headcount by year (Josh, approximate; employees + contractors). Band = where that year's
+receipts land (`BANDS-AND-GAGS.md`).
+
+| Year | Employees | Contractors | Total | Band |
+|---|---|---|---|---|
+| 2018 | ~80 | — | ~80 | 2 |
+| 2019 | ~150 | — | ~150 | 3 |
+| 2020 | ~220 | — | ~220 | 4 |
+| 2021 | ~310 | +50 | ~360 | 5 |
+| 2022 | ~420 | +70 | ~490 | 5 |
+| 2023 | ~510 | +100 | ~610 | 6 |
+| 2024 | ~500 | +150 | ~650 | 6 |
+| 2025 | ~500 | +200 | ~700 | 6 |
+| 2026 | ~500 | +250 | ~750 | 7 |
+
+Note the shape: employees plateau at ~500 from 2023 while contractors keep growing. Band 7
+is *today*, just barely; its receipts are the current ones (AI governance, KM, the chair).
+
 | Year | Fact |
 |---|---|
 | 2018 | Josh starts. Headcount **~80**. Cloud-first M365/Azure identity from day one (resume). Hire: Support (1 agent). Software Dev team stood up: 3 devs + 1 PM via team extension / outsource. Office build and move, ~9k → ~22k sq ft. First two teleconference rooms installed. |
@@ -25,8 +43,8 @@ where stated; see Q-10 for the per-year headcount we still need to place receipt
 | 2023 | Hired **InfoSec Manager**; cybersecurity function starts. Hired **Network Engineer**; network function starts. Hire: Support (1). |
 | 2024 | $500,000+ savings via renegotiation, renewals, licensing audits (resume). |
 | 2025 | Hire: Security Analyst. |
-| 2026 | Internal transfer in: Business Librarian. (Q-11: what does this role do, so it can be placed?) |
-| now | 29 teleconference rooms across Boston, Chicago, NYC, DC, Lawrence. 750+ people (resume). |
+| 2026 | Internal transfer in: **Business Librarian** — knowledge management. |
+| now | 29 teleconference rooms across Boston, Chicago, NYC, DC, Lawrence. Six offices: those five plus **Austin** (no VC rooms). 750+ people (resume). |
 
 ## Current employer — tooling and vendors (confirmed)
 

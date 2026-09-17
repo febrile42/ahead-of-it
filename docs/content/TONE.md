@@ -28,9 +28,12 @@ Two registers, kept strictly apart.
      to an `E-xx`.
   4. **Fixed looks like** — one sentence describing the built-state object. This is the
      line that makes the switch legible.
-- **Employer descriptor (D-014):** the current employer is never named. First mention in a
-  panel: *"a $3B+ clean-energy company"*; thereafter *"the company"*. the previous employer is
-  named as on the resume. Cities and years are fine.
+- **Employer descriptors (D-014, amended): neither company is named.** Fixed phrases,
+  first mention in a panel → thereafter:
+  - current: *"a $3B+ clean-energy company"* → *"the company"*
+  - previous: *"a $200M company on a nine-building campus"* → *"the campus"*
+  Cities and years are fine. Panels that cite both in one breath say "at the campus
+  company in 2013, and again at the clean-energy company in 2019".
 - No adjectives about Josh. "Transformational" is banned. The receipt does the work.
 - Numbers are written as on the resume; do not round up, do not add precision that isn't
   there. "$500,000+" not "half a million". "99.96%+" not "four nines".
