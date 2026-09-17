@@ -121,3 +121,11 @@ gag-defining props, which exist in no pack because they are bespoke by definitio
 Phase 1 builds on the ~$27 pixel_Salvaje pair (after Josh re-verifies the licence on the
 live page and buys it — money and purchase are his actions) with placeholder props; the
 prop question is Q-19. The single most-reused missing prop is the badge reader (three bands).
+
+**D-021 · 2026-09-16 · The thesis is prevention, not diagnosis.**
+Josh: "I don't want to focus on 'here's what breaks' — the goal is 'here's how Josh avoided
+things breaking (so you should hire him).'" The visitor's company is still the subject,
+but the argument is *what Josh had already built by the time the company was their size*.
+Consequences are structural (default state, band definition, panel order, share copy) and
+are proposed under Q-20 rather than applied silently. Supersedes the "what breaks next"
+framing in 00-VISION principle 1 and the Q-15 name candidates built on it.
