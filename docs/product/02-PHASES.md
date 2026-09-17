@@ -27,14 +27,15 @@ Exit criteria
 Deliverables
 - Repo scaffold: build tooling, `wrangler.jsonc` (assets-only Worker), CI for staging preview on `develop`. (S, brief from M)
 - Content pipeline: `docs/content/*.md` → `content/gags.json` with schema validation. (S build, H validate)
-- Tileset + sprite manifest from a CC0/licensed isometric pack, with licence file. (H inventory, S integrate)
+- Tileset + sprite manifest from the in-house pipeline (or the $27 fallback, with licence file). (H inventory, S integrate)
 - Building assembler: band → tile grid → canvas. Static per band. (S)
 - Slider (R-01) snapping to Josh's headcount bands; year-labelled ticks; readout. (S)
 - Both states static per band (built default, without on toggle — R-02/R-03/R-06). Hotspots + panel in D-021 order (R-04, R-05). (S)
 - Checklist (R-14) generated from the same data. (S)
 - Phone-first layout at 390px (R-20). (S, reviewed by M on a real phone screenshot)
 - No-third-party test (R-21), the employer-name build check (R-33, D-014), and `noindex` (R-16). (S)
-- **Art research brief (D-020):** what < $100 buys in commercially-licensed isometric/pixel office packs; gaps against the gag list. (S researches, H tabulates, M decides)
+- ~~Art research brief (D-020)~~ done: `docs/research/ART-PACKS-2026-09.md`.
+- **Art pipeline spike (D-024):** style-reference sheet, then five assets generated against it (floor, wall+window, desk+chair, worker walk cycle, badge reader), hand-cleaned. Go/no-go on in-house art. (S runs the pipeline, H slices/validates, M judges consistency — J sees the five before anything else is drawn)
 
 Exit criteria
 - All seven bands render with every gag placed and clickable at 390px.
@@ -59,7 +60,7 @@ Exit criteria
 
 Deliverables
 - URL state (R-10), share image + OG (R-11), refinement checkboxes (R-15), day/night (R-13), analytics events (R-17, D-016). (S)
-- Art per D-020: the pack chosen in Phase 1, with gap-fill sprites only if the research showed they are needed. Commissioning only if nothing usable was found.
+- Art per D-024: remaining assets through the proven pipeline; stock/commission only where it failed.
 - First-party analytics decision executed (Q-5). (S)
 - Copy pass on every panel in final voice. (M)
 - **TODO: public-facing name chosen (D-010, Q-2)** and applied to title, share image, OG. (J decides, M applies)

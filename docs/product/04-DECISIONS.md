@@ -142,3 +142,25 @@ as caption. Supersedes R-06's original default.
 nearest. Every band has receipts by construction; Q-14 is dissolved — each gag sits where
 its receipt happened. Gag IDs (G1.1 …) are kept stable and no longer encode the band.
 Supersedes D-002's round-number bands (still seven).
+
+**D-024 · 2026-09-16 · Art is generated in-house first.**
+Josh: "Let's try to generate all the assets ourselves. I will purchase stock or commission
+only if we have trouble doing it ourselves." Reverses 03-RESOURCING's "don't generate final
+art with image models" and D-020's stock-first plan. Mitigation for the known failure mode
+(inconsistency across a tileset): one fixed palette, one tile size, one style-reference
+sheet generated first and every later asset generated *against* it, hand-cleaned in a
+pixel editor; a Phase 1 spike proves or disproves the pipeline on five assets before
+anything else is drawn. Stock ($27 pair) and commissioning remain the fallbacks, in that order.
+
+**D-025 · 2026-09-16 · G5.6 and G7.4 accepted; G5.5 merged into G2.4.**
+Q-13: (a), own gag; the 2012 picture is workstations, portable hard drives and consumer
+NAS. Q-17: KM gag approved; offices were VPN-linked from 2019, so G5.1 gains a current-
+company receipt (E-27) and moves to band 150. Q-18: campus descriptor accepted. With every
+year known, gags are re-placed (v5); G5.5's cross-city frozen face is the same joke as
+G2.4's dongle meeting under offices-only, so they merge at band 220.
+
+**D-026 · 2026-09-16 · Both states are cumulative; each band emphasises its own.**
+At band N the built state shows everything built through year N (it is a résumé; nothing
+un-happens). The "without" state likewise shows every gag through N, but *this band's* gags
+at full size and earlier ones quieter, so that thin years (220, 490) still read as busy
+buildings and band 750 stays legible. R-03a.

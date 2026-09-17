@@ -10,6 +10,7 @@ Change any of these by writing a `04-DECISIONS.md` entry first.
 | R-01 | A headcount **slider** (range ~25 to 1,000+) that **snaps to seven bands at Josh's real headcounts** — 80 · 150 · 220 · 360 · 490 · 610 · 750 (D-023). Ticks are labelled with the year. The readout shows the visitor's number, the snapped band, and the year: "~400 → 2022, ~490". | 1 |
 | R-02 | The **building renders per band** as an isometric pixel-art scene assembled from a tileset, **in its built state by default** (D-022). Floors, desks, rooms and (from 360) an inset office change with the band. | 1 |
 | R-03 | In the **"without" state**, each band shows its **gags** as distinct, visually legible scenes placed where the problem physically occurs. In the built state the same spots show the **fix** (the "already" object). | 1 (static) / 2 (animated) |
+| R-03a | **States are cumulative** (D-026): band N shows all fixes (built) or all gags (without) from years ≤ N; the current band's items are rendered at full prominence, earlier bands' items smaller/quieter. Hotspots exist for all of them. | 1 |
 | R-04 | Every fix/gag pair is a **hotspot** in both states. The **panel** order is (D-021): **what Josh had already built** (dated, headcount, the number) → **what it prevented** (the gag, "typically around this size", with a thumbnail of the without-state scene) → **what it was worth later** (the receipt years on, where one exists). | 1 |
 | R-05 | Panel copy comes from a single **content data file** (`content/gags.json` or equivalent) generated from `docs/content/`. Copy is never hard-coded in components. | 1 |
 | R-06 | A **toggle** re-renders the current band between **built** (default) and **without**. Both states exist for every band. Label is copy, not a control name — e.g. *"See it without him"* / *"Back to what was built"* (final wording in `TONE.md`). | 2 |
@@ -64,6 +65,6 @@ Change any of these by writing a `04-DECISIONS.md` entry first.
 |---|---|
 | G-01 | **Seven bands, one per year of receipts** (D-023). Adding one requires a new year of receipts, not a round number. |
 | G-02 | **≤ 28 gags total** across all bands, ≤ 5 per band. |
-| G-03 | **Stock/CC0 tiles and sprites through Phase 2.** Custom art is commissioned only after Phase 2 exit, against a locked gag list. |
+| G-03 | **In-house generated art first** (D-024), proven by a five-asset Phase 1 spike against a style-reference sheet. Stock, then commission, only on failure. |
 | G-04 | **No code before Phase 0 sign-off.** The gag list and evidence ledger are approved by Josh first. |
 | G-05 | Any public action (remote, DNS, deploy) is a separate, explicit ask to Josh. |
