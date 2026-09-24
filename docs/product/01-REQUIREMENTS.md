@@ -8,6 +8,7 @@ Change any of these by writing a `04-DECISIONS.md` entry first.
 | ID | Requirement | Phase |
 |---|---|---|
 | R-01 | A headcount **slider** (range ~25 to 1,000+) that **snaps to seven bands at Josh's real headcounts** — 80 · 150 · 220 · 360 · 490 · 610 · 750 (D-023). Ticks are labelled with the year. The readout shows the visitor's number, the snapped band, and the year: "~400 → 2022, ~490". | 1 |
+| R-01b | Past 750 the slider has **one more stop, `1,000+`** (D-029). The building does not grow further; the band opens the Beyond panel automatically and the checklist shows its translation column. | 1 |
 | R-02 | The **building renders per band** as an isometric pixel-art scene assembled from a tileset, **in its built state by default** (D-022). Floors, desks, rooms and (from 360) an inset office change with the band. | 1 |
 | R-03 | In the **"without" state**, each band shows its **gags** as distinct, visually legible scenes placed where the problem physically occurs. In the built state the same spots show the **fix** (the "already" object). | 1 (static) / 2 (animated) |
 | R-03a | **States are cumulative** (D-026): band N shows all fixes (built) or all gags (without) from years ≤ N; the current band's items are rendered at full prominence, earlier bands' items smaller/quieter. Hotspots exist for all of them. | 1 |
@@ -26,6 +27,7 @@ Change any of these by writing a `04-DECISIONS.md` entry first.
 | R-16 | **`noindex`** meta + no sitemap at launch; not linked from joshgister.com until the Phase 4 publicity gate opens (D-018). | 1 |
 | R-17 | **First-party analytics** via the `/u/*` Umami proxy with exactly the D-016 event set; no values that identify the visitor or record their headcount. | 3 |
 | R-14 | A **text checklist** below the fold for the current band: *what was already in place at this size* (the fixes, each with its panel content), with the "without" description under each. It is the accessible equivalent of the scene and MUST stay in sync with it (generated from the same data). Downloadable as a single page. | 1 |
+| R-14a | At the `1,000+` stop the checklist gains a **translation column**: each receipt → its large-org equivalent (content in `PANELS.md` §Beyond). | 1 |
 | R-15 | A **"what do you already have?"** refinement (checkboxes: SSO · security lead · ERP · real network · MDM) that marks those items as done in the checklist and dims their hotspots. | 3 |
 
 ## Non-functional

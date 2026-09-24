@@ -9,9 +9,9 @@ where stated; see Q-10 for the per-year headcount we still need to place receipt
 |---|---|
 | 2011 | VoIP transition (−33% communication costs; remote + call-center teams — resume) |
 | 2012 | NetApp; migration and centralisation of company data. Before: data on workstations, portable hard drives and consumer NAS boxes. |
-| 2013 | VMware migration (physical → virtual) |
-| 2015 | Commvault; disaster recovery |
-| — | Nine buildings linked by **private fiber**. The +33% network capacity on the resume was **WAN**, unrelated to the private inter-building network. Do not conflate. |
+| 2013 | VMware migration (physical → virtual). **2013–2014:** network/telecom/hosting costs −40%, WAN capacity +33% |
+| 2015 | Commvault; disaster recovery (restore tested at setup). **2015–2017:** IT for two new 200k+ sq ft facilities; **private fiber** between the nine buildings (2014–2017) |
+| — | Nine buildings linked by **private fiber** (2014–2017). The +33% network capacity on the resume was **WAN**, unrelated to the private inter-building network. Do not conflate. |
 
 ## Current employer — a $3B+ clean-energy company, Boston MA
 
@@ -35,15 +35,15 @@ is *today*, just barely; its receipts are the current ones (AI governance, KM, t
 
 | Year | Fact |
 |---|---|
-| 2018 | Josh starts. Headcount **~80**. Cloud-first M365/Azure identity from day one (resume). Hire: Support (1 agent). Software Dev team stood up: 3 devs + 1 PM via team extension / outsource. **Boston** office build and move, ~9k → ~22k sq ft. First two teleconference rooms installed. **Palo Alto NGFW** at the edge. SaaS-portfolio work begins (ongoing). |
-| 2019 | Hire: Salesforce Admin. Software Dev team handed off to a dedicated lead. **Intune** deployed (Windows + mobile MDM). Annual security training begins. **Chicago** office opens. **Offices linked by VPN** from this year. |
-| 2020 | Hire: +1 Support. "Director of Product" title, +1 report: Salesforce Admin → Product Manager; +1 Product Manager via internal move. Teleconference rooms expand dramatically through the covid years. |
+| 2018 | Josh starts. Headcount **~80**. Cloud-first M365/Azure identity from day one (resume). Hire: Support (1 agent). Software Dev team stood up: 3 devs + 1 PM via team extension / outsource. **Boston** office build and move, ~9k → ~22k sq ft. First two teleconference rooms installed. **Palo Alto NGFW** at the edge, guest Wi-Fi segmented from the start. SSO + MFA enforced org-wide. Boston cabling in before move-in. SaaS-portfolio work begins (ongoing). |
+| 2019 | Hire: Salesforce Admin. Software Dev team handed off to a dedicated lead. **Intune** deployed (Windows + mobile MDM). Annual security training begins. **Chicago** office opens on the VPN from day one — as does every office after. Email security: Exchange ATP (now Defender for Office 365) + Area 1 via MSSP (year not stated). |
+| 2020 | Business Librarian role exists at the company from April (moves under IT in 2026). Hire: +1 Support. "Director of Product" title, +1 report: Salesforce Admin → Product Manager; +1 Product Manager via internal move. Teleconference rooms expand dramatically through the covid years. |
 | 2021 | Product team handed off to a dedicated lead. Hire: Support (1). |
-| 2022 | Hired Systems & Automation Engineer; **automation function starts**. Hire: Support (2). **Lawrence** office opens; Boston expands to a 4th floor. |
-| 2023 | Hired **InfoSec Manager**; cybersecurity function starts. Hired **Network Engineer**; network function starts. Hire: Support (1). **Leadership layers introduced.** **Austin, NYC, DC** offices open — three in one year. |
-| 2024 | $500,000+ savings via renegotiation, renewals, licensing audits (resume). **Major SaaS-portfolio work.** |
-| 2025 | Hire: Security Analyst. **AI governance starts** with the introduction of ChatGPT to the whole organisation. |
-| 2026 | Internal transfer in: **Business Librarian** — knowledge management. **Glean** rolled out; **Claude** mid-year. |
+| 2022 | Hired Systems & Automation Engineer; **automation function starts**. Hire: Support (2). **Lawrence** office opens (the one office with servers and OT; all others comms racks only); Boston expands to a 4th floor. **H2: Josh begins reporting to the SVP of Product & Technology.** |
+| 2023 | Hired **InfoSec Manager**; cybersecurity function starts. Hired **Network Engineer**; network function starts. Hire: Support (1). **Leadership layers introduced** (IT = 9 people; always reported into Technology). **Austin, NYC, DC** offices open — three in one year; conference-room kit unified by DC. |
+| 2024 | $500,000+ savings via renegotiation, renewals, licensing audits, mostly recurring (resume + Josh). **Major SaaS-portfolio work.** |
+| 2025 | Hire: Security Analyst. **AI governance starts** with the introduction of ChatGPT to the whole organisation. **Passwordless org-wide.** The ISO 27001 / SOC 2 certification target is dropped (not stated on the site). |
+| 2026 | **Business Librarian** moves under IT — knowledge management. **Glean** rolled out; **Claude** mid-year. Contractors (250) on the same JML automation as employees. |
 | now | 29 teleconference rooms across Boston, Chicago, NYC, DC, Lawrence. Six offices: those five plus **Austin** (no VC rooms). 750+ people (resume). |
 
 ## Current employer — tooling and vendors (confirmed)

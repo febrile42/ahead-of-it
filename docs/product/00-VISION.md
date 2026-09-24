@@ -38,6 +38,10 @@ and twelve others didn't (`docs/brainstorm/`).
    themselves in it — "that's us" — and then see judgment, not a task list.
 3. **Founders and operators who will never hire him** but will share it, because it is
    about their company, not about him.
+4. **Recruiters and leaders at organisations far larger than 750** (D-029). The site must
+   not leave "we already have all that" dangling. Past 750 the copy turns to the from-zero
+   seat inside a big company — acquisitions, regions, business units, new tool categories —
+   and maps every receipt to its large-org equivalent.
 
 ## What a visitor does
 

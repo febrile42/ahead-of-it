@@ -181,3 +181,25 @@ scale.* "Occupancy" stays internal. Phase 3 naming gate is satisfied.
 **D-028 · 2026-09-24 · Band 220 gets a second gag: G7.3a, the PRODUCT hat goes on.**
 Q-23. Product had an owner (Director of Product, two PMs, 2020) before there was a product
 team; the hat walks off at 360 in G7.3. 26 gags + ambient; cap 28.
+
+**D-029 · 2026-09-24 · A "Beyond" stop past 750 for large-org readers.**
+Josh: the site is about what he did, and a recruiter from a larger org must not be left
+with "we already have all that". Target seat: **the from-zero seat inside a big company**
+(acquisitions, new regions, new business units, new tool categories). Past 750 the slider
+has one more stop, `1,000+`; the building stops growing; one panel (PANELS.md "B") turns
+the copy to the reader's organisation and the checklist gains a translation column
+mapping each receipt to its large-org equivalent. Not a year band (G-01 unaffected).
+R-01b, R-14a.
+
+**D-030 · 2026-09-24 · The certification target is not stated.**
+ISO 27001 / SOC 2 was targeted in 2023 and later dropped. G4.1 keeps the function, the
+policy framework and audit readiness — all real — and the "what it prevented" is about
+having a program to show, not a certificate. Nothing on the site implies certification.
+
+**D-031 · 2026-09-24 · Panel facts, round 3.** SSO+MFA 2018 and passwordless 2025 (E-29);
+contractors on the same JML (E-30); Lawrence is the one office with servers/OT; guest Wi-Fi
+segmented from 2018; Boston cabled before move-in; rooms standardised by function from
+2018, kit unified 2023; DR restore tested at setup; $500K+ mostly recurring; fiber
+2014–17; 40%/33% by 2014; facilities 2015–17; SVP reporting since H2 2022; Librarian role
+since 2020, under IT 2026; email security = Exchange ATP + Area 1 via MSSP; badge removal
+a manual offboarding step. All folded into PANELS.md v4.
