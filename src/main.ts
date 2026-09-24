@@ -75,10 +75,13 @@ if (sliderRoot && toggleRoot && sceneWrap && canvas && hotspotsLayer && panelRoo
     if (token !== renderToken) return; // superseded by a newer render — drop this stale paint
     renderHotspots(hotspotsLayer!, layout, openPanel);
     checklist.render(band);
-    // Test hook (S4): tests/scene.spec.ts awaits this changing instead of
-    // sleeping a fixed timeout, and it only ever reflects a render that
-    // actually committed (not a stale, dropped one).
+    // Test hooks: tests/scene.spec.ts awaits renderedToken changing
+    // instead of sleeping a fixed timeout, and only ever sees a render
+    // that actually committed (not a stale, dropped one). `band` lets a
+    // test tell "nothing changed, no render was needed" apart from "a
+    // render should have happened but didn't".
     document.body.dataset.renderedToken = String(token);
+    document.body.dataset.band = String(band);
   }
 
   slider.onChange((newBand) => {
