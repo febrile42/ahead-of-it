@@ -6,9 +6,10 @@ is a dumb painter that draws it. The art side paints its own previews *from the 
 file*, so the web canvas at scale 1 must match the art's per-view reference image
 `art/preview/views/<band>-<state>-<viewId>@1x.png` pixel for pixel — a Playwright test, not
 a promise. Those references are painted from the exported `entries`, and `check_scenes.py`
-proves each one equals the same rect cropped out of the native full-plate render, so the
-chain art → export → web has no unchecked link. (The whole-plate `art/preview/band<N>-*.png`
-are 4× art-review images, not parity goldens.)
+proves each one equals the art pipeline's own native render of that view's room, so the
+chain art → export → web has no unchecked link. Each view is its own composed room (D-038),
+not a crop. (The whole-plate `art/preview/band<N>-*.png` show a band's views side by side at
+4× for art review; they are not parity goldens.)
 
 Files: `public/sprites/scenes/index.json` and `public/sprites/scenes/<band>-<state>.json`
 for band ∈ {80,150,220,360,490,610,750} and state ∈ {built,without}. `beyond` is an alias
@@ -74,15 +75,13 @@ Rules
   Pan/zoom is the escape valve, not the default.
 - `focus` is the region to scroll to when a view is wider than the viewport. It must lie
   inside the view; it need not equal it (the exporter currently emits the full view).
-- **Known debt** is listed, never silently tolerated. `index.json` may carry
-  `"knownSpacingDebt": [["G1.2","G2.2"], …]` — unordered pairs exempt from the 44 px rule.
-  Both `check_scenes.py` and the web contract test read it, warn on each listed pair, fail
-  on any unlisted pair, and fail if a listed pair is no longer too close. Two-part art debt
-  (a part not drawn yet) is tracked the same way in the contract test. Each list names the
-  brief that clears it.
+- **No exceptions.** Since PH1-10 the 44 px rule and the two-part rule hold for every drawn
+  band, and both sides enforce them without an exemption list (D-038). If art ever needs to
+  ship a known violation, write a decision first and add a list that `check_scenes.py` and
+  the contract test both read, warn on, and fail once stale.
 - Painter scaling is chosen in **device** pixels on both axes, so a view never overflows the
   fixed 360:240 scene box: `s = max(1, min(floor(cssW·dpr / nativeW), floor(cssH·dpr / nativeH)))`;
   backing store `native·s`; CSS size `native·s/dpr`; the canvas is centred horizontally.
 - `art/checks/check_scenes.py`: determinism, manifest references and frame keys, R-03a
   coverage both states, one primary per gag per file, hotspot bounds, 44 px spacing (with
-  known debt), `beyond` alias, and per-view pixel parity against the full-plate render.
+  no exceptions), `beyond` alias, and per-view pixel parity against each room's own render.
