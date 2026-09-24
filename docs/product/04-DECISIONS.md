@@ -212,3 +212,10 @@ Phase 4 step alongside the custom domain.
 
 **D-033 · 2026-09-24 · Phase 1 started.** Briefs PH1-01…05 in `docs/briefs/`. PH1-01 and
 PH1-02 running in parallel worktrees; 03 after 01; 04 after 01–03; 05 after 04.
+
+**D-034 · 2026-09-24 · In-house art confirmed; sprite work routes to Opus 5.5.**
+The PH1-02 spike passed (deterministic, palette-locked, coherent). Josh: "Continue in-house.
+Ensure you are using Opus 5.5 for art style and animation as it is superior." So: the
+pipeline stays (`art/`), and every sprite-drawing or animation brief is executed by `opus`,
+not sonnet. Known weaknesses to fix first: desk/chair silhouette, front-view stride, no
+ground shadows. Stock/commission fallbacks remain on paper only.
