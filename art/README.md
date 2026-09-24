@@ -20,6 +20,7 @@ not a redo.
 ```bash
 python3 art/build.py                 # renders public/sprites/*.png + manifest.json
                                       # and art/preview/{room,sheet,sheet@4x}.png
+                                      # and art/preview/band80-{without,built}.png
 python3 art/checks/check_palette.py  # independent palette-only verification
 ```
 
@@ -45,8 +46,15 @@ here).
   `place()` (grid math for the room composite).
 - `art/src/sprites/*.py` — one module per asset, each exporting `build()` (or
   `build_all()` for the worker, `build(state)` for the badge reader) and an `ANCHOR`.
+- `art/src/vox.py` (PH1-06) — world-unit iso boxes rasterised by inverse projection,
+  face painting (`Iso.paint`), ground shadows, the dotted network line, and `make()`,
+  which crops a prop and records its anchor and named points.
+- `art/src/glyphs.py` (PH1-06) — the 3×5 pixel font for `DEV`, `CAUTION`, `VISITOR`
+  and the SLA board. No font files.
+- `art/src/sprites/room.py`, `band80.py` (PH1-06) — room structure and band-80 props,
+  both states. `art/src/scene80.py` composes the band-80 previews by manifest anchor.
 - `art/build.py` — orchestrates: builds every sprite, writes 1x PNGs to
-  `public/sprites/`, writes `manifest.json`, composes the two preview images.
+  `public/sprites/`, writes `manifest.json`, composes the preview images.
 
 ## Add a sprite in ≤ 10 lines
 
@@ -89,8 +97,8 @@ $ diff /tmp/sha1.txt /tmp/sha2.txt
 
 $ python3 art/checks/check_palette.py
 PASS  public/sprites/badge-reader-green.png
-... (21 files)
-All 21 PNGs are palette-only (24 colours + transparency).
+... (169 files)
+All 169 PNGs are palette-only (32 colours + transparency).
 ```
 
 Determinism holds because the build has no randomness, no timestamps, no metadata

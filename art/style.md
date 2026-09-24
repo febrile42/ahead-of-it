@@ -86,6 +86,48 @@ fudge factors.
 | desk group (every variant) | 32×40 | (16, 40) |
 | worker (per frame) | 16×24 | (8, 24) |
 | badge reader | 12×20 | (6, 20) |
+| worker-seated (per look) | 32×40 | (16, 40) — same as the desk; paste on top of it |
+| worker-queue (per look/facing) | 16×32 | (8, 32) |
+| visitor | 16×24 | (8, 24) — on the floor in front of the sofa seat |
+
+**PH1-06 props and room pieces** (walls, partitions, closet, sofa, rack …) are cropped to
+their pixels, so their canvases vary. The rule is unchanged in meaning: the manifest
+`anchor` is the screen point of the **front vertex of the tile the sprite is placed on**
+— exactly what `iso.iso_to_screen(col, row)` returns — even when that point is below the
+drawn pixels (a wall on a tile's back edge, a firewall on top of a rack). Multi-tile
+props (the sofa, the shelving) anchor on their rear-most tile. Billboards not tied to a
+tile (`tag-visitor`, `sla-board`, `wifi`) anchor where they touch what they belong to:
+the tag's tail tip, the board's feet. Entries may also carry `points`, e.g.
+`"net": [x, y]` — where a network line attaches, in the sprite's own pixels.
+
+## On the network (PH1-06, G2.3)
+
+"This device is on the network" is a dotted line in `net` (magenta — the only colour in
+the palette nothing else uses), 1 px dots, one lit pixel every 3 along the dominant
+axis, each with a 1 px `outline` pixel under it so it reads on floor and wall alike
+(`vox.dotted`). Lines run from one sprite's `net` point to another's and are drawn over
+everything except billboard labels. Without: the visitor's laptop to the router and to
+every monitor. Built: the visitor's laptop to the firewall, and it stops there.
+
+## Cutaway rooms (PH1-06)
+
+Back walls are full height (40 units). Walls that would hide a room's contents — the
+closet's front partitions — are cut away at 7 units, with a dark (`chair-dark`) cut
+top: the dollhouse convention, and the architectural sign that the wall continues up.
+
+## Looks and poses (PH1-06)
+
+| look | shirt / shade | trousers | skin | hair |
+|---|---|---|---|---|
+| a (`worker`) | `shirt-1` / `shirt-1-dark` | `pants-1` | `skin-1` | `hair-1`, short |
+| b | `badge-green` / `shirt-2-dark` | `desk-wood-dark` | `skin-2` | `outline` (black), short |
+| c | `badge-red` / `shirt-3-dark` | `pants-1` | `skin-3` | `hair-1`, long |
+| d | `paper` / `wall-shadow` | `shirt-1-dark` | `skin-1` | `desk-wood` (auburn), long |
+| e | `badge-green` / `shirt-2-dark` | `pants-1` | `skin-3` | `outline`, long |
+
+Each look ships the walk cycle plus `idle-{down,up,left,right}` and
+`step-{right,left}`. `worker-queue` (laptop overhead) and `worker-seated` are separate
+entries keyed by look because their canvases differ.
 
 ## Worker walk cycle
 

@@ -203,6 +203,16 @@ def build_sheet(static, badge_rendered, worker_rendered, registry):
         for name in group:
             items.append(registry[name].canvas)
 
+    # trim to drawn pixels for the sheet only (wall-mounted props keep empty canvas
+    # below them so their anchor stays inside; the shipped PNGs are untouched)
+    trimmed = []
+    for spr in items:
+        bb = spr.img.getbbox()
+        t = Canvas(bb[2] - bb[0], bb[3] - bb[1])
+        t.img = spr.img.crop(bb)
+        trimmed.append(t)
+    items = trimmed
+
     pad, max_w = 6, 520
     rows, row, x, row_h = [], [], pad, 0
     for spr in items:
