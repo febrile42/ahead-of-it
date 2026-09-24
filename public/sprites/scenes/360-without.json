@@ -1023,8 +1023,8 @@
         {
           "sprite": "note-dave",
           "frame": "default",
-          "x": 144,
-          "y": 82,
+          "x": 142,
+          "y": 94,
           "depth": 6.01,
           "gagId": "G3.2",
           "part": "trolley"
@@ -1079,10 +1079,10 @@
         {
           "gagId": "G3.2",
           "part": "trolley",
-          "x": 114,
-          "y": 64,
-          "w": 48,
-          "h": 44,
+          "x": 120,
+          "y": 70,
+          "w": 47,
+          "h": 38,
           "primary": true
         },
         {

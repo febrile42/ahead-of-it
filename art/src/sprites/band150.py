@@ -64,32 +64,46 @@ def _laptop_open(iso: Iso, c0, r0, z, w=3.0):
               if c0 + 0.4 <= cc < c0 + w - 0.4 and z + 0.8 <= zz < z + 3.6 else None)
 
 
+def _laptop_tilted(iso: Iso, c0, r0, z, w=3.2):
+    """An open laptop whose lid leans back at an angle, screen lit toward the viewer."""
+    iso.box(c0, r0, z, c0 + w, r0 + 2.2, z + 0.7, top="chair-mid", left="badge-body",
+            right="chair-dark")
+    for k in range(5):                                   # the lid, stepping back as it rises
+        rr = r0 - 0.35 * k
+        f = iso.box(c0, rr - 0.5, z + 0.7 + k, c0 + w, rr, z + 1.7 + k, top="chair-dark",
+                    left="monitor-frame", right="outline", outline=None)
+        if 1 <= k <= 3:
+            iso.paint(f, "L", rr, lambda cc, zz: "monitor-screen"
+                      if c0 + 0.5 <= cc < c0 + w - 0.5 else None)
+    iso.box(c0, r0 - 2.3, z + 5.4, c0 + w, r0 - 1.6, z + 5.8, top="outline",
+            left="outline", right="outline", outline=None)   # the lid's top edge
+
+
 def _trolley(iso: Iso, c: Canvas):
-    """PH1-10 (item 2): drawn to read as a supermarket trolley at 1x. Long axis along
-    +c. A dark wire basket (a 1 px grid over the load, so it reads as wire, not a
-    box) whose floor slopes up toward the nose, on a low chassis with four castors
-    and daylight under it; the handle rises at the -c end with a red grip standing
-    clear above the load; closed laptops heaped over the rim, two open and lit."""
+    """PH1-10: drawn to read as a supermarket trolley at 1x. Long axis along +c. A
+    chrome wire basket (a light grid over a dark load) raised on a chassis with daylight
+    under it and castors at the corners; the handle rises at the +c end with a red grip
+    standing clear above the load; closed laptops heaped over the rim, two lids open
+    and leaning back, screens lit."""
     B0, B1, R0, R1 = 0.5, 15.0, 1.0, 7.0
-    ZB, ZT = 5.0, 12.0                              # basket bottom / rim at the back
+    ZB, ZT = 7.0, 14.0                              # basket bottom / rim
     iso.floor_shadow(B0, R0, B1, R1, grow=1.0, grow_r=0.4)
-    # chassis: two rails at castor height, castors at the four corners
-    iso.box(B0 + 0.5, R0 + 0.8, 1.2, B1 - 1.5, R0 + 1.4, 1.8, top="chair-mid",
-            left="chair-dark", right="chair-dark", outline=None)
-    iso.box(B0 + 0.5, R1 - 1.4, 1.2, B1 - 1.5, R1 - 0.8, 1.8, top="chair-mid",
-            left="chair-dark", right="chair-dark", outline=None)
-    for cc, rr in ((B0 + 1.0, R0 + 1.0), (B1 - 2.0, R0 + 1.0),
-                   (B0 + 1.0, R1 - 1.0), (B1 - 2.0, R1 - 1.0)):
+    # chassis: two low rails, and a castor under each corner
+    for rr in (R0 + 1.0, R1 - 1.2):
+        iso.box(B0 + 0.8, rr, 1.6, B1 - 1.2, rr + 0.5, 2.1, top="badge-body",
+                left="chair-mid", right="chair-mid", outline=None)
+    for cc, rr in ((B0 + 1.0, R0 + 1.0), (B1 - 1.6, R0 + 1.0),
+                   (B0 + 1.0, R1 - 0.8), (B1 - 1.6, R1 - 0.8)):
         x, y = iso.pt(cc, rr, 0)
         c.rect(x - 1, y - 1, x, y, "outline")
-    # legs from the chassis up to the basket, at the four corners
-    for cc, rr in ((B0 + 0.8, R1 - 0.6), (B1 - 1.2, R1 - 0.6), (B1 - 1.2, R0 + 0.6)):
-        x, y = iso.pt(cc, rr, 1.8)
-        for k in range(0, 4):
+        c.point(x, y - 2, "badge-body")
+    # four legs from the rails up to the basket floor
+    for cc, rr in ((B0 + 0.8, R1 - 0.7), (B1 - 1.2, R1 - 0.7), (B1 - 1.2, R0 + 0.7),
+                   (B0 + 0.8, R0 + 0.7)):
+        x, y = iso.pt(cc, rr, 2.1)
+        for k in range(0, 6):
             c.point(x, y - k, "badge-body")
-    # the load first, so the wire grid is drawn over it: the basket is full to the rim
-    # with laptops stacked flat (their edges in alternating greys, a lit screen edge
-    # here and there), then heaped above it
+    # the load: the basket is full to the rim, then heaped above it
     stack = iso.box(B0 + 0.3, R0 + 0.3, ZB, B1 - 0.3, R1 - 0.3, ZT - 0.5, top="chair-dark",
                     left="chair-mid", right="chair-dark", outline=None)
 
@@ -106,12 +120,11 @@ def _trolley(iso: Iso, c: Canvas):
     for i, (cc, rr, zz) in enumerate(((1.6, 2.0, top - 1.2), (5.0, 2.2, top - 0.8),
                                       (8.6, 2.0, top - 1.0), (11.8, 2.4, top - 1.0),
                                       (3.2, 3.2, top + 0.2), (9.8, 3.4, top + 0.4),
-                                      (6.4, 2.8, top + 1.0), (1.6, 4.0, top - 0.2),
-                                      (12.0, 4.2, top - 0.4))):
+                                      (1.6, 4.2, top - 0.2), (12.0, 4.4, top - 0.4))):
         _laptop_flat(iso, cc, rr, zz, lid=("chair-mid", "monitor-frame", "chair-dark")[i % 3],
                      w=3.4, d=2.6)
-    _laptop_open(iso, 2.2, 5.2, top + 1.2)
-    _laptop_open(iso, 8.0, 5.0, top + 1.8)
+    _laptop_tilted(iso, 3.0, 4.8, top + 0.8)
+    _laptop_tilted(iso, 8.4, 4.6, top + 1.2)
     # the basket: an open wire box — only its two visible sides, as a grid
     f = iso.box_faces(B0, R0, ZB, B1, R1, ZT)
     lit = {k: v for k, v in f.items() if v in ("L", "R")}
@@ -136,14 +149,14 @@ def _trolley(iso: Iso, c: Canvas):
         if col:
             c.point(x, y, col)
     iso.outline(set(f), "outline")
-    # the handle at the -c end: two posts climbing up and back, a red grip across,
-    # standing clear above the heap
+    # the handle at the +c end (nose toward the closet), so it stands against open
+    # floor: two posts climbing up and out, a red grip across, clear above the heap
     HZ = ZT + 7.0
     for rr in (R0 + 0.4, R1 - 0.4):
-        _thick(iso, [(B0, rr, ZT - 1.0), (B0 - 2.0, rr, HZ)], "wall-trim", width=1)
-    _thick(iso, [(B0 - 2.2, R0 - 0.2, HZ), (B0 - 2.2, R1 + 0.2, HZ)], "badge-red", width=2)
-    # the note goes on the heap, where it can be read without hiding the basket
-    x, y = iso.pt(9.0, 3.5, top + 3.0)
+        _thick(iso, [(B1, rr, ZT - 1.0), (B1 + 2.0, rr, HZ)], "wall-trim", width=1)
+    _thick(iso, [(B1 + 2.2, R0 - 0.2, HZ), (B1 + 2.2, R1 + 0.2, HZ)], "badge-red", width=2)
+    # the note hangs low on the basket's near side, over the wire
+    x, y = iso.pt(11.5, R1, ZB + 2.0)
     return {"note": (x, y)}
 
 
