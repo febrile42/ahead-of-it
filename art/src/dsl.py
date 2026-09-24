@@ -21,9 +21,12 @@ _PALETTE_PATH = os.path.join(_HERE, "..", "palette.json")
 with open(_PALETTE_PATH) as f:
     _raw = json.load(f)
 
+# PH1-06 raised the cap from 24 to 32 (shadow, sticky, net, paper, outfits, skins).
+MAX_COLOURS = 32
+
 PALETTE_NAMES = [k for k in _raw.keys() if not k.startswith("_")]
-if len(PALETTE_NAMES) > 24:
-    raise ValueError(f"palette.json has {len(PALETTE_NAMES)} colours, max is 24")
+if len(PALETTE_NAMES) > MAX_COLOURS:
+    raise ValueError(f"palette.json has {len(PALETTE_NAMES)} colours, max is {MAX_COLOURS}")
 
 
 def _hex_to_rgb(h: str) -> tuple[int, int, int]:
@@ -146,7 +149,7 @@ def scale_nn(canvas: Canvas, factor: int) -> Canvas:
 
 
 def save_png(canvas: Canvas, path: str):
-    """Save as PNG-8 (palette mode) using ONLY the fixed 24-colour palette, so the
+    """Save as PNG-8 (palette mode) using ONLY the fixed palette (<= 32 colours), so the
     palette-only constraint is structural, not just checked after the fact."""
     canvas.verify_palette_only()
     os.makedirs(os.path.dirname(path), exist_ok=True)

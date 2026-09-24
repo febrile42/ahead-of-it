@@ -28,8 +28,9 @@ here).
 
 ## How the pieces fit
 
-- `art/palette.json` — 24 named colours + a `_comment`, one outline colour. Locked
-  after this spike (D-024).
+- `art/palette.json` — 32 named colours (24 from the spike + 8 from PH1-06; 32 is the
+  cap, enforced by `dsl.py` and `checks/check_palette.py`) + a `_comment`. Locked
+  (D-024).
 - `art/style.md` — tile geometry, anchors, lighting rule. Read this before adding a
   sprite; it explains the bottom-center anchor convention build.py relies on.
 - `art/src/dsl.py` — `Canvas` (an RGBA drawing surface restricted to primitives that

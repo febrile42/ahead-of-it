@@ -166,7 +166,7 @@ def build_room(static, badge_rendered, worker_rendered):
     props = []
     props.append(((0, 0), desk_spr, desk.ANCHOR))
     props.append(((2, 0), desk_spr, desk.ANCHOR))
-    walk_frame = worker_rendered["right"][1]  # mid-stride, passing pose
+    walk_frame = worker_rendered["right"][0]  # contact pose: the stride is visible
     props.append(((1, 2), walk_frame, worker.ANCHOR))
     props.sort(key=lambda p: p[0][0] + p[0][1])
     for (col, row), spr, anchor in props:
