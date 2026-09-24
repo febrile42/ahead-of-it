@@ -66,8 +66,9 @@ def _screen_patch() -> dict:
     the plain desk's colours back over them."""
     plain, postit = desk_mod.build("plain"), desk_mod.build("postit")
     out = {}
-    for y in range(plain.h):
-        for x in range(plain.w):
+    x0, y0, x1, y1 = desk_mod.NOTE_PEEL          # only the note being peeled
+    for y in range(y0, y1 + 1):
+        for x in range(x0, x1 + 1):
             a, b = plain.img.getpixel((x, y)), postit.img.getpixel((x, y))
             if a != b:
                 out[(x, y)] = a
@@ -85,10 +86,10 @@ def peel_frames(look_name: str) -> list[Canvas]:
         if i == 0:
             # near arm stretched up across to the screen, fingertips on the note
             arm = {(12, 21), (13, 21), (13, 20), (14, 20), (15, 20), (15, 19), (16, 19),
-                   (17, 19), (17, 18), (18, 18), (19, 17), (19, 16), (20, 16), (20, 17)}
-            f.blob(arm, lambda p: "s" if p[0] >= 19 else "t", ring="outer")
-            f.put(21, 13, "Y")   # the note's corner, lifting off the glass
-            f.put(22, 13, "o")
+                   (17, 19), (17, 18)}
+            f.blob(arm, lambda p: "s" if p[0] >= 16 else "t", ring="outer")
+            f.put(16, 15, "Y")   # the note's corner, lifting off the bezel
+            f.put(16, 14, "o")
         else:
             # note pulled off and held up in front of the face: reading it
             arm = {(12, 21), (13, 21), (13, 20), (14, 20), (14, 19), (15, 19), (15, 18),
