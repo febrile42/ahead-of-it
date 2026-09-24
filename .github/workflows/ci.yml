@@ -1,0 +1,66 @@
+name: Checks
+
+# PH1-05: the non-negotiables (R-16, R-21, R-23, R-26, R-33) as CI gates.
+# Runs on every PR into develop and on every push to develop/main, ahead of
+# .github/workflows/deploy.yml so a bad build never reaches a deploy step.
+on:
+  pull_request:
+    branches:
+      - develop
+  push:
+    branches:
+      - develop
+      - main
+
+jobs:
+  check:
+    name: build, test, serving, lighthouse
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5.0.1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Playwright's own Chromium is reused for both the e2e smoke tests
+      # and Lighthouse CI (via CHROME_PATH below), so there's exactly one
+      # browser download per run and one binary the whole check suite
+      # agrees on.
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Resolve CHROME_PATH from the Playwright cache
+        run: |
+          CHROME_DIR=$(find "$HOME/.cache/ms-playwright" -maxdepth 1 -type d -name 'chromium-*' | sort | tail -1)
+          echo "CHROME_PATH=$CHROME_DIR/chrome-linux64/chrome" >> "$GITHUB_ENV"
+
+      - name: Verify Chrome binary
+        run: test -x "$CHROME_PATH"
+
+      # R-33 / D-014: check:employer runs inside `npm run build` already.
+      - name: Build
+        run: npm run build
+
+      # R-21/R-16/R-26 smoke + unit tests (tests/**, src/**/*.test.ts).
+      - name: Test
+        run: npm run test
+
+      # R-26: dist/ must carry nothing but the served site.
+      - name: Serving hygiene
+        run: npm run check:serving
+
+      # R-23: performance >= 80, first-band transfer < 600 KB.
+      - name: Lighthouse
+        run: npm run check:lighthouse
+
+      - name: Upload Lighthouse report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-report
+          path: .lighthouseci
+          retention-days: 14
