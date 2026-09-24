@@ -9,6 +9,7 @@
   },
   "scripts": {
     "dev": "vite",
+    "prebuild": "node scripts/run-build-content.mjs",
     "build": "vite build && npm run check:employer",
     "preview": "vite preview --port 4173 --strictPort",
     "test:unit": "vitest run",
