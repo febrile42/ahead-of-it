@@ -27,6 +27,17 @@ function gagRow(gag: Gag): HTMLElement {
   without.textContent = `Without it: ${gag.prevented}`;
 
   li.append(already, without);
+
+  // m4: R-14 asks for "each with its panel content" — Already and Without
+  // were here, Worth it later wasn't, so the text checklist fell out of
+  // sync with the visual panel for gags that have one.
+  if (gag.worthLater) {
+    const worth = document.createElement('p');
+    worth.className = 'checklist__worth';
+    worth.textContent = `Worth it later: ${gag.worthLater}`;
+    li.append(worth);
+  }
+
   return li;
 }
 

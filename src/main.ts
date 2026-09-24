@@ -2,7 +2,7 @@
 // checklist together. Each piece is a separate module under src/scene and
 // src/ui; this file only owns the glue — state (band, toggle state) and
 // re-render calls.
-import { getAmbientHover, getBands } from './content';
+import { getBands } from './content';
 import type { BandId } from './content';
 import { chooseScale, renderScene } from './scene/assembler';
 import { BUFFER_H, BUFFER_W, computeLayout } from './scene/layout';
@@ -26,11 +26,10 @@ if (sliderRoot && toggleRoot && sceneWrap && canvas && hotspotsLayer && panelRoo
   let state: SceneState = 'built';
   let hasMovedSlider = false;
 
-  const slider = createSlider(band);
-  sliderRoot.append(slider.root);
-
-  const toggle = createToggle(state);
-  toggleRoot.append(toggle.root);
+  // S1: slider and toggle markup already lives in index.html's static
+  // shell (CLS) — these fill it in rather than creating/appending it.
+  const slider = createSlider(sliderRoot, band);
+  const toggle = createToggle(toggleRoot, state);
 
   const panel = createPanel();
   panelRoot.append(panel.root);
@@ -38,10 +37,10 @@ if (sliderRoot && toggleRoot && sceneWrap && canvas && hotspotsLayer && panelRoo
   const checklist = createChecklist();
   checklistRoot.append(checklist.root);
 
-  // G3.A, the ambient 3:47am window (R-13, Phase 3) — hover text only, no
-  // panel, exactly as BANDS-AND-GAGS.md specifies. Attached to the scene
-  // wrapper itself since there is no dedicated sprite for it yet.
-  sceneWrap.title = getAmbientHover();
+  // S6: G3.A's ambient hover on the *whole* scene was noise (a tooltip on
+  // every hover anywhere on the canvas) for a Phase-3, optional (R-13)
+  // gag with no sprite of its own yet. Removed until a window sprite
+  // exists to hang the hover on specifically.
 
   function sizeCanvas() {
     const scale = chooseScale(window.innerWidth, BUFFER_W);
@@ -53,18 +52,33 @@ if (sliderRoot && toggleRoot && sceneWrap && canvas && hotspotsLayer && panelRoo
     hotspotsLayer!.style.height = `${BUFFER_H * scale}px`;
   }
 
-  function openPanel(gagId: string) {
+  function openPanel(gagId: string, source: HTMLElement) {
     const fields = panelFieldsFor(gagId);
     if (!fields) return;
-    panel.open(fields, 'without'); // R-04: the prevented-beat thumbnail is always the without-state scene
+    // R-04: the prevented-beat thumbnail is always the without-state
+    // scene. B4: closing returns focus to the hotspot that opened it.
+    panel.open(fields, 'without', { returnFocusTo: source });
   }
 
+  // S5: render() is async (renderScene awaits sprite loads) and isn't
+  // otherwise serialised — a fast slider drag can start a second render
+  // before the first's paint lands, interleaving two states on the
+  // canvas. Each call takes a token; if a newer render started before
+  // this one's await resolves, its paint is stale and gets dropped.
+  let renderToken = 0;
+
   async function render() {
+    const token = (renderToken += 1);
     sizeCanvas();
     const layout = computeLayout(band, state);
     await renderScene(canvas!, layout);
+    if (token !== renderToken) return; // superseded by a newer render — drop this stale paint
     renderHotspots(hotspotsLayer!, layout, openPanel);
     checklist.render(band);
+    // Test hook (S4): tests/scene.spec.ts awaits this changing instead of
+    // sleeping a fixed timeout, and it only ever reflects a render that
+    // actually committed (not a stale, dropped one).
+    document.body.dataset.renderedToken = String(token);
   }
 
   slider.onChange((newBand) => {
@@ -74,14 +88,17 @@ if (sliderRoot && toggleRoot && sceneWrap && canvas && hotspotsLayer && panelRoo
       toggle.showNudge(); // R-06a: the static nudge, once, after the first slider move.
     }
     if (band === 'beyond') {
-      // R-01b: the Beyond band opens its panel automatically.
-      panel.open(beyondPanelFields(), 'without');
+      // R-01b: the Beyond band opens its panel automatically. B4: it must
+      // not steal focus off the slider at its last stop, and Escape
+      // should return focus there too.
+      panel.open(beyondPanelFields(), 'without', { focus: false, returnFocusTo: slider.input });
     }
     void render();
   });
 
   toggle.onChange((newState) => {
     state = newState;
+    toggle.hideNudge(); // m2: the nudge's only job was getting them to toggle once.
     void render();
   });
 

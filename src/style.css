@@ -47,11 +47,17 @@ h1 {
   display: block;
   font-weight: 600;
   margin-bottom: 0.25rem;
+  /* S1: reserves a line of height before content.json's copy fills the
+     text in, so the label doesn't collapse to 0 height on first paint
+     (an empty element has no line box to size from) and then grow once
+     JS runs. */
+  min-height: 1.2em;
 }
 
 .slider__readout {
   font-variant-numeric: tabular-nums;
   margin: 0 0 0.5rem;
+  min-height: 1.2em; /* S1, see .slider__label */
 }
 
 .slider input[type='range'] {
@@ -68,6 +74,22 @@ h1 {
   position: absolute;
   transform: translateX(-50%);
   white-space: nowrap;
+}
+
+/* S2: the first labelled tick sits close to the left edge (band 80 isn't
+   quite at the slider's minimum) — left-align it instead of centring so
+   it can't bleed past the left edge. */
+.slider__tick--first {
+  transform: translateX(0);
+}
+
+/* S2: the 1,000+ stop is pinned to the right edge of the ticks row
+   (rather than left:100% + translateX(-50%), which put half the label
+   past the viewport and scrolled the whole page horizontally). */
+.slider__tick--beyond {
+  right: 0;
+  left: auto;
+  transform: none;
 }
 
 /* --- Toggle (3d) --- */
@@ -94,11 +116,22 @@ h1 {
 .toggle__subtitle {
   margin: 0.5rem 0 0;
   font-style: italic;
+  min-height: 1.2em; /* S1, see .slider__label */
 }
 
 .toggle__nudge {
   margin: 0.5rem 0 0;
   font-weight: 600;
+  min-height: 1.2em; /* S1, see .slider__label */
+  /* S1c/m2: visibility, not `hidden` — the nudge's line stays reserved in
+     the layout at all times so showing or hiding it (once, after the
+     first slider move; then again once the visitor toggles) never shifts
+     the scene below it. */
+  visibility: hidden;
+}
+
+.toggle__nudge--visible {
+  visibility: visible;
 }
 
 /* --- Scene (3a/3b) --- */
@@ -242,7 +275,8 @@ h1 {
   padding: 0.75rem 0;
 }
 
-.checklist__without {
+.checklist__without,
+.checklist__worth {
   color: #555;
   font-size: 0.9rem;
 }
