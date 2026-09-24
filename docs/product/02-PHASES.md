@@ -1,6 +1,6 @@
 # 02 — Phases
 
-Current phase: **0**. Phases exit on criteria, not dates. Owners: **J** = Josh,
+Current phase: **0 — exit criteria met 2026-09-24** (gag list v5 + Beyond stop approved through Josh's answers; every receipt confirmed; `PANELS.md` v4 passed the mechanical check). **Phase 1 starts on Josh's go.** Phases exit on criteria, not dates. Owners: **J** = Josh,
 **M** = mastermind (Opus session agent), **S** = sonnet subagents, **H** = haiku subagents,
 **A** = pixel artist (Phase 3+).
 
@@ -27,25 +27,27 @@ Exit criteria
 Deliverables
 - Repo scaffold: build tooling, `wrangler.jsonc` (assets-only Worker), CI for staging preview on `develop`. (S, brief from M)
 - Content pipeline: `docs/content/*.md` → `content/gags.json` with schema validation. (S build, H validate)
-- Tileset + sprite manifest from a CC0/licensed isometric pack, with licence file. (H inventory, S integrate)
+- Tileset + sprite manifest from the in-house pipeline (or the $27 fallback, with licence file). (H inventory, S integrate)
 - Building assembler: band → tile grid → canvas. Static per band. (S)
-- Slider (R-01) snapping to bands; band readout. (S)
-- Hotspots + panel (R-04, R-05). Static gag markers (no animation). (S)
-- Punch list (R-14) generated from the same data. (S)
+- Slider (R-01) snapping to Josh's headcount bands; year-labelled ticks; readout. (S)
+- Both states static per band (built default, without on toggle — R-02/R-03/R-06). Hotspots + panel in D-021 order (R-04, R-05). (S)
+- Checklist (R-14) generated from the same data. (S)
 - Phone-first layout at 390px (R-20). (S, reviewed by M on a real phone screenshot)
-- No-third-party test (R-21). (S)
+- No-third-party test (R-21), the employer-name build check (R-33, D-014), and `noindex` (R-16). (S)
+- ~~Art research brief (D-020)~~ done: `docs/research/ART-PACKS-2026-09.md`.
+- **Art pipeline spike (D-024):** style-reference sheet, then five assets generated against it (floor, wall+window, desk+chair, worker walk cycle, badge reader), hand-cleaned. Go/no-go on in-house art. (S runs the pipeline, H slices/validates, M judges consistency — J sees the five before anything else is drawn)
 
 Exit criteria
 - All seven bands render with every gag placed and clickable at 390px.
-- A stranger can identify what each gag *is* from the picture alone (M runs a 5-person hallway test with screenshots; ≥ 4/5 per gag or the gag is redrawn).
+- A stranger can identify what each gag *is* from the picture alone (M runs a 5-person hallway test with without-state screenshots; ≥ 4/5 per gag or the gag is redrawn).
+- **Toggle discoverability:** in the same hallway test, ≥ 4/5 people find and flip "without" within 20 seconds unprompted (R-06a). If not, the nudge is redesigned before Phase 2.
 - Staging preview URL works; nothing served outside the build output.
 
 ## Phase 2 — The switch and the workers
 
 Deliverables
-- Built state for every band (R-06, R-07). (S, copy by M)
+- Toggle + nudge (R-06, R-06a, R-07) polished; **band-crossing moment**: when the slider crosses into a band, the new threat briefly appears *already handled* (Q-20 item 5). (S, copy by M)
 - Animated workers, state poses, calmer built-state cycle (R-08). (S; H slices sheets)
-- Topology fork (R-09). (S)
 - `prefers-reduced-motion` (R-24). (S)
 - Performance budget met (R-23). (S measures, M signs)
 
@@ -57,18 +59,23 @@ Exit criteria
 ## Phase 3 — Share, polish, custom art
 
 Deliverables
-- URL state (R-10), share image + OG (R-11), refinement checkboxes (R-15), day/night (R-13). (S)
-- Custom tileset and sprites replacing stock, against the locked list. (A, brief from M with reference screenshots)
+- URL state (R-10), share image + OG (R-11), refinement checkboxes (R-15), day/night (R-13), analytics events (R-17, D-016). (S)
+- Art per D-024: remaining assets through the proven pipeline; stock/commission only where it failed.
 - First-party analytics decision executed (Q-5). (S)
 - Copy pass on every panel in final voice. (M)
+- Public-facing name **"Ahead of It"** (D-010, decided) applied to title, share image, OG. (S)
 
 Exit criteria
+- "Occupancy" appears in no served string.
 - Share image renders correctly in iMessage, Slack, LinkedIn, X previews (H checks).
+- Public-facing name applied (D-010).
 - J approves final art and copy.
+- Six-pin map (Boston, Chicago, NYC, DC, Lawrence, Austin) at band 6+.
 
 ## Phase 4 — Launch
 
 - GitHub remote (J approves), `main` promotion with merge commit, production deploy, smoke test.
+- **Publicity gate (D-018):** ships `noindex`, unlinked. Making it discoverable or linking from joshgister.com requires a deliberate professionalism / resume-exposure review that J opens explicitly. Not part of launch.
 - DNS: `resume.joshgister.com` moves from lime's `000-default` placeholder (`A 45.33.69.96`) to the Worker custom domain. **J approves the cutover explicitly.** Note in joshgister `CLAUDE.md` that the placeholder can be retired.
 - Post-launch: one week of first-party numbers against `00-VISION.md` success section, then a retro entry in `04-DECISIONS.md`.
 
