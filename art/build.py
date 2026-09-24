@@ -21,7 +21,8 @@ sys.path.insert(0, _REPO_ROOT)
 from art.src.dsl import Canvas, save_png, scale_nn
 from art.src import iso
 from art.src.sprites import floor, wall, desk, worker, badge_reader, room, band80, poses
-from art.src import scene80
+from art.src.sprites import band150
+from art.src import scene80, scene150
 from art.src.vox import Sprite
 
 SPRITES_DIR = os.path.join(_REPO_ROOT, "public", "sprites")
@@ -136,6 +137,36 @@ def build_worker(manifest, registry):
     manifest["worker-peel"] = save_entry("worker-peel", peel, desk.W, desk.H, desk.ANCHOR,
                                          durations={k: poses.PEEL_MS for k in peel})
     registry["worker-peel"] = Frames(peel, desk.ANCHOR)
+    looks = worker.LOOK_NAMES
+    reach = {look: poses.reach_frames(look) for look in looks}
+    manifest["worker-reach"] = save_entry("worker-reach", reach, desk.W, desk.H, desk.ANCHOR,
+                                          durations={k: poses.REACH_MS for k in reach})
+    registry["worker-reach"] = Frames(reach, desk.ANCHOR)
+    turned = {look: [worker.seated_frame(look, turned=True)] for look in looks}
+    manifest["worker-seated-turned"] = save_entry("worker-seated-turned", turned, desk.W,
+                                                  desk.H, desk.ANCHOR)
+    for look, cv in turned.items():
+        registry[f"worker-seated-turned-{look}"] = Sprite(cv[0], desk.ANCHOR)
+    pr = {look: poses.printouts_frames(look) for look in looks}
+    manifest["worker-printouts"] = save_entry(
+        "worker-printouts", pr, poses.PRINTOUTS_W, poses.PRINTOUTS_H, poses.PRINTOUTS_ANCHOR,
+        durations={k: poses.PRINTOUTS_MS for k in pr})
+    registry["worker-printouts"] = Frames(pr, poses.PRINTOUTS_ANCHOR)
+    give = {}
+    for look in looks:
+        give.update(poses.give_frames(look))
+    manifest["worker-give"] = save_entry("worker-give", give, poses.GIVE_W, poses.GIVE_H,
+                                         poses.GIVE_ANCHOR)
+    registry["worker-give"] = Frames({k: v for k, v in give.items()}, poses.GIVE_ANCHOR)
+    cour = poses.courier_frames()
+    manifest["courier"] = save_entry("courier", cour, poses.GIVE_W, poses.GIVE_H,
+                                     poses.GIVE_ANCHOR)
+    registry["courier"] = Frames(cour, poses.GIVE_ANCHOR)
+    watch = {look: poses.watch_frames(look) for look in looks}
+    manifest["worker-watch"] = save_entry("worker-watch", watch, worker.W, worker.H,
+                                          worker.ANCHOR,
+                                          durations={k: poses.WATCH_MS for k in watch})
+    registry["worker-watch"] = Frames(watch, worker.ANCHOR)
     vis = worker.visitor_frame()
     pts = {"net": worker.VISITOR_NET}
     manifest["visitor"] = save_entry("visitor", {"default": [vis]}, vis.w, vis.h,
@@ -146,8 +177,9 @@ def build_worker(manifest, registry):
 
 def build_desks(manifest, registry):
     pts = {"net": desk.net_point()}
+    pts = {"net": desk.net_point(), "card": desk.card_point()}
     registry["desk"] = Sprite(desk.build(), desk.ANCHOR, pts)
-    manifest["desk"]["points"] = {"net": list(pts["net"])}
+    manifest["desk"]["points"] = {k: list(v) for k, v in pts.items()}
     for kind in ("postit", "padlock", "dev", "dev-built"):
         cv = desk.build_variant(kind)
         name = f"desk-{kind}"
@@ -170,7 +202,7 @@ def save_sprite(manifest, registry, name, spr):
 
 
 def build_props(manifest, registry):
-    for group in (room.build_all(), band80.build_all()):
+    for group in (room.build_all(), band80.build_all(), band150.build_all()):
         for name, spr in group.items():
             save_sprite(manifest, registry, name, spr)
 
@@ -278,6 +310,21 @@ def build_band80(registry):
         save_png(scale_nn(out, 4), os.path.join(PREVIEW_DIR, f"band80-{st}.png"))
 
 
+def build_band(scene_mod, band: str, registry):
+    """Both states of one band on one shared crop, so the pair overlays pixel for pixel."""
+    scenes = {st: scene_mod.compose(registry, st) for st in ("without", "built")}
+    boxes = [sc.img.getbbox() for sc in scenes.values()]
+    m = 4
+    x0 = max(min(b[0] for b in boxes) - m, 0)
+    y0 = max(min(b[1] for b in boxes) - m, 0)
+    x1 = min(max(b[2] for b in boxes) + m, scene_mod.SIZE[0])
+    y1 = min(max(b[3] for b in boxes) + m, scene_mod.SIZE[1])
+    for st, sc in scenes.items():
+        out = Canvas(x1 - x0, y1 - y0)
+        out.img = sc.img.crop((x0, y0, x1, y1))
+        save_png(scale_nn(out, 4), os.path.join(PREVIEW_DIR, f"band{band}-{st}.png"))
+
+
 def build_room(static, badge_rendered, worker_rendered):
     """3x3 floor, two walls, two desks, one worker mid-stride, a badge reader on a
     wall — composited on the isometric grid, saved at 4x (the judged deliverable)."""
@@ -334,6 +381,7 @@ def main():
     build_sheet(static, badge_rendered, worker_rendered, registry)
     build_room(static, badge_rendered, worker_rendered)
     build_band80(registry)
+    build_band(scene150, "150", registry)
     print("Build complete.")
 
 

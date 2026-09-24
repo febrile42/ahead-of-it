@@ -141,6 +141,41 @@ def _partition_r(iso: Iso, door: str | None = None, end=False):
                 left="desk-wood", right="desk-wood-dark")
 
 
+def _partition_c_door(iso: Iso):
+    """PH1-07: a cutaway front wall on the tile's front-left edge (along +c at r = 8)
+    with an open doorway, c 1.5 .. 6.5, and a door mat. The front door of band 150's
+    HQ, where the courier comes to."""
+    iso.box(1.8, 8 - PART_T, 0, 6.2, 8 + 0.8, 0.3, top="hair-1", left="hair-1",
+            right="hair-1", outline=None)
+    for c0, c1 in ((0, 1.5), (6.5, 8)):
+        f = iso.box(c0, 8 - PART_T, 0, c1, 8, PART_H, top="chair-dark", left="wall",
+                    right="wall-shadow", outline=None)
+        iso.outline(set(f), "outline")
+    # the door frame stands full height even though the wall is cut: two posts and a
+    # lintel, so the opening reads as a front door and not a gap
+    for c0 in (1.1, 6.5):
+        iso.box(c0, 8 - PART_T, 0, c0 + 0.5, 8, 27, top="wall-trim", left="wall-trim",
+                right="badge-body")
+    iso.box(1.1, 8 - PART_T, 27, 6.9, 8, 29, top="wall-trim", left="wall-trim",
+            right="badge-body")
+
+
+def _partition_r_doorway(iso: Iso):
+    """PH1-07: the same doorway on the tile's front-right edge (along +r at c = 8):
+    cut jambs, a full-height frame, a mat. The inset office's front door."""
+    iso.box(8 - PART_T, 1.8, 0, 8 + 0.8, 6.2, 0.3, top="hair-1", left="hair-1",
+            right="hair-1", outline=None)
+    for r0, r1 in ((0, 1.5), (6.5, 8)):
+        f = iso.box(8, r0, 0, 8 + PART_T, r1, PART_H, top="chair-dark", left="wall",
+                    right="wall-shadow", outline=None)
+        iso.outline(set(f), "outline")
+    for r0 in (1.1, 6.5):
+        iso.box(8, r0, 0, 8 + PART_T, r0 + 0.5, 27, top="wall-trim", left="badge-body",
+                right="wall-trim")
+    iso.box(8, 1.1, 27, 8 + PART_T, 6.9, 29, top="wall-trim", left="badge-body",
+            right="wall-trim")
+
+
 def _slab_l(iso: Iso):
     iso.box(0, 7.9, -5, 8, 8, 0, top=None, left="floor-left", right="floor-right",
             outline=None)
@@ -175,6 +210,8 @@ def build_all() -> dict:
         "partition-r-end": make(lambda iso, c: _partition_r(iso, end=True)),
         "partition-r-door-open": make(lambda iso, c: _partition_r(iso, "open")),
         "partition-r-door-closed": make(lambda iso, c: _partition_r(iso, "closed")),
+        "partition-c-door-open": make(lambda iso, c: _partition_c_door(iso)),
+        "partition-r-doorway": make(lambda iso, c: _partition_r_doorway(iso)),
         "slab-l": make(lambda iso, c: _slab_l(iso)),
         "slab-r": make(lambda iso, c: _slab_r(iso)),
     }

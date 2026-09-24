@@ -172,3 +172,27 @@ A gag's key object must read at native size, not only in the 4× preview:
   monitor (frame 0), then holding the note up to read it (frame 1, which also paints the
   clean screen back over the note). Same 32 × 40 canvas and anchor as the desk; paste over
   `desk-postit`.
+
+## Band 150 (PH1-07)
+
+- **Turned props.** `vox.SwapIso` draws the same world-unit code with c and r exchanged,
+  so a desk can face +c (`desk-turned`, `desk-turned-sheet`, `worker-seated-turned`).
+  Colours stay screen-side and shadows still fall toward +c: the light does not turn.
+  Nothing readable is painted on a turned face (it would run right-to-left).
+- **Cards on monitors.** Desks carry a `card` point (middle of the monitor's top edge).
+  `card-customers` hangs from it; `card-report` is a button centred on the `net` point
+  (mid-screen). Cards are billboarded 3 × 5 glyph text, like `DEV`.
+- **Glyphs.** `M` is now 5 wide (3-wide read as `H`); added `(`, `)`, `Q`, `X` and `>`
+  (drawn as an arrow, for `CRM>ERP>HRIS`). `?` has a flat top.
+- **The street.** `road-r`, `road-c`, `road-turn` tile like the band-80 floor cable:
+  asphalt with a white dashed centre line (the "dotted line" the truck drives on).
+  `link-r/-c/-turn` lay the built state's solid `net` link along the same centre line and
+  `blink` a packet (2 × 300 ms). A dashed road is not the network; a solid magenta line is.
+- **Doorways.** `partition-c-door-open` (HQ's front door, front-left edge) and
+  `partition-r-doorway` (the inset office's, front-right edge) keep the cut walls but stand
+  a full-height frame, so the opening reads as a door. People in a doorway are depth-sorted
+  by hand: the one inside below the frame, the one outside above it.
+- **Poses.** `worker-reach` (seated, arm up at the bait), `worker-printouts` (26 × 24,
+  a sheet in each hand, looking left then right), `worker-give` (24 × 24, profile, padded
+  envelope out; `<look>-left/-right`), `courier` (same canvas; brown uniform and cap),
+  `worker-watch` (forearm across the chest, eyes down, then up). All in `poses.py`.

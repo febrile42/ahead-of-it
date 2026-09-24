@@ -40,24 +40,32 @@ def floor_pt(fc, fr):
 
 
 class Scene:
-    def __init__(self, sprites):
+    def __init__(self, sprites, size=SIZE, origin=ORIGIN):
         self.s = sprites
-        self.c = Canvas(*SIZE)
+        self.c = Canvas(*size)
+        self.origin = origin
         self.items = []  # (depth, order, fn)
+
+    def at(self, col, row):
+        return iso.iso_to_screen(col, row, self.origin)
+
+    def floor_pt(self, fc, fr):
+        o = self.origin
+        return (o[0] + round((fc - fr) * 16), o[1] + round((fc + fr - 2) * 8))
 
     def paste(self, canvas, anchor, pt):
         self.c.paste(canvas, pt[0] - anchor[0], pt[1] - anchor[1])
 
     def tile(self, name, col, row, depth=None, dx=0, dy=0):
         spr = self.s[name]
-        pt = at(col, row)
+        pt = self.at(col, row)
         pt = (pt[0] + dx, pt[1] + dy)
         d = col + row + 1 if depth is None else depth
         self.items.append((d, len(self.items), lambda: self.paste(spr.canvas, spr.anchor, pt)))
         return pt
 
     def fig(self, canvas, anchor, fc, fr, depth=None):
-        pt = floor_pt(fc, fr)
+        pt = self.floor_pt(fc, fr)
         d = fc + fr if depth is None else depth
         self.items.append((d, len(self.items), lambda: self.paste(canvas, anchor, pt)))
         return pt

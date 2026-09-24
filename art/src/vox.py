@@ -159,6 +159,42 @@ class Iso:
                 self.c.point(x, y, colour)
 
 
+class SwapIso(Iso):
+    """An Iso with the c and r axes exchanged (PH1-07): the same world-unit drawing code
+    renders the prop turned 90 degrees, e.g. a desk whose screen faces +c (down-right)
+    instead of +r. Colours stay screen-side (`left` is still the lit, screen-left face),
+    so the light still comes from the top-left; a face painted as "L" lands on the
+    +c face ("R") and vice versa. Content painted on a turned face runs right-to-left,
+    so only put symmetric things there (a grid, a glow), never text."""
+
+    _FACE = {"L": "R", "R": "L", "T": "T"}
+
+    def pt(self, c, r, z=0):
+        return super().pt(r, c, z)
+
+    def left_px(self, r, c, z):
+        return super().right_px(r, c, z)
+
+    def right_px(self, c, r, z):
+        return super().left_px(c, r, z)
+
+    def box_faces(self, c0, r0, z0, c1, r1, z1):
+        # Iso.box goes through here, so boxes turn with no further override
+        return super().box_faces(r0, c0, z0, r1, c1, z1)
+
+    def paint(self, faces, face, plane, fn):
+        if face == "T":
+            return super().paint(faces, "T", plane, lambda a, b: fn(b, a))
+        return super().paint(faces, self._FACE[face], plane, fn)
+
+    def floor_shadow(self, c0, r0, c1, r1, grow=1.5, grow_r=0.5, colour="shadow"):
+        # the light does not turn with the prop: shadow still falls toward world +c
+        faces = Iso.box_faces(self, r0, c0, 0, r1 + grow, c1 + grow_r, 0.001)
+        for (x, y), f in faces.items():
+            if f == "T":
+                self.c.point(x, y, colour)
+
+
 def dotted(canvas: Canvas, p0, p1, colour: str = "net", on: int = 1, period: int = 3,
            phase: int = 0, halo: str | None = None):
     """The 'on the network' convention (style.md): a 1 px dotted line, `on` pixels lit

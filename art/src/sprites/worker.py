@@ -20,7 +20,7 @@ top-left), drawn first so the feet sit on it. A lifted foot shows daylight above
 from __future__ import annotations
 
 from ..dsl import Canvas
-from ..vox import Iso
+from ..vox import Iso, SwapIso
 from . import desk as desk_mod
 
 W, H = 16, 24
@@ -34,6 +34,7 @@ FIXED = {
     "o": "outline", "e": "outline", "k": "outline", "w": "shadow",
     "L": "monitor-frame", "l": "chair-mid", "G": "monitor-screen", "X": "badge-red",
     "V": "paper", "Y": "sticky", "g": "wall-shadow", "n": "net",
+    "b": "desk-wood",
 }
 
 LOOKS = {
@@ -349,7 +350,7 @@ def queue_frame(look_name: str, facing: str = "left") -> Canvas:
 
 # -- seated at a desk -----------------------------------------------------------
 
-def seated_frame(look_name: str) -> Canvas:
+def seated_frame(look_name: str, turned: bool = False, arm=None) -> Canvas:
     """A worker in the desk group's chair, seen from behind, hands on the desk.
     Same 32x40 canvas and anchor as `desk`: paste it at the same point, over any desk
     variant. The chair's backrest is redrawn over the worker's lower back."""
@@ -362,11 +363,15 @@ def seated_frame(look_name: str) -> Canvas:
     body.blob(R(2, 9, 3, 13), "t")
     body.blob(R(12, 9, 13, 13), "T")
     _head_back(body, look["style"], 0)
-    # place hips on the seat: chair centre (c 2.5, r 6) -> screen x 9; seat top y ~28
-    body.shift(9 - 8, 28 - 15 - 3)
+    # place hips on the seat: chair centre (c 2.5, r 6) -> screen x 9; seat top y ~28.
+    # A turned desk (PH1-07) has its chair at (c 6, r 2.5): x 23, same height; the back
+    # view is symmetric, so the same body just moves across.
+    body.shift(9 - 8 + (14 if turned else 0), 28 - 15 - 3)
+    if arm is not None:
+        arm(body)  # a pose hook: add a raised arm etc. in the shifted body's pixels
     f.px.update({k: v for k, v in body.px.items() if 0 <= k[0] < f.w and 0 <= k[1] < f.h})
     c = f.to_canvas(look)
-    desk_mod.backrest(Iso(c))
+    desk_mod.backrest(SwapIso(c) if turned else Iso(c))
     return c
 
 
