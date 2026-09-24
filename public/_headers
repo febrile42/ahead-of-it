@@ -1,0 +1,12 @@
+/*
+  X-Robots-Tag: noindex, nofollow
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+
+# Sprites and static assets are content-hashed by Vite (or should be renamed
+# on change, per joshgister's font lesson), so a 1-year cache is safe.
+/sprites/*
+  Cache-Control: public, max-age=31536000
+/assets/*
+  Cache-Control: public, max-age=31536000

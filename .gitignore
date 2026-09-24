@@ -5,3 +5,10 @@ dist/
 *.log
 .DS_Store
 .claude/worktrees/
+
+# Vite / Playwright
+*.local
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
