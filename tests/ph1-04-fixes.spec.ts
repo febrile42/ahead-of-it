@@ -91,3 +91,26 @@ test.describe('panel copy (B5): inline beat labels', () => {
     await page.screenshot({ path: 'tests/screenshots/panel-G2.1.png' });
   });
 });
+
+test.describe('panel thumbnail (fix round item 8 / review fix 5)', () => {
+  test('a missing thumb hides the frame instead of showing a broken image', async ({ page }) => {
+    await interceptFixtureScenes(page);
+    await page.setViewportSize(VIEWPORT);
+    await page.goto('/');
+    await page.waitForFunction(() => document.body.dataset.renderedToken !== undefined);
+
+    await page.locator('[data-gag-id="G2.1"]').click();
+    const thumb = page.locator('.panel__thumb');
+    const img = thumb.locator('img');
+    await expect(img).toHaveAttribute('src', '/sprites/thumbs/G2.1.png');
+
+    // public/sprites/thumbs/ doesn't exist yet in this worktree, so this
+    // is a real 404, not a simulated one — thumbImg.onerror (panel.ts)
+    // should hide the whole frame once it fires.
+    await expect(thumb).toBeHidden();
+    // `naturalWidth === 0` is the DOM's own signal that the <img> never
+    // successfully decoded a bitmap — asserting on it, not just the CSS
+    // hidden state, rules out "hidden but actually loaded fine".
+    expect(await img.evaluate((el) => (el as HTMLImageElement).naturalWidth)).toBe(0);
+  });
+});

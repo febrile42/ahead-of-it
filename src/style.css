@@ -174,10 +174,15 @@ h1 {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   /* CLS: reserves box space before the scene file has even been fetched.
-     D-036 caps every view at 360x240 native px, so that's the widest this
-     box can ever need to be — main.ts narrows it to the loaded view's own
-     ratio once known, which only ever shrinks the box, never grows it
-     past this reservation. */
+     D-036 caps every view at 360x240 native px, so that's the widest/
+     tallest this box can ever need to be — and main.ts (fix round item 7)
+     deliberately does NOT narrow it to each loaded view's own ratio once
+     known; the aspect-ratio stays fixed at this worst case for the whole
+     page life. A smaller view just leaves empty space inside the box
+     (and now sits centred horizontally, not flush left — see
+     sizeAndPositionCanvas) instead of the box itself changing size,
+     which is what keeps this element's CLS contribution at ~0 after
+     first paint. */
   aspect-ratio: 360 / 240;
   /* R-20: "pan/zoom is allowed, tiny hotspots are not" — a view wider
      than the viewport (SCENE-FORMAT's `focus` rect) scrolls horizontally
@@ -277,6 +282,15 @@ h1 {
   font: 700 0.65rem monospace;
   margin: 0.5rem 0;
   overflow: hidden;
+}
+
+/* Fix round item 8 / review fix 5: the `display: inline-flex` above wins
+   over the UA stylesheet's default `[hidden] { display: none }` (a class
+   selector beats an attribute-only one), so `thumb.hidden = true`
+   (panel.ts's thumbImg.onerror) would otherwise leave the dashed frame
+   visibly on screen despite the attribute being set. This restores it. */
+.panel__thumb[hidden] {
+  display: none;
 }
 
 /* PH1-09: the thumbnail is a real <img src="/sprites/thumbs/<gagId>.png">

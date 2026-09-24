@@ -72,6 +72,13 @@ function renderBeats(container: HTMLElement, fields: PanelFields, thumbnailState
   thumbImg.alt = '';
   thumbImg.width = 64;
   thumbImg.height = 48;
+  // Fix round item 8 / review fix 5: no thumb exported for this gag yet
+  // (public/sprites/thumbs/ is still incomplete pre-PH1-08b) shouldn't
+  // show a browser's broken-image icon — hide the whole frame instead of
+  // leaving a visibly broken box in a shipped panel.
+  thumbImg.onerror = () => {
+    thumb.hidden = true;
+  };
   thumb.dataset.state = thumbnailState;
   thumb.append(thumbImg);
   const preventedP = document.createElement('p');
