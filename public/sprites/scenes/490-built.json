@@ -2236,9 +2236,9 @@
         {
           "sprite": "worker-hat",
           "frame": "e-left",
-          "x": 232,
-          "y": 178,
-          "depth": 16.6,
+          "x": 235,
+          "y": 184,
+          "depth": 17.4,
           "gagId": "G7.3a",
           "part": "board"
         },
@@ -2294,8 +2294,8 @@
           "part": "board",
           "x": 181,
           "y": 126,
-          "w": 70,
-          "h": 52,
+          "w": 73,
+          "h": 58,
           "primary": true
         },
         {

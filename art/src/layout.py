@@ -392,7 +392,7 @@ def _band220() -> list:
            gag="G7.3a", part="board"),
         _f("engineer", WB[0] + 1.2, WB[1] - 0.6, frame="point-left", states=W,
            gag="G7.3a", part="board"),
-        _f("worker-hat", WB[0] + 1.6, WB[1] - 0.5, frame="e-left", states=B,
+        _f("worker-hat", WB[0] + 2.1, WB[1] - 0.2, frame="e-left", states=B,
            gag="G7.3a", part="board"),
     ]
     # more of the floor: a desk in the new bay
