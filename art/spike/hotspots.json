@@ -1,0 +1,214 @@
+{
+ "A-750": {
+  "views": [
+   {
+    "id": "ground",
+    "size": [
+     360,
+     226
+    ],
+    "default": true,
+    "gags": [
+     "G1.1",
+     "G1.2",
+     "G2.1",
+     "G2.2",
+     "G2.3",
+     "G3.1",
+     "G3.2",
+     "G4.1",
+     "G5.3",
+     "G5.4",
+     "G5.6",
+     "G6.1",
+     "G7.1"
+    ],
+    "primaries": 12,
+    "min_primary_spacing": 46.8,
+    "under_44": []
+   },
+   {
+    "id": "floor-2",
+    "size": [
+     360,
+     226
+    ],
+    "default": false,
+    "gags": [
+     "G2.4",
+     "G3.3",
+     "G4.2",
+     "G4.3",
+     "G6.1",
+     "G6.2",
+     "G7.3",
+     "G7.3a",
+     "G7.4"
+    ],
+    "primaries": 8,
+    "min_primary_spacing": 44.0,
+    "under_44": []
+   },
+   {
+    "id": "top",
+    "size": [
+     360,
+     226
+    ],
+    "default": false,
+    "gags": [
+     "G6.1",
+     "G7.2"
+    ],
+    "primaries": 1,
+    "min_primary_spacing": null,
+    "under_44": []
+   },
+   {
+    "id": "street",
+    "size": [
+     360,
+     232
+    ],
+    "default": false,
+    "gags": [
+     "G2.4",
+     "G5.1",
+     "G5.2",
+     "G5.6",
+     "G6.3",
+     "G6.4"
+    ],
+    "primaries": 5,
+    "min_primary_spacing": 51.5,
+    "under_44": []
+   }
+  ],
+  "default": "ground",
+  "gag_count": 26,
+  "taps": {
+   "one_tap": 12,
+   "two_taps": 14,
+   "mean": 1.54
+  }
+ },
+ "B-750": {
+  "size": [
+   360,
+   990
+  ],
+  "gag_count": 26,
+  "primaries_per_screen_opened_at_top": {
+   "1": 9,
+   "2": 15,
+   "3": 2
+  },
+  "primaries_per_screen_opened_at_ground": {
+   "-1": 9,
+   "1": 17
+  },
+  "primaries": 26,
+  "min_primary_spacing": 44.0,
+  "under_44": [],
+  "screens_tall": 2.15,
+  "floor_tops_y": {
+   "top": 0,
+   "chunk": 60,
+   "floor-2": 302,
+   "ground": 518,
+   "street": 750
+  }
+ },
+ "A-360": {
+  "views": [
+   {
+    "id": "ground",
+    "size": [
+     360,
+     226
+    ],
+    "default": true,
+    "gags": [
+     "G1.1",
+     "G1.2",
+     "G2.1",
+     "G2.2",
+     "G2.3",
+     "G3.2",
+     "G5.3",
+     "G5.4",
+     "G5.6"
+    ],
+    "primaries": 8,
+    "min_primary_spacing": 46.8,
+    "under_44": []
+   },
+   {
+    "id": "floor-2",
+    "size": [
+     360,
+     226
+    ],
+    "default": false,
+    "gags": [
+     "G2.4",
+     "G4.2",
+     "G4.3",
+     "G7.3",
+     "G7.3a"
+    ],
+    "primaries": 5,
+    "min_primary_spacing": 45.8,
+    "under_44": []
+   },
+   {
+    "id": "street",
+    "size": [
+     360,
+     232
+    ],
+    "default": false,
+    "gags": [
+     "G2.4",
+     "G5.1",
+     "G5.6"
+    ],
+    "primaries": 2,
+    "min_primary_spacing": 121.8,
+    "under_44": []
+   }
+  ],
+  "default": "ground",
+  "gag_count": 15,
+  "taps": {
+   "one_tap": 8,
+   "two_taps": 7,
+   "mean": 1.47
+  }
+ },
+ "B-360": {
+  "size": [
+   360,
+   916
+  ],
+  "gag_count": 15,
+  "primaries_per_screen_opened_at_top": {
+   "1": 5,
+   "2": 10
+  },
+  "primaries_per_screen_opened_at_ground": {
+   "-1": 5,
+   "1": 10
+  },
+  "primaries": 15,
+  "min_primary_spacing": 45.8,
+  "under_44": [],
+  "screens_tall": 1.99,
+  "floor_tops_y": {
+   "chunk": 0,
+   "floor-2": 228,
+   "ground": 444,
+   "street": 676
+  }
+ }
+}
