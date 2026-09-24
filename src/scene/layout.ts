@@ -120,7 +120,7 @@ function cellPosition(slot: SlotId, cell: number): { x: number; y: number; w: nu
  * an 80% box, applied identically in both states. Beyond reuses exactly
  * the 750 set (no growth past 750 — brief item 3a / N-02).
  */
-function computeHotspots(band: BandId, state: 'built' | 'without'): Hotspot[] {
+function computeHotspots(band: BandId): Hotspot[] {
   const gags: Gag[] = getGags();
   const currentTier = band === 'beyond' ? 750 : band;
   const hotspots: Hotspot[] = [];
@@ -169,6 +169,6 @@ export function computeLayout(band: BandId, state: 'built' | 'without'): SceneLa
     hasTop,
     tiles,
     mapPins: hasMap ? computeMapPins(band) : [],
-    hotspots: computeHotspots(band, state),
+    hotspots: computeHotspots(band),
   };
 }
