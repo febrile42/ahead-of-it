@@ -115,19 +115,20 @@ def reach_frames(look_name: str) -> list[Canvas]:
     """Seated from behind, the right arm going up toward the envelope that dangles in
     front of the screen (fishing-line's `bait`); frame 1 is the fingertips on it."""
     from .worker import seated_frame
-    arms = [
-        # arm straight up past the head, silhouetted against the wall
-        {(13, y) for y in range(13, 20)} | {(14, y) for y in range(12, 20)} | {(15, 11), (15, 12)},
-        # ... and leaning in, fingertips on the envelope's corner
-        {(13, y) for y in range(15, 20)} | {(14, y) for y in range(13, 20)}
-        | {(15, 13), (15, 12), (16, 12), (16, 13)},
-    ]
+    # PH1-10 fix round: the arm clearly extended, up and out toward the envelope that
+    # hangs between the head and the screen, 2 px thick on the diagonal
+    def diag(x0, y0, n):
+        pts = set()
+        for k in range(n):
+            pts |= {(x0 + k, y0 - k), (x0 + k, y0 - k + 1), (x0 + k + 1, y0 - k + 1)}
+        return pts
+    arms = [diag(12, 19, 9), diag(12, 19, 10)]
     out = []
     for arm in arms:
         top = min(y for _, y in arm)
 
         def hook(body, arm=arm, top=top):
-            body.blob(arm, lambda p: "s" if p[1] <= top + 1 and p[0] >= 15 else "T", ring="outer")
+            body.blob(arm, lambda p: "s" if p[1] <= top + 1 else "T", ring="outer")
         out.append(seated_frame(look_name, arm=hook))
     return out
 

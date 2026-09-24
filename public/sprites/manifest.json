@@ -539,8 +539,8 @@
   },
   "fishing-line": {
     "anchor": [
-      8,
-      65
+      5,
+      83
     ],
     "frames": {
       "default": [
@@ -550,19 +550,19 @@
         }
       ]
     },
-    "h": 65,
+    "h": 83,
     "points": {
       "bait": [
-        12,
-        41
+        5,
+        48
       ]
     },
-    "w": 18
+    "w": 31
   },
   "fishing-shield": {
     "anchor": [
-      8,
-      65
+      3,
+      83
     ],
     "frames": {
       "default": [
@@ -572,8 +572,8 @@
         }
       ]
     },
-    "h": 65,
-    "w": 22
+    "h": 83,
+    "w": 29
   },
   "floor": {
     "anchor": [

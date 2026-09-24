@@ -283,14 +283,15 @@ def _band150() -> list:
         # second part in both states (SCENE-FORMAT: G3.2 is two-part in both)
         _t("desk", 1, 0, states=B, view=F2, gag="G3.2", part="box", primary=False),
     ]
-    # G4.2: the finance desk
+    # G4.2: the finance desk, a tile off the back wall so the line hangs in open air
+    fc_, fr_ = 5, 1
     P += [
-        _t("desk", 5, 0, id="finance", view=F2, gag="G4.2", part="desk"),
-        _t("fishing-line", 5, 0, depth=6.005, states=W, view=F2, gag="G4.2", part="desk"),
-        _t("worker-reach", 5, 0, frame="a", depth=6.01, states=W, view=F2, gag="G4.2",
+        _t("desk", fc_, fr_, id="finance", view=F2, gag="G4.2", part="desk"),
+        _t("fishing-line", fc_, fr_, depth=fc_ + fr_ + 1.005, states=W, view=F2, gag="G4.2", part="desk"),
+        _t("worker-reach", fc_, fr_, frame="a", depth=fc_ + fr_ + 1.01, states=W, view=F2, gag="G4.2",
            part="desk"),
-        _t("fishing-shield", 5, 0, depth=6.005, states=B, view=F2, gag="G4.2", part="desk"),
-        _t("worker-seated", 5, 0, frame="a", depth=6.01, states=B, view=F2, gag="G4.2",
+        _t("fishing-shield", fc_, fr_, depth=fc_ + fr_ + 1.005, states=B, view=F2, gag="G4.2", part="desk"),
+        _t("worker-seated", fc_, fr_, frame="a", depth=fc_ + fr_ + 1.01, states=B, view=F2, gag="G4.2",
            part="desk"),
         dict(sprite="card-report", attach={"id": "finance", "point": "net"}, states=B,
              layer="over", view=F2, gag="G4.2", part="desk"),

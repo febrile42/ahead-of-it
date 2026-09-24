@@ -2029,36 +2029,9 @@
         {
           "sprite": "desk",
           "frame": "default",
-          "x": 197,
-          "y": 101,
-          "depth": 6,
-          "gagId": "G4.2",
-          "part": "desk"
-        },
-        {
-          "sprite": "desk",
-          "frame": "default",
           "x": 101,
           "y": 101,
           "depth": 6
-        },
-        {
-          "sprite": "fishing-shield",
-          "frame": "default",
-          "x": 197,
-          "y": 101,
-          "depth": 6.005,
-          "gagId": "G4.2",
-          "part": "desk"
-        },
-        {
-          "sprite": "worker-seated",
-          "frame": "a",
-          "x": 197,
-          "y": 101,
-          "depth": 6.01,
-          "gagId": "G4.2",
-          "part": "desk"
         },
         {
           "sprite": "worker-seated",
@@ -2066,6 +2039,33 @@
           "x": 101,
           "y": 101,
           "depth": 6.01
+        },
+        {
+          "sprite": "desk",
+          "frame": "default",
+          "x": 181,
+          "y": 109,
+          "depth": 7,
+          "gagId": "G4.2",
+          "part": "desk"
+        },
+        {
+          "sprite": "fishing-shield",
+          "frame": "default",
+          "x": 181,
+          "y": 109,
+          "depth": 7.005,
+          "gagId": "G4.2",
+          "part": "desk"
+        },
+        {
+          "sprite": "worker-seated",
+          "frame": "a",
+          "x": 181,
+          "y": 109,
+          "depth": 7.01,
+          "gagId": "G4.2",
+          "part": "desk"
         },
         {
           "sprite": "desk",
@@ -2255,9 +2255,9 @@
         {
           "sprite": "card-report",
           "frame": "default",
-          "x": 204,
-          "y": 77,
-          "depth": 6.01,
+          "x": 188,
+          "y": 85,
+          "depth": 7.01,
           "gagId": "G4.2",
           "part": "desk"
         }
@@ -2284,10 +2284,10 @@
         {
           "gagId": "G4.2",
           "part": "desk",
-          "x": 182,
-          "y": 36,
-          "w": 36,
-          "h": 62,
+          "x": 166,
+          "y": 26,
+          "w": 41,
+          "h": 80,
           "primary": true
         },
         {
@@ -2321,7 +2321,7 @@
         {
           "gagId": "G3.3",
           "part": "main",
-          "x": 196,
+          "x": 208,
           "y": 4,
           "w": 32,
           "h": 32,

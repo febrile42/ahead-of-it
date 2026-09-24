@@ -221,28 +221,39 @@ def desk_retail_box() -> Canvas:
 
 # -- G4.2: the fish ---------------------------------------------------------------------
 
-FISH_C, FISH_R = 5.3, 3.0          # where the line hangs: in front of the screen
+# PH1-10 fix round: the finance desk stands a tile off the back wall, so the line hangs
+# in open air. It hangs between the worker's head and the monitor (r 2 .. 6), above the
+# screen's top edge so the envelope is never read as screen content.
+FISH_C, FISH_R = 4.4, 3.4
+WALL_R = -8.0                      # the back wall, relative to the desk's tile (a tile back)
 
 
 def _rod_and_line(iso: Iso, c: Canvas, z_hook: float, x_shift=0):
-    """A rod tip poking down from above the ceiling line, and the line off it."""
-    top_z = 50.0
-    x0, y0 = iso.pt(FISH_C, FISH_R, top_z)
-    for k in range(12):           # rod tip, coming in from the upper left
-        c.point(x0 - 12 + k, y0 - 6 + k // 2, "desk-wood-dark")
-        c.point(x0 - 12 + k, y0 - 7 + k // 2, "outline")
+    """A long rod angled down over the top of the back wall from somewhere beyond it,
+    its tip out over the desk, and the line straight down off the tip."""
+    tip_z = 44.0
+    _thick(iso, [(FISH_C - 5.0, WALL_R - 5.0, 52.0), (FISH_C, FISH_R, tip_z)],
+           "desk-wood-dark", width=1)
+    x0, y0 = iso.pt(FISH_C, FISH_R, tip_z)
     x1, y1 = iso.pt(FISH_C, FISH_R, z_hook)
-    for y in range(y0, y1):
+    for y in range(y0 + 1, y1):
         t = (y - y0) / max(1, y1 - y0)
         c.point(x0 + round(x_shift * t * t), y, "outline")
     return x1 + x_shift, y1
 
 
 def _hook(c: Canvas, x, y):
-    """A J hook, 3 x 4, point up on the left."""
-    for (dx, dy) in ((0, 0), (0, 1), (0, 2), (-1, 3), (-2, 3), (-2, 2)):
-        c.point(x + dx, y + dy, "badge-body")
-    c.point(x - 2, y + 1, "wall-shadow")
+    """A J hook, 5 x 9, hung from (x, y): a ring eye where the line ties on, the shank,
+    the bend and the barbed point turned back up — a clear J against the wall."""
+    for (dx, dy) in ((-1, 0), (0, 0), (1, 0), (-1, 1), (1, 1), (-1, 2), (0, 2), (1, 2)):
+        c.point(x + dx, y + dy, "outline")                        # the eye
+    for dy in range(3, 8):
+        c.point(x, y + dy, "badge-body")                          # the shank
+        c.point(x + 1, y + dy, "outline")
+    for (dx, dy) in ((0, 8), (-1, 8), (-2, 8), (-3, 7), (-3, 6), (-3, 5)):
+        c.point(x + dx, y + dy, "outline")                        # the bend, the point
+    c.point(x - 2, y + 5, "outline")                              # the barb
+    c.point(x - 1, y + 7, "badge-body")
 
 
 def _envelope(c: Canvas, x, y, w=9, h=6):
@@ -256,17 +267,20 @@ def _envelope(c: Canvas, x, y, w=9, h=6):
 
 
 def _fishing_line(iso: Iso, c: Canvas):
-    x, y = _rod_and_line(iso, c, 22.0)
-    _hook(c, x, y)
-    _envelope(c, x - 5, y + 3, w=11, h=7)
-    return {"bait": (x, y + 6)}
+    x, y = _rod_and_line(iso, c, 35.0)
+    # the envelope hangs with the hook's bend through its top edge; the hook is drawn
+    # over the paper so the J reads
+    _hook(c, x, y - 3)
+    _envelope(c, x - 7, y + 6, w=11, h=7)
+    c.point(x - 2, y + 6, "outline")                  # caught on the bend
+    return {"bait": (x - 2, y + 9)}
 
 
 def _fishing_shield(iso: Iso, c: Canvas):
     """Built: the same line comes down and lands on a small shield over the monitor;
     the hook is stopped on its rim, the envelope knocked askew, going nowhere."""
     sx, sy = iso.pt(FISH_C, FISH_R, 25.0)      # shield centre, above the screen
-    x, y = _rod_and_line(iso, c, 34.0)
+    x, y = _rod_and_line(iso, c, 32.0)
     rows = [
         "ooooooooo",
         "obbbbbbbo",
@@ -281,8 +295,8 @@ def _fishing_shield(iso: Iso, c: Canvas):
     ]
     _rows(c, rows, sx - 4, sy - 5, {"o": "outline", "b": "shirt-1", "w": "paper"})
     # the hook stopped on the rim, the envelope swung off to the side
-    _hook(c, x, y)
-    _envelope(c, x + 3, y - 2, w=7, h=5)
+    _hook(c, x, y - 9)
+    _envelope(c, x + 4, y - 5, w=7, h=5)
     for dx, dy in ((-4, 3), (-5, 1), (1, 4), (2, 3)):   # impact ticks on the rim
         c.point(x + dx, y + dy, "sticky")
 
