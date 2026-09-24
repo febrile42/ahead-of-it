@@ -149,7 +149,7 @@ def _band80() -> list:
     seated = {"without": {B80_DESKS[0]: "a", B80_DESKS[3]: "d"},
               "built": dict(zip(B80_DESKS, "aced"))}
     for (col, row) in B80_DESKS:
-        P.append(_t("desk-postit", col, row, states=W, id=f"desk80-{col}-{row}",
+        P.append(_t("desk-notes", col, row, states=W, id=f"desk80-{col}-{row}",
                     gag="G1.2", part="pit"))
         P.append(_t("desk-padlock", col, row, states=B, gag="G1.2", part="pit"))
         for st in BOTH:
@@ -178,9 +178,9 @@ def _band80() -> list:
     # trolley's spot, then across the open floor to the first pit desk. Someone straddles
     # it where the walkway crosses, the CAUTION sign at the crossing. The cable tiles
     # are plain scenery (a hotspot that long would sit on G1.2's).
-    P += [_t("cable-floor-r", 2, row, depth=row + 3.0, states=W) for row in range(1, 5)]
-    P += [_t("cable-floor-turn", 2, 5, depth=7.5, states=W)]
-    P += [_t("cable-floor-c", col, 5, depth=col + 5.5, states=W) for col in range(3, 6)]
+    P += [_t("cable-tape-r", 2, row, depth=row + 3.0, states=W) for row in range(1, 5)]
+    P += [_t("cable-tape-turn", 2, 5, depth=7.5, states=W)]
+    P += [_t("cable-tape-c", col, 5, depth=col + 5.5, states=W) for col in range(3, 6)]
     P += [
         _t("sign-caution", 4, 5, dx=-6, dy=-5, depth=9.2, states=W, gag="G2.2", part="cable"),
         _f("worker-c", 5.4, 5.55, frame="step-right", depth=11.0, states=W, quiet="drop",

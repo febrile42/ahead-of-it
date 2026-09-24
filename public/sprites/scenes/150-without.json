@@ -833,14 +833,14 @@
           "part": "lobby"
         },
         {
-          "sprite": "cable-floor-r",
+          "sprite": "cable-tape-r",
           "frame": "default",
           "x": 133,
           "y": 85,
           "depth": 4.0
         },
         {
-          "sprite": "cable-floor-r",
+          "sprite": "cable-tape-r",
           "frame": "default",
           "x": 117,
           "y": 93,
@@ -856,7 +856,7 @@
           "part": "queue"
         },
         {
-          "sprite": "cable-floor-r",
+          "sprite": "cable-tape-r",
           "frame": "default",
           "x": 101,
           "y": 101,
@@ -886,14 +886,14 @@
           "depth": 6.4
         },
         {
-          "sprite": "cable-floor-r",
+          "sprite": "cable-tape-r",
           "frame": "default",
           "x": 85,
           "y": 109,
           "depth": 7.0
         },
         {
-          "sprite": "cable-floor-turn",
+          "sprite": "cable-tape-turn",
           "frame": "default",
           "x": 69,
           "y": 117,
@@ -918,7 +918,7 @@
           "part": "queue"
         },
         {
-          "sprite": "cable-floor-c",
+          "sprite": "cable-tape-c",
           "frame": "default",
           "x": 85,
           "y": 125,
@@ -943,14 +943,14 @@
           "part": "cable"
         },
         {
-          "sprite": "cable-floor-c",
+          "sprite": "cable-tape-c",
           "frame": "default",
           "x": 101,
           "y": 133,
           "depth": 9.5
         },
         {
-          "sprite": "desk-postit",
+          "sprite": "desk-notes",
           "frame": "default",
           "x": 165,
           "y": 133,
@@ -968,14 +968,14 @@
           "part": "pit"
         },
         {
-          "sprite": "cable-floor-c",
+          "sprite": "cable-tape-c",
           "frame": "default",
           "x": 117,
           "y": 141,
           "depth": 10.5
         },
         {
-          "sprite": "desk-postit",
+          "sprite": "desk-notes",
           "frame": "default",
           "x": 197,
           "y": 149,
@@ -984,7 +984,7 @@
           "part": "pit"
         },
         {
-          "sprite": "desk-postit",
+          "sprite": "desk-notes",
           "frame": "default",
           "x": 133,
           "y": 149,
@@ -993,7 +993,7 @@
           "part": "pit"
         },
         {
-          "sprite": "desk-postit",
+          "sprite": "desk-notes",
           "frame": "default",
           "x": 165,
           "y": 165,

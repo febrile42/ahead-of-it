@@ -23,7 +23,7 @@ every look is a palette swap. Each pose is one manifest entry keyed by look (lik
                    envelope on the hook. Desk canvas + anchor.
   worker-peel      G1.2 (band 80): standing at a colleague's desk, peeling the password
                    sticky note off their monitor. Desk canvas + anchor: paste over
-                   `desk-postit` at the same point. Frame 1 erases the note from the
+                   `desk-notes` at the same point. Frame 1 erases the peeled note from the
                    screen (it is in the worker's hand now).
 """
 from __future__ import annotations
@@ -62,9 +62,9 @@ PEEL_OFFSET = (3, 12)
 
 
 def _screen_patch() -> dict:
-    """Pixels where `desk-postit` differs from the plain desk: the note. Frame 1 paints
+    """Pixels where `desk-notes` differs from the plain desk, inside NOTE_PEEL. Frame 1 paints
     the plain desk's colours back over them."""
-    plain, postit = desk_mod.build("plain"), desk_mod.build("postit")
+    plain, postit = desk_mod.build("plain"), desk_mod.build("notes")
     out = {}
     x0, y0, x1, y1 = desk_mod.NOTE_PEEL          # only the note being peeled
     for y in range(y0, y1 + 1):

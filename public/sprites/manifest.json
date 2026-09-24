@@ -101,6 +101,54 @@
     "h": 16,
     "w": 18
   },
+  "cable-tape-c": {
+    "anchor": [
+      9,
+      14
+    ],
+    "frames": {
+      "default": [
+        {
+          "duration": 0,
+          "file": "cable-tape-c.png"
+        }
+      ]
+    },
+    "h": 14,
+    "w": 19
+  },
+  "cable-tape-r": {
+    "anchor": [
+      9,
+      14
+    ],
+    "frames": {
+      "default": [
+        {
+          "duration": 0,
+          "file": "cable-tape-r.png"
+        }
+      ]
+    },
+    "h": 14,
+    "w": 19
+  },
+  "cable-tape-turn": {
+    "anchor": [
+      1,
+      14
+    ],
+    "frames": {
+      "default": [
+        {
+          "duration": 0,
+          "file": "cable-tape-turn.png"
+        }
+      ]
+    },
+    "h": 14,
+    "w": 11
+  },
   "cable-tray": {
     "anchor": [
       4,
@@ -333,6 +381,28 @@
       "net": [
         24,
         17
+      ]
+    },
+    "w": 32
+  },
+  "desk-notes": {
+    "anchor": [
+      16,
+      40
+    ],
+    "frames": {
+      "default": [
+        {
+          "duration": 0,
+          "file": "desk-notes.png"
+        }
+      ]
+    },
+    "h": 40,
+    "points": {
+      "net": [
+        23,
+        16
       ]
     },
     "w": 32

@@ -59,7 +59,7 @@ def build(kind: str = "plain", turned: bool = False, screen=None) -> Canvas:
         _dev_card(c)
     if kind == "padlock":
         _padlock(c, iso)
-    if kind == "postit":
+    if kind == "notes":
         _postits(c)
     return c
 
@@ -105,7 +105,7 @@ def card_point(turned: bool = False) -> tuple[int, int]:
 
 
 def build_variant(kind: str) -> Canvas:
-    assert kind in ("postit", "padlock", "dev", "dev-built"), kind
+    assert kind in ("postit", "notes", "padlock", "dev", "dev-built"), kind
     return build(kind)
 
 
@@ -162,6 +162,12 @@ def _screen(iso: Iso, faces: dict, kind: str, m: dict, custom=None):
         b = band(z)
         if custom is not None:
             return custom(c, z, b, c0, c1)
+        if kind == "postit" and c >= c1 - 2.2 and b <= 4:
+            # (kept for tests/fixtures' golden; the art now uses `desk-notes`) a
+            # password, written down: two scribbled lines on a note on the glass
+            if b in (1, 3) and c1 - 1.9 <= c < c1 - 0.4:
+                return "outline"
+            return "sticky"
         if kind in ("dev", "dev-built"):
             for bb, ind, ln, col in (pr if kind == "dev" else code):
                 if b == bb and c0 + ind <= c < c0 + ind + ln:

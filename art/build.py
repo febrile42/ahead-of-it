@@ -211,7 +211,7 @@ def build_desks(manifest, registry):
     pts = {"net": desk.net_point(), "card": desk.card_point()}
     registry["desk"] = Sprite(desk.build(), desk.ANCHOR, pts)
     manifest["desk"]["points"] = {k: list(v) for k, v in pts.items()}
-    for kind in ("postit", "padlock", "dev", "dev-built"):
+    for kind in ("postit", "notes", "padlock", "dev", "dev-built"):
         cv = desk.build_variant(kind)
         name = f"desk-{kind}"
         pts = {"net": desk.net_point(kind)}
@@ -283,12 +283,12 @@ def build_sheet(static, badge_rendered, worker_rendered, registry):
     for look in worker.LOOK_NAMES:
         for fr in registry["worker-peel"].frames[look]:
             seat = Canvas(desk.W, desk.H)
-            seat.paste(registry["desk-postit"].canvas, 0, 0)
+            seat.paste(registry["desk-notes"].canvas, 0, 0)
             seat.paste(fr, 0, 0)
             items.append(seat)
         break  # one look is enough to judge the pose; all five ship
     items.append(registry["visitor"].canvas)
-    for name in ("desk-postit", "desk-padlock", "desk-dev", "desk-dev-built"):
+    for name in ("desk-notes", "desk-padlock", "desk-dev", "desk-dev-built"):
         items.append(registry[name].canvas)
     for group in (room.build_all(), band80.build_all(), band150.build_all(),
                   band220.build_all(), street.build_all()):
