@@ -16,9 +16,12 @@
     "test:e2e": "playwright test",
     "test": "npm run test:unit && npm run test:e2e",
     "check:employer": "bash scripts/check-employer.sh",
-    "check": "npm run build && npm run test"
+    "check:serving": "bash scripts/check-serving.sh",
+    "check:lighthouse": "lhci autorun --config=./lighthouserc.cjs",
+    "check": "npm run build && npm run test && npm run check:serving && npm run check:lighthouse"
   },
   "devDependencies": {
+    "@lhci/cli": "0.15.1",
     "@playwright/test": "1.63.0",
     "typescript": "5.9.3",
     "vite": "8.3.1",
