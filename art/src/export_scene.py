@@ -79,14 +79,6 @@ NEW_GAGS_AT = {
     750: ["G6.1", "G6.2", "G7.1", "G7.2", "G7.4"],
 }
 
-# debt: art pass 4 (PH1-10) re-spaces band 80 ground; delete this list then. Pairs of
-# primaries under D-036 rule 7's 44 px, warned (not failed) by check_scenes.py and the
-# web contract test via index.json's `knownSpacingDebt`; both fail once it goes stale.
-KNOWN_SPACING_DEBT = [
-    ("G1.1", "G3.2"), ("G1.2", "G2.1"), ("G1.2", "G2.2"),
-    ("G2.1", "G2.3"), ("G2.1", "G3.2"),
-]
-
 PLACEHOLDER_BOX = 32   # native px, square
 PLACEHOLDER_GAP = 48   # min centre distance to any other primary; > 44 (rule 7)
 
@@ -545,8 +537,7 @@ def export_all():
     os.makedirs(THUMBS_DIR, exist_ok=True)
     lib = compose.Library(SPRITES_DIR)
 
-    index = {"schema": 1, "bands": {}, "beyond": "750", "thumbs": {},
-             "knownSpacingDebt": [list(pair) for pair in KNOWN_SPACING_DEBT]}
+    index = {"schema": 1, "bands": {}, "beyond": "750", "thumbs": {}}
 
     for band in DRAWN_BANDS:
         own_gags = {g for g in HOME_PART if _band_of(g) == band}

@@ -42,9 +42,9 @@ VIEW_ORDER = ["ground", "floor-2", "floor-3", "floor-4", "floor-5", "floor-6", "
 
 ROOMS = {
     "ground": [
-        (80, dict(kind="room", cols=9, rows=7, closet=True, tray=True,
-                  back_l={3: "wall-back-l-window", 5: "wall-back-l-door"},
-                  back_r_windows=(3, 5, 7))),
+        (80, dict(kind="room", cols=10, rows=7, closet=True, tray=True,
+                  back_l={4: "wall-back-l-door"},
+                  back_r_windows=(3, 7, 9))),
     ],
     "floor-2": [
         (150, dict(kind="room", cols=8, rows=7,
@@ -116,14 +116,21 @@ def structure(view: str, band: int, state: str) -> list:
 
 # -- band 80 ----------------------------------------------------------------------------
 
-B80_DESKS = [(4, 3), (6, 3), (4, 5), (6, 5)]
+B80_DESKS = [(6, 3), (8, 3), (6, 5), (8, 5)]
+DEV = (5, 0)          # the developer's desk, back-right wall
+HELP = (8, 1)         # built: the support desk, where the queue stood
 
 
 def _band80() -> list:
+    """PH1-10 (item 1): re-spaced so every primary is >= 44 px from every other at 1x
+    (D-036 rule 7) — the closet in the back corner, the lobby on the back-left wall by
+    the front door, the developer and the queue along the back-right wall, the pit in
+    the middle, the taped cable in front of it, and clear floor by the closet door for
+    band 150's trolley."""
     P = []
     # G1.1 the closet (and its cutaway partitions, both states). Only the closet's own
     # contents are gag-tagged; the partitions and the cable spilling out past them are
-    # structural/scenery (tagging them stretched the hotspot toward G3.2's trolley).
+    # structural/scenery.
     P += [
         _t("closet-shelf", 0, 0, depth=0.6, states=W, id="router", gag="G1.1", part="closet"),
         _t("mop-bucket", 0, 1, depth=1.5, states=W, gag="G1.1", part="closet"),
@@ -137,9 +144,10 @@ def _band80() -> list:
         _t("partition-r-door-closed", 1, 0, depth=2.5, states=B),
         _t("partition-r-end", 1, 1, depth=3.1),
     ]
-    # G1.2 the sales pit: post-its / padlocks; the note-peeler at (6, 3).
-    seated = {"without": {(4, 3): "a", (6, 5): "d"},
-              "built": {(4, 3): "a", (6, 3): "c", (4, 5): "e", (6, 5): "d"}}
+    # G1.2 the sales pit: post-its / padlocks; the note-peeler at the back-left desk.
+    peel_at = B80_DESKS[1]
+    seated = {"without": {B80_DESKS[0]: "a", B80_DESKS[3]: "d"},
+              "built": dict(zip(B80_DESKS, "aced"))}
     for (col, row) in B80_DESKS:
         P.append(_t("desk-postit", col, row, states=W, id=f"desk80-{col}-{row}",
                     gag="G1.2", part="pit"))
@@ -148,45 +156,44 @@ def _band80() -> list:
             if (col, row) in seated[st]:
                 P.append(_t("worker-seated", col, row, frame=seated[st][(col, row)],
                             depth=col + row + 1.01, states=(st,), gag="G1.2", part="pit"))
-        if (col, row) == (6, 3):
+        if (col, row) == peel_at:
             P.append(_t("worker-peel", col, row, frame="e", depth=col + row + 1.01,
                         states=W, quiet="drop", gag="G1.2", part="pit"))
-    # G2.1 the developer's desk and the queue
+    # G2.1 the developer's desk and the queue down the back-right wall
+    dc, dr = DEV
     P += [
-        _t("desk-dev", 3, 0, states=W, id="desk-dev", gag="G2.1", part="queue"),
+        _t("desk-dev", dc, dr, states=W, id="desk-dev", gag="G2.1", part="queue"),
         # desk-dev-built and its occupant carry no gag tag: G2.1's built-state story is
-        # the helpdesk group below, not this desk (avoids a second, near-duplicate
-        # "queue" hotspot sitting right on top of "helpdesk" once the desk is fixed).
-        _t("desk-dev-built", 3, 0, states=B),
-        _t("worker-seated", 3, 0, frame="b", depth=4.01),
+        # the helpdesk group below, not this desk.
+        _t("desk-dev-built", dc, dr, states=B),
+        _t("worker-seated", dc, dr, frame="b", depth=dc + dr + 1.01),
     ]
     queue = [("worker-c", "idle-left"), ("worker-queue", "a-left"), ("worker-e", "idle-left"),
              ("worker-d", "idle-left"), ("worker-b", "idle-left"), ("worker-c", "idle-left")]
     for i, (spr, fr) in enumerate(queue):
-        P.append(_f(spr, 4.95 + i * 0.62, 1.65, frame=fr, states=W,
+        P.append(_f(spr, dc + 0.95 + i * 0.62, 1.65, frame=fr, states=W,
                     quiet="drop" if i >= 3 else "keep", gag="G2.1", part="queue"))
-    # G2.2 the taped floor cable and the sign; someone stepping over it. The cable
-    # tiles themselves span almost the whole room (a hotspot union that wide would sit
-    # on top of G1.2's), so only the sign and the step-over — the gag's actual visual
-    # punchline — are gag-tagged; the cable stays plain scenery.
+    # G2.2 the taped floor cable, out of the closet, down the back-left side and across
+    # the floor in front of the pit; the sign on it and someone stepping over it. The
+    # cable tiles are plain scenery (a hotspot that wide would sit on G1.2's).
+    P += [_t("cable-floor-r", 2, row, depth=row + 3.0, states=W) for row in range(1, 6)]
+    P += [_t("cable-floor-turn", 2, 6, depth=9.0, states=W)]
+    P += [_t("cable-floor-c", col, 6, depth=col + 7.0, states=W) for col in range(3, 10)]
     P += [
-        _t("cable-floor-r", 1, 2, depth=3.0, states=W),
-        _t("cable-floor-r", 1, 3, depth=4.0, states=W),
-        _t("cable-floor-turn", 1, 4, depth=5.0, states=W),
+        _t("sign-caution", 3, 6, dx=-10, dy=-2, depth=10.6, states=W, gag="G2.2", part="cable"),
+        _f("worker-c", 4.55, 6.55, frame="step-right", states=W, quiet="drop",
+           gag="G2.2", part="cable"),
     ]
-    P += [_t("cable-floor-c", col, 4, depth=col + 4.0, states=W) for col in range(2, 9)]
+    # G2.1 built: the support desk where the queue stood, its board, someone being
+    # helped
+    hc, hr = HELP
     P += [
-        _t("sign-caution", 7, 4, dx=-10, dy=-2, depth=11.6, states=W, gag="G2.2", part="cable"),
-        _f("worker-c", 8.05, 4.55, frame="step-right", states=W, quiet="drop"),
-    ]
-    # G2.1 built: the support desk, its board, someone being helped; the cleared floor
-    P += [
-        _t("desk", 1, 5, states=B, gag="G2.1", part="helpdesk"),
-        _t("worker-seated", 1, 5, frame="e", depth=7.01, states=B, gag="G2.1", part="helpdesk"),
-        _f("sla-board", 1.45, 4.4, depth=5.85, states=B, gag="G2.1", part="helpdesk"),
-        _f("worker", 2.35, 5.95, frame="idle-left", states=B, quiet="drop",
+        _t("desk", hc, hr, states=B, gag="G2.1", part="helpdesk"),
+        _t("worker-seated", hc, hr, frame="e", depth=hc + hr + 1.01, states=B,
            gag="G2.1", part="helpdesk"),
-        _f("worker-c", 8.05, 4.55, frame="right", states=B, quiet="drop",
+        _f("sla-board", hc + 0.45, hr - 0.6, depth=hc + hr - 0.15, states=B,
+           gag="G2.1", part="helpdesk"),
+        _f("worker", hc + 1.35, hr + 0.95, frame="idle-left", states=B, quiet="drop",
            gag="G2.1", part="helpdesk"),
     ]
     # G2.3 the lobby and the visitor
@@ -253,19 +260,22 @@ def _inset(band: int) -> list:
 
 def _band150() -> list:
     P = []
-    # G3.2: the trolley parked across the closet door / the shelf against the wall
-    # beside the developer (ground); the shop box on the CEO's desk (floor 2)
+    # G3.2: the trolley parked on clear floor outside the closet door / the shelf
+    # against the wall beside the developer (ground); the shop box on the CEO's desk
+    # (floor 2). PH1-10 item 2: nothing under or behind the trolley but floor.
     P += [
-        _t("trolley", 2, 0, states=W, id="trolley", depth=3.5, gag="G3.2", part="trolley"),
+        _t("trolley", 3, 2, states=W, id="trolley", gag="G3.2", part="trolley"),
         dict(sprite="note-dave", attach={"id": "trolley", "point": "note"}, states=W,
              layer="over", gag="G3.2", part="trolley"),
-        _t("laptop-shelf", 4, 0, states=B),
+        _t("laptop-shelf", 3, 0, states=B, gag="G3.2", part="trolley"),
     ]
     F2 = "floor-2"
     P += [
         _t("desk-retail-box", 1, 0, states=W, view=F2, gag="G3.2", part="box",
            primary=False),
-        _t("desk", 1, 0, states=B, view=F2),
+        # built: the CEO's laptop came the managed way; the same desk is G3.2's
+        # second part in both states (SCENE-FORMAT: G3.2 is two-part in both)
+        _t("desk", 1, 0, states=B, view=F2, gag="G3.2", part="box", primary=False),
     ]
     # G4.2: the finance desk
     P += [

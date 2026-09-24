@@ -7,14 +7,14 @@
       "id": "ground",
       "label": "Ground floor",
       "size": {
-        "w": 266,
-        "h": 180
+        "w": 282,
+        "h": 188
       },
       "focus": {
         "x": 0,
         "y": 0,
-        "w": 266,
-        "h": 180
+        "w": 282,
+        "h": 188
       },
       "default": true,
       "entries": [
@@ -82,53 +82,60 @@
           "depth": 15
         },
         {
-          "sprite": "slab-r",
+          "sprite": "slab-l",
           "frame": "default",
-          "x": 245,
-          "y": 125,
-          "depth": 9
+          "x": 165,
+          "y": 181,
+          "depth": 16
         },
         {
           "sprite": "slab-r",
           "frame": "default",
-          "x": 229,
+          "x": 261,
           "y": 133,
           "depth": 10
         },
         {
           "sprite": "slab-r",
           "frame": "default",
-          "x": 213,
+          "x": 245,
           "y": 141,
           "depth": 11
         },
         {
           "sprite": "slab-r",
           "frame": "default",
-          "x": 197,
+          "x": 229,
           "y": 149,
           "depth": 12
         },
         {
           "sprite": "slab-r",
           "frame": "default",
-          "x": 181,
+          "x": 213,
           "y": 157,
           "depth": 13
         },
         {
           "sprite": "slab-r",
           "frame": "default",
-          "x": 165,
+          "x": 197,
           "y": 165,
           "depth": 14
         },
         {
           "sprite": "slab-r",
           "frame": "default",
-          "x": 149,
+          "x": 181,
           "y": 173,
           "depth": 15
+        },
+        {
+          "sprite": "slab-r",
+          "frame": "default",
+          "x": 165,
+          "y": 181,
+          "depth": 16
         },
         {
           "sprite": "floor-closet",
@@ -194,6 +201,13 @@
           "depth": 9
         },
         {
+          "sprite": "floor-office",
+          "frame": "default",
+          "x": 261,
+          "y": 133,
+          "depth": 10
+        },
+        {
           "sprite": "floor-closet",
           "frame": "default",
           "x": 101,
@@ -259,6 +273,13 @@
         {
           "sprite": "floor-office",
           "frame": "default",
+          "x": 245,
+          "y": 141,
+          "depth": 11
+        },
+        {
+          "sprite": "floor-office",
+          "frame": "default",
           "x": 85,
           "y": 77,
           "depth": 3
@@ -322,6 +343,13 @@
         {
           "sprite": "floor-office",
           "frame": "default",
+          "x": 229,
+          "y": 149,
+          "depth": 12
+        },
+        {
+          "sprite": "floor-office",
+          "frame": "default",
           "x": 69,
           "y": 85,
           "depth": 4
@@ -385,6 +413,13 @@
         {
           "sprite": "floor-office",
           "frame": "default",
+          "x": 213,
+          "y": 157,
+          "depth": 13
+        },
+        {
+          "sprite": "floor-office",
+          "frame": "default",
           "x": 53,
           "y": 93,
           "depth": 5
@@ -448,6 +483,13 @@
         {
           "sprite": "floor-office",
           "frame": "default",
+          "x": 197,
+          "y": 165,
+          "depth": 14
+        },
+        {
+          "sprite": "floor-office",
+          "frame": "default",
           "x": 37,
           "y": 101,
           "depth": 6
@@ -507,6 +549,13 @@
           "x": 165,
           "y": 165,
           "depth": 14
+        },
+        {
+          "sprite": "floor-office",
+          "frame": "default",
+          "x": 181,
+          "y": 173,
+          "depth": 15
         },
         {
           "sprite": "floor-office",
@@ -572,6 +621,13 @@
           "depth": 15
         },
         {
+          "sprite": "floor-office",
+          "frame": "default",
+          "x": 165,
+          "y": 181,
+          "depth": 16
+        },
+        {
           "sprite": "wall-corner",
           "frame": "default",
           "x": 117,
@@ -600,21 +656,21 @@
           "depth": 3
         },
         {
-          "sprite": "wall-back-l-window",
+          "sprite": "wall-back-l",
           "frame": "default",
           "x": 69,
           "y": 85,
           "depth": 4
         },
         {
-          "sprite": "wall-back-l",
+          "sprite": "wall-back-l-door",
           "frame": "default",
           "x": 53,
           "y": 93,
           "depth": 5
         },
         {
-          "sprite": "wall-back-l-door",
+          "sprite": "wall-back-l",
           "frame": "default",
           "x": 37,
           "y": 101,
@@ -663,7 +719,7 @@
           "depth": 5
         },
         {
-          "sprite": "wall-back-r-window",
+          "sprite": "wall-back-r",
           "frame": "default",
           "x": 197,
           "y": 101,
@@ -684,11 +740,18 @@
           "depth": 8
         },
         {
-          "sprite": "wall-back-r-end",
+          "sprite": "wall-back-r",
           "frame": "default",
           "x": 245,
           "y": 125,
           "depth": 9
+        },
+        {
+          "sprite": "wall-back-r-end",
+          "frame": "default",
+          "x": 261,
+          "y": 133,
+          "depth": 10
         },
         {
           "sprite": "closet-shelf",
@@ -739,13 +802,6 @@
           "depth": 2.6
         },
         {
-          "sprite": "cable-floor-r",
-          "frame": "default",
-          "x": 101,
-          "y": 85,
-          "depth": 3.0
-        },
-        {
           "sprite": "partition-c",
           "frame": "default",
           "x": 117,
@@ -769,15 +825,6 @@
           "part": "lobby"
         },
         {
-          "sprite": "trolley",
-          "frame": "default",
-          "x": 149,
-          "y": 77,
-          "depth": 3.5,
-          "gagId": "G3.2",
-          "part": "trolley"
-        },
-        {
           "sprite": "visitor",
           "frame": "default",
           "x": 83,
@@ -787,41 +834,50 @@
           "part": "lobby"
         },
         {
+          "sprite": "cable-floor-r",
+          "frame": "default",
+          "x": 133,
+          "y": 85,
+          "depth": 4.0
+        },
+        {
+          "sprite": "cable-floor-r",
+          "frame": "default",
+          "x": 117,
+          "y": 93,
+          "depth": 5.0
+        },
+        {
           "sprite": "desk-dev",
           "frame": "default",
-          "x": 165,
-          "y": 85,
-          "depth": 4,
+          "x": 197,
+          "y": 101,
+          "depth": 6,
           "gagId": "G2.1",
           "part": "queue"
         },
         {
           "sprite": "cable-floor-r",
           "frame": "default",
-          "x": 85,
-          "y": 93,
-          "depth": 4.0
+          "x": 101,
+          "y": 101,
+          "depth": 6.0
+        },
+        {
+          "sprite": "trolley",
+          "frame": "default",
+          "x": 133,
+          "y": 101,
+          "depth": 6,
+          "gagId": "G3.2",
+          "part": "trolley"
         },
         {
           "sprite": "worker-seated",
           "frame": "b",
-          "x": 165,
-          "y": 85,
-          "depth": 4.01
-        },
-        {
-          "sprite": "cable-floor-turn",
-          "frame": "default",
-          "x": 69,
+          "x": 197,
           "y": 101,
-          "depth": 5.0
-        },
-        {
-          "sprite": "cable-floor-c",
-          "frame": "default",
-          "x": 85,
-          "y": 109,
-          "depth": 6.0
+          "depth": 6.01
         },
         {
           "sprite": "plant",
@@ -831,69 +887,51 @@
           "depth": 6.4
         },
         {
+          "sprite": "cable-floor-r",
+          "frame": "default",
+          "x": 85,
+          "y": 109,
+          "depth": 7.0
+        },
+        {
           "sprite": "worker-c",
           "frame": "idle-left",
-          "x": 170,
-          "y": 98,
-          "depth": 6.6,
+          "x": 186,
+          "y": 106,
+          "depth": 7.6,
           "gagId": "G2.1",
           "part": "queue"
         },
         {
-          "sprite": "cable-floor-c",
+          "sprite": "cable-floor-r",
           "frame": "default",
-          "x": 101,
+          "x": 69,
           "y": 117,
-          "depth": 7.0
+          "depth": 8.0
         },
         {
           "sprite": "worker-queue",
           "frame": "a-left",
-          "x": 180,
-          "y": 103,
-          "depth": 7.22,
+          "x": 196,
+          "y": 111,
+          "depth": 8.22,
           "gagId": "G2.1",
           "part": "queue"
         },
         {
           "sprite": "worker-e",
           "frame": "idle-left",
-          "x": 190,
-          "y": 108,
-          "depth": 7.84,
+          "x": 206,
+          "y": 116,
+          "depth": 8.84,
           "gagId": "G2.1",
           "part": "queue"
         },
         {
-          "sprite": "desk-postit",
+          "sprite": "cable-floor-turn",
           "frame": "default",
-          "x": 133,
-          "y": 117,
-          "depth": 8,
-          "gagId": "G1.2",
-          "part": "pit"
-        },
-        {
-          "sprite": "cable-floor-c",
-          "frame": "default",
-          "x": 117,
+          "x": 53,
           "y": 125,
-          "depth": 8.0
-        },
-        {
-          "sprite": "worker-seated",
-          "frame": "a",
-          "x": 133,
-          "y": 117,
-          "depth": 8.01,
-          "gagId": "G1.2",
-          "part": "pit"
-        },
-        {
-          "sprite": "cable-floor-c",
-          "frame": "default",
-          "x": 133,
-          "y": 133,
           "depth": 9.0
         },
         {
@@ -906,36 +944,45 @@
           "part": "pit"
         },
         {
-          "sprite": "desk-postit",
+          "sprite": "cable-floor-c",
           "frame": "default",
-          "x": 101,
+          "x": 69,
           "y": 133,
-          "depth": 10,
+          "depth": 10.0
+        },
+        {
+          "sprite": "worker-seated",
+          "frame": "a",
+          "x": 165,
+          "y": 133,
+          "depth": 10.01,
           "gagId": "G1.2",
           "part": "pit"
         },
         {
-          "sprite": "cable-floor-c",
+          "sprite": "sign-caution",
           "frame": "default",
-          "x": 149,
-          "y": 141,
-          "depth": 10.0
+          "x": 59,
+          "y": 131,
+          "depth": 10.6,
+          "gagId": "G2.2",
+          "part": "cable"
         },
         {
           "sprite": "cable-floor-c",
           "frame": "default",
-          "x": 165,
-          "y": 149,
+          "x": 85,
+          "y": 141,
           "depth": 11.0
         },
         {
-          "sprite": "sign-caution",
+          "sprite": "desk-postit",
           "frame": "default",
-          "x": 155,
-          "y": 147,
-          "depth": 11.6,
-          "gagId": "G2.2",
-          "part": "cable"
+          "x": 197,
+          "y": 149,
+          "depth": 12,
+          "gagId": "G1.2",
+          "part": "pit"
         },
         {
           "sprite": "desk-postit",
@@ -949,18 +996,55 @@
         {
           "sprite": "cable-floor-c",
           "frame": "default",
-          "x": 181,
-          "y": 157,
+          "x": 101,
+          "y": 149,
           "depth": 12.0
+        },
+        {
+          "sprite": "cable-floor-c",
+          "frame": "default",
+          "x": 117,
+          "y": 157,
+          "depth": 13.0
+        },
+        {
+          "sprite": "desk-postit",
+          "frame": "default",
+          "x": 165,
+          "y": 165,
+          "depth": 14,
+          "gagId": "G1.2",
+          "part": "pit"
+        },
+        {
+          "sprite": "cable-floor-c",
+          "frame": "default",
+          "x": 133,
+          "y": 165,
+          "depth": 14.0
         },
         {
           "sprite": "worker-seated",
           "frame": "d",
-          "x": 133,
-          "y": 149,
-          "depth": 12.01,
+          "x": 165,
+          "y": 165,
+          "depth": 14.01,
           "gagId": "G1.2",
           "part": "pit"
+        },
+        {
+          "sprite": "cable-floor-c",
+          "frame": "default",
+          "x": 149,
+          "y": 173,
+          "depth": 15.0
+        },
+        {
+          "sprite": "cable-floor-c",
+          "frame": "default",
+          "x": 165,
+          "y": 181,
+          "depth": 16.0
         },
         {
           "sprite": "fx-net-220-without-ground",
@@ -974,9 +1058,9 @@
         {
           "sprite": "note-dave",
           "frame": "default",
-          "x": 141,
-          "y": 72,
-          "depth": 3.51,
+          "x": 144,
+          "y": 82,
+          "depth": 6.01,
           "gagId": "G3.2",
           "part": "trolley"
         }
@@ -994,8 +1078,8 @@
         {
           "gagId": "G1.2",
           "part": "pit",
-          "x": 86,
-          "y": 87,
+          "x": 118,
+          "y": 103,
           "w": 94,
           "h": 59,
           "primary": true
@@ -1003,17 +1087,17 @@
         {
           "gagId": "G2.1",
           "part": "queue",
-          "x": 150,
-          "y": 49,
-          "w": 46,
-          "h": 59,
+          "x": 179,
+          "y": 65,
+          "w": 34,
+          "h": 51,
           "primary": true
         },
         {
           "gagId": "G2.2",
           "part": "cable",
-          "x": 147,
-          "y": 122,
+          "x": 51,
+          "y": 106,
           "w": 17,
           "h": 22,
           "primary": true
@@ -1030,10 +1114,10 @@
         {
           "gagId": "G3.2",
           "part": "trolley",
-          "x": 123,
-          "y": 45,
-          "w": 40,
-          "h": 38,
+          "x": 114,
+          "y": 64,
+          "w": 48,
+          "h": 44,
           "primary": true
         },
         {
@@ -1059,8 +1143,8 @@
         {
           "gagId": "G3.1",
           "part": "main",
-          "x": 228,
-          "y": 24,
+          "x": 232,
+          "y": 4,
           "w": 32,
           "h": 32,
           "primary": true,
