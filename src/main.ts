@@ -181,10 +181,56 @@ if (sliderRoot && toggleRoot && sceneWrap && canvas && hotspotsLayer && panelRoo
   // gets dropped.
   let renderToken = 0;
 
+  /** No scene file for this band x state yet (PH1-08b hasn't landed for
+   * it, or at all — public/sprites/scenes/ doesn't exist in this
+   * worktree). SCENE-FORMAT's own placeholder mechanism (a drawn room
+   * plus `placeholder: true` hotspots) is data *inside* a scene file the
+   * exporter emits; this is the one level up from that — no file at
+   * all — so it draws a plain "not drawn yet" box instead of throwing
+   * and leaving the page broken. */
+  const MISSING_SCENE_SIZE = { w: 270, h: 184 };
+
+  function renderMissingScene() {
+    sizeAndPositionCanvas({
+      size: MISSING_SCENE_SIZE,
+      focus: { x: 0, y: 0, ...MISSING_SCENE_SIZE },
+    } as SceneView);
+    const ctx = canvas!.getContext('2d');
+    if (ctx) {
+      const scaleX = canvas!.width / MISSING_SCENE_SIZE.w;
+      ctx.setTransform(scaleX, 0, 0, scaleX, 0, 0);
+      ctx.imageSmoothingEnabled = false;
+      ctx.fillStyle = '#eafbff';
+      ctx.fillRect(0, 0, MISSING_SCENE_SIZE.w, MISSING_SCENE_SIZE.h);
+      ctx.fillStyle = '#1a1410';
+      ctx.font = '11px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('not drawn yet', MISSING_SCENE_SIZE.w / 2, MISSING_SCENE_SIZE.h / 2);
+    }
+    viewsRow.replaceChildren();
+    hotspotsLayer!.replaceChildren();
+  }
+
   async function render() {
     const token = (renderToken += 1);
-    const scene = await loadScene(band, state);
+    let scene: SceneFile | null = null;
+    try {
+      scene = await loadScene(band, state);
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error(`no scene file for band ${band}/${state} yet`, err);
+    }
     if (token !== renderToken) return; // superseded — drop this stale scene fetch too
+
+    if (!scene) {
+      renderMissingScene();
+      checklist.render(band);
+      document.body.dataset.renderedToken = String(token);
+      document.body.dataset.band = String(band);
+      document.body.dataset.view = '';
+      return;
+    }
+
     const view = (currentViewId && findView(scene, currentViewId)) || defaultView(scene);
     currentViewId = view.id;
     renderViewSwitcher(scene, view);
