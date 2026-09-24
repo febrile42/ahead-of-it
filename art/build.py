@@ -22,7 +22,7 @@ from art.src.dsl import Canvas, save_png, scale_nn
 from art.src import iso
 from art.src.sprites import floor, wall, desk, worker, badge_reader, room, band80, poses
 from art.src.sprites import band150
-from art.src import scene80, scene150
+from art.src import compose, layout
 from art.src.vox import Sprite
 
 SPRITES_DIR = os.path.join(_REPO_ROOT, "public", "sprites")
@@ -294,31 +294,22 @@ def build_sheet(static, badge_rendered, worker_rendered, registry):
     save_png(scale_nn(sheet, 4), os.path.join(PREVIEW_DIR, "sheet@4x.png"))
 
 
-def build_band80(registry):
-    """The two judged composites: same layout, both states, one shared crop so the two
-    PNGs overlay pixel for pixel."""
-    scenes = {st: scene80.compose(registry, st) for st in ("without", "built")}
+def build_band(band: int):
+    """Both states of one band from `layout.scene` (data), rendered by `compose` from
+    the manifest and PNGs just written; one shared crop so the pair overlays pixel for
+    pixel."""
+    lib = compose.Library(SPRITES_DIR)
+    room_ = layout.ROOMS[band]
+    scenes = {}
+    for st in ("without", "built"):
+        placed = compose.resolve(lib, layout.scene(band, st), room_["origin"])
+        scenes[st] = compose.render(lib, placed, room_["size"])
     boxes = [sc.img.getbbox() for sc in scenes.values()]
     m = 4
     x0 = max(min(b[0] for b in boxes) - m, 0)
     y0 = max(min(b[1] for b in boxes) - m, 0)
-    x1 = min(max(b[2] for b in boxes) + m, scene80.SIZE[0])
-    y1 = min(max(b[3] for b in boxes) + m, scene80.SIZE[1])
-    for st, sc in scenes.items():
-        out = Canvas(x1 - x0, y1 - y0)
-        out.img = sc.img.crop((x0, y0, x1, y1))
-        save_png(scale_nn(out, 4), os.path.join(PREVIEW_DIR, f"band80-{st}.png"))
-
-
-def build_band(scene_mod, band: str, registry):
-    """Both states of one band on one shared crop, so the pair overlays pixel for pixel."""
-    scenes = {st: scene_mod.compose(registry, st) for st in ("without", "built")}
-    boxes = [sc.img.getbbox() for sc in scenes.values()]
-    m = 4
-    x0 = max(min(b[0] for b in boxes) - m, 0)
-    y0 = max(min(b[1] for b in boxes) - m, 0)
-    x1 = min(max(b[2] for b in boxes) + m, scene_mod.SIZE[0])
-    y1 = min(max(b[3] for b in boxes) + m, scene_mod.SIZE[1])
+    x1 = min(max(b[2] for b in boxes) + m, room_["size"][0])
+    y1 = min(max(b[3] for b in boxes) + m, room_["size"][1])
     for st, sc in scenes.items():
         out = Canvas(x1 - x0, y1 - y0)
         out.img = sc.img.crop((x0, y0, x1, y1))
@@ -380,8 +371,8 @@ def main():
     static, badge_rendered, worker_rendered, registry = build_manifest()
     build_sheet(static, badge_rendered, worker_rendered, registry)
     build_room(static, badge_rendered, worker_rendered)
-    build_band80(registry)
-    build_band(scene150, "150", registry)
+    for band in sorted(layout.ROOMS):
+        build_band(band)
     print("Build complete.")
 
 

@@ -394,7 +394,8 @@ def build_all() -> dict:
     pipe = sign_pipeline()
     return {
         # without
-        "trolley": make(_trolley),
+        # parked along +r, nose to the wall, right across the closet door
+        "trolley": make(lambda iso, c: _trolley(SwapIso(c, (iso.ox, iso.oy)), c)),
         "note-dave": Sprite(note, (note.w // 2, note.h)),
         "desk-retail-box": _desk_sprite(desk_retail_box()),
         "fishing-line": make(_fishing_line),

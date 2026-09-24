@@ -52,7 +52,12 @@ here).
 - `art/src/glyphs.py` (PH1-06) — the 3×5 pixel font for `DEV`, `CAUTION`, `VISITOR`
   and the SLA board. No font files.
 - `art/src/sprites/room.py`, `band80.py` (PH1-06) — room structure and band-80 props,
-  both states. `art/src/scene80.py` composes the band-80 previews by manifest anchor.
+  both states; `band150.py`, `band220.py` (PH1-07) likewise.
+- `art/src/layout.py` (PH1-07) — every band x state room as *data*: a list of
+  placements (manifest key, frame, tile or floor point, depth, layer, gag band). Later
+  bands contain every earlier band's placements, quieter (R-03a); `scene(band, state)`
+  is the list PH1-08b exports. `art/src/compose.py` renders it from `manifest.json` and
+  the shipped PNGs alone, the way the site's painter will.
 - `art/build.py` — orchestrates: builds every sprite, writes 1x PNGs to
   `public/sprites/`, writes `manifest.json`, composes the preview images.
 
