@@ -203,3 +203,12 @@ segmented from 2018; Boston cabled before move-in; rooms standardised by functio
 2014–17; 40%/33% by 2014; facilities 2015–17; SVP reporting since H2 2022; Librarian role
 since 2020, under IT 2026; email security = Exchange ATP + Area 1 via MSSP; badge removal
 a manual offboarding step. All folded into PANELS.md v4.
+
+**D-032 · 2026-09-24 · GitHub remote: `febrile42/ahead-of-it`, private.**
+Josh's explicit yes via AskUserQuestion. Private because internal docs name both employers
+and carry the headcount timeline. `develop` is the default branch (PRs target it); `main`
+is promoted with merge commits. The Cloudflare secrets for CI are not yet set — that is a
+Phase 4 step alongside the custom domain.
+
+**D-033 · 2026-09-24 · Phase 1 started.** Briefs PH1-01…05 in `docs/briefs/`. PH1-01 and
+PH1-02 running in parallel worktrees; 03 after 01; 04 after 01–03; 05 after 04.
