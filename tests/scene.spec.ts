@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
+import { expectedHotspotCount, hasRealScenes, interceptFixtureScenes } from './scene-source';
 
 // Duplicated rather than imported from src/scene/bands: that module pulls
 // in src/content/content.json, and Playwright's own Node ESM loader (this
@@ -20,29 +21,13 @@ const content = JSON.parse(readFileSync(new URL('../src/content/content.json', i
   copy: { contact: { email: { user: string; domain: string } } };
 };
 
-// Mirrors src/scene/slots.ts's GAG_PLACEMENTS: every gag gets one hotspot
-// except the two the brief calls out as spanning two slots. slots.ts is
-// slated for deletion (PH1-09 replaces the scene approach entirely — see
-// docs/briefs/PH1-04-REVIEW.md), so this small duplication is cheaper than
-// importing a module that's going away.
-const MULTI_PART_GAGS: ReadonlySet<string> = new Set(['G4.1', 'G5.1']);
-
-function expectedHotspotCount(band: BandId): number {
-  const tier = band === 'beyond' ? 750 : band;
-  let count = 0;
-  for (const gag of content.gags) {
-    const gagTier = gag.band === 'beyond' ? 750 : gag.band;
-    if (gagTier > tier) continue;
-    count += MULTI_PART_GAGS.has(gag.id) ? 2 : 1;
-  }
-  return count;
-}
-
-// PH1-04 acceptance (brief 3h): every band x both states renders at 390px
-// with all hotspots present, focusable and centred on their rect; toggling
-// changes the canvas; no request leaves origin. Also generates the four
-// required screenshots (band 80 and 750, both states) under
-// tests/screenshots/.
+// PH1-09/D-035: hotspot geometry is no longer computed in the web (that
+// was src/scene/slots.ts, deleted) — it comes straight from the art
+// pipeline's exported scene file (docs/product/SCENE-FORMAT.md).
+// `interceptFixtureScenes` (tests/scene-source.ts) only serves the
+// hand-written band-80 fixture when the real export doesn't exist yet —
+// once public/sprites/scenes/ lands for real (fix round item 2), this
+// suite asserts real geometry with no changes needed here.
 
 const VIEWPORT = { width: 390, height: 900 };
 
@@ -92,6 +77,7 @@ test.describe('no third-party requests (R-21)', () => {
         offOrigin.push(request.url());
       }
     });
+    await interceptFixtureScenes(page);
     await page.setViewportSize(VIEWPORT);
     await page.goto('/');
     await page.waitForFunction(() => document.body.dataset.renderedToken !== undefined);
@@ -99,25 +85,35 @@ test.describe('no third-party requests (R-21)', () => {
   });
 });
 
-test.describe('every band x both states (PH1-04 acceptance)', () => {
+test.describe('every band x both states (PH1-09 acceptance)', () => {
   for (const band of BAND_ORDER) {
     for (const state of ['built', 'without'] as const) {
       test(`band ${band} / ${state} renders with every hotspot focusable and centred`, async ({ page }) => {
+        await interceptFixtureScenes(page);
         await page.setViewportSize(VIEWPORT);
         await page.goto('/');
         await page.waitForFunction(() => document.body.dataset.renderedToken !== undefined);
         await setBand(page, band);
         await setState(page, state);
 
+        // A missing/undefined view label is an export bug (found by
+        // reading the combined-tree screenshots: the tab row rendered
+        // "undefined (5)"). src/main.ts's view switcher has no fallback
+        // for it on purpose — this is the Playwright-level backstop for
+        // src/scene/scene-contract.test.ts's label assertion.
+        const viewTabs = page.locator('.scene-views__button');
+        const tabCount = await viewTabs.count();
+        for (let i = 0; i < tabCount; i += 1) {
+          const tabText = (await viewTabs.nth(i).textContent()) ?? '';
+          expect(tabText.toLowerCase()).not.toContain('undefined');
+          expect(tabText.trim().length).toBeGreaterThan(0);
+        }
+
         const layerHandle = page.locator('#hotspots-layer');
-        const bufferW = Number(await layerHandle.getAttribute('data-buffer-w'));
-
         const hotspots = page.locator('.hotspot');
-        // S4: this used to only assert count > 0. The exact expected count
-        // (every active gag's parts, cumulative — R-03a) catches both
-        // missing and duplicated hotspots.
-        await expect(hotspots).toHaveCount(expectedHotspotCount(band));
+        await expect(hotspots).toHaveCount(expectedHotspotCount(band, state));
 
+        const bufferW = Number(await layerHandle.getAttribute('data-buffer-w'));
         const count = await hotspots.count();
         for (let i = 0; i < count; i += 1) {
           const button = hotspots.nth(i);
@@ -125,8 +121,8 @@ test.describe('every band x both states (PH1-04 acceptance)', () => {
           await expect(button).toBeFocused();
 
           // Recomputed per hotspot: focusing an off-screen hotspot
-          // auto-scrolls .scene-wrap (it's the horizontally-scrolling
-          // container — see src/scene/layout.ts), which moves
+          // auto-scrolls .scene-wrap (the horizontally-scrolling
+          // container — see src/style.css), which moves
           // #hotspots-layer relative to the viewport along with it.
           const layerBox = await layerHandle.boundingBox();
           expect(layerBox).not.toBeNull();
@@ -153,10 +149,11 @@ test.describe('every band x both states (PH1-04 acceptance)', () => {
 
 test.describe('toggling changes the canvas', () => {
   test('built and without states render different pixels', async ({ page }) => {
+    await interceptFixtureScenes(page);
     await page.setViewportSize(VIEWPORT);
     await page.goto('/');
     await page.waitForFunction(() => document.body.dataset.renderedToken !== undefined);
-    await setBand(page, 750);
+    await setBand(page, 80);
     await setState(page, 'built');
     const builtHash = await page.locator('#scene-canvas').evaluate((c) => (c as HTMLCanvasElement).toDataURL());
 
@@ -174,6 +171,7 @@ test.describe('email is never a joined string in the page', () => {
     const { user, domain } = content.copy.contact.email;
     const assembled = `${user}@${domain}`;
 
+    await interceptFixtureScenes(page);
     await page.setViewportSize(VIEWPORT);
     await page.goto('/');
     await page.waitForFunction(() => document.body.dataset.renderedToken !== undefined);
@@ -188,10 +186,16 @@ test.describe('email is never a joined string in the page', () => {
   });
 });
 
-test.describe('screenshots (acceptance: band 80 and band 750, both states, 390px)', () => {
-  for (const band of [80, 750] as const) {
+test.describe('screenshots (acceptance: bands 80/150/750, both states)', () => {
+  // With no real export, only band 80 has a scene file (the fixture);
+  // 150 and 750 render the "not drawn yet" placeholder — expected until
+  // PH1-08b lands. Once it does (hasRealScenes()), all three should show
+  // real (or, for 750 until later art, placeholder) content per whatever
+  // public/sprites/scenes/ actually has — no change needed here either way.
+  for (const band of [80, 150, 750] as const) {
     for (const state of ['built', 'without'] as const) {
       test(`screenshot band ${band} / ${state}`, async ({ page }) => {
+        await interceptFixtureScenes(page);
         await page.setViewportSize(VIEWPORT);
         await page.goto('/');
         await page.waitForFunction(() => document.body.dataset.renderedToken !== undefined);
@@ -201,4 +205,14 @@ test.describe('screenshots (acceptance: band 80 and band 750, both states, 390px
       });
     }
   }
+});
+
+test.describe('scene source (fix round item 2 sanity)', () => {
+  test('records which source this run actually used', async () => {
+    // Not an assertion on behaviour — just makes it obvious from the
+    // report which mode the suite ran in, since the same tests above
+    // cover both.
+    // eslint-disable-next-line no-console
+    console.info(`scene.spec.ts ran against ${hasRealScenes() ? 'the real public/sprites/scenes' : 'tests/fixtures'}`);
+  });
 });

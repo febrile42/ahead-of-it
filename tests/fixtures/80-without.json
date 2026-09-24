@@ -1,0 +1,280 @@
+{
+  "schema": 1,
+  "band": 80,
+  "state": "without",
+  "views": [
+    {
+      "id": "ground",
+      "label": "Ground floor",
+      "size": {
+        "w": 270,
+        "h": 184
+      },
+      "focus": {
+        "x": 0,
+        "y": 0,
+        "w": 270,
+        "h": 184
+      },
+      "default": true,
+      "entries": [
+        {
+          "sprite": "floor",
+          "frame": "default",
+          "x": 16,
+          "y": 168,
+          "depth": 1
+        },
+        {
+          "sprite": "floor",
+          "frame": "default",
+          "x": 46,
+          "y": 168,
+          "depth": 2
+        },
+        {
+          "sprite": "floor",
+          "frame": "default",
+          "x": 76,
+          "y": 168,
+          "depth": 3
+        },
+        {
+          "sprite": "floor",
+          "frame": "default",
+          "x": 106,
+          "y": 168,
+          "depth": 4
+        },
+        {
+          "sprite": "floor",
+          "frame": "default",
+          "x": 136,
+          "y": 168,
+          "depth": 5
+        },
+        {
+          "sprite": "floor",
+          "frame": "default",
+          "x": 166,
+          "y": 168,
+          "depth": 6
+        },
+        {
+          "sprite": "floor",
+          "frame": "default",
+          "x": 196,
+          "y": 168,
+          "depth": 7
+        },
+        {
+          "sprite": "floor",
+          "frame": "default",
+          "x": 226,
+          "y": 168,
+          "depth": 8
+        },
+        {
+          "sprite": "floor",
+          "frame": "default",
+          "x": 256,
+          "y": 168,
+          "depth": 9
+        },
+        {
+          "sprite": "wall",
+          "frame": "default",
+          "x": 16,
+          "y": 168,
+          "depth": 0
+        },
+        {
+          "sprite": "closet-shelf",
+          "frame": "default",
+          "x": 30,
+          "y": 150,
+          "depth": 120,
+          "gagId": "G1.1"
+        },
+        {
+          "sprite": "box-fan",
+          "frame": "default",
+          "x": 20,
+          "y": 158,
+          "depth": 118,
+          "gagId": "G1.1"
+        },
+        {
+          "sprite": "mop-bucket",
+          "frame": "default",
+          "x": 42,
+          "y": 158,
+          "depth": 119,
+          "gagId": "G1.1"
+        },
+        {
+          "sprite": "cable-spill",
+          "frame": "default",
+          "x": 34,
+          "y": 166,
+          "depth": 121,
+          "gagId": "G1.1"
+        },
+        {
+          "sprite": "desk-postit",
+          "frame": "default",
+          "x": 84,
+          "y": 152,
+          "depth": 130,
+          "gagId": "G1.2"
+        },
+        {
+          "sprite": "worker",
+          "frame": "down",
+          "x": 90,
+          "y": 152,
+          "depth": 131,
+          "gagId": "G1.2"
+        },
+        {
+          "sprite": "desk-dev",
+          "frame": "default",
+          "x": 133,
+          "y": 152,
+          "depth": 140,
+          "gagId": "G2.1"
+        },
+        {
+          "sprite": "worker-queue",
+          "frame": "a-left",
+          "x": 118,
+          "y": 152,
+          "depth": 138,
+          "gagId": "G2.1"
+        },
+        {
+          "sprite": "worker-queue",
+          "frame": "b-left",
+          "x": 106,
+          "y": 152,
+          "depth": 137,
+          "gagId": "G2.1"
+        },
+        {
+          "sprite": "cable-floor-c",
+          "frame": "default",
+          "x": 176,
+          "y": 166,
+          "depth": 150,
+          "gagId": "G2.2"
+        },
+        {
+          "sprite": "cable-floor-r",
+          "frame": "default",
+          "x": 195,
+          "y": 166,
+          "depth": 151,
+          "gagId": "G2.2"
+        },
+        {
+          "sprite": "cable-floor-turn",
+          "frame": "default",
+          "x": 214,
+          "y": 166,
+          "depth": 152,
+          "gagId": "G2.2"
+        },
+        {
+          "sprite": "sign-caution",
+          "frame": "default",
+          "x": 190,
+          "y": 152,
+          "depth": 153,
+          "gagId": "G2.2"
+        },
+        {
+          "sprite": "sofa",
+          "frame": "default",
+          "x": 235,
+          "y": 156,
+          "depth": 160,
+          "gagId": "G2.3"
+        },
+        {
+          "sprite": "plant",
+          "frame": "default",
+          "x": 254,
+          "y": 154,
+          "depth": 161,
+          "gagId": "G2.3"
+        },
+        {
+          "sprite": "visitor",
+          "frame": "default",
+          "x": 226,
+          "y": 152,
+          "depth": 159,
+          "gagId": "G2.3"
+        },
+        {
+          "sprite": "tag-visitor",
+          "frame": "default",
+          "x": 226,
+          "y": 132,
+          "depth": 162,
+          "gagId": "G2.3"
+        },
+        {
+          "sprite": "wifi",
+          "frame": "default",
+          "x": 235,
+          "y": 124,
+          "depth": 163,
+          "gagId": "G2.3"
+        }
+      ],
+      "hotspots": [
+        {
+          "gagId": "G1.1",
+          "x": 8,
+          "y": 110,
+          "w": 48,
+          "h": 70,
+          "primary": true
+        },
+        {
+          "gagId": "G1.2",
+          "x": 64,
+          "y": 120,
+          "w": 40,
+          "h": 50,
+          "primary": true
+        },
+        {
+          "gagId": "G2.1",
+          "x": 108,
+          "y": 120,
+          "w": 50,
+          "h": 50,
+          "primary": true
+        },
+        {
+          "gagId": "G2.2",
+          "x": 166,
+          "y": 140,
+          "w": 48,
+          "h": 40,
+          "primary": true
+        },
+        {
+          "gagId": "G2.3",
+          "x": 210,
+          "y": 110,
+          "w": 50,
+          "h": 60,
+          "primary": true
+        }
+      ]
+    }
+  ]
+}

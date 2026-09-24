@@ -1,4 +1,11 @@
 import { expect, test } from '@playwright/test';
+import { interceptFixtureScenes } from './scene-source';
+
+// PH1-09/D-035: the default band (80) needs a real scene file to measure
+// CLS/scroll against something other than the "not drawn yet" placeholder.
+// `interceptFixtureScenes` (tests/scene-source.ts) only serves the
+// hand-written fixture when public/sprites/scenes/ doesn't exist yet — it
+// never masks a real export.
 
 // PH1-04 review S1/S2: everything above the canvas (slider, readout,
 // ticks, toggle, tagline) used to be built by JS into empty roots, and the
@@ -45,6 +52,7 @@ test.describe('CLS under throttling (PH1-04 review S1)', () => {
       observer.observe({ type: 'layout-shift', buffered: true });
     });
 
+    await interceptFixtureScenes(page);
     await page.setViewportSize(VIEWPORT);
     await page.goto('/', { timeout: 60_000 });
     await page.waitForFunction(() => document.body.dataset.renderedToken !== undefined, { timeout: 60_000 });
@@ -60,6 +68,7 @@ test.describe('CLS under throttling (PH1-04 review S1)', () => {
 
 test.describe('no page-level horizontal scroll at 390px (PH1-04 review S2)', () => {
   test('documentElement.scrollWidth equals the viewport width', async ({ page }) => {
+    await interceptFixtureScenes(page);
     await page.setViewportSize(VIEWPORT);
     await page.goto('/');
     await page.waitForFunction(() => document.body.dataset.renderedToken !== undefined);
@@ -67,4 +76,45 @@ test.describe('no page-level horizontal scroll at 390px (PH1-04 review S2)', () 
     const scrollWidth = await page.evaluate(() => document.documentElement.scrollWidth);
     expect(scrollWidth).toBe(VIEWPORT.width);
   });
+});
+
+// Fix round item 7 / review fix 4: chooseScale now takes the *smaller* of
+// the width- and height-derived integer scales, so a view can't earn a
+// scale on width alone that makes it taller than .scene-wrap's own
+// 360:240-capped box — which would otherwise force an internal vertical
+// scrollbar inside the scene (as opposed to the page-level horizontal
+// scroll case above, which is allowed). Checked at three real device
+// profiles named in the fix-round brief.
+test.describe('no internal vertical scroll inside .scene-wrap (fix round item 7)', () => {
+  const profiles = [
+    { label: '360 CSS width, DPR 3', width: 360, deviceScaleFactor: 3 },
+    { label: '390 CSS width, DPR 3', width: 390, deviceScaleFactor: 3 },
+    { label: '412 CSS width, DPR 2.625', width: 412, deviceScaleFactor: 2.625 },
+  ];
+
+  for (const profile of profiles) {
+    test(`${profile.label}: .scene-wrap has no internal vertical overflow`, async ({ browser }) => {
+      const context = await browser.newContext({
+        viewport: { width: profile.width, height: 900 },
+        deviceScaleFactor: profile.deviceScaleFactor,
+      });
+      const page = await context.newPage();
+      try {
+        await interceptFixtureScenes(page);
+        await page.goto('/');
+        await page.waitForFunction(() => document.body.dataset.renderedToken !== undefined);
+
+        const overflow = await page.locator('#scene-wrap').evaluate((el) => ({
+          scrollHeight: el.scrollHeight,
+          clientHeight: el.clientHeight,
+        }));
+        expect(
+          overflow.scrollHeight,
+          `${profile.label}: scene-wrap scrollHeight (${overflow.scrollHeight}) should not exceed its clientHeight (${overflow.clientHeight})`
+        ).toBeLessThanOrEqual(overflow.clientHeight);
+      } finally {
+        await context.close();
+      }
+    });
+  }
 });

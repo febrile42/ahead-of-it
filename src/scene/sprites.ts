@@ -57,3 +57,28 @@ export async function loadSpriteFrame(
   const image = await loadImage(frames[0].file);
   return { image, entry };
 }
+
+/**
+ * PH1-09: resolves a scene entry's `{sprite, frame}` (SCENE-FORMAT — a
+ * manifest key plus a frame reference, never a file name) to an image.
+ * `frame` is a manifest frame *key*, strictly (fix round: no `"default"`
+ * or first-key fallback — a scene file referencing a frame that doesn't
+ * exist on that sprite is an export bug, and this throws instead of
+ * silently drawing the wrong pose). Phase 1 has no animation yet, so
+ * (like loadSpriteFrame) only the *first* image in the resolved key's
+ * array is drawn.
+ */
+export async function loadEntryImage(
+  manifest: SpriteManifest,
+  sprite: string,
+  frame: string
+): Promise<{ image: HTMLImageElement; entry: SpriteManifestEntry }> {
+  const entry = manifest[sprite];
+  if (!entry) throw new Error(`unknown sprite "${sprite}" in manifest (scene file references it)`);
+  const frames = entry.frames[frame];
+  if (!frames) {
+    throw new Error(`sprite "${sprite}" has no frame "${frame}" in manifest.json`);
+  }
+  const image = await loadImage(frames[0].file);
+  return { image, entry };
+}
