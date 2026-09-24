@@ -5,17 +5,25 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { copy } from './content';
-import { BUFFER_H, BUFFER_W } from './scene/layout';
 
 const html = readFileSync(new URL('../index.html', import.meta.url), 'utf-8');
 
+// PH1-09/D-035: canvas sizing no longer comes from a static BUFFER_W/H
+// constant (src/scene/layout.ts's computeLayout was deleted along with
+// the elevation it laid out) — it now comes from whichever scene file's
+// current view is loaded, at runtime, per SCENE-FORMAT's device-pixel
+// scale rule (src/main.ts's sizeAndPositionCanvas). index.html is out of
+// this brief's boundary, so its static width/height attributes stay as
+// PH1-04 left them; they only matter pre-JS (an explicit width/height
+// stops the browser's 300x150 default from being the first paint), and
+// get overwritten by the first render() regardless.
 describe('index.html static shell (S1: CLS canvas reservation)', () => {
-  it('the canvas width/height attributes match src/scene/layout.ts BUFFER_W/BUFFER_H', () => {
+  it('the canvas has explicit width/height attributes (avoids the 300x150 default before JS runs)', () => {
     const match = html.match(/<canvas id="scene-canvas" width="(\d+)" height="(\d+)"/);
     expect(match, 'index.html canvas tag not found or missing width/height attributes').not.toBeNull();
     const [, width, height] = match!;
-    expect(Number(width)).toBe(BUFFER_W);
-    expect(Number(height)).toBe(BUFFER_H);
+    expect(Number(width)).toBeGreaterThan(0);
+    expect(Number(height)).toBeGreaterThan(0);
   });
 });
 
