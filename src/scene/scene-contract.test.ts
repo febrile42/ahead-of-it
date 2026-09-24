@@ -60,11 +60,6 @@ interface SceneIndex {
   bands: Record<string, { built: string; without: string }>;
   beyond: string;
   thumbs: Record<string, string>;
-  /** Fix round: unordered [gagId, gagId] pairs the contract test must
-   * skip when checking D-036 rule 7 (44 native px spacing) — real band
-   * 80 has 5 known-debt pairs, to be fixed in a later art pass. Absent
-   * on tests/fixtures, which stays strict. */
-  knownSpacingDebt?: Array<[string, string]>;
 }
 
 type BandId = 80 | 150 | 220 | 360 | 490 | 610 | 750 | 'beyond';
@@ -134,18 +129,9 @@ function tierOf(band: BandId): number {
   return band === 'beyond' ? 750 : band;
 }
 
-/** Builds a lookup for "is this unordered pair of gag ids known spacing debt?" from index.json's `knownSpacingDebt`. */
-function spacingDebtKey(a: string, b: string): string {
-  return [a, b].sort().join('~');
-}
-
-function spacingDebtSet(index: SceneIndex | undefined): Set<string> {
-  const pairs = index?.knownSpacingDebt ?? [];
-  return new Set(pairs.map(([a, b]) => spacingDebtKey(a, b)));
-}
 
 /** All the format-level checks a single scene file must pass, independent of which band it's for. */
-function checkSceneFileShape(scene: SceneFile, label: string, debt: Set<string>) {
+function checkSceneFileShape(scene: SceneFile, label: string) {
   expect(scene.schema, `${label}: schema`).toBe(1);
   expect(NUMERIC_BANDS as readonly number[], `${label}: band`).toContain(scene.band);
   expect(['built', 'without'], `${label}: state`).toContain(scene.state);
@@ -240,10 +226,8 @@ function checkSceneFileShape(scene: SceneFile, label: string, debt: Set<string>)
       expect(primaries.length, `${vlabel}: gag "${gagId}" has at most one primary hotspot in this view`).toBeLessThanOrEqual(1);
     }
 
-    // D-036 rule 7: primary hotspot centres >= 44 native px apart, except
-    // pairs index.json explicitly flags as known spacing debt (fix round
-    // — real band 80 fails this on 5 pairs, to be fixed in a later art
-    // pass, not papered over here or silently ignored everywhere).
+    // D-036 rule 7 (D-038): primary hotspot centres >= 44 native px apart.
+    // Rule has no exceptions.
     const primaries = view.hotspots.filter((h) => h.primary);
     for (let i = 0; i < primaries.length; i += 1) {
       for (let j = i + 1; j < primaries.length; j += 1) {
@@ -254,13 +238,6 @@ function checkSceneFileShape(scene: SceneFile, label: string, debt: Set<string>)
         const bcx = b.x + b.w / 2;
         const bcy = b.y + b.h / 2;
         const dist = Math.hypot(acx - bcx, acy - bcy);
-        if (dist < 44 && debt.has(spacingDebtKey(a.gagId, b.gagId))) {
-          // eslint-disable-next-line no-console
-          console.info(
-            `${vlabel}: primary hotspots "${a.gagId}"/"${b.gagId}" are ${dist.toFixed(1)}px apart (< 44) — known spacing debt, skipped`
-          );
-          continue;
-        }
         expect(
           dist,
           `${vlabel}: primary hotspots "${a.gagId}" and "${b.gagId}" are >= 44px apart`
@@ -349,7 +326,6 @@ function runContractSuite(dirLabel: string, dir: string, options: { strict: bool
   }
 
   const index = JSON.parse(readFileSync(indexPath, 'utf-8')) as SceneIndex;
-  const debt = spacingDebtSet(index);
 
   it(`${dirLabel}: index.json — beyond is an explicit alias of 750 (N-02)`, () => {
     expect(index.beyond).toBe('750');
@@ -383,7 +359,7 @@ function runContractSuite(dirLabel: string, dir: string, options: { strict: bool
   for (const fileName of sceneFiles) {
     it(`${dirLabel}/${fileName}: format, coverage, two-part, hotspot spacing`, () => {
       const scene = readScene(dir, fileName);
-      checkSceneFileShape(scene, `${dirLabel}/${fileName}`, debt);
+      checkSceneFileShape(scene, `${dirLabel}/${fileName}`);
       checkCumulativeCoverage(scene, `${dirLabel}/${fileName}`);
       checkTwoPartGags(scene, `${dirLabel}/${fileName}`);
     });
@@ -416,7 +392,7 @@ describe('D-036 rule 4 regression: primary count is per file, not per view', () 
       ground: [{ gagId: 'G3.2', part: 'trolley', x: 0, y: 0, w: 10, h: 10, primary: true }],
       'floor-2': [{ gagId: 'G3.2', part: 'box', x: 0, y: 0, w: 10, h: 10, primary: false }],
     });
-    expect(() => checkSceneFileShape(scene, 'regression', new Set())).not.toThrow();
+    expect(() => checkSceneFileShape(scene, 'regression')).not.toThrow();
   });
 
   it('two primaries for the same gag across different views is invalid', () => {
@@ -424,7 +400,7 @@ describe('D-036 rule 4 regression: primary count is per file, not per view', () 
       ground: [{ gagId: 'G3.2', part: 'trolley', x: 0, y: 0, w: 10, h: 10, primary: true }],
       'floor-2': [{ gagId: 'G3.2', part: 'box', x: 0, y: 0, w: 10, h: 10, primary: true }],
     });
-    expect(() => checkSceneFileShape(scene, 'regression', new Set())).toThrow();
+    expect(() => checkSceneFileShape(scene, 'regression')).toThrow();
   });
 
   it("a primary outside the gag's D-036 home view is invalid", () => {
@@ -432,7 +408,7 @@ describe('D-036 rule 4 regression: primary count is per file, not per view', () 
       ground: [],
       'floor-2': [{ gagId: 'G3.2', part: 'trolley', x: 0, y: 0, w: 10, h: 10, primary: true }],
     });
-    expect(() => checkSceneFileShape(scene, 'regression', new Set())).toThrow();
+    expect(() => checkSceneFileShape(scene, 'regression')).toThrow();
   });
 });
 
