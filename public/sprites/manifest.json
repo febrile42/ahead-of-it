@@ -165,6 +165,22 @@
     "h": 9,
     "w": 27
   },
+  "chair": {
+    "anchor": [
+      13,
+      17
+    ],
+    "frames": {
+      "default": [
+        {
+          "duration": 0,
+          "file": "chair.png"
+        }
+      ]
+    },
+    "h": 17,
+    "w": 14
+  },
   "closet-shelf": {
     "anchor": [
       8,
@@ -2850,6 +2866,66 @@
         {
           "duration": 0,
           "file": "worker-seated-turned-e.png"
+        }
+      ]
+    },
+    "h": 40,
+    "w": 32
+  },
+  "worker-seated-wave": {
+    "anchor": [
+      16,
+      40
+    ],
+    "frames": {
+      "a": [
+        {
+          "duration": 280,
+          "file": "worker-seated-wave-a-0.png"
+        },
+        {
+          "duration": 280,
+          "file": "worker-seated-wave-a-1.png"
+        }
+      ],
+      "b": [
+        {
+          "duration": 280,
+          "file": "worker-seated-wave-b-0.png"
+        },
+        {
+          "duration": 280,
+          "file": "worker-seated-wave-b-1.png"
+        }
+      ],
+      "c": [
+        {
+          "duration": 280,
+          "file": "worker-seated-wave-c-0.png"
+        },
+        {
+          "duration": 280,
+          "file": "worker-seated-wave-c-1.png"
+        }
+      ],
+      "d": [
+        {
+          "duration": 280,
+          "file": "worker-seated-wave-d-0.png"
+        },
+        {
+          "duration": 280,
+          "file": "worker-seated-wave-d-1.png"
+        }
+      ],
+      "e": [
+        {
+          "duration": 280,
+          "file": "worker-seated-wave-e-0.png"
+        },
+        {
+          "duration": 280,
+          "file": "worker-seated-wave-e-1.png"
         }
       ]
     },

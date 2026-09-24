@@ -281,4 +281,7 @@ def build_all() -> dict:
         "tv-live-inset": make_anim(_tv_live(TV, HQ_PERSON), 2, key="talk", ms=180),
         "conf-table": make(_conf_table),
         "whiteboard-owned": Sprite(wb1, (wb1.w // 2, wb1.h)),
+        # a desk chair on its own (desk geometry, desk anchor): the inset's seat in
+        # front of its screen; the backrest comes with whoever sits in it
+        "chair": make(lambda iso, c: _chair_at(iso, 0.0, back=False)),
     }

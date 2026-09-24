@@ -419,6 +419,12 @@ def _band220() -> list:
            gag="G2.4", part="inset", primary=False),
         _t("camera-bar", *tv, depth=i["r0"] + 1.6, states=B, view=S, band=220,
            gag="G2.4", part="inset", primary=False),
+        # built: someone on the call, facing the screen, the wave returned
+        _t("chair", i["c0"] + 1, i["r0"] + 1, states=B, view=S, band=220,
+           gag="G2.4", part="inset", primary=False),
+        _t("worker-seated-wave", i["c0"] + 1, i["r0"] + 1, frame="a",
+           depth=i["c0"] + i["r0"] + 3.01, states=B, view=S, band=220,
+           gag="G2.4", part="inset", primary=False),
     ]
     return P
 

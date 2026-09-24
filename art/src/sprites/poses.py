@@ -322,6 +322,27 @@ def huddle_frames(look_name: str) -> dict:
 WAVE_MS = 280
 
 
+def seated_wave_frames(look_name: str) -> list[Canvas]:
+    """G2.4 built (PH1-10 fix round): seated from behind, facing the screen, one hand
+    up — the wave returned. Desk canvas + anchor, like `worker-seated`: paste over a
+    `chair` (or a desk) at the same point. Frame 1 tips the hand out a pixel."""
+    from .worker import seated_frame
+    arms = [
+        {(13, y) for y in range(13, 20)} | {(14, y) for y in range(10, 20)} | {(15, 10), (15, 11)},
+        {(13, y) for y in range(13, 20)} | {(14, y) for y in range(12, 20)}
+        | {(15, y) for y in range(9, 13)} | {(16, 9), (16, 10)},
+    ]
+    out = []
+    for arm in arms:
+        top = min(y for _, y in arm)
+
+        def hook(body, arm=arm, top=top):
+            body.blob(arm, lambda p: "s" if p[1] <= top + 1 and p[0] >= 15 else "T",
+                      ring="outer")
+        out.append(seated_frame(look_name, arm=hook))
+    return out
+
+
 def wave_side_frames(look_name: str) -> dict:
     """G2.4 (PH1-10 fix round): profile, standing beside a screen and waving at it —
     the near arm straight up with the hand open, mouth open mid-"can you hear me?".

@@ -3269,11 +3269,29 @@
           "depth": 8
         },
         {
+          "sprite": "chair",
+          "frame": "default",
+          "x": 53,
+          "y": 141,
+          "depth": 8,
+          "gagId": "G2.4",
+          "part": "inset"
+        },
+        {
           "sprite": "worker-seated",
           "frame": "b",
           "x": 21,
           "y": 141,
           "depth": 8.01
+        },
+        {
+          "sprite": "worker-seated-wave",
+          "frame": "a",
+          "x": 53,
+          "y": 141,
+          "depth": 8.01,
+          "gagId": "G2.4",
+          "part": "inset"
         },
         {
           "sprite": "partition-c",
@@ -3322,10 +3340,10 @@
         {
           "gagId": "G2.4",
           "part": "inset",
-          "x": 53,
+          "x": 38,
           "y": 79,
-          "w": 46,
-          "h": 42,
+          "w": 61,
+          "h": 57,
           "primary": false
         },
         {

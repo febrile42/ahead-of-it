@@ -179,6 +179,11 @@ def build_worker(manifest, registry):
     manifest["worker-huddle"] = save_entry("worker-huddle", hud, worker.W, worker.H,
                                            worker.ANCHOR)
     registry["worker-huddle"] = Frames(hud, worker.ANCHOR)
+    swave = {look: poses.seated_wave_frames(look) for look in looks}
+    manifest["worker-seated-wave"] = save_entry("worker-seated-wave", swave, desk.W, desk.H,
+                                                desk.ANCHOR,
+                                                durations={k: poses.WAVE_MS for k in swave})
+    registry["worker-seated-wave"] = Frames(swave, desk.ANCHOR)
     wave = {}
     for look in looks:
         wave.update(poses.wave_side_frames(look))
