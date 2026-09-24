@@ -52,9 +52,11 @@ Rules
 - **Placeholders:** bands with no composer yet export the nearest drawn room plus
   `placeholder: true` hotspots; the web draws its labelled box for those. No off-palette
   PNGs ever.
-- **Width budget:** each view is ≤ 390 native px wide (pending D-036 from the PH1-08a
-  spike); primary hotspot centres ≥ 44 CSS px apart at phone scale; `check_scenes.py`
-  fails the build otherwise. Pan/zoom is the escape valve, not the default.
+- **Views (D-036):** ids ∈ {ground, floor-2…floor-6, top, street} in that order; `ground`
+  always; others only if they hold a primary hotspot; `w ≤ 360`, `h ≤ 240`; each gag has one
+  primary in its home view (table in D-036); inset + map only in `street`; default view =
+  most primaries of the current band's gags; primary centres ≥ 44 native px apart.
+  `check_scenes.py` fails the build otherwise. Pan/zoom is the escape valve, not the default.
 - Painter scaling is chosen in **device** pixels: `s = max(1, floor(cssAvail·dpr / nativeW))`;
   backing store `native·s`; CSS size `native·s/dpr`.
 - `art/checks/check_scenes.py`: determinism, manifest references, R-03a coverage both
