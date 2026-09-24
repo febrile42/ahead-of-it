@@ -345,15 +345,16 @@ def wave_frames(look_name: str) -> list[Canvas]:
     return out
 
 
-HAT_W, HAT_H = 32, 34
-HAT_ANCHOR = (16, 34)
+HAT_W, HAT_H = 38, 36
+HAT_ANCHOR = (19, 36)
 
 
 def hat_frame(look_name: str, side: str = "right") -> Canvas:
     """Front view at the whiteboard, marker hand up by the board (screen `side`), and
-    the hat: a red crown with a paper band reading PRODUCT, wider than the head —
-    the comic size of a thing everyone can now see. The body mirrors; the hat is drawn
-    after, so its text never does."""
+    the hat (PH1-10 item 4): a real hat silhouette — a rounded red crown, a white band
+    reading PRODUCT in the 3x5 glyphs, and a brim wider than both — far bigger than the
+    head, the comic size of a thing everyone can now see. The body mirrors; the hat is
+    drawn after, so its text never does."""
     from ..glyphs import GLYPHS, text_width
     from .worker import _arm_front
     look = LOOKS[look_name]
@@ -365,28 +366,40 @@ def hat_frame(look_name: str, side: str = "right") -> Canvas:
     _torso_front(body, 0)
     _arm_front(body, "left", 6, 0)
     _head_front(body, look["style"], 0)
-    _place(f, body, 8, HAT_H - 24)
+    bx = (HAT_W - 16) // 2
     oy = HAT_H - 24
+    _place(f, body, bx, oy)
     # marker arm up and out toward the board on the right
-    f.blob({(21, oy + 9), (22, oy + 9), (22, oy + 8), (23, oy + 8), (23, oy + 7),
-            (24, oy + 7), (24, oy + 6), (25, oy + 6)},
-           lambda p: "s" if p[0] >= 24 else "T", ring="outer")
-    f.put(26, oy + 5, "X")                    # the marker cap
+    ax = bx + 13
+    f.blob({(ax, oy + 9), (ax + 1, oy + 9), (ax + 1, oy + 8), (ax + 2, oy + 8),
+            (ax + 2, oy + 7), (ax + 3, oy + 7), (ax + 3, oy + 6), (ax + 4, oy + 6)},
+           lambda p: "s" if p[0] >= ax + 3 else "T", ring="outer")
+    f.put(ax + 5, oy + 5, "X")                # the marker cap
     if side == "left":
         f.px = {(HAT_W - 1 - x, y): r for (x, y), r in f.px.items()}
-    # the hat: crown sits on the head, band across the front
+    # the hat, sitting low on the head: brim at the brow
     text = "PRODUCT"
     tw = text_width(text)
-    bx0 = (HAT_W - (tw + 4)) // 2
-    by0 = oy - 3
-    f.blob(R(bx0 + 7, by0 - 5, bx0 + tw - 4, by0 - 1), "X")            # crown
-    band = R(bx0, by0, bx0 + tw + 3, by0 + 6)
-    f.blob(band, "V")
-    gx = bx0 + 2
+    band_w = tw + 4
+    x0 = (HAT_W - band_w) // 2
+    x1 = x0 + band_w - 1
+    brim_y = oy + 1
+    band = R(x0, brim_y - 7, x1, brim_y - 1)                # the band: 7 rows
+    crown = (R(x0 + 3, brim_y - 11, x1 - 3, brim_y - 11)    # a rounded dome above it
+             | R(x0 + 1, brim_y - 10, x1 - 1, brim_y - 10)
+             | R(x0, brim_y - 9, x1, brim_y - 8))
+    brim = R(x0 - 3, brim_y, x1 + 3, brim_y + 1)
+    f.blob(crown | band | brim, lambda p: "V" if p in band else "X", ring=True)
+    for x in range(x0 - 3, x1 + 4):                          # the brim's underside
+        f.put(x, brim_y + 1, "k" if x in (x0 - 3, x1 + 3) else "X")
+    for x in range(x0 + 2, x1 - 1):                          # a glint on the dome
+        if x < x0 + 6:
+            f.put(x, brim_y - 9, "V")
+    gx = x0 + 2
     for ch in text:
         for dy, row in enumerate(GLYPHS[ch]):
             for dx, px in enumerate(row):
                 if px == "#":
-                    f.put(gx + dx, by0 + 1 + dy, "k")
+                    f.put(gx + dx, brim_y - 6 + dy, "k")
         gx += len(GLYPHS[ch][0]) + 1
     return f.to_canvas(look)
