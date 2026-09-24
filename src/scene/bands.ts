@@ -57,8 +57,9 @@ export function bandIndex(band: BandId): number {
 /**
  * True when `band` is at or after `threshold` in the fixed band order.
  * 'beyond' is always at-or-after every numeric threshold (it never grows
- * past what 750 already has — see src/scene/slots.ts — but geography that
- * exists at 750 must still show as present at 'beyond').
+ * past what 750 already has — SCENE-FORMAT's `beyond` is an explicit
+ * alias of 750, N-02 — but geography that exists at 750 must still show
+ * as present at 'beyond').
  */
 export function isAtLeast(band: BandId, threshold: Exclude<BandId, 'beyond'>): boolean {
   return bandIndex(band) >= bandIndex(threshold);
