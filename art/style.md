@@ -219,3 +219,29 @@ A gag's key object must read at native size, not only in the 4× preview:
 - **Depth by hand.** Long props break the col + row sort; anything outside the glass
   keeps fc + fr > 19 so it draws after the front glass.
 - **Glyphs.** `W` is 5 wide (3-wide read as `H`), as `M`.
+
+## Rooms, not crops (PH1-10)
+
+- **One view, one room** (D-036, D-037 item 8). `ground` is HQ's ground floor (10 x 7);
+  `floor-2` is the room one storey up (8 x 7 at 150, grown to 12 x 7 at 220 for the
+  glass room); `street` is an exterior pavement plate (10 x 8) with HQ, the road and
+  the inset office on it. Each has its own walls, floor and slab (or kerb), and the
+  canvas is fitted to the room with 2 px clear all round.
+- **Ground floor, re-spaced for 44 px** (D-036 rule 7): closet in the back corner, the
+  lobby sofa and the front door on the back-left wall, the developer and the queue down
+  the back-right wall (the built support desk stands where the queue stood), the pit
+  mid-floor, the taped cable across the front with its sign and a step-over, and clear
+  floor outside the closet door for band 150's trolley.
+- **The street.** HQ is a block (`hq-3` at 150, `hq-4` at 220: ground storey 28
+  units, 20 per storey above, flat roof behind a parapet, no sign or name) with its
+  front door (`hq-door`, `open` / `closed`, an awning) on the front-left face; the road
+  runs out of the door toward the viewer and round to the inset office's doorway.
+- **Trolley (G3.2).** Chrome wire — a light grid over a basket full of dark laptops,
+  so it reads as wire, not a box — a raised red handle, castors, the note on the heap.
+- **G2.4.** The conference TV is 22 x 19 units; the face is drawn at screen aspect (a
+  face unit is 2 px wide, 1 px tall) and the freeze quantises to squares on screen.
+  The adapter is `sticky` yellow. The inset office carries the second part:
+  `tv-frozen-small` with two `worker-wave` (from behind, arm up) each side of it, or
+  `tv-live-small` under `camera-bar-small`.
+- **The hat (G7.3a).** A rounded red crown, a white band with PRODUCT in the glyphs,
+  a brim wider than both, set on the crown of the head so the face shows (38 x 36).
