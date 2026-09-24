@@ -22,7 +22,9 @@ module.exports = {
       startServerCommand: 'npm run preview',
       startServerReadyPattern: 'Local:',
       startServerReadyTimeout: 30000,
-      numberOfRuns: 1,
+      // 3 runs, LHCI asserts on the median — shared CI runners are noisy
+      // enough that a single run flakes on performance score/timing.
+      numberOfRuns: 3,
       settings: {
         chromePath: process.env.CHROME_PATH,
         formFactor: 'mobile',
