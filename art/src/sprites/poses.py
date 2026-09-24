@@ -15,13 +15,15 @@ every look is a palette swap. Each pose is one manifest entry keyed by look (lik
                    whiteboard. `point-right` / `point-left`, 2-frame jab each. 20 x 24.
   worker-huddle    G2.4: seen from behind, hunched over the table's one laptop;
                    `<look>` and `<look>-dongle` (an arm up, holding an adapter).
+  worker-wave      G2.4 (band 220, PH1-10): profile, beside a screen, the near arm up
+                   waving at it, mouth open (2 frames). `<look>-right` / `-left`. 16 x 24.
   worker-hat       G7.3a built: front view, a marker raised to the board, wearing the
                    `PRODUCT` hat — a paper band far wider than the head. 32 x 34.
   worker-reach     G4.2 (band 150): seated at the finance desk, reaching up for the
                    envelope on the hook. Desk canvas + anchor.
   worker-peel      G1.2 (band 80): standing at a colleague's desk, peeling the password
                    sticky note off their monitor. Desk canvas + anchor: paste over
-                   `desk-postit` at the same point. Frame 1 erases the note from the
+                   `desk-notes` at the same point. Frame 1 erases the peeled note from the
                    screen (it is in the worker's hand now).
 """
 from __future__ import annotations
@@ -60,12 +62,13 @@ PEEL_OFFSET = (3, 12)
 
 
 def _screen_patch() -> dict:
-    """Pixels where `desk-postit` differs from the plain desk: the note. Frame 1 paints
+    """Pixels where `desk-notes` differs from the plain desk, inside NOTE_PEEL. Frame 1 paints
     the plain desk's colours back over them."""
-    plain, postit = desk_mod.build("plain"), desk_mod.build("postit")
+    plain, postit = desk_mod.build("plain"), desk_mod.build("notes")
     out = {}
-    for y in range(plain.h):
-        for x in range(plain.w):
+    x0, y0, x1, y1 = desk_mod.NOTE_PEEL          # only the note being peeled
+    for y in range(y0, y1 + 1):
+        for x in range(x0, x1 + 1):
             a, b = plain.img.getpixel((x, y)), postit.img.getpixel((x, y))
             if a != b:
                 out[(x, y)] = a
@@ -83,10 +86,10 @@ def peel_frames(look_name: str) -> list[Canvas]:
         if i == 0:
             # near arm stretched up across to the screen, fingertips on the note
             arm = {(12, 21), (13, 21), (13, 20), (14, 20), (15, 20), (15, 19), (16, 19),
-                   (17, 19), (17, 18), (18, 18), (19, 17), (19, 16), (20, 16), (20, 17)}
-            f.blob(arm, lambda p: "s" if p[0] >= 19 else "t", ring="outer")
-            f.put(21, 13, "Y")   # the note's corner, lifting off the glass
-            f.put(22, 13, "o")
+                   (17, 19), (17, 18)}
+            f.blob(arm, lambda p: "s" if p[0] >= 16 else "t", ring="outer")
+            f.put(16, 15, "Y")   # the note's corner, lifting off the bezel
+            f.put(16, 14, "o")
         else:
             # note pulled off and held up in front of the face: reading it
             arm = {(12, 21), (13, 21), (13, 20), (14, 20), (14, 19), (15, 19), (15, 18),
@@ -113,19 +116,20 @@ def reach_frames(look_name: str) -> list[Canvas]:
     """Seated from behind, the right arm going up toward the envelope that dangles in
     front of the screen (fishing-line's `bait`); frame 1 is the fingertips on it."""
     from .worker import seated_frame
-    arms = [
-        # arm straight up past the head, silhouetted against the wall
-        {(13, y) for y in range(13, 20)} | {(14, y) for y in range(12, 20)} | {(15, 11), (15, 12)},
-        # ... and leaning in, fingertips on the envelope's corner
-        {(13, y) for y in range(15, 20)} | {(14, y) for y in range(13, 20)}
-        | {(15, 13), (15, 12), (16, 12), (16, 13)},
-    ]
+    # PH1-10 fix round: the arm clearly extended, up and out toward the envelope that
+    # hangs between the head and the screen, 2 px thick on the diagonal
+    def diag(x0, y0, n):
+        pts = set()
+        for k in range(n):
+            pts |= {(x0 + k, y0 - k), (x0 + k, y0 - k + 1), (x0 + k + 1, y0 - k + 1)}
+        return pts
+    arms = [diag(12, 19, 9), diag(12, 19, 10)]
     out = []
     for arm in arms:
         top = min(y for _, y in arm)
 
         def hook(body, arm=arm, top=top):
-            body.blob(arm, lambda p: "s" if p[1] <= top + 1 and p[0] >= 15 else "T", ring="outer")
+            body.blob(arm, lambda p: "s" if p[1] <= top + 1 else "T", ring="outer")
         out.append(seated_frame(look_name, arm=hook))
     return out
 
@@ -312,20 +316,66 @@ def huddle_frames(look_name: str) -> dict:
         _head_back(f, look["style"], 2)
         if dongle:
             f.blob(R(13, 2, 14, 10), lambda p: "s" if p[1] <= 3 else "T", ring="outer")
-            f.blob(R(12, 0, 15, 1), "V", ring=True)    # the adapter, held up
+            f.blob(R(12, 0, 15, 2), "Y", ring=True)    # the adapter, held up (yellow)
         out[look_name + ("-dongle" if dongle else "")] = [f.to_canvas(look)]
     return out
 
 
-HAT_W, HAT_H = 32, 34
-HAT_ANCHOR = (16, 34)
+WAVE_MS = 280
+
+
+def seated_wave_frames(look_name: str) -> list[Canvas]:
+    """G2.4 built (PH1-10 fix round): seated from behind, facing the screen, one hand
+    up — the wave returned. Desk canvas + anchor, like `worker-seated`: paste over a
+    `chair` (or a desk) at the same point. Frame 1 tips the hand out a pixel."""
+    from .worker import seated_frame
+    arms = [
+        {(13, y) for y in range(13, 20)} | {(14, y) for y in range(10, 20)} | {(15, 10), (15, 11)},
+        {(13, y) for y in range(13, 20)} | {(14, y) for y in range(12, 20)}
+        | {(15, y) for y in range(9, 13)} | {(16, 9), (16, 10)},
+    ]
+    out = []
+    for arm in arms:
+        top = min(y for _, y in arm)
+
+        def hook(body, arm=arm, top=top):
+            body.blob(arm, lambda p: "s" if p[1] <= top + 1 and p[0] >= 15 else "T",
+                      ring="outer")
+        out.append(seated_frame(look_name, arm=hook))
+    return out
+
+
+def wave_side_frames(look_name: str) -> dict:
+    """G2.4 (PH1-10 fix round): profile, standing beside a screen and waving at it —
+    the near arm straight up with the hand open, mouth open mid-"can you hear me?".
+    Frame 0 hand up, frame 1 tipped forward. `<look>-right` / `<look>-left`."""
+    look = LOOKS[look_name]
+    right = []
+    for i in range(2):
+        f = _standing_right(look)
+        f.put(10, 6, "X")                                   # the open mouth
+        f.put(10, 7, "e")
+        tip = 12 if i == 0 else 13
+        arm = {(8, 10), (9, 10), (9, 9), (10, 9), (10, 8), (11, 8)}
+        for y in range(3, 8):
+            x = 11 if y >= 6 else tip - (1 if y >= 5 and i == 1 else 0)
+            arm |= {(x, y), (x + 1, y)}
+        hand = {(tip, 1), (tip + 1, 1), (tip, 2), (tip + 1, 2)}
+        f.blob(arm | hand, lambda p: "s" if p in hand else "T", ring="outer")
+        right.append(f.to_canvas(look))
+    return {look_name + "-right": right, look_name + "-left": [c.mirror_h() for c in right]}
+
+
+HAT_W, HAT_H = 38, 36
+HAT_ANCHOR = (19, 36)
 
 
 def hat_frame(look_name: str, side: str = "right") -> Canvas:
     """Front view at the whiteboard, marker hand up by the board (screen `side`), and
-    the hat: a red crown with a paper band reading PRODUCT, wider than the head —
-    the comic size of a thing everyone can now see. The body mirrors; the hat is drawn
-    after, so its text never does."""
+    the hat (PH1-10 item 4): a real hat silhouette — a rounded red crown, a white band
+    reading PRODUCT in the 3x5 glyphs, and a brim wider than both — far bigger than the
+    head, the comic size of a thing everyone can now see. The body mirrors; the hat is
+    drawn after, so its text never does."""
     from ..glyphs import GLYPHS, text_width
     from .worker import _arm_front
     look = LOOKS[look_name]
@@ -337,28 +387,40 @@ def hat_frame(look_name: str, side: str = "right") -> Canvas:
     _torso_front(body, 0)
     _arm_front(body, "left", 6, 0)
     _head_front(body, look["style"], 0)
-    _place(f, body, 8, HAT_H - 24)
+    bx = (HAT_W - 16) // 2
     oy = HAT_H - 24
+    _place(f, body, bx, oy)
     # marker arm up and out toward the board on the right
-    f.blob({(21, oy + 9), (22, oy + 9), (22, oy + 8), (23, oy + 8), (23, oy + 7),
-            (24, oy + 7), (24, oy + 6), (25, oy + 6)},
-           lambda p: "s" if p[0] >= 24 else "T", ring="outer")
-    f.put(26, oy + 5, "X")                    # the marker cap
+    ax = bx + 13
+    f.blob({(ax, oy + 9), (ax + 1, oy + 9), (ax + 1, oy + 8), (ax + 2, oy + 8),
+            (ax + 2, oy + 7), (ax + 3, oy + 7), (ax + 3, oy + 6), (ax + 4, oy + 6)},
+           lambda p: "s" if p[0] >= ax + 3 else "T", ring="outer")
+    f.put(ax + 5, oy + 5, "X")                # the marker cap
     if side == "left":
         f.px = {(HAT_W - 1 - x, y): r for (x, y), r in f.px.items()}
-    # the hat: crown sits on the head, band across the front
+    # the hat, sitting low on the head: brim at the brow
     text = "PRODUCT"
     tw = text_width(text)
-    bx0 = (HAT_W - (tw + 4)) // 2
-    by0 = oy - 3
-    f.blob(R(bx0 + 7, by0 - 5, bx0 + tw - 4, by0 - 1), "X")            # crown
-    band = R(bx0, by0, bx0 + tw + 3, by0 + 6)
-    f.blob(band, "V")
-    gx = bx0 + 2
+    band_w = tw + 4
+    x0 = (HAT_W - band_w) // 2
+    x1 = x0 + band_w - 1
+    brim_y = oy + 1
+    band = R(x0, brim_y - 7, x1, brim_y - 1)                # the band: 7 rows
+    crown = (R(x0 + 3, brim_y - 11, x1 - 3, brim_y - 11)    # a rounded dome above it
+             | R(x0 + 1, brim_y - 10, x1 - 1, brim_y - 10)
+             | R(x0, brim_y - 9, x1, brim_y - 8))
+    brim = R(x0 - 3, brim_y, x1 + 3, brim_y + 1)
+    f.blob(crown | band | brim, lambda p: "V" if p in band else "X", ring=True)
+    for x in range(x0 - 3, x1 + 4):                          # the brim's underside
+        f.put(x, brim_y + 1, "k" if x in (x0 - 3, x1 + 3) else "X")
+    for x in range(x0 + 2, x1 - 1):                          # a glint on the dome
+        if x < x0 + 6:
+            f.put(x, brim_y - 9, "V")
+    gx = x0 + 2
     for ch in text:
         for dy, row in enumerate(GLYPHS[ch]):
             for dx, px in enumerate(row):
                 if px == "#":
-                    f.put(gx + dx, by0 + 1 + dy, "k")
+                    f.put(gx + dx, brim_y - 6 + dy, "k")
         gx += len(GLYPHS[ch][0]) + 1
     return f.to_canvas(look)

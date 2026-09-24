@@ -368,6 +368,9 @@ def seated_frame(look_name: str, turned: bool = False, arm=None) -> Canvas:
     # view is symmetric, so the same body just moves across.
     body.shift(9 - 8 + (14 if turned else 0), 28 - 15 - 3)
     if arm is not None:
+        # the hook draws in desk-canvas pixels, so an arm may reach past the 16 px body
+        # (PH1-10: it was silently clipped at x = 16)
+        body.w, body.h = desk_mod.W, desk_mod.H
         arm(body)  # a pose hook: add a raised arm etc. in the shifted body's pixels
     f.px.update({k: v for k, v in body.px.items() if 0 <= k[0] < f.w and 0 <= k[1] < f.h})
     c = f.to_canvas(look)

@@ -59,7 +59,34 @@ def build(kind: str = "plain", turned: bool = False, screen=None) -> Canvas:
         _dev_card(c)
     if kind == "padlock":
         _padlock(c, iso)
+    if kind == "notes":
+        _postits(c)
     return c
+
+
+# PH1-10 fix round (G1.2): the notes are paper stuck *on* the monitor, not pixels on
+# the screen: flat squares, outlined, on the bezel's corners and sticking out past its
+# edge. NOTE_PEEL (x0, y0, x1, y1 inclusive, desk canvas) is the one `worker-peel`
+# takes: on the bottom-left corner, overhanging onto the desk top, so the peel's second
+# frame can paint the desk back over it.
+NOTE_PEEL = (17, 15, 22, 20)
+NOTE_TOP = (24, 10, 28, 14)
+
+
+def _note(c: Canvas, box, scribbles):
+    x0, y0, x1, y1 = box
+    c.rect(x0, y0, x1, y1, "outline")
+    c.rect(x0 + 1, y0 + 1, x1 - 1, y1 - 1, "sticky")
+    for (x, y) in scribbles:                      # a password, written down
+        c.point(x, y, "outline")
+
+
+def _postits(c: Canvas):
+    x0, y0, _x1, _y1 = NOTE_PEEL
+    _note(c, NOTE_PEEL, [(x0 + 1, y0 + 2), (x0 + 2, y0 + 2), (x0 + 3, y0 + 2),
+                         (x0 + 2, y0 + 4), (x0 + 3, y0 + 4)])
+    tx, ty, _a, _b = NOTE_TOP
+    _note(c, NOTE_TOP, [(tx + 1, ty + 2), (tx + 2, ty + 2)])
 
 
 def net_point(kind: str = "plain", turned: bool = False) -> tuple[int, int]:
@@ -78,7 +105,7 @@ def card_point(turned: bool = False) -> tuple[int, int]:
 
 
 def build_variant(kind: str) -> Canvas:
-    assert kind in ("postit", "padlock", "dev", "dev-built"), kind
+    assert kind in ("postit", "notes", "padlock", "dev", "dev-built"), kind
     return build(kind)
 
 
@@ -136,7 +163,8 @@ def _screen(iso: Iso, faces: dict, kind: str, m: dict, custom=None):
         if custom is not None:
             return custom(c, z, b, c0, c1)
         if kind == "postit" and c >= c1 - 2.2 and b <= 4:
-            # a password, written down: two scribbled lines on the note
+            # (kept for tests/fixtures' golden; the art now uses `desk-notes`) a
+            # password, written down: two scribbled lines on a note on the glass
             if b in (1, 3) and c1 - 1.9 <= c < c1 - 0.4:
                 return "outline"
             return "sticky"

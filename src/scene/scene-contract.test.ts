@@ -82,17 +82,6 @@ const TWO_PART_GAGS: Record<string, 'both' | 'built' | 'without'> = {
   'G2.4': 'both',
 };
 
-// debt: art pass 4 (PH1-10) draws G2.4's inset part; delete then. Until
-// it does, G2.4 legitimately has only one hotspot in files where the
-// inset room isn't drawn yet — checkTwoPartGags logs and skips instead
-// of failing, but only for the real public/sprites/scenes suite (the
-// fixture stays strict: it doesn't reach band 220 where G2.4 appears, so
-// this never actually fires there, but the intent is it never would).
-// If a listed gag ends up with >= 2 hotspots in *every* file it appears
-// in, the debt is gone and the suite fails loudly so it gets removed
-// from this list rather than going stale.
-const TWO_PART_ART_DEBT: ReadonlySet<string> = new Set(['G2.4']);
-
 // D-036 rule 4's table (docs/product/04-DECISIONS.md): each gag's *home*
 // view — the one its single primary hotspot must sit in. G3.2 and G2.4
 // are two-part (their non-primary "part" can sit in a different view —
@@ -315,32 +304,18 @@ function checkCumulativeCoverage(scene: SceneFile, label: string) {
   }
 }
 
-interface DebtStatus {
-  sawGag: boolean;
-  sawShortfall: boolean;
-}
-
 /**
  * SCENE-FORMAT two-part gags: one hotspot per part, all sharing gagId,
- * one primary. Three exemptions, all ruled on by the mastermind after
- * the combined-tree run:
+ * one primary. Two exemptions, both ruled on by the mastermind after
+ * the combined-tree run (a third, the art-debt list for G2.4's undrawn
+ * inset part, was cleared by PH1-10):
  *
  * - A gag whose hotspots are ALL `placeholder: true` (undrawn for this
  *   band) exports one placeholder box, not real two-part geometry yet —
  *   the rule doesn't apply.
  * - TWO_PART_GAGS is per-state (G5.1 is only two-part `without`).
- * - TWO_PART_ART_DEBT gags (`applyDebt`, the real suite only — the
- *   fixture stays strict) get a console note and a pass instead of a
- *   failure when short a part; `debtTracking` accumulates across every
- *   file in the suite so a final check (in runContractSuite) can fail
- *   loudly if a listed gag turns out to have >= 2 parts everywhere it
- *   appears — debt that should have been deleted from the list.
  */
-function checkTwoPartGags(
-  scene: SceneFile,
-  label: string,
-  options: { applyDebt: boolean; debtTracking?: Map<string, DebtStatus> }
-) {
+function checkTwoPartGags(scene: SceneFile, label: string) {
   const allHotspots = scene.views.flatMap((v) => v.hotspots);
   for (const [gagId, stateRule] of Object.entries(TWO_PART_GAGS)) {
     if (stateRule !== 'both' && stateRule !== scene.state) continue; // not two-part in this state
@@ -348,26 +323,7 @@ function checkTwoPartGags(
     if (parts.length === 0) continue; // not yet due at this band
     if (parts.every((p) => p.placeholder)) continue; // undrawn — one placeholder box, not real two-part geometry yet
 
-    const isDebtGag = options.applyDebt && TWO_PART_ART_DEBT.has(gagId);
-    const status = isDebtGag ? options.debtTracking?.get(gagId) : undefined;
-
-    if (parts.length < 2) {
-      if (isDebtGag) {
-        if (status) {
-          status.sawGag = true;
-          status.sawShortfall = true;
-        }
-        // eslint-disable-next-line no-console
-        console.info(
-          `${label}: two-part gag ${gagId} has only ${parts.length} hotspot(s) — known art debt (art pass 4 / PH1-10), skipped`
-        );
-        continue;
-      }
-      expect(parts.length, `${label}: two-part gag ${gagId} has >= 2 hotspots`).toBeGreaterThanOrEqual(2);
-    } else if (status) {
-      status.sawGag = true; // has enough parts here; sawShortfall only flips true elsewhere
-    }
-
+    expect(parts.length, `${label}: two-part gag ${gagId} has >= 2 hotspots`).toBeGreaterThanOrEqual(2);
     expect(parts.filter((p) => p.primary).length, `${label}: two-part gag ${gagId} has exactly one primary`).toBe(1);
     const partNames = parts.map((p) => p.part);
     expect(partNames.every(Boolean), `${label}: two-part gag ${gagId}'s hotspots all carry a "part"`).toBe(true);
@@ -424,31 +380,12 @@ function runContractSuite(dirLabel: string, dir: string, options: { strict: bool
   const sceneFiles = readdirSync(dir).filter((f: string) => f.endsWith('.json') && f !== 'index.json');
   expect(sceneFiles.length, `${dirLabel}: at least one scene file next to index.json`).toBeGreaterThan(0);
 
-  // Accumulates across every file in this suite, mutated by
-  // checkTwoPartGags — the final `it` below reads it once all the
-  // per-file tests above have run (vitest runs a describe's tests in
-  // definition order), so it can catch a debt gag that turns out to have
-  // >= 2 parts everywhere it appears.
-  const debtTracking = new Map<string, DebtStatus>();
-  for (const gagId of TWO_PART_ART_DEBT) debtTracking.set(gagId, { sawGag: false, sawShortfall: false });
-
   for (const fileName of sceneFiles) {
     it(`${dirLabel}/${fileName}: format, coverage, two-part, hotspot spacing`, () => {
       const scene = readScene(dir, fileName);
       checkSceneFileShape(scene, `${dirLabel}/${fileName}`, debt);
       checkCumulativeCoverage(scene, `${dirLabel}/${fileName}`);
-      checkTwoPartGags(scene, `${dirLabel}/${fileName}`, { applyDebt: options.strict, debtTracking });
-    });
-  }
-
-  if (options.strict) {
-    it(`${dirLabel}: TWO_PART_ART_DEBT entries are still needed`, () => {
-      for (const [gagId, status] of debtTracking) {
-        expect(
-          status.sawGag && !status.sawShortfall,
-          `${dirLabel}: two-part gag ${gagId} now has >= 2 hotspots in every file — remove from TWO_PART_ART_DEBT`
-        ).toBe(false);
-      }
+      checkTwoPartGags(scene, `${dirLabel}/${fileName}`);
     });
   }
 }
@@ -510,20 +447,20 @@ function makeOneViewScene(state: 'built' | 'without', hotspots: SceneHotspot[]):
   };
 }
 
-// Cheap regression coverage for the three exemptions the mastermind ruled
-// on after the combined-tree run found 11 checkTwoPartGags failures:
-// per-state applicability (G5.1), the placeholder exemption (G4.1 at
-// 610/750), and the TWO_PART_ART_DEBT exemption (G2.4, art pass 4 /
-// PH1-10) with its own "debt gone, remove from the list" failure mode.
+// Cheap regression coverage for the exemptions the mastermind ruled on
+// after the combined-tree run found 11 checkTwoPartGags failures:
+// per-state applicability (G5.1) and the placeholder exemption (G4.1 at
+// 610/750). The G2.4 art-debt exemption was deleted when PH1-10 drew the
+// inset part; a lone G2.4 hotspot is now simply invalid.
 describe('checkTwoPartGags exemptions (fix round 3)', () => {
   it("G5.1 is single-part in 'built' (docs/content/BANDS-AND-GAGS.md: one picture, a solid link)", () => {
     const scene = makeOneViewScene('built', [{ gagId: 'G5.1', x: 0, y: 0, w: 10, h: 10, primary: true }]);
-    expect(() => checkTwoPartGags(scene, 'r', { applyDebt: false })).not.toThrow();
+    expect(() => checkTwoPartGags(scene, 'r')).not.toThrow();
   });
 
   it("G5.1 is still two-part in 'without' — a single hotspot there is invalid", () => {
     const scene = makeOneViewScene('without', [{ gagId: 'G5.1', x: 0, y: 0, w: 10, h: 10, primary: true }]);
-    expect(() => checkTwoPartGags(scene, 'r', { applyDebt: false })).toThrow();
+    expect(() => checkTwoPartGags(scene, 'r')).toThrow();
   });
 
   it('G5.1 with both parts in without is valid', () => {
@@ -531,43 +468,27 @@ describe('checkTwoPartGags exemptions (fix round 3)', () => {
       { gagId: 'G5.1', part: 'door-a', x: 0, y: 0, w: 10, h: 10, primary: true },
       { gagId: 'G5.1', part: 'door-b', x: 50, y: 0, w: 10, h: 10, primary: false },
     ]);
-    expect(() => checkTwoPartGags(scene, 'r', { applyDebt: false })).not.toThrow();
+    expect(() => checkTwoPartGags(scene, 'r')).not.toThrow();
   });
 
   it('a two-part gag with only a placeholder hotspot is exempt (undrawn, not real two-part geometry yet)', () => {
     const scene = makeOneViewScene('built', [
       { gagId: 'G4.1', x: 0, y: 0, w: 10, h: 10, primary: true, placeholder: true },
     ]);
-    expect(() => checkTwoPartGags(scene, 'r', { applyDebt: false })).not.toThrow();
+    expect(() => checkTwoPartGags(scene, 'r')).not.toThrow();
   });
 
-  it('G2.4 with one (non-placeholder) hotspot fails when debt is not applied (the fixture-strict case)', () => {
+  it('G2.4 with one (non-placeholder) hotspot fails', () => {
     const scene = makeOneViewScene('built', [{ gagId: 'G2.4', x: 0, y: 0, w: 10, h: 10, primary: true }]);
-    expect(() => checkTwoPartGags(scene, 'r', { applyDebt: false })).toThrow();
+    expect(() => checkTwoPartGags(scene, 'r')).toThrow();
   });
 
-  it('G2.4 with one hotspot passes when TWO_PART_ART_DEBT applies, and records the shortfall', () => {
-    const scene = makeOneViewScene('built', [{ gagId: 'G2.4', x: 0, y: 0, w: 10, h: 10, primary: true }]);
-    const debtTracking = new Map<string, DebtStatus>([['G2.4', { sawGag: false, sawShortfall: false }]]);
-    expect(() => checkTwoPartGags(scene, 'r', { applyDebt: true, debtTracking })).not.toThrow();
-    expect(debtTracking.get('G2.4')).toEqual({ sawGag: true, sawShortfall: true });
-  });
-
-  it('a debt gag that has >= 2 parts in every file it appears in never records a shortfall — the state the "remove from TWO_PART_ART_DEBT" check keys on', () => {
-    const scene1 = makeOneViewScene('built', [
-      { gagId: 'G2.4', part: 'conf', x: 0, y: 0, w: 10, h: 10, primary: true },
-      { gagId: 'G2.4', part: 'screen', x: 50, y: 0, w: 10, h: 10, primary: false },
+  it('G2.4 with both parts (conference room + inset office) is valid', () => {
+    const scene = makeOneViewScene('built', [
+      { gagId: 'G2.4', part: 'room', x: 0, y: 0, w: 10, h: 10, primary: true },
+      { gagId: 'G2.4', part: 'inset', x: 50, y: 0, w: 10, h: 10, primary: false },
     ]);
-    const scene2 = makeOneViewScene('without', [
-      { gagId: 'G2.4', part: 'conf', x: 0, y: 0, w: 10, h: 10, primary: true },
-      { gagId: 'G2.4', part: 'screen', x: 50, y: 0, w: 10, h: 10, primary: false },
-    ]);
-    const debtTracking = new Map<string, DebtStatus>([['G2.4', { sawGag: false, sawShortfall: false }]]);
-    checkTwoPartGags(scene1, 'r1', { applyDebt: true, debtTracking });
-    checkTwoPartGags(scene2, 'r2', { applyDebt: true, debtTracking });
-    // Mirrors runContractSuite's own final check exactly: sawGag && !sawShortfall means "graduated, remove from the list".
-    const status = debtTracking.get('G2.4')!;
-    expect(status.sawGag && !status.sawShortfall).toBe(true);
+    expect(() => checkTwoPartGags(scene, 'r')).not.toThrow();
   });
 });
 

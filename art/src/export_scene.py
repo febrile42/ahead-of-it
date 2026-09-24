@@ -1,26 +1,22 @@
-"""PH1-08b: scene export (D-035/D-036).
+"""PH1-08b scene export (D-035/D-036), re-aimed at rooms by PH1-10.
 
 Exports `public/sprites/scenes/<band>-<state>.json` + `index.json`, per the contract in
 `docs/product/SCENE-FORMAT.md`. Reuses `layout.scene()` + `compose.resolve()` — the same
-data `art/build.py` renders the whole-building previews from — so the exported `entries`
-are the same list the previews are painted from (deliverable 1). This module never calls
-`compose.render()` on the full, uncropped room and never changes `art/build.py`'s own
-preview crop/scale logic, so `art/preview/<band>-<state>.png` stay byte-identical.
+data `art/build.py` renders its review previews from — so the exported `entries` are the
+list each view is painted from.
 
-**Views (D-036).** `art/src/layout.py`'s band 80/150/220 composers draw one continuous
-room that only grows *wider* (9 -> 12 -> 16 columns), not stacked floors — band 80's
-"one floor, then two" and band 150's "three floors" in `docs/content/BANDS-AND-GAGS.md`
-are narrative, not yet separate geometry. D-036's `ground`/`floor-2`/`street` labels are
-therefore implemented here as **named crop rectangles** into that single plate (verified
-empirically: there is a real ~16px gap in the floor tiles between the inset/road region
-and the main plate, but *no* gap between the main plate's "ground" and "floor-2" gag
-clusters — see the PH1-08b handback for the full account and why this is flagged as a
-gap against D-036 rather than silently patched).
+**Views are rooms (PH1-10, D-037 item 8).** `layout.scene(band, state)` returns one
+placement list per D-036 view — `ground`, `floor-2`, `street` — each a whole room (or,
+for `street`, the whole exterior plate). A view's canvas is fitted to what is drawn in
+it across *both* states (`compose.fit`), so the two states overlay pixel for pixel and no
+view edge cuts anything. There are no crop rectangles any more: a view's entries are its
+room's placements, in paint order, in the room's own coordinates.
 
 **Placeholders (bands 360-750).** No composer exists yet, so every placeholder band
-re-exports band 220's views verbatim plus one small `placeholder: true` box per
-undrawn gag, positioned by D-036 rule 4's view table (not by any real geometry — there
-is none yet) in a reserved strip so 44px spacing holds.
+re-exports band 220's views verbatim plus one `placeholder: true` box per undrawn gag in
+its D-036 home view, placed where the room is emptiest and >= 48 px from every other
+primary (`_place_placeholders`). A view that band 220 doesn't have yet (`top`) is an
+empty canvas holding only its boxes.
 """
 from __future__ import annotations
 
@@ -45,27 +41,7 @@ DRAWN_BANDS = (80, 150, 220)
 UNDRAWN_BANDS = (360, 490, 610, 750)
 ALL_BANDS = DRAWN_BANDS + UNDRAWN_BANDS
 NEAREST_DRAWN = 220
-
-# -- D-036 views: named crop rectangles (x0, y0, x1, y1) in the full band canvas ------
-# `None` = the whole room (band 80's room is already <=360x240 native px).
-VIEW_CROPS = {
-    80: [("ground", None)],
-    150: [
-        ("street", (25, 60, 225, 260)),
-        ("ground", (140, 10, 355, 240)),
-        ("floor-2", (300, 60, 465, 300)),
-    ],
-    220: [
-        ("street", (25, 60, 225, 260)),
-        # `ground`/`floor-2` are wider than band 220 alone needs so the placeholder
-        # bands (360-750, which reuse these crops) have a reserved strip for
-        # `placeholder: true` boxes without exceeding the 240px height budget.
-        ("ground", (140, 10, 470, 220)),
-        ("floor-2", (300, 60, 525, 260)),
-    ],
-}
-# Every drawn band >= 220 reuses band 220's crops (360-750 have no composer of their own).
-VIEW_CROPS[360] = VIEW_CROPS[490] = VIEW_CROPS[610] = VIEW_CROPS[750] = VIEW_CROPS[220]
+MAX_W, MAX_H = 360, 240          # D-036 rule 3
 
 # The part of a gag that carries its D-036 primary hotspot. A dict means the primary
 # location differs by state (the "before" and "after" are different objects).
@@ -77,31 +53,14 @@ HOME_PART = {
     "G5.1": "handover", "G2.4": "room", "G7.3a": "board",
 }
 
-# D-036 rule 4's view assignment, for a gag's *primary* hotspot. Authoritative — used
-# ahead of geometry, because the composers' physical layout doesn't reliably put a gag
-# in the D-036-decided view (G2.3's lobby, for instance, sits physically close to the
-# street/inset region even though D-036 calls it a `ground` gag). Non-primary parts of
-# a multi-part gag (e.g. G3.2's `box`) are still placed by geometry (nearest crop
-# centre): the table only pins down what "one primary hotspot, in its home view" (D-036
-# rule 4) requires.
+# D-036 rule 4: the view a gag's *primary* hotspot must be in. Not used to move
+# anything — the layout puts each primary part in its home view's room, and the export
+# fails if it didn't.
 GAG_HOME_VIEW = {
     "G1.1": "ground", "G1.2": "ground", "G2.1": "ground", "G2.2": "ground",
     "G2.3": "ground", "G3.2": "ground", "G4.2": "floor-2", "G4.3": "floor-2",
     "G2.4": "floor-2", "G7.3a": "floor-2", "G5.1": "street",
 }
-
-# debt: art pass 4 (PH1-10) re-spaces band 80 ground; delete this set then. These 5
-# unordered gag pairs from band 80's own 5 gags sit 25-40 native px apart at their
-# real drawn positions (propagated to every later band, since they're cumulative —
-# R-03a), under D-036 rule 7's 44px floor. Rule 7 is not relaxed for them (mastermind
-# ruling, PH1-08b fix round): check_scenes.py warns instead of failing on exactly this
-# set, fails on anything else under 44px, and fails if a listed pair is ever >= 44px
-# everywhere (so the debt can't go stale once art pass 4 lands). Mirrored into
-# index.json's `knownSpacingDebt` so the web's contract test can share this one list.
-KNOWN_SPACING_DEBT = [
-    ("G1.1", "G3.2"), ("G1.2", "G2.1"), ("G1.2", "G2.2"),
-    ("G2.1", "G2.3"), ("G2.1", "G3.2"),
-]
 
 # D-036 rule 4's view assignment for gags with no composer yet (no geometry to derive
 # a view from, so the table is authoritative here).
@@ -121,10 +80,9 @@ NEW_GAGS_AT = {
 }
 
 PLACEHOLDER_BOX = 32   # native px, square
-PLACEHOLDER_PITCH = 48  # centre-to-centre; > 44 so the spacing check passes
+PLACEHOLDER_GAP = 48   # min centre distance to any other primary; > 44 (rule 7)
 
-# D-036 rule 1's canonical view order.
-VIEW_ORDER = ["ground", "floor-2", "floor-3", "floor-4", "floor-5", "floor-6", "top", "street"]
+VIEW_ORDER = layout.VIEW_ORDER
 
 
 def _sort_views(vlist: list) -> list:
@@ -146,57 +104,57 @@ def _view_label(view_id: str) -> str:
 
 
 # ---------------------------------------------------------------------------
-# geometry helpers
+# views: each a room, fitted to its own contents
 # ---------------------------------------------------------------------------
 
-def _bbox(lib: compose.Library, q: dict) -> tuple[int, int, int, int]:
-    img = lib.image(q["sprite"], q.get("frame", "default"), q.get("index", 0))
-    ax, ay = lib.anchor(q["sprite"])
-    x0, y0 = q["x"] - ax, q["y"] - ay
-    return x0, y0, x0 + img.width, y0 + img.height
+def _site_only(lib: compose.Library, placements: list) -> list:
+    """Drop `preview_only` manifest entries (style.md): those exist for the 4x judging
+    sheet only and are never drawn by the site."""
+    return [p for p in placements
+            if "line" in p or not lib.manifest.get(p["sprite"], {}).get("preview_only")]
 
 
-def _resolve_band_state(lib: compose.Library, band: int, state: str):
-    """(placements, lines) for a real (drawn) band x state: `layout.scene()` resolved
-    through `compose.resolve()` — the entry list the whole-building preview is painted
-    from. Skips `preview_only` manifest entries (style.md): those exist for the 4x
-    judging sheet only and are never drawn by the site."""
-    room = layout.ROOMS[band]
-    resolved = compose.resolve(lib, layout.scene(band, state), room["origin"])
-    placements, lines = [], []
-    for q in resolved:
-        if "line" in q:
-            lines.append(q)
-            continue
-        if lib.manifest.get(q["sprite"], {}).get("preview_only"):
-            continue
-        placements.append(q)
+def view_frame(lib: compose.Library, band: int, view: str):
+    """(origin, (w, h)) of `view` at `band`: the room fitted to everything drawn in it
+    in either state, plus layout.MARGIN. Fails if the room breaks D-036 rule 3."""
+    lists = [_site_only(lib, layout.scene(band, s)[view]) for s in STATES]
+    origin, size = compose.fit(lib, lists, layout.MARGIN)
+    if size[0] > MAX_W or size[1] > MAX_H:
+        raise ValueError(f"band {band} view {view}: room is {size[0]}x{size[1]}, over "
+                         f"D-036's {MAX_W}x{MAX_H} — make the room smaller")
+    return origin, size
+
+
+def resolve_view(lib: compose.Library, band: int, state: str, view: str, origin):
+    """(placements, lines) for one view: the room's placements resolved at its origin."""
+    resolved = compose.resolve(lib, _site_only(lib, layout.scene(band, state)[view]), origin)
+    placements = [q for q in resolved if "line" not in q]
+    lines = [q for q in resolved if "line" in q]
     return placements, lines
 
 
-def _view_for_rect(band: int, x0: int, y0: int, x1: int, y1: int) -> str:
-    """Which named D-036 view a (gag, part)'s bbox belongs to: the crop whose *centre*
-    is nearest the bbox's centre. The three crops overlap at their edges (they're
-    windows into one continuous plate, not a partition of it — see the module
-    docstring), so "which rect contains the point" is not well-defined near a seam;
-    nearest-centre is."""
-    cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
-    crops = VIEW_CROPS[band]
-    if len(crops) == 1 and crops[0][1] is None:
-        return crops[0][0]
-    best, best_d = None, None
-    for name, rect in crops:
-        rx0, ry0, rx1, ry1 = rect
-        rcx, rcy = (rx0 + rx1) / 2, (ry0 + ry1) / 2
-        d = (rcx - cx) ** 2 + (rcy - cy) ** 2
-        if best_d is None or d < best_d:
-            best, best_d = name, d
-    return best
+def render_view(lib: compose.Library, band: int, state: str, view: str) -> Image.Image:
+    """The room at native scale, *as the site draws it* (no preview-only sprites),
+    straight from `layout` + `compose` — never from the exported JSON. This is the
+    ground truth the exported view must reproduce pixel for pixel (check_scenes.py)
+    and what thumbnails are cut from."""
+    origin, size = view_frame(lib, band, view)
+    resolved = compose.resolve(lib, _site_only(lib, layout.scene(band, state)[view]), origin)
+    return compose.render(lib, resolved, size).img
 
 
 # ---------------------------------------------------------------------------
 # hotspots
 # ---------------------------------------------------------------------------
+
+def _bbox(lib: compose.Library, q: dict) -> tuple[int, int, int, int]:
+    """Opaque bounds of one placed sprite."""
+    img = lib.image(q["sprite"], q.get("frame", "default"), q.get("index", 0))
+    ax, ay = lib.anchor(q["sprite"])
+    bb = img.getchannel("A").getbbox() or (0, 0, img.width, img.height)
+    x0, y0 = q["x"] - ax, q["y"] - ay
+    return x0 + bb[0], y0 + bb[1], x0 + bb[2], y0 + bb[3]
+
 
 def _gag_groups(lib: compose.Library, placements: list) -> dict:
     """{(gagId, part): [x0, y0, x1, y1]} — the union of opaque bounds of every
@@ -206,9 +164,8 @@ def _gag_groups(lib: compose.Library, placements: list) -> dict:
         gag = q.get("gag")
         if not gag:
             continue
-        part = q.get("part", "main")
+        key = (gag, q.get("part", "main"))
         x0, y0, x1, y1 = _bbox(lib, q)
-        key = (gag, part)
         if key in groups:
             g = groups[key]
             g[0], g[1] = min(g[0], x0), min(g[1], y0)
@@ -229,53 +186,42 @@ def _primary_part(gag: str, state: str, parts_present: set) -> str | None:
     return sorted(parts_present)[0]
 
 
-def _hotspots_for_band(lib: compose.Library, band: int) -> dict:
-    """{state: {(gag, part): [x0,y0,x1,y1]}}. If a gag has no placement at all in one
-    state, its rect is copied from the other state — the tile geometry does not move
-    between states, only which sprites are drawn on it (e.g. G2.2: the cable is gone in
-    `built`, but the floor location is still there and still tappable)."""
+def _hotspots_for_band(lib: compose.Library, band: int, frames: dict) -> dict:
+    """{state: {(view, gag, part): [x0,y0,x1,y1]}} in each view's own coordinates. If a
+    gag has no placement at all in one state, its rects are copied from the other state
+    — the tiles don't move between states, only which sprites are drawn on them (G2.2:
+    the cable is gone in `built`, but the spot is still there and still tappable)."""
     per_state = {}
     for state in STATES:
-        placements, _ = _resolve_band_state(lib, band, state)
-        per_state[state] = _gag_groups(lib, placements)
-    gags = sorted({g for (g, _p) in per_state["without"]} | {g for (g, _p) in per_state["built"]})
-    for gag in gags:
-        for state, other in (("without", "built"), ("built", "without")):
-            has = any(g == gag for (g, _p) in per_state[state])
-            if not has:
-                for (g, p), rect in per_state[other].items():
-                    if g == gag:
-                        per_state[state][(g, p)] = list(rect)
+        groups = {}
+        for view in layout.views(band):
+            placements, _ = resolve_view(lib, band, state, view, frames[view][0])
+            for (gag, part), rect in _gag_groups(lib, placements).items():
+                groups[(view, gag, part)] = rect
+        per_state[state] = groups
+    for state, other in (("without", "built"), ("built", "without")):
+        have = {g for (_v, g, _p) in per_state[state]}
+        for (v, g, p), rect in list(per_state[other].items()):
+            if g not in have:
+                per_state[state][(v, g, p)] = list(rect)
     return per_state
 
 
 # ---------------------------------------------------------------------------
-# view assembly
+# entries
 # ---------------------------------------------------------------------------
 
-def _view_size(band: int, view_id: str, rect) -> tuple[int, int, int, int]:
-    if rect is None:
-        w, h = layout.ROOMS[band]["size"]
-        return 0, 0, w, h
-    return rect
-
-
 def _entries_for_view(lib: compose.Library, placements: list, lines: list, band: int,
-                       state: str, rect) -> list:
+                      state: str, view: str, size) -> list:
     """Entries in true paint order — the same bucketing `compose.render` uses: `base`
     (list order), then `main` (sorted by `(depth, order)`), then `over` (list order) —
     so a painter that just draws the array in order (as the contract says the web
-    painter does) reproduces the same picture. Sprites whose bbox only partly overlaps
-    the view are kept (the painter clips); only sprites entirely outside are dropped."""
-    x0, y0, x1, y1 = rect
+    painter does) reproduces the same picture."""
     base, main, over = [], [], []
     for q in placements:
-        bx0, by0, bx1, by1 = _bbox(lib, q)
-        if bx1 <= x0 or bx0 >= x1 or by1 <= y0 or by0 >= y1:
-            continue
         entry = {
             "sprite": q["sprite"], "frame": q.get("frame", "default"),
-            "x": q["x"] - x0, "y": q["y"] - y0,
+            "x": q["x"], "y": q["y"],
             "depth": round(q.get("depth", q.get("order", 0)), 3),
         }
         if q.get("gag"):
@@ -292,39 +238,30 @@ def _entries_for_view(lib: compose.Library, placements: list, lines: list, band:
             main.append((entry["depth"], q.get("order", 0), entry))
     main.sort(key=lambda t: (t[0], t[1]))
 
-    # band 80's "on the network" dotted lines: baked to one overlay sprite per view
-    # that actually shows any of them (A3 — the painter draws images only), inserted
-    # into `over` at the position of the *first* baked line's own `order` — `compose.
-    # resolve()` assigns `order` to lines too, so this reproduces `compose.render`'s
-    # true interleaving of lines with other `over`-layer sprites (e.g. G4.3's
-    # `card-customers`) instead of always drawing the bake last.
+    # "on the network" dotted lines: baked to one overlay sprite per view (A3 — the
+    # painter draws images only), inserted into `over` at the *first* line's own
+    # `order`, which reproduces `compose.render`'s interleaving of lines with other
+    # over-layer sprites (cards, notes).
     if lines:
         by_id = {p["id"]: p for p in placements if "id" in p}
         seg, orders = [], []
         for ln in lines:
-            try:
-                p0 = _point_of(lib, by_id, ln["from"])
-                p1 = _point_of(lib, by_id, ln["to"])
-            except KeyError:
-                continue
-            if max(p0[0], p1[0]) <= x0 or min(p0[0], p1[0]) >= x1 \
-                    or max(p0[1], p1[1]) <= y0 or min(p0[1], p1[1]) >= y1:
-                continue
+            p0 = _point_of(lib, by_id, ln["from"])
+            p1 = _point_of(lib, by_id, ln["to"])
             seg.append((p0, p1, ln.get("colour", "net"), ln.get("halo", "outline")))
             orders.append(ln.get("order", 0))
-        if seg:
-            name = f"fx-net-{band}-{state}-{_slug(rect)}"
-            _bake_overlay(lib, seg, x0, y0, x1 - x0, y1 - y0, name)
-            bake_entry = {"sprite": name, "frame": "default", "x": 0, "y": 0,
-                          "depth": 900, "gagId": "G2.3", "part": "lobby"}
-            over.append((min(orders), bake_entry))
+        name = f"fx-net-{band}-{state}-{view}"
+        _bake_overlay(seg, size[0], size[1], name)
+        gags = {(ln.get("gag"), ln.get("part", "main")) for ln in lines}
+        bake_entry = {"sprite": name, "frame": "default", "x": 0, "y": 0, "depth": 900}
+        if len(gags) == 1:
+            g, part = gags.pop()
+            if g:
+                bake_entry["gagId"], bake_entry["part"] = g, part
+        over.append((min(orders), bake_entry))
 
     over.sort(key=lambda t: t[0])
     return base + [e for (_d, _o, e) in main] + [e for (_o, e) in over]
-
-
-def _slug(rect) -> str:
-    return "-".join(str(v) for v in rect)
 
 
 def _point_of(lib, by_id, ref):
@@ -337,12 +274,13 @@ def _point_of(lib, by_id, ref):
 _manifest_additions: dict = {}
 
 
-def _bake_overlay(lib, segments, ox, oy, w, h, name):
+def _bake_overlay(segments, w, h, name):
     """Bake dotted-line segments (A3, style.md "On the network") into one palette-only
-    overlay PNG, and register it under a manifest key so it resolves like any sprite."""
+    overlay PNG the size of the view, registered under a manifest key so it resolves
+    like any sprite."""
     c = Canvas(w, h)
     for (p0, p1, colour, halo) in segments:
-        dotted(c, (p0[0] - ox, p0[1] - oy), (p1[0] - ox, p1[1] - oy), colour, halo=halo)
+        dotted(c, p0, p1, colour, halo=halo)
     fname = f"{name}.png"
     save_png(c, os.path.join(SPRITES_DIR, fname))
     _manifest_additions[name] = {
@@ -356,37 +294,62 @@ def _bake_overlay(lib, segments, ox, oy, w, h, name):
 # ---------------------------------------------------------------------------
 
 def _views_for_band(lib: compose.Library, band: int) -> list:
-    hotspots_by_state = _hotspots_for_band(lib, band)
+    """[(view_id, w, h, {state: {entries, hotspots}})] in D-036 order."""
+    frames = {v: view_frame(lib, band, v) for v in layout.views(band)}
+    hotspots_by_state = _hotspots_for_band(lib, band, frames)
     views_out = []
-    for view_id, rect in VIEW_CROPS[band]:
-        x0, y0, x1, y1 = _view_size(band, view_id, rect)
-        w, h = x1 - x0, y1 - y0
+    for view_id in layout.views(band):
+        origin, (w, h) = frames[view_id]
         per_state = {}
         for state in STATES:
-            placements, lines = _resolve_band_state(lib, band, state)
-            entries = _entries_for_view(lib, placements, lines, band, state, (x0, y0, x1, y1))
+            placements, lines = resolve_view(lib, band, state, view_id, origin)
+            entries = _entries_for_view(lib, placements, lines, band, state, view_id, (w, h))
             groups = hotspots_by_state[state]
-            hs = []
-            # which part is primary for each gag, in this state
             parts_by_gag: dict = {}
-            for (gag, part) in groups:
+            for (_v, gag, part) in groups:
                 parts_by_gag.setdefault(gag, set()).add(part)
             primaries = {gag: _primary_part(gag, state, parts)
-                        for gag, parts in parts_by_gag.items()}
-            for (gag, part), (gx0, gy0, gx1, gy1) in groups.items():
-                is_primary = primaries.get(gag) == part
-                target = (GAG_HOME_VIEW.get(gag) if is_primary and gag in GAG_HOME_VIEW
-                          else _view_for_rect(band, gx0, gy0, gx1, gy1))
-                if target != view_id:
+                         for gag, parts in parts_by_gag.items()}
+            hs = []
+            for (v, gag, part), (gx0, gy0, gx1, gy1) in groups.items():
+                if v != view_id:
                     continue
+                is_primary = primaries.get(gag) == part
+                if is_primary and GAG_HOME_VIEW.get(gag, view_id) != view_id:
+                    raise ValueError(f"band {band} {state}: {gag}'s primary part {part!r} "
+                                     f"is drawn in {view_id}, but its D-036 home view is "
+                                     f"{GAG_HOME_VIEW[gag]}")
                 hs.append({
                     "gagId": gag, "part": part,
-                    "x": gx0 - x0, "y": gy0 - y0, "w": gx1 - gx0, "h": gy1 - gy0,
+                    "x": gx0, "y": gy0, "w": gx1 - gx0, "h": gy1 - gy0,
                     "primary": is_primary,
                 })
+            hs.sort(key=lambda h_: (h_["gagId"], h_["part"]))
             per_state[state] = {"entries": entries, "hotspots": hs}
         views_out.append((view_id, w, h, per_state))
     return views_out
+
+
+def _write_doc(band: int, state: str, vlist: list) -> str:
+    doc = {"schema": 1, "band": band, "state": state, "views": _sort_views(vlist)}
+    fname = f"{band}-{state}.json"
+    with open(os.path.join(SCENES_DIR, fname), "w") as f:
+        json.dump(doc, f, indent=2, sort_keys=False)
+        f.write("\n")
+    return fname
+
+
+def _mark_default(vlist: list, own_gags: set):
+    """D-036 rule 6: the view with the most primaries among the band's own gags; ties to
+    the earlier view (vlist is in D-036 order)."""
+    def n(v):
+        return sum(1 for h_ in v["hotspots"] if h_["primary"] and h_["gagId"] in own_gags)
+    best = None
+    for v in vlist:
+        if best is None or n(v) > n(best):
+            best = v
+    for v in vlist:
+        v["default"] = v is best
 
 
 def export_band(lib: compose.Library, band: int, band_new_gags: set) -> dict:
@@ -394,29 +357,19 @@ def export_band(lib: compose.Library, band: int, band_new_gags: set) -> dict:
     files = {}
     for state in STATES:
         vlist = []
-        primaries_by_view = {}
         for view_id, w, h, per_state in views:
             hs = per_state[state]["hotspots"]
-            if view_id != "ground" and not hs:
-                continue  # D-036 rule 2: non-ground views only exist if they hold a primary
-            n_primary_own = sum(1 for h_ in hs if h_["primary"] and h_["gagId"] in band_new_gags)
-            primaries_by_view[view_id] = n_primary_own
+            if view_id != "ground" and not any(h_["primary"] for h_ in hs):
+                raise ValueError(f"band {band} {state}: view {view_id} holds no primary "
+                                 f"hotspot (D-036 rule 2) — it should not exist yet")
             vlist.append({
                 "id": view_id, "label": _view_label(view_id), "size": {"w": w, "h": h},
                 "focus": {"x": 0, "y": 0, "w": w, "h": h},
                 "entries": per_state[state]["entries"],
                 "hotspots": hs,
             })
-        if vlist:
-            best = max(vlist, key=lambda v: primaries_by_view.get(v["id"], 0))
-            for v in vlist:
-                v["default"] = v is best
-        doc = {"schema": 1, "band": band, "state": state, "views": _sort_views(vlist)}
-        fname = f"{band}-{state}.json"
-        with open(os.path.join(SCENES_DIR, fname), "w") as f:
-            json.dump(doc, f, indent=2, sort_keys=False)
-            f.write("\n")
-        files[state] = fname
+        _mark_default(vlist, band_new_gags)
+        files[state] = _write_doc(band, state, vlist)
     return files
 
 
@@ -424,8 +377,50 @@ def export_band(lib: compose.Library, band: int, band_new_gags: set) -> dict:
 # placeholder bands (360-750): band 220's views + placeholder:true boxes
 # ---------------------------------------------------------------------------
 
-def export_placeholder_band(lib: compose.Library, band: int, cumulative_new: list) -> dict:
-    base_views = _views_for_band(lib, NEAREST_DRAWN)
+def _place_placeholders(img: Image.Image | None, w: int, h: int, hotspots: list,
+                        gags: list):
+    """Place one PLACEHOLDER_BOX square per gag in a w x h view: >= PLACEHOLDER_GAP
+    from every primary centre (real and already placed), preferring the emptiest part of
+    the room (fewest opaque pixels under the box) and never over a real hotspot if it
+    can be helped. If the room is full, the canvas grows downward (never cropping it)
+    within D-036's 240 px. Returns (boxes, w, h)."""
+    B, G = PLACEHOLDER_BOX, PLACEHOLDER_GAP
+    alpha = img.getchannel("A") if img is not None else None
+    centres = [(h_["x"] + h_["w"] / 2, h_["y"] + h_["h"] / 2) for h_ in hotspots
+               if h_.get("primary")]
+    rects = [(h_["x"], h_["y"], h_["x"] + h_["w"], h_["y"] + h_["h"]) for h_ in hotspots]
+    boxes = []
+    for gag in gags:
+        while True:
+            best = None
+            for y in range(4, h - B - 3, 4):
+                for x in range(4, w - B - 3, 4):
+                    cx, cy = x + B / 2, y + B / 2
+                    if any((cx - px) ** 2 + (cy - py) ** 2 < G * G for px, py in centres):
+                        continue
+                    over = sum(1 for (a, b, c, d) in rects
+                               if x < c and x + B > a and y < d and y + B > b)
+                    ink = 0
+                    if alpha is not None and y + B <= alpha.height and x + B <= alpha.width:
+                        ink = sum(1 for v in alpha.crop((x, y, x + B, y + B)).getdata() if v)
+                    score = (over, ink, y, x)
+                    if best is None or score < best[0]:
+                        best = (score, x, y)
+            if best is not None:
+                break
+            if h + G > MAX_H:
+                raise ValueError(f"no room for placeholder {gag} in a {w}x{h} view")
+            h += G
+        _s, x, y = best
+        boxes.append({"gagId": gag, "part": "main", "x": x, "y": y, "w": B, "h": B,
+                      "primary": True, "placeholder": True})
+        centres.append((x + B / 2, y + B / 2))
+        rects.append((x, y, x + B, y + B))
+    return boxes, w, h
+
+
+def export_placeholder_band(lib: compose.Library, band: int, cumulative_new: list,
+                            base_views: list, base_imgs: dict) -> dict:
     by_view_gags: dict = {}
     for gag in cumulative_new:
         by_view_gags.setdefault(PLACEHOLDER_VIEW[gag], []).append(gag)
@@ -433,82 +428,35 @@ def export_placeholder_band(lib: compose.Library, band: int, cumulative_new: lis
     files = {}
     for state in STATES:
         vlist = []
-        seen_views = {v for v, _, _, _ in base_views} | set(by_view_gags)
-        for view_id in ["ground"] + sorted(v for v in seen_views if v != "ground"):
+        view_ids = [v for v, _, _, _ in base_views]
+        view_ids += [v for v in by_view_gags if v not in view_ids]
+        for view_id in view_ids:
             base = next(((w, h, ps) for (vid, w, h, ps) in base_views if vid == view_id), None)
             if base is None:
-                w, h, entries, hs = 200, 120, [], []
+                w, h, entries, hs, img = 200, 120, [], [], None
             else:
                 w, h, per_state = base
                 entries = list(per_state[state]["entries"])
-                # drawn gags keep exactly the real hotspot band 220 exported (D-036's
-                # `default`/primary bookkeeping is scoped to a band's own new gags, and
-                # these were some earlier band's own gags, not this one's)
+                # drawn gags keep exactly the real hotspots band 220 exported
                 hs = [dict(h_) for h_ in per_state[state]["hotspots"]]
-            gags_here = by_view_gags.get(view_id, [])
-            if gags_here or hs:
-                # one reserved row below the real content, as wide as the view allows
-                # (up to the 360px budget) so `n` placeholder boxes fit in one row at
-                # >= 44px spacing before a second row is ever needed.
-                cols = max(1, min(len(gags_here), 360 // PLACEHOLDER_PITCH))
-                content_bottom = max([h_["y"] + h_["h"] for h_ in hs], default=0)
-                strip_y = content_bottom + 24
-                if gags_here:
-                    h = content_bottom  # entries beyond this are empty space; the
-                    # reserved strip below is sized to what it actually needs, so the
-                    # view stays inside the 240px budget instead of the whole crop's
-                    # nominal (looser) height.
-                for i, gag in enumerate(gags_here):
-                    col, row = i % cols, i // cols
-                    bx = 8 + col * PLACEHOLDER_PITCH
-                    by = strip_y + row * PLACEHOLDER_PITCH
-                    hs.append({
-                        "gagId": gag, "part": "main",
-                        "x": bx, "y": by, "w": PLACEHOLDER_BOX, "h": PLACEHOLDER_BOX,
-                        "primary": True, "placeholder": True,
-                    })
-                    w = max(w, bx + PLACEHOLDER_BOX + 8)
-                    h = max(h, by + PLACEHOLDER_BOX + 8)
-                vlist.append({
-                    "id": view_id, "label": _view_label(view_id), "size": {"w": w, "h": h},
-                    "focus": {"x": 0, "y": 0, "w": w, "h": h},
-                    "default": view_id == "ground",
-                    "entries": entries, "hotspots": hs,
-                })
-        doc = {"schema": 1, "band": band, "state": state, "views": _sort_views(vlist)}
-        fname = f"{band}-{state}.json"
-        with open(os.path.join(SCENES_DIR, fname), "w") as f:
-            json.dump(doc, f, indent=2, sort_keys=False)
-            f.write("\n")
-        files[state] = fname
+                img = base_imgs[(state, view_id)]
+            boxes, w, h = _place_placeholders(img, w, h, hs, by_view_gags.get(view_id, []))
+            hs += boxes
+            vlist.append({
+                "id": view_id, "label": _view_label(view_id), "size": {"w": w, "h": h},
+                "focus": {"x": 0, "y": 0, "w": w, "h": h},
+                "default": view_id == "ground",
+                "entries": entries, "hotspots": hs,
+            })
+        files[state] = _write_doc(band, state, vlist)
     return files
-
-
-# ---------------------------------------------------------------------------
-# thumbnails (R-04) — drawn gags only; see the handback for undrawn ones
-# ---------------------------------------------------------------------------
-
-def _render_full_1x(lib: compose.Library, band: int, state: str) -> Image.Image:
-    """The full plate at native scale, *as the site would draw it* — unlike
-    `art/build.py`'s own preview renderer, this drops `preview_only` sprites (style.md:
-    "not drawn by the site renderer"), so it's the right ground truth for both thumbs
-    (R-04, shipped/site content) and the pixel-parity check. `art/preview/*.png` itself
-    is untouched — it's rendered by `art/build.py`'s own, separate call to
-    `compose.render`, which this function does not replace."""
-    room = layout.ROOMS[band]
-    resolved = compose.resolve(lib, layout.scene(band, state), room["origin"])
-    resolved = [q for q in resolved
-                if "line" in q or not lib.manifest.get(q["sprite"], {}).get("preview_only")]
-    c = compose.render(lib, resolved, room["size"])
-    return c.img
 
 
 # ---------------------------------------------------------------------------
 # the reference painter — exactly what the contract says the web painter does:
 # draw `entries` in array order, sprite anchor handling identical to `compose.paste`,
 # clipped to the view's canvas. Used both to write art/preview/views/*.png (so there
-# is something to look at) and, independently, by check_scenes.py's parity check
-# (deliverable "the web canvas at scale 1 must match... pixel for pixel").
+# is something to look at) and, independently, by check_scenes.py's parity check.
 # ---------------------------------------------------------------------------
 
 def paint_entries(lib: compose.Library, entries: list, w: int, h: int) -> Image.Image:
@@ -518,8 +466,6 @@ def paint_entries(lib: compose.Library, entries: list, w: int, h: int) -> Image.
         ax, ay = lib.anchor(e["sprite"])
         x0, y0 = e["x"] - ax, e["y"] - ay
         x1, y1 = x0 + sprite_img.width, y0 + sprite_img.height
-        # clip to canvas — entries partly (or wholly) outside the view are expected
-        # (mastermind ruling): the painter clips rather than the exporter filtering.
         cx0, cy0 = max(x0, 0), max(y0, 0)
         cx1, cy1 = min(x1, w), min(y1, h)
         if cx0 >= cx1 or cy0 >= cy1:
@@ -533,15 +479,6 @@ def paint_entries(lib: compose.Library, entries: list, w: int, h: int) -> Image.
     return img
 
 
-def reference_crop(lib: compose.Library, band: int, state: str, rect) -> Image.Image:
-    """The same view rect cropped straight out of the native-scale full-plate render
-    (`compose.render` over the *whole* room — not the upscaled `art/preview/` PNG).
-    This is the ground truth the painted view must match pixel-for-pixel."""
-    x0, y0, x1, y1 = rect
-    full = _render_full_1x(lib, band, state)
-    return full.crop((x0, y0, x1, y1))
-
-
 def export_view_previews(lib: compose.Library) -> list:
     """Write art/preview/views/<band>-<state>-<viewId>@1x.png for every drawn band and
     view, painted with `paint_entries` from the exported JSON (not re-derived), so the
@@ -550,8 +487,7 @@ def export_view_previews(lib: compose.Library) -> list:
     written = []
     for band in DRAWN_BANDS:
         for state in STATES:
-            path = os.path.join(SCENES_DIR, f"{band}-{state}.json")
-            with open(path) as f:
+            with open(os.path.join(SCENES_DIR, f"{band}-{state}.json")) as f:
                 doc = json.load(f)
             for v in doc["views"]:
                 w, h = v["size"]["w"], v["size"]["h"]
@@ -562,26 +498,28 @@ def export_view_previews(lib: compose.Library) -> list:
     return written
 
 
+# ---------------------------------------------------------------------------
+# thumbnails (R-04) — drawn gags only, cut from the view holding the primary
+# ---------------------------------------------------------------------------
+
 def export_thumbs(lib: compose.Library) -> dict:
     thumbs = {}
     for band in DRAWN_BANDS:
-        placements, _ = _resolve_band_state(lib, band, "without")
-        groups = _gag_groups(lib, placements)
+        frames = {v: view_frame(lib, band, v) for v in layout.views(band)}
+        groups = _hotspots_for_band(lib, band, frames)["without"]
         parts_by_gag: dict = {}
-        for (gag, part) in groups:
+        for (_v, gag, part) in groups:
             parts_by_gag.setdefault(gag, set()).add(part)
-        img = None
-        for gag, parts in parts_by_gag.items():
+        for gag, parts in sorted(parts_by_gag.items()):
             if gag in thumbs:
                 continue
             part = _primary_part(gag, "without", parts)
-            x0, y0, x1, y1 = groups[(gag, part)]
+            view = next(v for (v, g, p) in groups if g == gag and p == part)
+            x0, y0, x1, y1 = groups[(view, gag, part)]
+            img = render_view(lib, band, "without", view)
             m = 8
-            room_w, room_h = layout.ROOMS[band]["size"]
             cx0, cy0 = max(x0 - m, 0), max(y0 - m, 0)
-            cx1, cy1 = min(x1 + m, room_w), min(y1 + m, room_h)
-            if img is None:
-                img = _render_full_1x(lib, band, "without")
+            cx1, cy1 = min(x1 + m, img.width), min(y1 + m, img.height)
             crop = Canvas(cx1 - cx0, cy1 - cy0)
             crop.img = img.crop((cx0, cy0, cx1, cy1))
             fname = f"{gag}.png"
@@ -599,30 +537,30 @@ def export_all():
     os.makedirs(THUMBS_DIR, exist_ok=True)
     lib = compose.Library(SPRITES_DIR)
 
-    index = {"schema": 1, "bands": {}, "beyond": "750", "thumbs": {},
-              "knownSpacingDebt": [list(pair) for pair in KNOWN_SPACING_DEBT]}
+    index = {"schema": 1, "bands": {}, "beyond": "750", "thumbs": {}}
 
-    cumulative = []
-    for band in ALL_BANDS:
-        if band in DRAWN_BANDS:
-            own_gags = {g for g, part_map in HOME_PART.items()
-                        if _band_of(g) == band}
-            files = export_band(lib, band, own_gags)
-        else:
-            cumulative = cumulative + NEW_GAGS_AT[band]
-            files = export_placeholder_band(lib, band, cumulative)
-        index["bands"][str(band)] = files
+    for band in DRAWN_BANDS:
+        own_gags = {g for g in HOME_PART if _band_of(g) == band}
+        index["bands"][str(band)] = export_band(lib, band, own_gags)
 
-    # `lib.manifest` was loaded once, before any overlay sprite was baked; merge the
-    # bake-time additions into it now so thumbs/view-preview rendering (which look
-    # sprites up through `lib`) can resolve them too.
+    # `lib.manifest` was loaded before any overlay sprite was baked; merge the bake-time
+    # additions in so everything below can resolve them.
     lib.manifest.update(_manifest_additions)
+
+    base_views = _views_for_band(lib, NEAREST_DRAWN)
+    base_imgs = {(s, v): paint_entries(lib, ps[s]["entries"], w, h)
+                 for (v, w, h, ps) in base_views for s in STATES}
+    cumulative = []
+    for band in UNDRAWN_BANDS:
+        cumulative = cumulative + NEW_GAGS_AT[band]
+        index["bands"][str(band)] = export_placeholder_band(lib, band, cumulative,
+                                                            base_views, base_imgs)
 
     index["thumbs"] = export_thumbs(lib)
     export_view_previews(lib)
 
-    # manifest additions (dotted-line overlay sprites) get merged into the shipped
-    # manifest so `{sprite, frame}` references resolve (A2/the manifest check).
+    # overlay sprites get merged into the shipped manifest so `{sprite, frame}`
+    # references resolve (A2 / the manifest check).
     if _manifest_additions:
         manifest_path = os.path.join(SPRITES_DIR, "manifest.json")
         with open(manifest_path) as f:

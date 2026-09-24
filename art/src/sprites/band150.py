@@ -64,50 +64,99 @@ def _laptop_open(iso: Iso, c0, r0, z, w=3.0):
               if c0 + 0.4 <= cc < c0 + w - 0.4 and z + 0.8 <= zz < z + 3.6 else None)
 
 
-def _trolley(iso: Iso, c: Canvas):
-    """Long axis along +c, the handle at the -c end. A light wire basket on legs and
-    castors, heaped above the rim with dark laptops, two open with screens lit."""
-    B0, B1, R0, R1, Z0, Z1 = 1.5, 14.5, 1.5, 6.5, 5.0, 12.0
-    iso.floor_shadow(B0, R0, B1, R1, grow=0.8, grow_r=0.3)
-    # legs and castors
-    for cc, rr in ((B0 + 0.5, R1 - 0.5), (B1 - 0.8, R1 - 0.5), (B1 - 0.8, R0 + 0.5)):
-        x, y = iso.pt(cc, rr, 0)
-        for k in range(1, 6):
-            c.point(x, y - k, "badge-body")
-        c.point(x, y, "outline")
-        c.point(x - 1, y, "outline")
-    # bottom rack
-    iso.box(B0 + 0.5, R0 + 0.4, 1.4, B1 - 0.8, R1 - 0.4, 1.9, top="wall-shadow",
-            left="badge-body", right="badge-body")
-    # the basket: light wire panels, a grid on the two visible sides
-    f = iso.box(B0, R0, Z0, B1, R1, Z1, top=None, left="wall-shadow", right="wall-trim")
+def _laptop_tilted(iso: Iso, c0, r0, z, w=3.2):
+    """An open laptop whose lid leans back at an angle, screen lit toward the viewer."""
+    iso.box(c0, r0, z, c0 + w, r0 + 2.2, z + 0.7, top="chair-mid", left="badge-body",
+            right="chair-dark")
+    for k in range(5):                                   # the lid, stepping back as it rises
+        rr = r0 - 0.35 * k
+        f = iso.box(c0, rr - 0.5, z + 0.7 + k, c0 + w, rr, z + 1.7 + k, top="chair-dark",
+                    left="monitor-frame", right="outline", outline=None)
+        if 1 <= k <= 3:
+            iso.paint(f, "L", rr, lambda cc, zz: "monitor-screen"
+                      if c0 + 0.5 <= cc < c0 + w - 0.5 else None)
+    iso.box(c0, r0 - 2.3, z + 5.4, c0 + w, r0 - 1.6, z + 5.8, top="outline",
+            left="outline", right="outline", outline=None)   # the lid's top edge
 
-    def grid(u, z):
-        if Z1 - 1.0 <= z:
-            return "paper"                     # the rim
-        if u % 2.0 < 0.5 or (z - Z0) % 2.0 < 0.8:
-            return "badge-body"
+
+def _trolley(iso: Iso, c: Canvas):
+    """PH1-10: drawn to read as a supermarket trolley at 1x. Long axis along +c. A
+    chrome wire basket (a light grid over a dark load) raised on a chassis with daylight
+    under it and castors at the corners; the handle rises at the +c end with a red grip
+    standing clear above the load; closed laptops heaped over the rim, two lids open
+    and leaning back, screens lit."""
+    B0, B1, R0, R1 = 0.5, 15.0, 1.0, 7.0
+    ZB, ZT = 7.0, 14.0                              # basket bottom / rim
+    iso.floor_shadow(B0, R0, B1, R1, grow=1.0, grow_r=0.4)
+    # chassis: two low rails, and a castor under each corner
+    for rr in (R0 + 1.0, R1 - 1.2):
+        iso.box(B0 + 0.8, rr, 1.6, B1 - 1.2, rr + 0.5, 2.1, top="badge-body",
+                left="chair-mid", right="chair-mid", outline=None)
+    for cc, rr in ((B0 + 1.0, R0 + 1.0), (B1 - 1.6, R0 + 1.0),
+                   (B0 + 1.0, R1 - 0.8), (B1 - 1.6, R1 - 0.8)):
+        x, y = iso.pt(cc, rr, 0)
+        c.rect(x - 1, y - 1, x, y, "outline")
+        c.point(x, y - 2, "badge-body")
+    # four legs from the rails up to the basket floor
+    for cc, rr in ((B0 + 0.8, R1 - 0.7), (B1 - 1.2, R1 - 0.7), (B1 - 1.2, R0 + 0.7),
+                   (B0 + 0.8, R0 + 0.7)):
+        x, y = iso.pt(cc, rr, 2.1)
+        for k in range(0, 6):
+            c.point(x, y - k, "badge-body")
+    # the load: the basket is full to the rim, then heaped above it
+    stack = iso.box(B0 + 0.3, R0 + 0.3, ZB, B1 - 0.3, R1 - 0.3, ZT - 0.5, top="chair-dark",
+                    left="chair-mid", right="chair-dark", outline=None)
+
+    def edges(u, z):
+        k = int((z - ZB) // 1.5)
+        if (z - ZB) % 1.5 < 0.6:
+            return "outline"
+        if k % 3 == 1 and int(u // 5) % 2 == 0:
+            return "monitor-screen"
+        return ("chair-dark", "chair-mid", "monitor-frame")[k % 3]
+    iso.paint(stack, "L", R1 - 0.3, edges)
+    iso.paint(stack, "R", B1 - 0.3, lambda u, z: "chair-dark" if (z - ZB) % 1.5 < 0.6 else "chair-mid")
+    top = ZT
+    for i, (cc, rr, zz) in enumerate(((1.6, 2.0, top - 1.2), (5.0, 2.2, top - 0.8),
+                                      (8.6, 2.0, top - 1.0), (11.8, 2.4, top - 1.0),
+                                      (3.2, 3.2, top + 0.2), (9.8, 3.4, top + 0.4),
+                                      (1.6, 4.2, top - 0.2), (12.0, 4.4, top - 0.4))):
+        _laptop_flat(iso, cc, rr, zz, lid=("chair-mid", "monitor-frame", "chair-dark")[i % 3],
+                     w=3.4, d=2.6)
+    _laptop_tilted(iso, 3.0, 4.8, top + 0.8)
+    _laptop_tilted(iso, 8.4, 4.6, top + 1.2)
+    # the basket: an open wire box — only its two visible sides, as a grid
+    f = iso.box_faces(B0, R0, ZB, B1, R1, ZT)
+    lit = {k: v for k, v in f.items() if v in ("L", "R")}
+
+    def wire(face, u, z):
+        if z >= ZT - 0.9:
+            return "paper" if face == "L" else "wall-shadow"      # the rim
+        if z < ZB + 0.8:
+            return "wall-trim"                                    # the basket floor
+        if u % 2.0 < 0.6 or (z - ZB) % 3.0 < 0.7:
+            return "wall-shadow" if face == "L" else "wall-trim"  # chrome wire
         return None
-    iso.paint(f, "L", R1, grid)
-    iso.paint(f, "R", B1, grid)
-    # the load, heaped above the rim
-    for i, (cc, rr, zz) in enumerate(((2.0, 3.2, Z1 - 0.8), (5.2, 3.0, Z1 - 0.6),
-                                      (8.4, 3.2, Z1 - 0.8), (11.2, 3.0, Z1 - 0.7),
-                                      (3.4, 2.6, Z1 + 0.2), (9.8, 2.8, Z1 + 0.3),
-                                      (6.2, 3.4, Z1 + 0.4))):
-        _laptop_flat(iso, cc, rr, zz, lid=("chair-mid", "monitor-frame", "chair-dark")[i % 3])
-    _laptop_open(iso, 2.4, 3.8, Z1 + 1.0)
-    _laptop_open(iso, 7.4, 4.0, Z1 + 1.4)
-    _laptop_open(iso, 11.0, 3.6, Z1 + 1.0)
-    # handle at the -c end: two posts and a red grip, above the rim
-    for rr in (R0 + 0.3, R1 - 0.3):
-        x0, y0 = iso.pt(B0, rr, Z1 - 1)
-        for k in range(5):
-            c.point(x0 - (k + 1) // 2, y0 - k, "badge-body")
-    _thick(iso, [(B0 - 1.4, R0 + 0.1, Z1 + 4.0), (B0 - 1.4, R1 - 0.1, Z1 + 4.0)],
-           "badge-red", width=1)
-    # the note is stuck to the side of the basket, on the laptop showing through
-    x, y = iso.pt(10.4, R1, Z0 + 0.5)
+    for (x, y), face in lit.items():
+        px, py = x + 0.5 - iso.ox, y + 0.5 - iso.oy
+        if face == "L":
+            u = px / 2 + R1
+            z = u + R1 - py
+        else:
+            u = B1 - px / 2
+            z = B1 + u - py
+        col = wire(face, u, z)
+        if col:
+            c.point(x, y, col)
+    iso.outline(set(f), "outline")
+    # the handle at the +c end (nose toward the closet), so it stands against open
+    # floor: two posts climbing up and out, a red grip across, clear above the heap
+    HZ = ZT + 7.0
+    for rr in (R0 + 0.4, R1 - 0.4):
+        _thick(iso, [(B1, rr, ZT - 1.0), (B1 + 2.0, rr, HZ)], "wall-trim", width=1)
+    _thick(iso, [(B1 + 2.2, R0 - 0.2, HZ), (B1 + 2.2, R1 + 0.2, HZ)], "badge-red", width=2)
+    # the note hangs low on the basket's near side, over the wire
+    x, y = iso.pt(11.5, R1, ZB + 2.0)
     return {"note": (x, y)}
 
 
@@ -172,28 +221,39 @@ def desk_retail_box() -> Canvas:
 
 # -- G4.2: the fish ---------------------------------------------------------------------
 
-FISH_C, FISH_R = 5.3, 3.0          # where the line hangs: in front of the screen
+# PH1-10 fix round: the finance desk stands a tile off the back wall, so the line hangs
+# in open air. It hangs between the worker's head and the monitor (r 2 .. 6), above the
+# screen's top edge so the envelope is never read as screen content.
+FISH_C, FISH_R = 4.4, 3.4
+WALL_R = -8.0                      # the back wall, relative to the desk's tile (a tile back)
 
 
 def _rod_and_line(iso: Iso, c: Canvas, z_hook: float, x_shift=0):
-    """A rod tip poking down from above the ceiling line, and the line off it."""
-    top_z = 50.0
-    x0, y0 = iso.pt(FISH_C, FISH_R, top_z)
-    for k in range(12):           # rod tip, coming in from the upper left
-        c.point(x0 - 12 + k, y0 - 6 + k // 2, "desk-wood-dark")
-        c.point(x0 - 12 + k, y0 - 7 + k // 2, "outline")
+    """A long rod angled down over the top of the back wall from somewhere beyond it,
+    its tip out over the desk, and the line straight down off the tip."""
+    tip_z = 44.0
+    _thick(iso, [(FISH_C - 5.0, WALL_R - 5.0, 52.0), (FISH_C, FISH_R, tip_z)],
+           "desk-wood-dark", width=1)
+    x0, y0 = iso.pt(FISH_C, FISH_R, tip_z)
     x1, y1 = iso.pt(FISH_C, FISH_R, z_hook)
-    for y in range(y0, y1):
+    for y in range(y0 + 1, y1):
         t = (y - y0) / max(1, y1 - y0)
         c.point(x0 + round(x_shift * t * t), y, "outline")
     return x1 + x_shift, y1
 
 
 def _hook(c: Canvas, x, y):
-    """A J hook, 3 x 4, point up on the left."""
-    for (dx, dy) in ((0, 0), (0, 1), (0, 2), (-1, 3), (-2, 3), (-2, 2)):
-        c.point(x + dx, y + dy, "badge-body")
-    c.point(x - 2, y + 1, "wall-shadow")
+    """A J hook, 5 x 9, hung from (x, y): a ring eye where the line ties on, the shank,
+    the bend and the barbed point turned back up — a clear J against the wall."""
+    for (dx, dy) in ((-1, 0), (0, 0), (1, 0), (-1, 1), (1, 1), (-1, 2), (0, 2), (1, 2)):
+        c.point(x + dx, y + dy, "outline")                        # the eye
+    for dy in range(3, 8):
+        c.point(x, y + dy, "badge-body")                          # the shank
+        c.point(x + 1, y + dy, "outline")
+    for (dx, dy) in ((0, 8), (-1, 8), (-2, 8), (-3, 7), (-3, 6), (-3, 5)):
+        c.point(x + dx, y + dy, "outline")                        # the bend, the point
+    c.point(x - 2, y + 5, "outline")                              # the barb
+    c.point(x - 1, y + 7, "badge-body")
 
 
 def _envelope(c: Canvas, x, y, w=9, h=6):
@@ -207,17 +267,20 @@ def _envelope(c: Canvas, x, y, w=9, h=6):
 
 
 def _fishing_line(iso: Iso, c: Canvas):
-    x, y = _rod_and_line(iso, c, 22.0)
-    _hook(c, x, y)
-    _envelope(c, x - 5, y + 3, w=11, h=7)
-    return {"bait": (x, y + 6)}
+    x, y = _rod_and_line(iso, c, 35.0)
+    # the envelope hangs with the hook's bend through its top edge; the hook is drawn
+    # over the paper so the J reads
+    _hook(c, x, y - 3)
+    _envelope(c, x - 7, y + 6, w=11, h=7)
+    c.point(x - 2, y + 6, "outline")                  # caught on the bend
+    return {"bait": (x - 2, y + 9)}
 
 
 def _fishing_shield(iso: Iso, c: Canvas):
     """Built: the same line comes down and lands on a small shield over the monitor;
     the hook is stopped on its rim, the envelope knocked askew, going nowhere."""
     sx, sy = iso.pt(FISH_C, FISH_R, 25.0)      # shield centre, above the screen
-    x, y = _rod_and_line(iso, c, 34.0)
+    x, y = _rod_and_line(iso, c, 32.0)
     rows = [
         "ooooooooo",
         "obbbbbbbo",
@@ -232,8 +295,8 @@ def _fishing_shield(iso: Iso, c: Canvas):
     ]
     _rows(c, rows, sx - 4, sy - 5, {"o": "outline", "b": "shirt-1", "w": "paper"})
     # the hook stopped on the rim, the envelope swung off to the side
-    _hook(c, x, y)
-    _envelope(c, x + 3, y - 2, w=7, h=5)
+    _hook(c, x, y - 9)
+    _envelope(c, x + 4, y - 5, w=7, h=5)
     for dx, dy in ((-4, 3), (-5, 1), (1, 4), (2, 3)):   # impact ticks on the rim
         c.point(x + dx, y + dy, "sticky")
 
@@ -395,7 +458,7 @@ def build_all() -> dict:
     return {
         # without
         # parked along +r, nose to the wall, right across the closet door
-        "trolley": make(lambda iso, c: _trolley(SwapIso(c, (iso.ox, iso.oy)), c)),
+        "trolley": make(_trolley),
         "note-dave": Sprite(note, (note.w // 2, note.h)),
         "desk-retail-box": _desk_sprite(desk_retail_box()),
         "fishing-line": make(_fishing_line),

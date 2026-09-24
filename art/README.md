@@ -53,10 +53,16 @@ here).
   and the SLA board. No font files.
 - `art/src/sprites/room.py`, `band80.py` (PH1-06) — room structure and band-80 props,
   both states; `band150.py`, `band220.py` (PH1-07) likewise.
-- `art/src/layout.py` (PH1-07) — every band x state room as *data*: a list of
-  placements (manifest key, frame, tile or floor point, depth, layer, gag band). Later
+- `art/src/layout.py` (PH1-07, rooms since PH1-10) — every band x state scene as
+  *data*: per D-036 view (`ground`, `floor-2`, `street`) a room spec in `ROOMS` and a
+  list of placements (manifest key, frame, tile or floor point, depth, layer, gag,
+  `view`). Each view is its own room in its own grid, never a crop of another. Later
   bands contain every earlier band's placements, quieter (R-03a); `scene(band, state)`
-  is the list PH1-08b exports. `art/src/compose.py` renders it from `manifest.json` and
+  returns `{view: placements}`, which `export_scene.py` exports. A view's canvas is
+  fitted to what it draws in both states (`compose.fit`, 2 px margin), so no edge ever
+  cuts a sprite; export fails if a room outgrows 360 x 240.
+- `art/src/sprites/street.py` (PH1-10) — the street exterior: `pavement`, HQ as a
+  building (`hq-3`, `hq-4`: a storey per narrated floor) and `hq-door`. `art/src/compose.py` renders it from `manifest.json` and
   the shipped PNGs alone, the way the site's painter will.
 - `art/build.py` — orchestrates: builds every sprite, writes 1x PNGs to
   `public/sprites/`, writes `manifest.json`, composes the preview images.

@@ -219,3 +219,44 @@ A gag's key object must read at native size, not only in the 4× preview:
 - **Depth by hand.** Long props break the col + row sort; anything outside the glass
   keeps fc + fr > 19 so it draws after the front glass.
 - **Glyphs.** `W` is 5 wide (3-wide read as `H`), as `M`.
+
+## Rooms, not crops (PH1-10)
+
+- **One view, one room** (D-036, D-037 item 8). `ground` is HQ's ground floor (10 x 7);
+  `floor-2` is the room one storey up (8 x 7 at 150, grown to 12 x 7 at 220 for the
+  glass room); `street` is an exterior pavement plate (10 x 8) with HQ, the road and
+  the inset office on it. Each has its own walls, floor and slab (or kerb), and the
+  canvas is fitted to the room with 2 px clear all round.
+- **Ground floor, re-spaced for 44 px** (D-036 rule 7): closet in the back corner, the
+  lobby sofa and the front door on the back-left wall, the developer and the queue down
+  the back-right wall (the built support desk stands where the queue stood), the pit
+  mid-floor, the taped cable across the front with its sign and a step-over, and clear
+  floor outside the closet door for band 150's trolley.
+- **The street.** HQ is a block (`hq-3` at 150, `hq-4` at 220: ground storey 28
+  units, 20 per storey above, flat roof behind a parapet, no sign or name) with its
+  front door (`hq-door`, `open` / `closed`, an awning) on the front-left face; the road
+  runs out of the door toward the viewer and round to the inset office's doorway.
+- **Trolley (G3.2).** Chrome wire — a light grid over a basket full of dark laptops,
+  so it reads as wire, not a box — raised on a chassis (rails, legs, a castor at each
+  corner, daylight under it), two lids open and leaning back, the handle and its red
+  grip at the +c end where only floor is behind it, the note low on the near side.
+- **Cable (G2.2).** One continuous 2 px blue cable, outlined, with short grey tape
+  strips about every 6 px (`TAPE_EVERY`), routed across open floor well inside the
+  slab; the step-over straddles it at the crossing, beside the CAUTION sign.
+- **G2.4.** Conference-size TV (22 x 19 units) in both rooms; faces drawn at screen
+  aspect (a face unit is 2 px wide, 1 px tall), freeze blocks square on screen. Both
+  ends of the stalled call are frozen mid-wave: the conference TV shows the inset's
+  person (red), `tv-frozen-inset` shows HQ's (green). In the inset, nobody stands in
+  front of the screen; `worker-wave` (profile, near arm up, mouth open) stands beside
+  it. Built: `tv-live-inset` under `camera-bar`, and `worker-seated-wave` on a bare
+  `chair` facing it. The adapter is `sticky` yellow.
+- **G4.2.** The finance desk stands a tile off the wall; a long rod angles down over
+  the wall top; the line ends in a J-hook (ring eye, shank, bend, barbed point) with
+  the envelope hanging from its bend above the screen, and `worker-reach`'s arm is a
+  2 px diagonal up to it. Arm hooks in `seated_frame` draw on the desk canvas.
+- **G1.2.** Post-its are outlined paper squares stuck on the monitor's corners and
+  overhanging its edge, never screen pixels; `worker-peel` takes the bottom-left one
+  (`NOTE_PEEL`).
+- **The hat (G7.3a).** A rounded red crown, a white band with PRODUCT in the glyphs,
+  a brim wider than both, set on the crown of the head so the face shows (38 x 36);
+  the wearer stands clear of the board's OWNER: line.
