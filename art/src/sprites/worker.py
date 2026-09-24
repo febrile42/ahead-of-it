@@ -374,6 +374,7 @@ def seated_frame(look_name: str) -> Canvas:
 
 VISITOR_W, VISITOR_H = 16, 24
 VISITOR_ANCHOR = (8, 24)
+VISITOR_NET = (8, 13)  # top edge of the laptop lid, where the screen light spills
 
 
 def visitor_frame(look_name: str = "d") -> Canvas:

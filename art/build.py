@@ -20,7 +20,9 @@ sys.path.insert(0, _REPO_ROOT)
 
 from art.src.dsl import Canvas, save_png, scale_nn
 from art.src import iso
-from art.src.sprites import floor, wall, desk, worker, badge_reader
+from art.src.sprites import floor, wall, desk, worker, badge_reader, room, band80
+from art.src import scene80
+from art.src.vox import Sprite
 
 SPRITES_DIR = os.path.join(_REPO_ROOT, "public", "sprites")
 PREVIEW_DIR = os.path.join(_HERE, "preview")
@@ -70,69 +72,173 @@ def build_badge_reader():
     return entry, {"red": red, "green": green}
 
 
-def build_worker():
-    directions = worker.build_all()
-    frames_manifest = {}
-    rendered = {}
-    for direction, frames in directions.items():
-        rendered[direction] = frames
-        file_list = []
-        for i, frame in enumerate(frames):
-            fname = f"worker-{direction}-{i}.png"
-            save_png(frame, os.path.join(SPRITES_DIR, fname))
-            file_list.append({"file": fname, "duration": WALK_FRAME_MS})
-        frames_manifest[direction] = file_list
-    entry = {
-        "w": worker.W, "h": worker.H, "anchor": list(worker.ANCHOR),
-        "frames": frames_manifest,
-    }
-    return entry, rendered
+WALK_KEYS = ("down", "up", "left", "right")
+
+
+def save_entry(name, frames, w, h, anchor, points=None):
+    """Save every frame of one manifest entry and return the entry. File naming keeps
+    the spike's scheme: `<name>.png` for a single default frame, `<name>-<key>.png` for
+    a single-frame state, `<name>-<key>-<i>.png` for an animation."""
+    fm = {}
+    for key, canvases in frames.items():
+        files = []
+        for i, cv in enumerate(canvases):
+            if key == "default":
+                fname = f"{name}.png"
+            elif len(canvases) == 1:
+                fname = f"{name}-{key}.png"
+            else:
+                fname = f"{name}-{key}-{i}.png"
+            assert (cv.w, cv.h) == (w, h), (name, key, cv.w, cv.h, w, h)
+            save_png(cv, os.path.join(SPRITES_DIR, fname))
+            files.append({"file": fname, "duration": WALK_FRAME_MS if key in WALK_KEYS else 0})
+        fm[key] = files
+    entry = {"w": w, "h": h, "anchor": list(anchor), "frames": fm}
+    if points:
+        entry["points"] = {k: list(v) for k, v in points.items()}
+    return entry
+
+
+class Frames:
+    """Registry record for a multi-frame sprite (workers)."""
+
+    def __init__(self, frames, anchor):
+        self.frames = frames
+        self.anchor = tuple(anchor)
+
+
+def build_worker(manifest, registry):
+    """`worker` keeps its name and its four walk keys (the PH1-04 contract) and gains
+    idle-* and step-* keys; looks b..e are new entries with the same keys."""
+    rendered = None
+    for look in worker.LOOK_NAMES:
+        frames = worker.look_frames(look)
+        name = "worker" if look == "a" else f"worker-{look}"
+        manifest[name] = save_entry(name, frames, worker.W, worker.H, worker.ANCHOR)
+        registry[f"worker-{look}"] = Frames({k: (v if k in WALK_KEYS else v[0]) for k, v in frames.items()},
+                                           worker.ANCHOR)
+        if look == "a":
+            rendered = {k: frames[k] for k in WALK_KEYS}
+    # poses that need a different canvas get their own entries, one frame per look
+    q = {}
+    for look in worker.LOOK_NAMES:
+        q[f"{look}-left"] = [worker.queue_frame(look, "left")]
+        q[f"{look}-right"] = [worker.queue_frame(look, "right")]
+    manifest["worker-queue"] = save_entry("worker-queue", q, worker.QUEUE_W, worker.QUEUE_H,
+                                          worker.QUEUE_ANCHOR)
+    registry["worker-queue"] = Frames({k: v[0] for k, v in q.items()}, worker.QUEUE_ANCHOR)
+    seated = {look: [worker.seated_frame(look)] for look in worker.LOOK_NAMES}
+    manifest["worker-seated"] = save_entry("worker-seated", seated, desk.W, desk.H, desk.ANCHOR)
+    for look, cv in seated.items():
+        registry[f"worker-seated-{look}"] = Sprite(cv[0], desk.ANCHOR)
+    vis = worker.visitor_frame("d")
+    pts = {"net": worker.VISITOR_NET}
+    manifest["visitor"] = save_entry("visitor", {"default": [vis]}, vis.w, vis.h,
+                                     worker.VISITOR_ANCHOR, pts)
+    registry["visitor"] = Sprite(vis, worker.VISITOR_ANCHOR, pts)
+    return rendered
+
+
+def build_desks(manifest, registry):
+    pts = {"net": desk.net_point()}
+    registry["desk"] = Sprite(desk.build(), desk.ANCHOR, pts)
+    manifest["desk"]["points"] = {"net": list(pts["net"])}
+    for kind in ("postit", "padlock", "dev", "dev-built"):
+        cv = desk.build_variant(kind)
+        name = f"desk-{kind}"
+        pts = {"net": desk.net_point(kind)}
+        manifest[name] = save_entry(name, {"default": [cv]}, desk.W, desk.H, desk.ANCHOR, pts)
+        registry[name] = Sprite(cv, desk.ANCHOR, pts)
+
+
+def build_props(manifest, registry):
+    for group in (room.build_all(), band80.build_all()):
+        for name, spr in group.items():
+            manifest[name] = save_entry(name, {"default": [spr.canvas]}, spr.w, spr.h,
+                                        spr.anchor, spr.points)
+            registry[name] = spr
 
 
 def build_manifest():
     manifest, static = build_static_sprites()
     badge_entry, badge_rendered = build_badge_reader()
     manifest["badge-reader"] = badge_entry
-    worker_entry, worker_rendered = build_worker()
-    manifest["worker"] = worker_entry
+    registry = {}
+    worker_rendered = build_worker(manifest, registry)
+    build_desks(manifest, registry)
+    build_props(manifest, registry)
 
     manifest_path = os.path.join(SPRITES_DIR, "manifest.json")
     with open(manifest_path, "w") as f:
         json.dump(manifest, f, indent=2, sort_keys=True)
         f.write("\n")
 
-    return static, badge_rendered, worker_rendered
+    return static, badge_rendered, worker_rendered, registry
 
 
 # ---------------------------------------------------------------------------
 # Previews
 # ---------------------------------------------------------------------------
 
-def build_sheet(static, badge_rendered, worker_rendered):
-    """Every sprite laid out on one sheet — the style-reference sheet, at 1x and 4x."""
-    pad = 4
-    cell_w, cell_h = 40, 56
-    cols = 8
-    items = []
-    items.append(("floor", static["floor"]))
-    items.append(("wall", static["wall"]))
-    items.append(("desk", static["desk"]))
-    items.append(("badge-red", badge_rendered["red"]))
-    items.append(("badge-green", badge_rendered["green"]))
-    for direction in ("down", "up", "left", "right"):
-        for i, frame in enumerate(worker_rendered[direction]):
-            items.append((f"worker-{direction}-{i}", frame))
+def build_sheet(static, badge_rendered, worker_rendered, registry):
+    """Every sprite on one sheet — the style-reference sheet, at 1x and 4x. Shelf-packed
+    in a fixed order (no dict iteration surprises), each sprite bottom-aligned in its row."""
+    items = [static["floor"], static["wall"], static["desk"], badge_rendered["red"],
+             badge_rendered["green"]]
+    for direction in WALK_KEYS:
+        items.extend(worker_rendered[direction])
+    for look in worker.LOOK_NAMES:
+        fr = registry[f"worker-{look}"].frames
+        items.extend([fr["idle-down"], fr["idle-up"], fr["idle-right"], fr["step-right"],
+                      registry["worker-queue"].frames[f"{look}-left"]])
+    for look in worker.LOOK_NAMES:
+        seat = Canvas(desk.W, desk.H)
+        seat.paste(registry["desk"].canvas, 0, 0)
+        seat.paste(registry[f"worker-seated-{look}"].canvas, 0, 0)
+        items.append(seat)
+    items.append(registry["visitor"].canvas)
+    for name in ("desk-postit", "desk-padlock", "desk-dev", "desk-dev-built"):
+        items.append(registry[name].canvas)
+    for group in (room.build_all(), band80.build_all()):
+        for name in group:
+            items.append(registry[name].canvas)
 
-    rows = (len(items) + cols - 1) // cols
-    sheet = Canvas(cols * cell_w, rows * cell_h)
-    for i, (_name, spr) in enumerate(items):
-        col, row = i % cols, i // cols
-        x = col * cell_w + (cell_w - spr.w) // 2
-        y = row * cell_h + (cell_h - spr.h) // 2
-        sheet.paste(spr, x, y)
+    pad, max_w = 6, 520
+    rows, row, x, row_h = [], [], pad, 0
+    for spr in items:
+        if x + spr.w + pad > max_w and row:
+            rows.append((row, row_h))
+            row, x, row_h = [], pad, 0
+        row.append((x, spr))
+        x += spr.w + pad
+        row_h = max(row_h, spr.h)
+    rows.append((row, row_h))
+    total_h = sum(h + pad for _, h in rows) + pad
+    sheet = Canvas(max_w, total_h)
+    y = pad
+    for row, h in rows:
+        for x, spr in row:
+            sheet.paste(spr, x, y + h - spr.h)
+        y += h + pad
 
     save_png(sheet, os.path.join(PREVIEW_DIR, "sheet.png"))
     save_png(scale_nn(sheet, 4), os.path.join(PREVIEW_DIR, "sheet@4x.png"))
+
+
+def build_band80(registry):
+    """The two judged composites: same layout, both states, one shared crop so the two
+    PNGs overlay pixel for pixel."""
+    scenes = {st: scene80.compose(registry, st) for st in ("without", "built")}
+    boxes = [sc.img.getbbox() for sc in scenes.values()]
+    m = 4
+    x0 = max(min(b[0] for b in boxes) - m, 0)
+    y0 = max(min(b[1] for b in boxes) - m, 0)
+    x1 = min(max(b[2] for b in boxes) + m, scene80.SIZE[0])
+    y1 = min(max(b[3] for b in boxes) + m, scene80.SIZE[1])
+    for st, sc in scenes.items():
+        out = Canvas(x1 - x0, y1 - y0)
+        out.img = sc.img.crop((x0, y0, x1, y1))
+        save_png(scale_nn(out, 4), os.path.join(PREVIEW_DIR, f"band80-{st}.png"))
 
 
 def build_room(static, badge_rendered, worker_rendered):
@@ -187,9 +293,10 @@ def build_room(static, badge_rendered, worker_rendered):
 
 
 def main():
-    static, badge_rendered, worker_rendered = build_manifest()
-    build_sheet(static, badge_rendered, worker_rendered)
+    static, badge_rendered, worker_rendered, registry = build_manifest()
+    build_sheet(static, badge_rendered, worker_rendered, registry)
     build_room(static, badge_rendered, worker_rendered)
+    build_band80(registry)
     print("Build complete.")
 
 

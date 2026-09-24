@@ -1,7 +1,8 @@
 """A 3x5 pixel font for in-scene labels (`DEV`, `CAUTION`, `VISITOR`, the SLA board).
 
 Brief PH1-06: text in the pixels is drawn as glyphs, never with a font file. Each glyph
-is 5 rows of 3 characters ('#' = ink); `I`, `1`, `:` and space are narrower. Letters are
+is 5 rows of 3 characters ('#' = ink); `I`, `1`, `:` and space are narrower, `N`
+is 4 wide (a 3-wide N reads as a lowercase n). Letters are
 separated by one blank column. Only what the art needs is defined; `draw` raises on
 anything else so a typo can't silently render as a gap.
 """
@@ -22,14 +23,14 @@ GLYPHS = {
     "K": ["#.#", "#.#", "##.", "#.#", "#.#"],
     "L": ["#..", "#..", "#..", "#..", "###"],
     "M": ["#.#", "###", "###", "#.#", "#.#"],
-    "N": ["##.", "#.#", "#.#", "#.#", "#.#"],
+    "N": ["#..#", "##.#", "#.##", "#..#", "#..#"],
     "O": [".#.", "#.#", "#.#", "#.#", ".#."],
     "P": ["##.", "#.#", "##.", "#..", "#.."],
     "R": ["##.", "#.#", "##.", "#.#", "#.#"],
     "S": [".##", "#..", ".#.", "..#", "##."],
     "T": ["###", ".#.", ".#.", ".#.", ".#."],
-    "U": ["#.#", "#.#", "#.#", "#.#", ".##"],
-    "V": ["#.#", "#.#", "#.#", "#.#", ".#."],
+    "U": ["#.#", "#.#", "#.#", "#.#", "###"],
+    "V": ["#.#", "#.#", "#.#", ".#.", ".#."],
     "W": ["#.#", "#.#", "###", "###", "#.#"],
     "Y": ["#.#", "#.#", ".#.", ".#.", ".#."],
     "0": [".#.", "#.#", "#.#", "#.#", ".#."],

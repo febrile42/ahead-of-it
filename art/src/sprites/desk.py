@@ -20,6 +20,8 @@ Variants (band 80): `desk` (plain), `desk-postit` (G1.2 without: yellow sticky n
 the screen), `desk-padlock` (G1.2 built: tiny padlock on the bezel), `desk-dev` (G2.1
 without: a `DEV` card taped to the monitor, screen showing a half-written pull request),
 `desk-dev-built` (G2.1 built: same developer's desk, card gone, screen full of code).
+`desk-dev` also carries a colleague's broken laptop, open beside the PR — the developer
+is a hero doing two jobs (TONE.md), not a bottleneck.
 """
 from ..dsl import Canvas
 from ..vox import Iso
@@ -31,6 +33,9 @@ ANCHOR = (16, H)
 # world-unit geometry, shared with worker-seated
 DESK = dict(c0=0.5, c1=7.5, r0=0.5, r1=4.0, top=8.0, slab=1.5)
 MON = dict(c0=3.2, c1=7.2, r0=1.2, r1=2.0, z0=DESK["top"] + 1.5, z1=DESK["top"] + 9.5)
+# the developer's desk carries a second machine, so his monitor is narrower and shifted
+# right; both screens then sit clear of his head
+MON_DEV = dict(MON, c0=4.4, c1=7.4)
 CHAIR = dict(c0=0.8, c1=4.2, r0=4.6, r1=7.4, seat=5.0)
 BACKREST = dict(c0=0.8, c1=4.2, r0=7.4, r1=8.1, z0=6.0, z1=11.0)
 SCREEN_PLANE = MON["r1"]
@@ -41,15 +46,24 @@ def build(kind: str = "plain") -> Canvas:
     iso = Iso(c)
     _shadows(iso)
     _desk(iso)
-    faces = _monitor(iso)
-    _screen(iso, faces, kind)
+    mon = MON_DEV if kind.startswith("dev") else MON
+    faces = _monitor(iso, mon)
+    _screen(iso, faces, kind, mon)
     _chair(iso)
     backrest(iso)
     if kind == "dev":
+        _their_laptop(iso)
         _dev_card(c)
     if kind == "padlock":
         _padlock(c, iso)
     return c
+
+
+def net_point(kind: str = "plain") -> tuple[int, int]:
+    """Where a dotted network line meets this desk: the middle of the screen."""
+    m = MON_DEV if kind.startswith("dev") else MON
+    iso = Iso(Canvas(W, H))
+    return iso.left_px(SCREEN_PLANE, (m["c0"] + m["c1"]) / 2, (m["z0"] + m["z1"]) / 2)
 
 
 def build_variant(kind: str) -> Canvas:
@@ -79,22 +93,21 @@ def _desk(iso: Iso):
             top="desk-wood", left="desk-wood-dark", right="desk-wood-dark")
 
 
-def _monitor(iso: Iso) -> dict:
-    m = MON
+def _monitor(iso: Iso, m: dict) -> dict:
+    mid = (m["c0"] + m["c1"]) / 2
     top = DESK["top"] + DESK["slab"]
     # foot plate and neck: the monitor now stands on the desktop, not above it
-    iso.box(4.2, 1.0, top, 6.2, 2.6, top + 0.8,
+    iso.box(mid - 1.0, 1.0, top, mid + 1.0, 2.6, top + 0.8,
             top="monitor-frame", left="monitor-frame", right="monitor-frame")
-    iso.box(4.9, 1.0, top, 5.6, 1.6, m["z0"] + 1,
+    iso.box(mid - 0.3, 1.0, top, mid + 0.4, 1.6, m["z0"] + 1,
             top="monitor-frame", left="monitor-frame", right="monitor-frame")
     return iso.box(m["c0"], m["r0"], m["z0"], m["c1"], m["r1"], m["z1"],
                    top="chair-mid", left="monitor-frame", right="chair-dark")
 
 
-def _screen(iso: Iso, faces: dict, kind: str):
+def _screen(iso: Iso, faces: dict, kind: str, m: dict):
     """Screen content, painted in face coordinates so it skews with the monitor.
     Lines are 1 unit (1 px) tall bands counted down from the top of the glass."""
-    m = MON
     c0, c1 = m["c0"] + 0.5, m["c1"] - 0.5
     top, bot = m["z1"] - 1.0, m["z0"] + 1.0
 
@@ -109,7 +122,10 @@ def _screen(iso: Iso, faces: dict, kind: str):
         if not (c0 <= c < c1 and bot <= z < top):
             return None
         b = band(z)
-        if kind == "postit" and c >= c1 - 1.7 and b <= 3:
+        if kind == "postit" and c >= c1 - 2.2 and b <= 4:
+            # a password, written down: two scribbled lines on the note
+            if b in (1, 3) and c1 - 1.9 <= c < c1 - 0.4:
+                return "outline"
             return "sticky"
         if kind in ("dev", "dev-built"):
             for bb, ind, ln, col in (pr if kind == "dev" else code):
@@ -144,6 +160,25 @@ def backrest(iso: Iso):
             top="chair-dark", left="chair-dark", right="outline")
     iso.box(b["c0"], b["r0"], b["z0"], b["c1"], b["r1"], b["z1"],
             top="chair-mid", left="chair-mid", right="chair-dark")
+
+
+def _their_laptop(iso: Iso):
+    """Someone else's laptop, open on the developer's desk beside his own half-finished
+    pull request: he is doing two jobs, and doing both. Red X where the desktop was."""
+    top = DESK["top"] + DESK["slab"]
+    iso.box(1.6, 2.2, top, 4.0, 3.9, top + 0.6, top="chair-mid", left="chair-dark",
+            right="outline")
+    lid = iso.box(1.6, 1.8, top, 4.0, 2.3, top + 4.8, top="chair-dark",
+                  left="monitor-frame", right="outline")
+
+    def screen(c, z):
+        if 2.0 <= c < 3.6 and top + 1.0 <= z < top + 4.2:
+            u, v = (c - 2.0) / 1.6, (z - top - 1.0) / 3.2
+            if abs(u - v) < 0.22 or abs(u - (1 - v)) < 0.22:
+                return "badge-red"
+            return "monitor-screen"
+        return None
+    iso.paint(lid, "L", 2.3, screen)
 
 
 def _dev_card(c: Canvas):

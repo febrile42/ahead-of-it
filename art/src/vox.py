@@ -128,13 +128,16 @@ class Iso:
                 self.c.point(x, y, col)
 
     def outline(self, pts: set, colour: str, open_sides: str = ""):
-        """Paint every pixel of `pts` that touches the outside (4-neighbour) in `colour`."""
+        """Paint every pixel of `pts` that touches the outside (4-neighbour) in `colour`.
+        open_sides "v" = only vertical exposure counts (tileable wall runs: the top and
+        bottom edges get a line, the vertical ends where segments meet do not)."""
         if not pts:
             return
         xs = [p[0] for p in pts]
         minx, maxx = min(xs), max(xs)
+        dirs = ((0, 1), (0, -1)) if "v" in open_sides else ((1, 0), (-1, 0), (0, 1), (0, -1))
         for (x, y) in pts:
-            for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+            for dx, dy in dirs:
                 if (x + dx, y + dy) in pts:
                     continue
                 if "l" in open_sides and x == minx and dx == -1:
@@ -175,3 +178,44 @@ def dotted(canvas: Canvas, p0, p1, colour: str = "net", on: int = 1, period: int
         if halo:
             canvas.point(x, y + 1, halo)
         canvas.point(x, y, colour)
+
+
+class Sprite:
+    """A rendered prop: canvas, anchor (the reference tile's front vertex, i.e. the
+    point `iso.iso_to_screen(col, row)` returns for the tile it is placed on), and
+    named points (e.g. "net": where a dotted network line attaches)."""
+
+    def __init__(self, canvas: Canvas, anchor, points=None):
+        self.canvas = canvas
+        self.anchor = tuple(anchor)
+        self.points = dict(points or {})
+
+    @property
+    def w(self):
+        return self.canvas.w
+
+    @property
+    def h(self):
+        return self.canvas.h
+
+
+def make(draw, size: int = 192) -> Sprite:
+    """Render `draw(iso, canvas) -> {name: (x, y)} | None` on a scratch canvas whose
+    reference tile has its back vertex at the centre, then crop to the drawn pixels
+    (always keeping the anchor inside the canvas) and translate anchor + points."""
+    c = Canvas(size, size)
+    ox, oy = size // 2, size // 2
+    iso = Iso(c, (ox, oy))
+    points = draw(iso, c) or {}
+    anchor = (ox, oy + 16)
+    bbox = c.img.getbbox() or (ox, oy, ox + 1, oy + 1)
+    x0 = min(bbox[0], anchor[0] - 1)
+    y0 = min(bbox[1], anchor[1] - 1)
+    x1 = max(bbox[2], anchor[0] + 1)
+    y1 = max(bbox[3], anchor[1])
+    out = Canvas(x1 - x0, y1 - y0)
+    out.img = c.img.crop((x0, y0, x1, y1))
+    from PIL import ImageDraw
+    out.draw = ImageDraw.Draw(out.img)
+    return Sprite(out, (anchor[0] - x0, anchor[1] - y0),
+                  {k: (v[0] - x0, v[1] - y0) for k, v in points.items()})
