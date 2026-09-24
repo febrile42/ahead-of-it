@@ -173,15 +173,17 @@ def _band80() -> list:
     for i, (spr, fr) in enumerate(queue):
         P.append(_f(spr, dc + 0.95 + i * 0.62, 1.65, frame=fr, states=W,
                     quiet="drop" if i >= 3 else "keep", gag="G2.1", part="queue"))
-    # G2.2 the taped floor cable, out of the closet, down the back-left side and across
-    # the floor in front of the pit; the sign on it and someone stepping over it. The
-    # cable tiles are plain scenery (a hotspot that wide would sit on G1.2's).
-    P += [_t("cable-floor-r", 2, row, depth=row + 3.0, states=W) for row in range(1, 6)]
-    P += [_t("cable-floor-turn", 2, 6, depth=9.0, states=W)]
-    P += [_t("cable-floor-c", col, 6, depth=col + 7.0, states=W) for col in range(3, 10)]
+    # G2.2 the taped floor cable (PH1-10 fix round: off the slab edge, where it read as
+    # a border): out of the closet door, down the open floor between the lobby and the
+    # trolley's spot, then across the open floor to the first pit desk. Someone straddles
+    # it where the walkway crosses, the CAUTION sign at the crossing. The cable tiles
+    # are plain scenery (a hotspot that long would sit on G1.2's).
+    P += [_t("cable-floor-r", 2, row, depth=row + 3.0, states=W) for row in range(1, 5)]
+    P += [_t("cable-floor-turn", 2, 5, depth=7.5, states=W)]
+    P += [_t("cable-floor-c", col, 5, depth=col + 5.5, states=W) for col in range(3, 6)]
     P += [
-        _t("sign-caution", 3, 6, dx=-10, dy=-2, depth=10.6, states=W, gag="G2.2", part="cable"),
-        _f("worker-c", 4.55, 6.55, frame="step-right", states=W, quiet="drop",
+        _t("sign-caution", 4, 5, dx=-6, dy=-5, depth=9.2, states=W, gag="G2.2", part="cable"),
+        _f("worker-c", 5.4, 5.55, frame="step-right", depth=11.0, states=W, quiet="drop",
            gag="G2.2", part="cable"),
     ]
     # G2.1 built: the support desk where the queue stood, its board, someone being

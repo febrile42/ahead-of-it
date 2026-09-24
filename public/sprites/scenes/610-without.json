@@ -894,6 +894,13 @@
           "depth": 7.0
         },
         {
+          "sprite": "cable-floor-turn",
+          "frame": "default",
+          "x": 69,
+          "y": 117,
+          "depth": 7.5
+        },
+        {
           "sprite": "worker-c",
           "frame": "idle-left",
           "x": 186,
@@ -901,13 +908,6 @@
           "depth": 7.6,
           "gagId": "G2.1",
           "part": "queue"
-        },
-        {
-          "sprite": "cable-floor-r",
-          "frame": "default",
-          "x": 69,
-          "y": 117,
-          "depth": 8.0
         },
         {
           "sprite": "worker-queue",
@@ -919,6 +919,13 @@
           "part": "queue"
         },
         {
+          "sprite": "cable-floor-c",
+          "frame": "default",
+          "x": 85,
+          "y": 125,
+          "depth": 8.5
+        },
+        {
           "sprite": "worker-e",
           "frame": "idle-left",
           "x": 206,
@@ -928,11 +935,20 @@
           "part": "queue"
         },
         {
-          "sprite": "cable-floor-turn",
+          "sprite": "sign-caution",
           "frame": "default",
-          "x": 53,
-          "y": 125,
-          "depth": 9.0
+          "x": 95,
+          "y": 128,
+          "depth": 9.2,
+          "gagId": "G2.2",
+          "part": "cable"
+        },
+        {
+          "sprite": "cable-floor-c",
+          "frame": "default",
+          "x": 101,
+          "y": 133,
+          "depth": 9.5
         },
         {
           "sprite": "desk-postit",
@@ -944,13 +960,6 @@
           "part": "pit"
         },
         {
-          "sprite": "cable-floor-c",
-          "frame": "default",
-          "x": 69,
-          "y": 133,
-          "depth": 10.0
-        },
-        {
           "sprite": "worker-seated",
           "frame": "a",
           "x": 165,
@@ -960,20 +969,11 @@
           "part": "pit"
         },
         {
-          "sprite": "sign-caution",
-          "frame": "default",
-          "x": 59,
-          "y": 131,
-          "depth": 10.6,
-          "gagId": "G2.2",
-          "part": "cable"
-        },
-        {
           "sprite": "cable-floor-c",
           "frame": "default",
-          "x": 85,
+          "x": 117,
           "y": 141,
-          "depth": 11.0
+          "depth": 10.5
         },
         {
           "sprite": "desk-postit",
@@ -994,20 +994,6 @@
           "part": "pit"
         },
         {
-          "sprite": "cable-floor-c",
-          "frame": "default",
-          "x": 101,
-          "y": 149,
-          "depth": 12.0
-        },
-        {
-          "sprite": "cable-floor-c",
-          "frame": "default",
-          "x": 117,
-          "y": 157,
-          "depth": 13.0
-        },
-        {
           "sprite": "desk-postit",
           "frame": "default",
           "x": 165,
@@ -1017,13 +1003,6 @@
           "part": "pit"
         },
         {
-          "sprite": "cable-floor-c",
-          "frame": "default",
-          "x": 133,
-          "y": 165,
-          "depth": 14.0
-        },
-        {
           "sprite": "worker-seated",
           "frame": "d",
           "x": 165,
@@ -1031,20 +1010,6 @@
           "depth": 14.01,
           "gagId": "G1.2",
           "part": "pit"
-        },
-        {
-          "sprite": "cable-floor-c",
-          "frame": "default",
-          "x": 149,
-          "y": 173,
-          "depth": 15.0
-        },
-        {
-          "sprite": "cable-floor-c",
-          "frame": "default",
-          "x": 165,
-          "y": 181,
-          "depth": 16.0
         },
         {
           "sprite": "fx-net-220-without-ground",
@@ -1096,8 +1061,8 @@
         {
           "gagId": "G2.2",
           "part": "cable",
-          "x": 51,
-          "y": 106,
+          "x": 87,
+          "y": 103,
           "w": 17,
           "h": 22,
           "primary": true
@@ -1154,7 +1119,7 @@
           "gagId": "G4.1",
           "part": "main",
           "x": 4,
-          "y": 132,
+          "y": 124,
           "w": 32,
           "h": 32,
           "primary": true,

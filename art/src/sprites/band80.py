@@ -191,29 +191,36 @@ def _cable_spill(iso: Iso, c: Canvas):
 
 # -- G2.2 without: taped floor cable --------------------------------------------------
 
+TAPE_EVERY = 8.0 / 3        # world units between tape strips: ~6 px on screen
+
+
 def _tape_run(iso: Iso, pts, marks):
+    """PH1-10 fix round: one continuous blue cable (2 px, outlined) with short grey
+    strips of tape across it every ~6 px — a cable taped down, not a dashed border."""
     _thick(iso, pts, "shirt-1")
     for (cc, rr, along) in marks:
-        # a strip of silver tape across the cable
         if along == "c":
-            iso.box(cc - 0.5, rr - 1.2, 0, cc + 0.5, rr + 1.2, 0.5, top="wall-shadow",
-                    left="wall-trim", right="wall-trim", outline=None)
+            iso.box(cc - 0.3, rr - 0.9, 0.5, cc + 0.3, rr + 0.9, 0.6, top="wall-shadow",
+                    left="wall-shadow", right="wall-shadow", outline=None)
         else:
-            iso.box(cc - 1.2, rr - 0.5, 0, cc + 1.2, rr + 0.5, 0.5, top="wall-shadow",
-                    left="wall-trim", right="wall-trim", outline=None)
+            iso.box(cc - 0.9, rr - 0.3, 0.5, cc + 0.9, rr + 0.3, 0.6, top="wall-shadow",
+                    left="wall-shadow", right="wall-shadow", outline=None)
+
+
+_MARKS = [TAPE_EVERY * (k + 0.5) for k in range(3)]      # 1.33, 4.0, 6.67
 
 
 def _cable_c(iso, c):
-    _tape_run(iso, [(0, 4), (8, 4)], [(2.0, 4.0, "c"), (6.0, 4.0, "c")])
+    _tape_run(iso, [(0, 4), (8, 4)], [(u, 4.0, "c") for u in _MARKS])
 
 
 def _cable_r(iso, c):
-    _tape_run(iso, [(4, 0), (4, 8)], [(4.0, 2.0, "r"), (4.0, 6.0, "r")])
+    _tape_run(iso, [(4, 0), (4, 8)], [(4.0, u, "r") for u in _MARKS])
 
 
 def _cable_turn(iso, c):
     """Comes in along +r at c=4, leaves along +c at r=4."""
-    _tape_run(iso, [(4, 0), (4, 4), (8, 4)], [(4.0, 2.0, "r"), (6.0, 4.0, "c")])
+    _tape_run(iso, [(4, 0), (4, 4), (8, 4)], [(4.0, _MARKS[0], "r"), (_MARKS[2], 4.0, "c")])
 
 
 def _sign_caution(iso: Iso, c: Canvas):
