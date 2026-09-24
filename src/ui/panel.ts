@@ -57,13 +57,23 @@ function renderBeats(container: HTMLElement, fields: PanelFields, thumbnailState
   // paragraph instead.
   const prevented = document.createElement('section');
   prevented.className = 'panel__beat panel__beat--prevented';
-  // A without-state thumbnail (R-04): the same placeholder treatment the
-  // main scene uses, not a second canvas render — see src/scene/assembler.ts
-  // for why placeholders are the honest choice until PH1-06 lands.
+  // R-04 / PH1-09: a real without-state thumbnail, cropped by the art
+  // exporter from the without scene around the gag's primary hotspot
+  // (SCENE-FORMAT "Files": public/sprites/thumbs/<gagId>.png) — no
+  // longer the PH1-04 coloured placeholder div. `thumbnailState` is
+  // always 'without' in practice (R-04: the panel always shows what was
+  // prevented), kept as a param so a future built-state thumbnail is a
+  // one-line change here.
   const thumb = document.createElement('div');
-  thumb.className = `panel__thumb panel__thumb--${thumbnailState}`;
+  thumb.className = 'panel__thumb';
   thumb.setAttribute('aria-hidden', 'true');
-  thumb.textContent = fields.id;
+  const thumbImg = document.createElement('img');
+  thumbImg.src = `/sprites/thumbs/${fields.id}.png`;
+  thumbImg.alt = '';
+  thumbImg.width = 64;
+  thumbImg.height = 48;
+  thumb.dataset.state = thumbnailState;
+  thumb.append(thumbImg);
   const preventedP = document.createElement('p');
   const preventedLabel = document.createElement('strong');
   preventedLabel.textContent = 'What it prevented:';
