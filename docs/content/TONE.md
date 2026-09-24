@@ -73,3 +73,5 @@ Two registers, kept strictly apart.
 - Nudge (once, after the first slider move): *"Now see what this looks like without him."*
 - Share caption: *"By the time the company was your size, Josh had already fixed this."*
 - OG title: *At Your Scale — Josh Gister's résumé* (name pending Q-15).
+- **OG description / tagline (F-4, D-027):** *Build it, then make sure it doesn't need you.*
+  Also the subtitle under the "What he'd already built" toggle state.

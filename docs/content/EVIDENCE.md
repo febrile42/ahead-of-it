@@ -25,7 +25,7 @@ Round 1 answered 2026-09-16. Remaining asks are in **bold**.
 | E-15 | Engagement survey ranking | — | **withheld** (Josh: keep for the resume) | G7.4 — **cut** (D-011) |
 | E-16 | 750+ employees and contractors, hybrid; $3B+ balance sheet | Resume | resume | band 7 framing |
 | E-17 | ip2geo.org: 8 years, 99.96%+ uptime | Resume | deferred | possible panel footer |
-| E-18 | the previous employer web: 4 → 80, $20M, 1.2M visitors/mo, 35k leads/mo | Resume | resume | not used |
+| E-18 | the previous employer web: 4 → 80, $20M, 1.2M visitors/mo, 35k leads/mo | Resume | resume | G7.3 (one line, F-3) |
 | E-19 | Intune deployed 2019 (Windows + mobile MDM); Jamf and Zebra later | TIMELINE 2019 + tooling | confirmed | G3.2 |
 | E-20 | Annual security training begins 2019 | TIMELINE 2019 | confirmed — **[JOSH: any email-security tooling to name, or keep the fix as "training + reporting"?]** | G4.2 |
 | E-21 | Onboarding time before/after | — | **does not exist — G3.1 ships without a number** | G3.1 |
@@ -35,6 +35,7 @@ Round 1 answered 2026-09-16. Remaining asks are in **bold**.
 | E-25 | Teleconference rooms: 2 in 2018 → expanded through covid → 29 across Boston, Chicago, NYC, DC, Lawrence | TIMELINE | confirmed | G2.4 (G5.5 merged in) |
 | E-26 | Business Librarian internal transfer 2026 — knowledge management | TIMELINE 2026 | confirmed | G7.4 |
 | E-27 | Offices linked by VPN from 2019 (Chicago opening year) | Josh, Q-17 answer | confirmed | G5.1 |
+| E-28 | 2020: when everyone went home, meetings moved without an AV project — rooms and the standard were already in place | Josh, F-6 answer 2026-09-24 | confirmed | G2.4 |
 
 ## Rules
 

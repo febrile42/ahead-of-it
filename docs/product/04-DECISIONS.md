@@ -164,3 +164,11 @@ At band N the built state shows everything built through year N (it is a résum�
 un-happens). The "without" state likewise shows every gag through N, but *this band's* gags
 at full size and earlier ones quieter, so that thin years (220, 490) still read as busy
 buildings and band 750 stays legible. R-03a.
+
+**D-027 · 2026-09-24 · The six panel forks.**
+F-1 keep G5.3 and G5.6 both · F-2 keep G6.1 and G6.2 separate, cross-linked · F-3 the
+first build (E-18) gets one line in G7.3 · F-4 "Build it, then make sure it doesn't need
+you" is the OG description and the built-state toggle subtitle · F-5 G7.1's present-tense
+beat stays · F-6 G2.4 gains a real Worth-it-later: the 2020 move home needed no AV
+project (E-28). Trim order in `BANDS-AND-GAGS.md` stands; F-1 means G5.3/G5.6 are not a
+merge candidate unless art forces it.

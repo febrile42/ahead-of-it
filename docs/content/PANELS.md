@@ -1,4 +1,4 @@
-# Panels — DRAFT v2 (2026-09-16, after adversarial review)
+# Panels — DRAFT v3 (2026-09-24: six forks resolved)
 
 Final copy for every hotspot, in the `TONE.md` voice: **Already** (dated, numbered, first
 person, past tense) → **What it prevented** (second person, honest confidence) → **Worth it
@@ -147,7 +147,9 @@ through 2020, at ~220 people, when everyone went home.
 
 **What it prevented:** by now your meetings start with four people around one laptop
 pointed at a TV, and a colleague in another city frozen mid-sentence on the wall.
-`E-25`
+
+**Worth it later:** when everyone went home in 2020, the meetings just moved. There was
+no AV project. `E-25 E-28`
 
 ---
 
@@ -164,7 +166,8 @@ incubated product in 2020, as Director of Product with two PMs, and handed that 
 of them — five hats on one head, walking carefully.
 
 **Worth it later:** IT itself got leadership layers in 2023, on the same principle: build
-it, then make sure it doesn't need you. `E-14 E-02`
+it, then make sure it doesn't need you. And before any of this, at the campus, a web team
+grown from four to eighty. `E-14 E-02 E-18`
 
 ### G5.4 · Phone costs down 33%, in 2011
 `2011 · 300+ · a $200M company, nine-building campus`
@@ -296,7 +299,8 @@ what the company pays for twice. `E-08`
 ### G6.2 · $500,000+ back, in one year
 `2024 · ~650 → 750 · a $3B+ clean-energy company`
 **Already:** I owned enterprise IT budgeting and vendor strategy. In 2024 that produced
-over $500,000 in savings through renegotiation, renewals and licensing audits.
+over $500,000 in savings through renegotiation, renewals and licensing audits — the
+same year as the portfolio consolidation in the previous panel.
 `[JOSH: fork — on what spend base, across roughly how many vendors, recurring or
 one-time? Any of those makes this the strongest panel on the site.]`
 
@@ -346,35 +350,35 @@ rotation."*
 
 ---
 
-## Forks for Josh
+## Forks — resolved 2026-09-24
 
-True either-way calls. Answer inline.
+Answered via AskUserQuestion; recorded as D-027. Original framing kept for the record.
 
-**F-1 · Merge G5.3 into G5.6?** Both are E-09, same band, same closet, adjacent years.
+**F-1 · Merge G5.3 into G5.6?** → **Keep both.** Both are E-09, same band, same closet, adjacent years.
 G5.6 is the better-written; G5.3's VMware/Commvault is already its Worth-it-later. Merging
 saves one gag's art and loses the two-fans picture. (Trim order currently folds G5.6 into
 G5.1 — the reviewer and I both think G5.3 → G5.6 is the better fold.)
 
-**F-2 · Merge G6.1 into G6.2?** One achievement split across two panels: the portfolio
+**F-2 · Merge G6.1 into G6.2?** → **Keep separate, cross-link** (done, both directions). One achievement split across two panels: the portfolio
 work and the money it produced. Merged, the $500,000+ gets the consolidation as its
 cause and the balloons/avalanche become one scene. Kept separate, band 750 stays at five
 gags.
 
-**F-3 · The first build (E-18) is nowhere on the site.** The web organisation you grew 4 →
+**F-3 · The first build (E-18) is nowhere on the site.** → **(b)**, one line in G7.3 (done). The web organisation you grew 4 →
 80 / $20M / 1.2M visitors a month is the "twice" in `00-VISION.md`'s rare fact, and no
 panel mentions it because the building is about IT. Options: (a) leave it to LinkedIn;
 (b) one line in G7.3's Worth-it-later ("…and before any of this, a web team from four
 to eighty"); (c) a footer/about line, outside the building. I lean (b).
 
-**F-4 · The tagline.** "Build it, then make sure it doesn't need you" (G7.3) is the
+**F-4 · The tagline.** → **Promote** to OG description and toggle copy (done in `TONE.md`). "Build it, then make sure it doesn't need you" (G7.3) is the
 résumé's thesis in nine words and currently lives in one mid-band panel. Promote it to
 the OG description / toggle copy alongside "at your scale"?
 
-**F-5 · G7.1's present tense.** "by now someone is already pasting…" is the most
+**F-5 · G7.1's present tense.** → **Keep as is.** "by now someone is already pasting…" is the most
 aggressive line in the doc. The reviewer flagged it against "honest confidence"; both of
 us think it should stay. Your call on whether it makes a reader defensive.
 
-**F-6 · G2.4's prevention beat.** Currently an inconvenience (the dongle huddle), not a
+**F-6 · G2.4's prevention beat.** → **Yes**: the 2020 move was remote-without-an-AV-project. Now G2.4's Worth-it-later (E-28). Currently an inconvenience (the dongle huddle), not a
 cost. The stronger frame — "the company went fully remote in 2020 without an AV project"
 — needs you to say whether that's true.
 
