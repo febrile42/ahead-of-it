@@ -73,6 +73,41 @@ const VIEW_ID_ORDER = ['ground', 'floor-2', 'floor-3', 'floor-4', 'floor-5', 'fl
 // SCENE-FORMAT's "Two-part gags" list.
 const TWO_PART_GAGS: ReadonlySet<string> = new Set(['G4.1', 'G5.1', 'G3.2', 'G2.4']);
 
+// D-036 rule 4's table (docs/product/04-DECISIONS.md): each gag's *home*
+// view — the one its single primary hotspot must sit in. G3.2 and G2.4
+// are two-part (their non-primary "part" can sit in a different view —
+// G3.2's box on the CEO's desk is `ground`, its trolley-by-the-closet
+// primary is also `ground`; G2.4's screen is `floor-2` alongside its
+// conference-room primary) but the *primary* is always the home view.
+const HOME_VIEW: Record<string, string> = {
+  'G1.1': 'ground',
+  'G1.2': 'ground',
+  'G2.1': 'ground',
+  'G2.2': 'ground',
+  'G2.3': 'ground',
+  'G3.1': 'ground',
+  'G3.2': 'ground',
+  'G4.1': 'ground',
+  'G5.3': 'ground',
+  'G5.4': 'ground',
+  'G6.1': 'ground',
+  'G7.1': 'ground',
+  'G2.4': 'floor-2',
+  'G3.3': 'floor-2',
+  'G4.2': 'floor-2',
+  'G4.3': 'floor-2',
+  'G6.2': 'floor-2',
+  'G7.3': 'floor-2',
+  'G7.3a': 'floor-2',
+  'G7.4': 'floor-2',
+  'G7.2': 'top',
+  'G5.1': 'street',
+  'G5.2': 'street',
+  'G5.6': 'street',
+  'G6.3': 'street',
+  'G6.4': 'street',
+};
+
 const content = contentJson as unknown as {
   gags: Array<{ id: string; band: BandId }>;
 };
@@ -120,6 +155,15 @@ function checkSceneFileShape(scene: SceneFile, label: string, debt: Set<string>)
   const defaults = scene.views.filter((v) => v.default);
   expect(defaults.length, `${label}: exactly one default view`).toBe(1);
 
+  // D-036 rule 4 is "each gag has exactly one primary hotspot, in its
+  // home view" — counted per *file*, across every view, not per view
+  // (fix round: real band >= 150 legitimately has G3.2's primary in
+  // `ground` and its non-primary "box" part in `floor-2` — the earlier
+  // per-view "exactly one" check flagged floor-2 as missing a primary
+  // it was never supposed to have). Collected here across the view loop
+  // below, checked once after it against HOME_VIEW.
+  const primariesByGag = new Map<string, Array<{ viewId: string; hotspot: SceneHotspot }>>();
+
   for (const view of scene.views) {
     const vlabel = `${label} view "${view.id}"`;
     // D-036 rule 3: w <= 360, h <= 240 native px.
@@ -157,8 +201,10 @@ function checkSceneFileShape(scene: SceneFile, label: string, debt: Set<string>)
       // (button placement, scroll-to), still get one below.
     }
 
-    // D-036 rule 4: exactly one primary hotspot per gag (within this view,
-    // a gag may have non-primary parts too — see the two-part check below).
+    // Per-view part of D-036 rule 4: a gag may have AT MOST one primary
+    // in any single view (never two primaries for the same gag in the
+    // same view) — the "exactly one, total" half of the rule is checked
+    // per file, after this loop, via primariesByGag.
     const byGag = new Map<string, SceneHotspot[]>();
     for (const h of view.hotspots) {
       expect(h.x + h.w, `${vlabel}: hotspot "${h.gagId}" x+w in bounds`).toBeLessThanOrEqual(view.size.w);
@@ -166,10 +212,15 @@ function checkSceneFileShape(scene: SceneFile, label: string, debt: Set<string>)
       const list = byGag.get(h.gagId) ?? [];
       list.push(h);
       byGag.set(h.gagId, list);
+      if (h.primary) {
+        const list2 = primariesByGag.get(h.gagId) ?? [];
+        list2.push({ viewId: view.id, hotspot: h });
+        primariesByGag.set(h.gagId, list2);
+      }
     }
     for (const [gagId, parts] of byGag) {
       const primaries = parts.filter((p) => p.primary);
-      expect(primaries.length, `${vlabel}: gag "${gagId}" has exactly one primary hotspot`).toBe(1);
+      expect(primaries.length, `${vlabel}: gag "${gagId}" has at most one primary hotspot in this view`).toBeLessThanOrEqual(1);
     }
 
     // D-036 rule 7: primary hotspot centres >= 44 native px apart, except
@@ -197,6 +248,27 @@ function checkSceneFileShape(scene: SceneFile, label: string, debt: Set<string>)
           dist,
           `${vlabel}: primary hotspots "${a.gagId}" and "${b.gagId}" are >= 44px apart`
         ).toBeGreaterThanOrEqual(44);
+      }
+    }
+  }
+
+  // File-level half of D-036 rule 4: every gag present anywhere in this
+  // file (any view, primary or not) has exactly one primary hotspot
+  // across the whole file, and it sits in that gag's D-036 home view.
+  // (A two-part gag's non-primary part(s) can be in a different view —
+  // that's fine, and not checked here.)
+  const allGagIds = new Set(scene.views.flatMap((v) => v.hotspots.map((h) => h.gagId)));
+  for (const gagId of allGagIds) {
+    const primaries = primariesByGag.get(gagId) ?? [];
+    expect(primaries.length, `${label}: gag "${gagId}" has exactly one primary hotspot across the file`).toBe(1);
+    if (primaries.length === 1) {
+      const homeView = HOME_VIEW[gagId];
+      expect(homeView, `${label}: gag "${gagId}" has a D-036 home view entry (test data gap, not an export bug)`).toBeDefined();
+      if (homeView) {
+        expect(
+          primaries[0].viewId,
+          `${label}: gag "${gagId}"'s primary is in its D-036 home view "${homeView}", found in "${primaries[0].viewId}"`
+        ).toBe(homeView);
       }
     }
   }
@@ -287,6 +359,52 @@ function runContractSuite(dirLabel: string, dir: string, options: { strict: bool
     });
   }
 }
+
+// Cheap regression coverage for the bug this fix round found: a two-part
+// gag's primary living in its D-036 home view while a non-primary part
+// sits in a different view is VALID (real band >= 150's G3.2), but two
+// primaries for the same gag anywhere in the file is not. Synthetic
+// scene files, not the fixture or real data, so both the good and the
+// broken shape can be exercised directly.
+function makeTwoViewScene(hotspotsByView: { ground: SceneHotspot[]; 'floor-2': SceneHotspot[] }): SceneFile {
+  const size = { w: 300, h: 200 };
+  const focus = { x: 0, y: 0, w: 300, h: 200 };
+  return {
+    schema: 1,
+    band: 150,
+    state: 'built',
+    views: [
+      { id: 'ground', label: 'Ground floor', size, focus, default: true, entries: [], hotspots: hotspotsByView.ground },
+      { id: 'floor-2', label: 'Floor 2', size, focus, entries: [], hotspots: hotspotsByView['floor-2'] },
+    ],
+  };
+}
+
+describe('D-036 rule 4 regression: primary count is per file, not per view', () => {
+  it('a two-part gag with its primary in its home view and a non-primary part elsewhere is valid', () => {
+    const scene = makeTwoViewScene({
+      ground: [{ gagId: 'G3.2', part: 'trolley', x: 0, y: 0, w: 10, h: 10, primary: true }],
+      'floor-2': [{ gagId: 'G3.2', part: 'box', x: 0, y: 0, w: 10, h: 10, primary: false }],
+    });
+    expect(() => checkSceneFileShape(scene, 'regression', new Set())).not.toThrow();
+  });
+
+  it('two primaries for the same gag across different views is invalid', () => {
+    const scene = makeTwoViewScene({
+      ground: [{ gagId: 'G3.2', part: 'trolley', x: 0, y: 0, w: 10, h: 10, primary: true }],
+      'floor-2': [{ gagId: 'G3.2', part: 'box', x: 0, y: 0, w: 10, h: 10, primary: true }],
+    });
+    expect(() => checkSceneFileShape(scene, 'regression', new Set())).toThrow();
+  });
+
+  it("a primary outside the gag's D-036 home view is invalid", () => {
+    const scene = makeTwoViewScene({
+      ground: [],
+      'floor-2': [{ gagId: 'G3.2', part: 'trolley', x: 0, y: 0, w: 10, h: 10, primary: true }],
+    });
+    expect(() => checkSceneFileShape(scene, 'regression', new Set())).toThrow();
+  });
+});
 
 describe('scene contract — public/sprites/scenes (the real thing, once PH1-08b lands)', () => {
   runContractSuite('public/sprites/scenes', new URL('../../public/sprites/scenes', import.meta.url).pathname, {
