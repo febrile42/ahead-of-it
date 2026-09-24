@@ -159,6 +159,42 @@ class Iso:
                 self.c.point(x, y, colour)
 
 
+class SwapIso(Iso):
+    """An Iso with the c and r axes exchanged (PH1-07): the same world-unit drawing code
+    renders the prop turned 90 degrees, e.g. a desk whose screen faces +c (down-right)
+    instead of +r. Colours stay screen-side (`left` is still the lit, screen-left face),
+    so the light still comes from the top-left; a face painted as "L" lands on the
+    +c face ("R") and vice versa. Content painted on a turned face runs right-to-left,
+    so only put symmetric things there (a grid, a glow), never text."""
+
+    _FACE = {"L": "R", "R": "L", "T": "T"}
+
+    def pt(self, c, r, z=0):
+        return super().pt(r, c, z)
+
+    def left_px(self, r, c, z):
+        return super().right_px(r, c, z)
+
+    def right_px(self, c, r, z):
+        return super().left_px(c, r, z)
+
+    def box_faces(self, c0, r0, z0, c1, r1, z1):
+        # Iso.box goes through here, so boxes turn with no further override
+        return super().box_faces(r0, c0, z0, r1, c1, z1)
+
+    def paint(self, faces, face, plane, fn):
+        if face == "T":
+            return super().paint(faces, "T", plane, lambda a, b: fn(b, a))
+        return super().paint(faces, self._FACE[face], plane, fn)
+
+    def floor_shadow(self, c0, r0, c1, r1, grow=1.5, grow_r=0.5, colour="shadow"):
+        # the light does not turn with the prop: shadow still falls toward world +c
+        faces = Iso.box_faces(self, r0, c0, 0, r1 + grow, c1 + grow_r, 0.001)
+        for (x, y), f in faces.items():
+            if f == "T":
+                self.c.point(x, y, colour)
+
+
 def dotted(canvas: Canvas, p0, p1, colour: str = "net", on: int = 1, period: int = 3,
            phase: int = 0, halo: str | None = None):
     """The 'on the network' convention (style.md): a 1 px dotted line, `on` pixels lit
@@ -185,10 +221,13 @@ class Sprite:
     point `iso.iso_to_screen(col, row)` returns for the tile it is placed on), and
     named points (e.g. "net": where a dotted network line attaches)."""
 
-    def __init__(self, canvas: Canvas, anchor, points=None):
+    def __init__(self, canvas: Canvas, anchor, points=None, anims=None):
         self.canvas = canvas
         self.anchor = tuple(anchor)
         self.points = dict(points or {})
+        # optional animations: {key: ([Canvas, ...], ms_per_frame)}, every frame the
+        # same size as `canvas` and sharing its anchor (PH1-07: router blink etc.)
+        self.anims = dict(anims or {})
 
     @property
     def w(self):
@@ -219,3 +258,35 @@ def make(draw, size: int = 192) -> Sprite:
     out.draw = ImageDraw.Draw(out.img)
     return Sprite(out, (anchor[0] - x0, anchor[1] - y0),
                   {k: (v[0] - x0, v[1] - y0) for k, v in points.items()})
+
+
+def make_anim(draw, n: int, size: int = 192, key: str = "blink", ms: int = 400,
+              default: int = 0) -> Sprite:
+    """Like `make`, for an animated prop: `draw(iso, canvas, frame)` is called once per
+    frame; every frame is cropped to the *union* of the drawn pixels so all frames share
+    one canvas size and one anchor. The returned Sprite's `canvas` is frame `default`
+    (the still, for renderers that don't animate) and `anims[key]` holds all n frames."""
+    from PIL import ImageDraw
+    scratch, pts = [], None
+    ox, oy = size // 2, size // 2
+    for i in range(n):
+        c = Canvas(size, size)
+        p = draw(Iso(c, (ox, oy)), c, i) or {}
+        if i == default:
+            pts = p
+        scratch.append(c)
+    anchor = (ox, oy + 16)
+    boxes = [c.img.getbbox() for c in scratch if c.img.getbbox()]
+    x0 = min([b[0] for b in boxes] + [anchor[0] - 1])
+    y0 = min([b[1] for b in boxes] + [anchor[1] - 1])
+    x1 = max([b[2] for b in boxes] + [anchor[0] + 1])
+    y1 = max([b[3] for b in boxes] + [anchor[1]])
+    frames = []
+    for c in scratch:
+        out = Canvas(x1 - x0, y1 - y0)
+        out.img = c.img.crop((x0, y0, x1, y1))
+        out.draw = ImageDraw.Draw(out.img)
+        frames.append(out)
+    return Sprite(frames[default], (anchor[0] - x0, anchor[1] - y0),
+                  {k: (v[0] - x0, v[1] - y0) for k, v in pts.items()},
+                  {key: (frames, ms)})

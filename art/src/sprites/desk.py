@@ -24,7 +24,7 @@ without: a `DEV` card taped to the monitor, screen showing a half-written pull r
 is a hero doing two jobs (TONE.md), not a bottleneck.
 """
 from ..dsl import Canvas
-from ..vox import Iso
+from ..vox import Iso, SwapIso
 from .. import glyphs
 
 W, H = 32, 40
@@ -41,14 +41,17 @@ BACKREST = dict(c0=0.8, c1=4.2, r0=7.4, r1=8.1, z0=6.0, z1=11.0)
 SCREEN_PLANE = MON["r1"]
 
 
-def build(kind: str = "plain") -> Canvas:
+def build(kind: str = "plain", turned: bool = False, screen=None) -> Canvas:
+    """`turned` (PH1-07): the same desk rotated a quarter turn, screen facing +c
+    (down-right), chair on the tile's right; built with `vox.SwapIso`. `screen`
+    optionally overrides the screen painter: fn(c, z, band, c0, c1) -> colour | None."""
     c = Canvas(W, H)
-    iso = Iso(c)
+    iso = SwapIso(c) if turned else Iso(c)
     _shadows(iso)
     _desk(iso)
     mon = MON_DEV if kind.startswith("dev") else MON
     faces = _monitor(iso, mon)
-    _screen(iso, faces, kind, mon)
+    _screen(iso, faces, kind, mon, screen)
     _chair(iso)
     backrest(iso)
     if kind == "dev":
@@ -59,11 +62,19 @@ def build(kind: str = "plain") -> Canvas:
     return c
 
 
-def net_point(kind: str = "plain") -> tuple[int, int]:
+def net_point(kind: str = "plain", turned: bool = False) -> tuple[int, int]:
     """Where a dotted network line meets this desk: the middle of the screen."""
     m = MON_DEV if kind.startswith("dev") else MON
-    iso = Iso(Canvas(W, H))
+    iso = (SwapIso if turned else Iso)(Canvas(W, H))
     return iso.left_px(SCREEN_PLANE, (m["c0"] + m["c1"]) / 2, (m["z0"] + m["z1"]) / 2)
+
+
+def card_point(turned: bool = False) -> tuple[int, int]:
+    """The middle of the monitor's top edge: where a billboarded card (`DEV`,
+    `CUSTOMERS`, `REPORT`) is taped. PH1-07."""
+    m = MON
+    iso = (SwapIso if turned else Iso)(Canvas(W, H))
+    return iso.left_px(SCREEN_PLANE, (m["c0"] + m["c1"]) / 2, m["z1"] + 1)
 
 
 def build_variant(kind: str) -> Canvas:
@@ -105,7 +116,7 @@ def _monitor(iso: Iso, m: dict) -> dict:
                    top="chair-mid", left="monitor-frame", right="chair-dark")
 
 
-def _screen(iso: Iso, faces: dict, kind: str, m: dict):
+def _screen(iso: Iso, faces: dict, kind: str, m: dict, custom=None):
     """Screen content, painted in face coordinates so it skews with the monitor.
     Lines are 1 unit (1 px) tall bands counted down from the top of the glass."""
     c0, c1 = m["c0"] + 0.5, m["c1"] - 0.5
@@ -122,6 +133,8 @@ def _screen(iso: Iso, faces: dict, kind: str, m: dict):
         if not (c0 <= c < c1 and bot <= z < top):
             return None
         b = band(z)
+        if custom is not None:
+            return custom(c, z, b, c0, c1)
         if kind == "postit" and c >= c1 - 2.2 and b <= 4:
             # a password, written down: two scribbled lines on the note
             if b in (1, 3) and c1 - 1.9 <= c < c1 - 0.4:

@@ -27,7 +27,7 @@ Built
 from __future__ import annotations
 
 from ..dsl import Canvas
-from ..vox import Iso, make
+from ..vox import Iso, make, make_anim
 from .. import glyphs
 
 
@@ -69,7 +69,11 @@ def _rows(c: Canvas, rows, x, y, mapping):
 
 # -- G1.1 without: the supply closet ---------------------------------------------
 
-def _closet_shelf(iso: Iso, c: Canvas):
+def _closet_shelf(iso: Iso, c: Canvas, frame: int = 0):
+    """Supply shelving with the office's only router on the top shelf, beside the paper
+    towels. PH1-07: the router is the gag, so it is now the darkest, largest thing on
+    the shelf (20 px wide, antennas up), every cable in the closet converges on its
+    ports, and frame 1 of the `blink` animation flickers its LEDs."""
     c0, c1, r0, r1 = 1.0, 13.0, 0.3, 3.8
     iso.floor_shadow(c0, r0, c1, r1, grow=1.0)
     # uprights (back one first)
@@ -92,24 +96,45 @@ def _closet_shelf(iso: Iso, c: Canvas):
     for cc, rr, zz in ((2.4, 1.2, 12), (4.0, 1.2, 12), (3.2, 1.0, 16)):
         iso.box(cc, rr, zz, cc + 1.4, rr + 1.4, zz + 4, top="paper", left="paper",
                 right="wall-shadow")
-    # top shelf, eye level: paper towels ... and the router, right beside them
-    for cc in (2.0, 3.8):
-        f = iso.box(cc, 1.0, 22, cc + 1.6, 2.8, 29, top="paper", left="paper",
+    # top shelf: paper towels, three rolls
+    for cc in (2.0, 3.6, 5.2):
+        f = iso.box(cc, 1.2, 22, cc + 1.4, 2.6, 28, top="paper", left="paper",
                     right="wall-shadow")
-        iso.paint(f, "T", 29, lambda a, b, cc=cc: "wall-trim" if abs(a - cc - 0.8) < 0.35 and abs(b - 1.9) < 0.35 else None)
-    rf = iso.box(6.4, 0.9, 22, 11.6, 3.4, 25.5, top="wall-shadow", left="badge-body",
-                 right="chair-mid")
-    # LEDs, blinking away
-    iso.paint(rf, "L", 3.4, lambda cc, z: "badge-green" if 23.5 <= z < 24.5 and int(cc * 2) % 2 == 0 and 7.4 < cc < 11 else None)
-    # antennas, splayed, poking up past the top board
-    for cc, lean in ((7.0, -1), (9.0, 0), (11.0, 1)):
-        x, y = iso.pt(cc, 1.4, 25.5)
-        for k in range(9):
-            c.point(x + (lean * k) // 4, y - k, "outline")
-    # cables drooping off the router, down past the shelves
-    _thick(iso, [(8.0, 3.5, 22.5), (8.4, 4.0, 15.0), (8.0, 4.1, 8.0)], "shirt-1", width=1)
-    _thick(iso, [(9.5, 3.5, 22.5), (10.1, 4.0, 13.0), (10.6, 4.1, 4.0)], "sticky", width=1)
-    return {"net": iso.pt(9.0, 2.0, 26)}
+        iso.paint(f, "T", 28, lambda a, b, cc=cc: "wall-trim" if abs(a - cc - 0.7) < 0.3 and abs(b - 1.9) < 0.3 else None)
+    # ... and on top of the unit, silhouetted against the wall: the router
+    R0, R1, RR0, RR1, Z0, Z1 = 2.6, 11.4, 0.7, 3.6, 31.0, 36.0
+    rf = iso.box(R0, RR0, Z0, R1, RR1, Z1, top="chair-mid", left="monitor-frame",
+                 right="outline", edge="chair-dark")
+    lit = {0: ("badge-green", "badge-green", "sticky", "badge-green", "badge-green"),
+           1: ("chair-dark", "badge-green", "badge-green", "chair-dark", "badge-red")}[frame]
+
+    def leds(cc, z):
+        if Z0 + 2.0 <= z < Z0 + 3.0:
+            k = int((cc - R0 - 1.0) / 1.5)
+            if 0 <= k < 5 and (cc - R0 - 1.0) % 1.5 < 1.0:
+                return lit[k]
+        return None
+    iso.paint(rf, "L", RR1, leds)
+    # four antennas, splayed, standing up against the wall
+    for cc, lean in ((3.4, -3), (6.0, -1), (8.2, 1), (10.6, 3)):
+        x, y = iso.pt(cc, 1.6, Z1)
+        for k in range(10):
+            c.point(x + (lean * k) // 9, y - k, "outline")
+    # every cable in the closet converges on the router's front ports: one up the wall
+    # to the ceiling, three down across the shelves to the floor and toward the door
+    port = (7.0, RR1 + 0.2, Z0 + 0.6)
+    runs = [
+        ("sticky", [(13.6, 0.2, 40.0), (12.6, 0.4, 36.5), (10.0, 4.0, 33.0), port]),
+        ("shirt-1", [(15.5, 5.2, 0.3), (12.8, 5.0, 0.3), (9.8, 4.4, 14.0), port]),
+        ("badge-green", [(7.2, 6.6, 0.3), (6.8, 4.5, 16.0), port]),
+        ("badge-red", [(2.4, 5.8, 0.3), (4.2, 4.4, 18.0), port]),
+    ]
+    for col, pts in runs:
+        _thick(iso, pts, col, width=1)
+    px, py = iso.pt(*port)
+    for dx in (-1, 0, 1):
+        c.point(px + dx, py, "chair-mid")
+    return {"net": iso.pt(7.0, 2.0, Z1 + 1)}
 
 
 def _box_fan(iso: Iso, c: Canvas):
@@ -133,9 +158,9 @@ def _box_fan(iso: Iso, c: Canvas):
     # wind: three streaks heading -r (screen up-right), toward the router
     for i, (cc, z) in enumerate(((1.6, 13.0), (3.4, 14.5), (5.2, 12.5))):
         x, y = iso.pt(cc, 3.0, z)
-        for k in range(4 + (i == 1)):
-            c.point(x + k * 2, y - k, "glass-highlight")
-            c.point(x + k * 2 + 1, y - k, "glass-highlight")
+        for k in range(4 + (i == 1)):   # rising: aimed up at the router on the shelf top
+            c.point(x + k * 2, y - 2 * k, "glass-highlight")
+            c.point(x + k * 2 + 1, y - 2 * k - 1, "glass-highlight")
 
 
 def _mop_bucket(iso: Iso, c: Canvas):
@@ -398,7 +423,7 @@ def build_all() -> dict:
     w = wifi()
     return {
         # without
-        "closet-shelf": make(_closet_shelf),
+        "closet-shelf": make_anim(_closet_shelf, 2, ms=350),
         "box-fan": make(_box_fan),
         "mop-bucket": make(_mop_bucket),
         "cable-spill": make(_cable_spill),

@@ -148,3 +148,74 @@ still not authored: it is `right` mirrored horizontally (`Canvas.mirror_h`).
 The worker is built from outlined *blobs* (`art/src/sprites/worker.py`), with colours
 as roles (`t` shirt, `s` skin, `h` hair …) resolved per look, which is how outfits and
 hair/skin variants are palette swaps rather than redraws.
+
+## Animated props and preview-only sprites (PH1-07)
+
+A prop can carry an animation next to its still: the manifest entry keeps `default` (the
+still, for anything that doesn't animate) and gains a named key whose frames all share
+the still's canvas size and anchor, each with a `duration` in ms (`vox.make_anim`).
+`closet-shelf` has `blink` (the router's LEDs, 2 × 350 ms). An entry marked
+`"preview_only": true` (`tag-visitor`) exists for the 4× previews and is not drawn by the
+site renderer.
+
+## Legibility at 1× (PH1-07)
+
+A gag's key object must read at native size, not only in the 4× preview:
+
+- **The router** sits on *top* of the closet shelving, the darkest and widest thing there
+  (22 px), four antennas silhouetted against the wall, every cable in the closet
+  converging on its port row.
+- **The visitor** wears a dark jacket nobody on staff wears and an oversized name-tag
+  sticker: red band, `VIS` in the 3 × 5 glyphs on white, 11 × 7 px. The `VISITOR` callout
+  above the sofa is preview-only.
+- **`worker-peel`** (G1.2): a standing worker at a colleague's desk, arm stretched to the
+  monitor (frame 0), then holding the note up to read it (frame 1, which also paints the
+  clean screen back over the note). Same 32 × 40 canvas and anchor as the desk; paste over
+  `desk-postit`.
+
+## Band 150 (PH1-07)
+
+- **Turned props.** `vox.SwapIso` draws the same world-unit code with c and r exchanged,
+  so a desk can face +c (`desk-turned`, `desk-turned-sheet`, `worker-seated-turned`).
+  Colours stay screen-side and shadows still fall toward +c: the light does not turn.
+  Nothing readable is painted on a turned face (it would run right-to-left).
+- **Cards on monitors.** Desks carry a `card` point (middle of the monitor's top edge).
+  `card-customers` hangs from it; `card-report` is a button centred on the `net` point
+  (mid-screen). Cards are billboarded 3 × 5 glyph text, like `DEV`.
+- **Glyphs.** `M` is now 5 wide (3-wide read as `H`); added `(`, `)`, `Q`, `X` and `>`
+  (drawn as an arrow, for `CRM>ERP>HRIS`). `?` has a flat top.
+- **The street.** `road-r`, `road-c`, `road-turn` tile like the band-80 floor cable:
+  asphalt with a white dashed centre line (the "dotted line" the truck drives on).
+  `link-r/-c/-turn` lay the built state's solid `net` link along the same centre line and
+  `blink` a packet (2 × 300 ms). A dashed road is not the network; a solid magenta line is.
+- **Doorways.** `partition-c-door-open` (HQ's front door, front-left edge) and
+  `partition-r-doorway` (the inset office's, front-right edge) keep the cut walls but stand
+  a full-height frame, so the opening reads as a door. People in a doorway are depth-sorted
+  by hand: the one inside below the frame, the one outside above it.
+- **Poses.** `worker-reach` (seated, arm up at the bait), `worker-printouts` (26 × 24,
+  a sheet in each hand, looking left then right), `worker-give` (24 × 24, profile, padded
+  envelope out; `<look>-left/-right`), `courier` (same canvas; brown uniform and cap),
+  `worker-watch` (forearm across the chest, eyes down, then up). All in `poses.py`.
+
+## Band 220 (PH1-07)
+
+- **The plate grows, nothing moves** (R-03a). `layout.py` holds every room as data; band
+  220 is band 150's plate extended to 16 columns. Earlier bands' items keep their tiles
+  and drop to their minimum legible form (`quiet`); the current band's gags are full.
+- **Glass is cut away** like any wall that would hide a room: aluminium sill, panes to
+  11 units with a frosted band and one glint, a `glass-highlight` cut top. Only thin
+  things stand full height: the room's front corner posts (`glass-c-corner`,
+  `glass-c-end`) and the door frame (`glass-r-door`). Full-height glass with glints
+  made the people inside unreadable.
+- **The conference room** (12..15, 0..2): without, four workers from behind
+  (`worker-huddle`, one `-dongle` with an adapter held up) at the table's two ends so
+  the single laptop and its cable up to the frozen, pixelated face (`tv-frozen`, spinner
+  `blink`) stay visible; built, four seated, `camera-bar` over `tv-live` (`talk`).
+- **G7.3a** stands on open floor in front of the new bay, clear of the glass and of
+  G4.3: `whiteboard-requests` (FEATURE / REQUESTS / OWNER:?) with `sales` (shirt, red
+  tie) and `engineer` (grey hoodie, headphones) pointing at each other across it;
+  built, `whiteboard-owned` and `worker-hat` (`<look>-left`: marker hand on screen left;
+  the body mirrors, the hat text is drawn after so it never does).
+- **Depth by hand.** Long props break the col + row sort; anything outside the glass
+  keeps fc + fr > 19 so it draws after the front glass.
+- **Glyphs.** `W` is 5 wide (3-wide read as `H`), as `M`.

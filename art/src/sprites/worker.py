@@ -20,7 +20,7 @@ top-left), drawn first so the feet sit on it. A lifted foot shows daylight above
 from __future__ import annotations
 
 from ..dsl import Canvas
-from ..vox import Iso
+from ..vox import Iso, SwapIso
 from . import desk as desk_mod
 
 W, H = 16, 24
@@ -34,6 +34,7 @@ FIXED = {
     "o": "outline", "e": "outline", "k": "outline", "w": "shadow",
     "L": "monitor-frame", "l": "chair-mid", "G": "monitor-screen", "X": "badge-red",
     "V": "paper", "Y": "sticky", "g": "wall-shadow", "n": "net",
+    "b": "desk-wood",
 }
 
 LOOKS = {
@@ -349,7 +350,7 @@ def queue_frame(look_name: str, facing: str = "left") -> Canvas:
 
 # -- seated at a desk -----------------------------------------------------------
 
-def seated_frame(look_name: str) -> Canvas:
+def seated_frame(look_name: str, turned: bool = False, arm=None) -> Canvas:
     """A worker in the desk group's chair, seen from behind, hands on the desk.
     Same 32x40 canvas and anchor as `desk`: paste it at the same point, over any desk
     variant. The chair's backrest is redrawn over the worker's lower back."""
@@ -362,11 +363,15 @@ def seated_frame(look_name: str) -> Canvas:
     body.blob(R(2, 9, 3, 13), "t")
     body.blob(R(12, 9, 13, 13), "T")
     _head_back(body, look["style"], 0)
-    # place hips on the seat: chair centre (c 2.5, r 6) -> screen x 9; seat top y ~28
-    body.shift(9 - 8, 28 - 15 - 3)
+    # place hips on the seat: chair centre (c 2.5, r 6) -> screen x 9; seat top y ~28.
+    # A turned desk (PH1-07) has its chair at (c 6, r 2.5): x 23, same height; the back
+    # view is symmetric, so the same body just moves across.
+    body.shift(9 - 8 + (14 if turned else 0), 28 - 15 - 3)
+    if arm is not None:
+        arm(body)  # a pose hook: add a raised arm etc. in the shifted body's pixels
     f.px.update({k: v for k, v in body.px.items() if 0 <= k[0] < f.w and 0 <= k[1] < f.h})
     c = f.to_canvas(look)
-    desk_mod.backrest(Iso(c))
+    desk_mod.backrest(SwapIso(c) if turned else Iso(c))
     return c
 
 
@@ -374,33 +379,55 @@ def seated_frame(look_name: str) -> Canvas:
 
 VISITOR_W, VISITOR_H = 16, 24
 VISITOR_ANCHOR = (8, 24)
-VISITOR_NET = (8, 13)  # top edge of the laptop lid, where the screen light spills
+VISITOR_NET = (13, 16)  # top-right corner of the laptop lid, clear of the sticker
 
 
-def visitor_frame(look_name: str = "d") -> Canvas:
-    """Seated, facing the viewer, laptop open on the lap (we see the lid, its screen
-    glowing onto the visitor), a white-and-red VISITOR sticker on the chest.
+# The visitor dresses differently from the staff (a dark jacket), so the sticker's white
+# and red read against it. Not in LOOKS: nobody else wears it.
+VISITOR_LOOK = dict(t="pants-1", T="chair-dark", p="pants-1", s="skin-1", h="desk-wood",
+                    style="long")
+
+
+def visitor_sticker(f: Fig, x0: int, y0: int):
+    """A name-tag sticker that reads at 1x (PH1-07): red band on top, `VIS` in the 3x5
+    glyphs on white. 11 x 7 px — deliberately oversized for the chest, the way a comic
+    draws the one thing it needs you to read."""
+    from ..glyphs import GLYPHS
+    for x in range(x0, x0 + 11):
+        f.put(x, y0, "X")
+        for y in range(y0 + 1, y0 + 7):
+            f.put(x, y, "V")
+    gx = x0 + 1
+    for ch in "VIS":
+        rows = GLYPHS[ch]
+        for dy, row in enumerate(rows):
+            for dx, px in enumerate(row):
+                if px == "#":
+                    f.put(gx + dx, y0 + 1 + dy, "k")
+        gx += len(rows[0]) + 1
+
+
+def visitor_frame(look_name: str | None = None) -> Canvas:
+    """Seated on the sofa, facing the viewer, laptop open on the lap (we see the lid,
+    its screen glowing onto the visitor) and a `VIS` name-tag sticker on the chest.
     Anchor = the front edge of the sofa seat under the visitor's feet."""
-    look = LOOKS[look_name]
+    look = LOOKS[look_name] if look_name else VISITOR_LOOK
     f = Fig(VISITOR_W, VISITOR_H)
     # lower legs + shoes, hanging from the seat edge
     for x0 in (4, 9):
-        f.blob(R(x0, 18, x0 + 2, 22), lambda p: "k" if p[1] == 22 else "p")
-    # thighs, foreshortened toward the viewer
-    f.blob(R(4, 15, 11, 17), "p")
+        f.blob(R(x0, 19, x0 + 2, 22), lambda p: "k" if p[1] == 22 else "p")
     _torso_front(f, 0)
-    # sticker: a white label with a red band, left chest
-    for x in range(5, 9):
-        f.put(x, 10, "X")
-        f.put(x, 11, "V")
-        f.put(x, 12, "V")
+    _arm_front(f, "left", 6, 0, hand=False)
+    _arm_front(f, "right", 6, 0, hand=False)
     _head_front(f, look["style"], 0)
-    # the laptop lid, back toward us, screen light spilling round its top edge
-    f.blob(R(4, 14, 11, 17), "l")
-    for x in range(5, 11):
-        f.put(x, 13, "G")
-    f.put(8, 15, "V")  # the lid logo
+    visitor_sticker(f, 3, 9)
+    # the laptop lid on the lap, back toward us, screen light spilling round its top
+    f.blob(R(3, 17, 12, 19), "l")
+    for x in range(4, 12):
+        f.put(x, 16, "G")
+    f.put(7, 18, "V")  # the lid logo
+    f.put(8, 18, "V")
     # hands on the keys either side of the lid
-    f.blob(R(2, 15, 2, 16), "s")
-    f.blob(R(13, 15, 13, 16), "s")
+    f.blob(R(1, 16, 1, 17), "s")
+    f.blob(R(14, 16, 14, 17), "s")
     return f.to_canvas(look)
