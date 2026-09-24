@@ -1,26 +1,30 @@
-"""Room compositions as data (PH1-07): every band x state scene is a list of placements
-that `compose.py` renders from the manifest and the shipped PNGs. PH1-08 can dump
-`scene(band, state)` to JSON as it stands.
+"""Room compositions as data (PH1-07, re-cut into rooms by PH1-10): every band x state
+scene is a set of **views** (D-036), each a whole room drawn on its own canvas, each a
+list of placements that `compose.py` renders from the manifest and the shipped PNGs.
 
-**Cumulative (R-03a, D-026).** The building grows; nothing in it moves. Band 150's plate
-is band 80's 9 x 7 extended to 12 columns, band 220's to 16; every band-80 placement
-keeps its tile in every later band. `scene(B, state)` is every placement whose `band`
-<= B and whose `states` include `state`.
+**Views are rooms, not crops (PH1-10, D-037 item 8).** `ground` is HQ's ground-floor
+room, `floor-2` the room one storey up, `street` the exterior: HQ's front door, the road
+and the inset office on one pavement plate. Each has its own walls (or kerb), floor and
+slab, and its canvas is fitted to what is drawn in it (`view_frame`), so no view edge
+ever cuts a person or a desk. A placement says which view it lives in (`view`, default
+`ground`); each gag's primary part lives in its D-036 home view.
+
+**Cumulative (R-03a, D-026).** The building grows; nothing in it moves. A view's room
+may grow in a later band (floor-2 gains a glass conference room at 220), but every
+placement keeps its tile in every later band. `scene(B, state)` is every placement whose
+`band` <= B and whose `states` include `state`, grouped by view.
 
 **Quieter.** An earlier band's items stay on screen at their *minimum legible form*: a
 placement's `quiet` says what happens to it when the band being shown is later than its
 own — "drop" (secondary actors and crowd members beyond the few that tell the joke;
 preview-only callouts) or a dict of overrides. The current band's items are full-size.
-Concretely: the DEV queue shrinks from six to three (the laptop overhead stays); the
-note-peeler, the cable-stepper, the VISITOR callout, the person at the support desk and
-the walker on the cleared floor drop; at 220, band 150's doorstep handover drops (the
-van on the road and the worker checking a watch still tell G5.1).
 
 Billboard labels (notes, cards) go in the "over" layer, after the network lines, so
 text always reads (style.md "On the network").
 
 Coordinates: `tile` = [col, row] (anchor on the tile's front vertex), `floor` =
-[fc, fr] continuous floor (tile (i, j) spans i..i+1). See compose.py for the rest.
+[fc, fr] continuous floor (tile (i, j) spans i..i+1), both in the view's own grid. See
+compose.py for the rest.
 """
 from __future__ import annotations
 
@@ -28,18 +32,43 @@ BOTH = ("without", "built")
 W = ("without",)
 B = ("built",)
 
+# D-036 rule 1's canonical order.
+VIEW_ORDER = ["ground", "floor-2", "floor-3", "floor-4", "floor-5", "floor-6", "top", "street"]
+
 # -- rooms ------------------------------------------------------------------------------
+# Per view, the room as it stands from a band on: [(from_band, spec)]. `kind` "room" is an
+# interior (back walls, floor, slab); "street" is the exterior pavement plate (kerb and
+# slab, no walls — the buildings on it are placements).
 
 ROOMS = {
-    80: dict(cols=9, rows=7, size=(300, 214), origin=(134, 84),
-             back_l={3: "wall-back-l-window", 5: "wall-back-l-door"}, back_r_windows=(3, 5, 7)),
-    150: dict(cols=12, rows=7, size=(520, 340), origin=(260, 80),
-              back_l={3: "wall-back-l-window", 5: "wall-back-l-door"},
-              back_r_windows=(3, 5, 7, 10)),
-    220: dict(cols=16, rows=7, size=(600, 360), origin=(260, 80),
-              back_l={3: "wall-back-l-window", 5: "wall-back-l-door"},
-              back_r_windows=(3, 5, 7, 10, 15)),
+    "ground": [
+        (80, dict(kind="room", cols=9, rows=7, closet=True, tray=True,
+                  back_l={3: "wall-back-l-window", 5: "wall-back-l-door"},
+                  back_r_windows=(3, 5, 7))),
+    ],
+    "floor-2": [
+        (150, dict(kind="room", cols=8, rows=7,
+                   back_l={2: "wall-back-l-window", 4: "wall-back-l-window"},
+                   back_r_windows=(3, 7))),
+        (220, dict(kind="room", cols=12, rows=7,
+                   back_l={2: "wall-back-l-window", 4: "wall-back-l-window"},
+                   back_r_windows=(3, 7))),
+    ],
+    "street": [
+        (150, dict(kind="street", cols=10, rows=8)),
+    ],
 }
+
+MARGIN = 2          # px of clear canvas around everything drawn in a view
+
+
+def room(view: str, band: int) -> dict | None:
+    """The room `view` is at `band`, or None if it doesn't exist yet."""
+    best = None
+    for b, spec in ROOMS.get(view, []):
+        if b <= band:
+            best = spec
+    return best
 
 
 def _t(sprite, col, row, **kw):
@@ -50,19 +79,26 @@ def _f(sprite, fc, fr, **kw):
     return dict(sprite=sprite, floor=[fc, fr], **kw)
 
 
-def structure(band: int, state: str) -> list:
-    """The shell: slab edges, floor, back walls (and the band-80 cable tray, built)."""
-    r = ROOMS[band]
+def structure(view: str, band: int, state: str) -> list:
+    """The shell of one view: slab edges, floor, back walls (interiors); or the pavement
+    plate and its slab (the street)."""
+    r = room(view, band)
     cols, rows = r["cols"], r["rows"]
     out = []
     for col in range(cols):
         out.append(_t("slab-l", col, rows - 1, layer="base"))
     for row in range(rows):
         out.append(_t("slab-r", cols - 1, row, layer="base"))
+    if r["kind"] == "street":
+        for row in range(rows):
+            for col in range(cols):
+                out.append(_t("pavement", col, row, layer="base"))
+        return out
     for row in range(rows):
         for col in range(cols):
-            name = "floor-closet" if col <= 1 and row <= 1 else "floor-office"
-            out.append(_t(name, col, row, layer="base"))
+            closet = r.get("closet") and col <= 1 and row <= 1
+            out.append(_t("floor-closet" if closet else "floor-office", col, row,
+                          layer="base"))
     out.append(_t("wall-corner", 0, 0, layer="base"))
     for row in range(rows):
         name = "wall-back-l-end" if row == rows - 1 else r["back_l"].get(row, "wall-back-l")
@@ -72,7 +108,7 @@ def structure(band: int, state: str) -> list:
         if col == cols - 1:
             name = "wall-back-r-end"
         out.append(_t(name, col, 0, layer="base"))
-    if state == "built":
+    if state == "built" and r.get("tray"):
         for col in range(cols):
             out.append(_t("cable-tray", col, 0, layer="base"))
     return out
@@ -171,23 +207,23 @@ def _band80() -> list:
                   layer="over", quiet="drop", gag="G2.3", part="lobby"))
     for p in P:
         p.setdefault("band", 80)
+        p.setdefault("view", "ground")
     return P
 
 
-# -- band 150: the plate grows to 12 columns; the inset office down the road -----------
+# -- band 150: floor 2 (finance, the CRMs, the CEO's desk); the street ------------------
 
-GROUND = 5          # px: the street is a slab's thickness below the floor
-INSET = dict(c0=-2, c1=0, r0=9, r1=11)
-FRONT_DOOR = 2      # HQ's front door: the front-left edge of tile (2, 6)
+# The street plate (10 x 8): HQ stands along the back, c 3..10, r 0..3, its front door on
+# the front-left face at c 5..6; the road runs out of the door toward the viewer, turns,
+# and reaches the inset office (c 0..3, r 5..8) at its front-right doorway.
+HQ = dict(c0=3, c1=10, r0=0, r1=3)
+HQ_DOOR = 5          # the door is on the front-left face of tile (HQ_DOOR, r1 - 1)
+INSET = dict(c0=0, c1=2, r0=5, r1=7)
 
 
-def _inset() -> list:
+def _inset(band: int) -> list:
     i = INSET
     P = []
-    for col in range(i["c0"], i["c1"] + 1):
-        P.append(_t("slab-l", col, i["r1"], layer="base"))
-    for row in range(i["r0"], i["r1"] + 1):
-        P.append(_t("slab-r", i["c1"], row, layer="base"))
     for row in range(i["r0"], i["r1"] + 1):
         for col in range(i["c0"], i["c1"] + 1):
             P.append(_t("floor-office", col, row, layer="base"))
@@ -204,12 +240,13 @@ def _inset() -> list:
         P.append(_t(name, col, i["r1"], depth=col + i["r1"] + 1.95))
     for row in range(i["r0"], i["r1"] + 1):
         name = "partition-r-end" if row == i["r1"] else (
-            "partition-r-doorway" if row == 10 else "partition-r")
+            "partition-r-doorway" if row == i["r0"] + 1 else "partition-r")
         P.append(_t(name, i["c1"], row, depth=i["c1"] + row + 1.95))
-    P.append(_t("desk", -1, 9))
-    P.append(_t("worker-seated", -1, 9, frame="b", depth=9.01, states=B))
+    P.append(_t("desk", i["c0"], i["r0"] + 1))
+    P.append(_t("worker-seated", i["c0"], i["r0"] + 1, frame="b",
+                depth=i["c0"] + i["r0"] + 2.01, states=B))
     # without: on the step outside the door, at the kerb, checking the time
-    P.append(_f("worker-watch", i["c1"] + 1.25, 10.3, frame="b", dy=GROUND, depth=11.2,
+    P.append(_f("worker-watch", i["c1"] + 1.25, i["r0"] + 1.3, frame="b", depth=i["r0"] + 5.2,
                 states=W, gag="G5.1", part="inset-door", primary=False))
     return P
 
@@ -217,82 +254,102 @@ def _inset() -> list:
 def _band150() -> list:
     P = []
     # G3.2: the trolley parked across the closet door / the shelf against the wall
-    # beside the developer; the shop box on the CEO's desk (far corner)
+    # beside the developer (ground); the shop box on the CEO's desk (floor 2)
     P += [
         _t("trolley", 2, 0, states=W, id="trolley", depth=3.5, gag="G3.2", part="trolley"),
         dict(sprite="note-dave", attach={"id": "trolley", "point": "note"}, states=W,
              layer="over", gag="G3.2", part="trolley"),
         _t("laptop-shelf", 4, 0, states=B),
-        _t("desk-retail-box", 11, 0, states=W, gag="G3.2", part="box", primary=False),
-        _t("desk", 11, 0, states=B),
+    ]
+    F2 = "floor-2"
+    P += [
+        _t("desk-retail-box", 1, 0, states=W, view=F2, gag="G3.2", part="box",
+           primary=False),
+        _t("desk", 1, 0, states=B, view=F2),
     ]
     # G4.2: the finance desk
     P += [
-        _t("desk", 9, 0, id="finance", gag="G4.2", part="desk"),
-        _t("fishing-line", 9, 0, depth=10.005, states=W, gag="G4.2", part="desk"),
-        _t("worker-reach", 9, 0, frame="a", depth=10.01, states=W, gag="G4.2", part="desk"),
-        _t("fishing-shield", 9, 0, depth=10.005, states=B, gag="G4.2", part="desk"),
-        _t("worker-seated", 9, 0, frame="a", depth=10.01, states=B, gag="G4.2", part="desk"),
+        _t("desk", 5, 0, id="finance", view=F2, gag="G4.2", part="desk"),
+        _t("fishing-line", 5, 0, depth=6.005, states=W, view=F2, gag="G4.2", part="desk"),
+        _t("worker-reach", 5, 0, frame="a", depth=6.01, states=W, view=F2, gag="G4.2",
+           part="desk"),
+        _t("fishing-shield", 5, 0, depth=6.005, states=B, view=F2, gag="G4.2", part="desk"),
+        _t("worker-seated", 5, 0, frame="a", depth=6.01, states=B, view=F2, gag="G4.2",
+           part="desk"),
         dict(sprite="card-report", attach={"id": "finance", "point": "net"}, states=B,
-             layer="over", gag="G4.2", part="desk"),
+             layer="over", view=F2, gag="G4.2", part="desk"),
     ]
     # G4.3: two desks back to back, screens +r and +c, someone where their backs meet
+    cc, cr = 5, 4
     P += [
-        _t("desk-sheet", 11, 4, states=W, id="crm-a", gag="G4.3", part="desks"),
-        _t("desk", 11, 4, states=B, gag="G4.3", part="desks"),
-        _t("worker-seated", 11, 4, frame="e", depth=16.01, gag="G4.3", part="desks"),
-        _t("desk-turned-sheet", 10, 5, states=W, id="crm-b", gag="G4.3", part="desks"),
-        _t("desk-turned", 10, 5, states=B, gag="G4.3", part="desks"),
-        _t("worker-seated-turned", 10, 5, frame="a", depth=16.01, states=W,
-           gag="G4.3", part="desks"),
-        _t("worker-seated-turned", 10, 5, frame="c", depth=16.01, states=B,
-           gag="G4.3", part="desks"),
+        _t("desk-sheet", cc, cr, states=W, id="crm-a", view=F2, gag="G4.3", part="desks"),
+        _t("desk", cc, cr, states=B, view=F2, gag="G4.3", part="desks"),
+        _t("worker-seated", cc, cr, frame="e", depth=cc + cr + 1.01, view=F2, gag="G4.3",
+           part="desks"),
+        _t("desk-turned-sheet", cc - 1, cr + 1, states=W, id="crm-b", view=F2, gag="G4.3",
+           part="desks"),
+        _t("desk-turned", cc - 1, cr + 1, states=B, view=F2, gag="G4.3", part="desks"),
+        _t("worker-seated-turned", cc - 1, cr + 1, frame="a", depth=cc + cr + 1.01,
+           states=W, view=F2, gag="G4.3", part="desks"),
+        _t("worker-seated-turned", cc - 1, cr + 1, frame="c", depth=cc + cr + 1.01,
+           states=B, view=F2, gag="G4.3", part="desks"),
         dict(sprite="card-customers", attach={"id": "crm-a", "point": "card"},
-             states=W, layer="over", gag="G4.3", part="desks"),
+             states=W, layer="over", view=F2, gag="G4.3", part="desks"),
         dict(sprite="card-customers", attach={"id": "crm-b", "point": "card"},
-             states=W, layer="over", gag="G4.3", part="desks"),
-        _f("worker-printouts", 11.62, 5.62, frame="c", states=W, gag="G4.3", part="desks"),
-        _f("sign-pipeline", 11.62, 5.62, states=B, gag="G4.3", part="desks"),
+             states=W, layer="over", view=F2, gag="G4.3", part="desks"),
+        _f("worker-printouts", cc + 0.62, cr + 1.62, frame="c", states=W, view=F2,
+           gag="G4.3", part="desks"),
+        _f("sign-pipeline", cc + 0.62, cr + 1.62, states=B, view=F2, gag="G4.3",
+           part="desks"),
     ]
-    # G5.1: the front door, the handover, the road, the van / the link
-    d = FRONT_DOOR
+    # the rest of the floor: two desks, people at them
+    for (col, row), look in (((2, 3), "c"), ((2, 5), "b")):
+        P.append(_t("desk", col, row, view=F2))
+        P.append(_t("worker-seated", col, row, frame=look, depth=col + row + 1.01, view=F2))
+    # G5.1 (street): HQ, its front door, the handover, the road, the van / the link
+    S = "street"
+    d, dr = HQ_DOOR, HQ["r1"]
     P += [
-        _t("partition-c", d - 1, 6, depth=d - 1 + 6 + 1.95),
-        _t("partition-c-door-open", d, 6, depth=d + 7.6, gag="G5.1", part="handover"),
-        _t("partition-c-end", d + 1, 6, depth=d + 1 + 6 + 1.95),
-        # HQ inside (depth under the door frame), the courier outside (over it)
-        _f("worker-give", d + 0.95, 6.55, frame="e-left", depth=d + 7.5, states=W,
-           quiet="drop", gag="G5.1", part="handover"),
-        _f("courier", d + 0.45, 7.3, frame="right", depth=d + 7.8, states=W, quiet="drop",
+        _t("hq-3", HQ["c1"] - 1, HQ["r1"] - 1, depth=1.0, view=S),
+        _t("hq-door", d, dr - 1, frame="open", depth=1.1, states=W, view=S,
            gag="G5.1", part="handover"),
+        _t("hq-door", d, dr - 1, frame="closed", depth=1.1, states=B, view=S,
+           gag="G5.1", part="handover"),
+        # HQ in the doorway, the courier outside on the step
+        _f("worker-give", d + 0.95, dr - 0.1, frame="e-left", depth=dr + d + 0.5, states=W,
+           quiet="drop", view=S, gag="G5.1", part="handover"),
+        _f("courier", d + 0.45, dr + 0.65, frame="right", depth=dr + d + 0.8, states=W,
+           quiet="drop", view=S, gag="G5.1", part="handover"),
     ]
-    road = [(d, 7, "road-r"), (d, 8, "road-r"), (d, 9, "road-r"), (d, 10, "road-turn"),
-            (d - 1, 10, "road-c")]
+    road = [(d, dr, "road-r"), (d, dr + 1, "road-r"), (d, dr + 2, "road-r"),
+            (d, dr + 3, "road-turn"), (d - 1, dr + 3, "road-c"), (d - 2, dr + 3, "road-c")]
     link = {"road-r": "link-r", "road-turn": "link-turn", "road-c": "link-c"}
-    P += [_t(n, c, r, dy=GROUND, layer="base") for (c, r, n) in road]
-    P += [_t(link[n], c, r, dy=GROUND, layer="base", states=B) for (c, r, n) in road]
-    P.append(_t("truck", d, 8, dy=4 + GROUND, depth=d + 9.5, states=W,
+    P += [_t(n, c, r, layer="base", view=S) for (c, r, n) in road]
+    P += [_t(link[n], c, r, layer="base", states=B, view=S) for (c, r, n) in road]
+    P.append(_t("truck", d, dr + 1, dy=4, depth=d + dr + 2.5, states=W, view=S,
                 gag="G5.1", part="truck", primary=False))
-    P += _inset()
+    P += [dict(p, view=S) for p in _inset(150)]
     for p in P:
         p.setdefault("band", 150)
+        p.setdefault("view", "ground")
     return P
 
 
-# -- band 220: the plate grows to 16 columns; a glass conference room in the corner ----
+# -- band 220: floor 2 grows four columns; a glass conference room in the corner --------
 
-GLASS = dict(c0=12, c1=15, r0=0, r1=2)
-WB = (14.3, 5.2)      # the whiteboard's feet
+GLASS = dict(c0=8, c1=11, r0=0, r1=2)
+WB = (10.3, 5.2)      # the whiteboard's feet
 
 
 def _band220() -> list:
     g = GLASS
+    F2 = "floor-2"
     P = []
     # G2.4: the room, the TV, the table
     P += [
-        _t("tv-frozen", 13, 0, depth=0.5, states=W, gag="G2.4", part="room"),
-        _t("tv-live", 13, 0, depth=0.5, states=B, gag="G2.4", part="room"),
-        _t("camera-bar", 13, 0, depth=0.6, states=B, gag="G2.4", part="room"),
+        _t("tv-frozen", g["c0"] + 1, 0, depth=0.5, states=W, gag="G2.4", part="room"),
+        _t("tv-live", g["c0"] + 1, 0, depth=0.5, states=B, gag="G2.4", part="room"),
+        _t("camera-bar", g["c0"] + 1, 0, depth=0.6, states=B, gag="G2.4", part="room"),
         _t("conf-table", g["c0"], 1, states=B, gag="G2.4", part="room"),
         _t("conf-huddle", g["c0"], 1, states=W, gag="G2.4", part="room"),
     ]
@@ -300,8 +357,9 @@ def _band220() -> list:
         P.append(_t("worker-seated", col, 1, frame=look, depth=col + 2.01, states=B,
                     gag="G2.4", part="room"))
     # two at each end of the table, the gap left open so the one laptop shows
-    for (fc, fr), fr_key in (((12.85, 2.3), "a"), ((13.4, 2.45), "c-dongle"),
-                             ((14.75, 2.4), "e"), ((15.3, 2.25), "d")):
+    c0 = g["c0"]
+    for (fc, fr), fr_key in (((c0 + 0.85, 2.3), "a"), ((c0 + 1.4, 2.45), "c-dongle"),
+                             ((c0 + 2.75, 2.4), "e"), ((c0 + 3.3, 2.25), "d")):
         P.append(_f("worker-huddle", fc, fr, frame=fr_key, states=W, gag="G2.4", part="room"))
     for row in range(g["r0"], g["r1"] + 1):
         P.append(_t("glass-r-door" if row == 1 else "glass-r", g["c0"] - 1, row,
@@ -321,26 +379,38 @@ def _band220() -> list:
         _f("worker-hat", WB[0] + 1.6, WB[1] - 0.5, frame="e-left", states=B,
            gag="G7.3a", part="board"),
     ]
-    # more of the floor: two desks in the new bay
-    for (col, row), look in (((9, 2), "a"), ((8, 6), "b")):
-        P.append(_t("desk", col, row))
-        P.append(_t("worker-seated", col, row, frame=look, depth=col + row + 1.01))
+    # more of the floor: a desk in the new bay
+    P.append(_t("desk", 7, 4))
+    P.append(_t("worker-seated", 7, 4, frame="a", depth=12.01))
     for p in P:
         p.setdefault("band", 220)
+        p.setdefault("view", F2)
+    # the street: HQ is a storey taller
+    P.append(_t("hq-4", HQ["c1"] - 1, HQ["r1"] - 1, depth=1.0, view="street", band=220))
     return P
 
 
 PLACEMENTS = {80: _band80(), 150: _band150(), 220: _band220()}
 
+# A later band's building replaces an earlier one's (HQ gains a storey): the earlier
+# sprite is superseded rather than drawn twice.
+SUPERSEDES = {"hq-4": "hq-3"}
 
-def scene(band: int, state: str) -> list:
-    """Every placement on screen at `band` in `state`, quieter rules applied, shell
-    first. This list is the scene (PH1-08 exports it)."""
-    out = structure(band, state)
-    for b, items in sorted(PLACEMENTS.items()):
+
+def views(band: int) -> list:
+    """The views that exist at `band`, in D-036 order."""
+    return [v for v in VIEW_ORDER if room(v, band) is not None]
+
+
+def scene(band: int, state: str) -> dict:
+    """{view: placements} on screen at `band` in `state`, quieter rules applied, shell
+    first. These lists are the scene (export_scene.py exports them)."""
+    out = {v: structure(v, band, state) for v in views(band)}
+    items = []
+    for b, group in sorted(PLACEMENTS.items()):
         if b > band:
             continue
-        for p in items:
+        for p in group:
             if state not in p.get("states", BOTH):
                 continue
             if b < band:
@@ -349,5 +419,14 @@ def scene(band: int, state: str) -> list:
                     continue
                 if isinstance(q, dict):
                     p = dict(p, **q)
-            out.append(p)
+            items.append(p)
+    gone = {SUPERSEDES[p["sprite"]] for p in items if p.get("sprite") in SUPERSEDES}
+    for p in items:
+        if p.get("sprite") in gone:
+            continue
+        v = p.get("view", "ground")
+        if v not in out:
+            raise ValueError(f"placement {p.get('sprite')} is in view {v!r}, which does "
+                             f"not exist at band {band}")
+        out[v].append(p)
     return out

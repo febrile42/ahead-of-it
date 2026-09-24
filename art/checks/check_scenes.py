@@ -25,9 +25,9 @@ Checks:
   8. beyond alias       — index.json's `beyond` points at band 750.
   9. pixel parity       — for every drawn band x state x view, painting the exported
                          `entries` in array order (exactly the contract's painter:
-                         anchor-adjusted, clipped to the canvas) reproduces the same
-                         rect cropped out of `compose.render`'s native-scale render of
-                         the whole plate, byte-for-byte in RGBA. Catches wrong entry
+                         anchor-adjusted, clipped to the canvas) reproduces that view's
+                         own room as `compose.render` draws it from the layout data,
+                         byte-for-byte in RGBA (PH1-10: views are rooms, not crops). Catches wrong entry
                          order, missing entries, wrong offsets — the actual "web ==
                          art" guarantee D-035 promises, not just a shared code path.
 
@@ -72,10 +72,10 @@ def load_json(path):
 def check_pixel_parity():
     """D-035's real guarantee: for every drawn band x state x view, painting the
     exported `entries` in array order — exactly the contract's painter (anchor-adjusted,
-    clipped to the view canvas) — reproduces the same rect cropped out of
-    `compose.render`'s native-scale render of the whole plate, byte-for-byte in RGBA.
-    Independent of the exporter's own internals: it re-derives the reference render
-    itself rather than trusting anything export_scene.py precomputed."""
+    clipped to the view canvas) — reproduces the view's own room as `compose.render`
+    draws it straight from `layout` (PH1-10: each view is a room, not a crop of a plate),
+    byte-for-byte in RGBA, and at the same size. Independent of the exported JSON: the
+    reference is re-derived from the layout data, not read back from the export."""
     lib = compose.Library(SPRITES_DIR)
     for band in export_scene.DRAWN_BANDS:
         for state in export_scene.STATES:
@@ -83,17 +83,17 @@ def check_pixel_parity():
             doc = load_json(path)
             for v in doc["views"]:
                 w, h = v["size"]["w"], v["size"]["h"]
-                rect = export_scene.VIEW_CROPS[band]
-                crop_rect = next((r for (vid, r) in rect if vid == v["id"]), None)
-                if crop_rect is None:
-                    crop_rect = (0, 0, w, h)
                 painted = export_scene.paint_entries(lib, v["entries"], w, h)
-                reference = export_scene.reference_crop(lib, band, state, crop_rect)
+                reference = export_scene.render_view(lib, band, state, v["id"])
+                if reference.size != (w, h):
+                    fail(f"{band}-{state}.json:{v['id']} — view is {w}x{h} but its room "
+                         f"renders at {reference.size[0]}x{reference.size[1]}")
+                    continue
                 if painted.tobytes() != reference.tobytes():
                     diffs = sum(1 for a, b in zip(painted.getdata(), reference.getdata())
                                 if a != b)
                     fail(f"{band}-{state}.json:{v['id']} — pixel parity: painted view "
-                         f"!= native-scale crop of compose.render ({diffs} pixels differ "
+                         f"!= compose.render of its room ({diffs} pixels differ "
                          f"of {w * h})")
 
 

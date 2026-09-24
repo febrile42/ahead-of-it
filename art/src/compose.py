@@ -126,3 +126,37 @@ def render(lib: Library, resolved: list, size) -> Canvas:
             paste(q)
     c.draw = ImageDraw.Draw(c.img)
     return c
+
+
+def bounds(lib: Library, resolved: list):
+    """Union of the opaque pixels of every sprite in `resolved` (lines excluded: they
+    run between sprites' points, so they are inside it). (x0, y0, x1, y1) or None."""
+    box = None
+    for q in resolved:
+        if "line" in q:
+            continue
+        img = lib.image(q["sprite"], q["frame"], q["index"])
+        bb = img.getchannel("A").getbbox()
+        if not bb:
+            continue
+        ax, ay = lib.anchor(q["sprite"])
+        x0, y0 = q["x"] - ax + bb[0], q["y"] - ay + bb[1]
+        x1, y1 = q["x"] - ax + bb[2], q["y"] - ay + bb[3]
+        box = (x0, y0, x1, y1) if box is None else (
+            min(box[0], x0), min(box[1], y0), max(box[2], x1), max(box[3], y1))
+    return box
+
+
+def fit(lib: Library, placement_lists: list, margin: int):
+    """(origin, size) of the smallest canvas that holds everything drawn in any of
+    `placement_lists` (e.g. one view's two states, so both share a canvas and overlay
+    pixel for pixel), with `margin` clear pixels all round. Nothing is ever cut."""
+    box = None
+    for placements in placement_lists:
+        b = bounds(lib, resolve(lib, placements, (0, 0)))
+        if b is None:
+            continue
+        box = b if box is None else (min(box[0], b[0]), min(box[1], b[1]),
+                                     max(box[2], b[2]), max(box[3], b[3]))
+    x0, y0, x1, y1 = box
+    return (margin - x0, margin - y0), (x1 - x0 + 2 * margin, y1 - y0 + 2 * margin)

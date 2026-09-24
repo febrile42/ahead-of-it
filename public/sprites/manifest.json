@@ -607,7 +607,7 @@
     "h": 16,
     "w": 32
   },
-  "fx-net-150-built-140-10-355-240": {
+  "fx-net-150-built-ground": {
     "anchor": [
       0,
       0
@@ -616,14 +616,14 @@
       "default": [
         {
           "duration": 0,
-          "file": "fx-net-150-built-140-10-355-240.png"
+          "file": "fx-net-150-built-ground.png"
         }
       ]
     },
-    "h": 230,
-    "w": 215
+    "h": 180,
+    "w": 266
   },
-  "fx-net-150-without-140-10-355-240": {
+  "fx-net-150-without-ground": {
     "anchor": [
       0,
       0
@@ -632,14 +632,14 @@
       "default": [
         {
           "duration": 0,
-          "file": "fx-net-150-without-140-10-355-240.png"
+          "file": "fx-net-150-without-ground.png"
         }
       ]
     },
-    "h": 230,
-    "w": 215
+    "h": 180,
+    "w": 266
   },
-  "fx-net-150-without-300-60-465-300": {
+  "fx-net-220-built-ground": {
     "anchor": [
       0,
       0
@@ -648,14 +648,14 @@
       "default": [
         {
           "duration": 0,
-          "file": "fx-net-150-without-300-60-465-300.png"
+          "file": "fx-net-220-built-ground.png"
         }
       ]
     },
-    "h": 240,
-    "w": 165
+    "h": 180,
+    "w": 266
   },
-  "fx-net-220-built-140-10-470-220": {
+  "fx-net-220-without-ground": {
     "anchor": [
       0,
       0
@@ -664,14 +664,14 @@
       "default": [
         {
           "duration": 0,
-          "file": "fx-net-220-built-140-10-470-220.png"
+          "file": "fx-net-220-without-ground.png"
         }
       ]
     },
-    "h": 210,
-    "w": 330
+    "h": 180,
+    "w": 266
   },
-  "fx-net-220-without-140-10-470-220": {
+  "fx-net-80-built-ground": {
     "anchor": [
       0,
       0
@@ -680,14 +680,14 @@
       "default": [
         {
           "duration": 0,
-          "file": "fx-net-220-without-140-10-470-220.png"
+          "file": "fx-net-80-built-ground.png"
         }
       ]
     },
-    "h": 210,
-    "w": 330
+    "h": 180,
+    "w": 266
   },
-  "fx-net-220-without-300-60-525-260": {
+  "fx-net-80-without-ground": {
     "anchor": [
       0,
       0
@@ -696,44 +696,12 @@
       "default": [
         {
           "duration": 0,
-          "file": "fx-net-220-without-300-60-525-260.png"
+          "file": "fx-net-80-without-ground.png"
         }
       ]
     },
-    "h": 200,
-    "w": 225
-  },
-  "fx-net-80-built-0-0-300-214": {
-    "anchor": [
-      0,
-      0
-    ],
-    "frames": {
-      "default": [
-        {
-          "duration": 0,
-          "file": "fx-net-80-built-0-0-300-214.png"
-        }
-      ]
-    },
-    "h": 214,
-    "w": 300
-  },
-  "fx-net-80-without-0-0-300-214": {
-    "anchor": [
-      0,
-      0
-    ],
-    "frames": {
-      "default": [
-        {
-          "duration": 0,
-          "file": "fx-net-80-without-0-0-300-214.png"
-        }
-      ]
-    },
-    "h": 214,
-    "w": 300
+    "h": 180,
+    "w": 266
   },
   "glass-c": {
     "anchor": [
@@ -814,6 +782,66 @@
     },
     "h": 32,
     "w": 19
+  },
+  "hq-3": {
+    "anchor": [
+      113,
+      151
+    ],
+    "frames": {
+      "default": [
+        {
+          "duration": 0,
+          "file": "hq-3.png"
+        }
+      ]
+    },
+    "h": 154,
+    "w": 164
+  },
+  "hq-4": {
+    "anchor": [
+      113,
+      171
+    ],
+    "frames": {
+      "default": [
+        {
+          "duration": 0,
+          "file": "hq-4.png"
+        }
+      ]
+    },
+    "h": 174,
+    "w": 164
+  },
+  "hq-door": {
+    "anchor": [
+      21,
+      36
+    ],
+    "frames": {
+      "closed": [
+        {
+          "duration": 0,
+          "file": "hq-door-closed.png"
+        }
+      ],
+      "default": [
+        {
+          "duration": 0,
+          "file": "hq-door.png"
+        }
+      ],
+      "open": [
+        {
+          "duration": 0,
+          "file": "hq-door-open.png"
+        }
+      ]
+    },
+    "h": 37,
+    "w": 22
   },
   "laptop-shelf": {
     "anchor": [
@@ -1068,6 +1096,22 @@
     },
     "h": 16,
     "w": 19
+  },
+  "pavement": {
+    "anchor": [
+      16,
+      16
+    ],
+    "frames": {
+      "default": [
+        {
+          "duration": 0,
+          "file": "pavement.png"
+        }
+      ]
+    },
+    "h": 16,
+    "w": 32
   },
   "plant": {
     "anchor": [

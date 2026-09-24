@@ -21,7 +21,7 @@ sys.path.insert(0, _REPO_ROOT)
 from art.src.dsl import Canvas, save_png, scale_nn
 from art.src import iso
 from art.src.sprites import floor, wall, desk, worker, badge_reader, room, band80, poses
-from art.src.sprites import band150, band220
+from art.src.sprites import band150, band220, street
 from art.src import compose, layout, export_scene
 from art.src.vox import Sprite
 
@@ -222,7 +222,7 @@ def save_sprite(manifest, registry, name, spr):
 
 def build_props(manifest, registry):
     for group in (room.build_all(), band80.build_all(), band150.build_all(),
-                  band220.build_all()):
+                  band220.build_all(), street.build_all()):
         for name, spr in group.items():
             save_sprite(manifest, registry, name, spr)
 
@@ -279,7 +279,7 @@ def build_sheet(static, badge_rendered, worker_rendered, registry):
     for name in ("desk-postit", "desk-padlock", "desk-dev", "desk-dev-built"):
         items.append(registry[name].canvas)
     for group in (room.build_all(), band80.build_all(), band150.build_all(),
-                  band220.build_all()):
+                  band220.build_all(), street.build_all()):
         for name in group:
             items.append(registry[name].canvas)
     # PH1-07 poses, one look each (all five ship): every frame, so the animation is
@@ -329,24 +329,24 @@ def build_sheet(static, badge_rendered, worker_rendered, registry):
 
 
 def build_band(band: int):
-    """Both states of one band from `layout.scene` (data), rendered by `compose` from
-    the manifest and PNGs just written; one shared crop so the pair overlays pixel for
-    pixel."""
+    """Both states of one band for art review: every view (D-036) rendered as its own
+    room from `layout.scene` (data) by `compose`, from the manifest and PNGs just
+    written — preview-only callouts included — laid side by side in D-036 order,
+    bottom-aligned, at 4x. Both states share every view's canvas, so the pair overlays
+    pixel for pixel."""
     lib = compose.Library(SPRITES_DIR)
-    room_ = layout.ROOMS[band]
-    scenes = {}
+    gap = 12
+    frames = {v: export_scene.view_frame(lib, band, v) for v in layout.views(band)}
+    width = sum(size[0] for _o, size in frames.values()) + gap * (len(frames) - 1)
+    height = max(size[1] for _o, size in frames.values())
     for st in ("without", "built"):
-        placed = compose.resolve(lib, layout.scene(band, st), room_["origin"])
-        scenes[st] = compose.render(lib, placed, room_["size"])
-    boxes = [sc.img.getbbox() for sc in scenes.values()]
-    m = 4
-    x0 = max(min(b[0] for b in boxes) - m, 0)
-    y0 = max(min(b[1] for b in boxes) - m, 0)
-    x1 = min(max(b[2] for b in boxes) + m, room_["size"][0])
-    y1 = min(max(b[3] for b in boxes) + m, room_["size"][1])
-    for st, sc in scenes.items():
-        out = Canvas(x1 - x0, y1 - y0)
-        out.img = sc.img.crop((x0, y0, x1, y1))
+        out = Canvas(width, height)
+        x = 0
+        for v, (origin, size) in frames.items():
+            placed = compose.resolve(lib, layout.scene(band, st)[v], origin)
+            room_ = compose.render(lib, placed, size)
+            out.img.alpha_composite(room_.img, (x, height - size[1]))
+            x += size[0] + gap
         save_png(scale_nn(out, 4), os.path.join(PREVIEW_DIR, f"band{band}-{st}.png"))
 
 
@@ -405,7 +405,7 @@ def main():
     static, badge_rendered, worker_rendered, registry = build_manifest()
     build_sheet(static, badge_rendered, worker_rendered, registry)
     build_room(static, badge_rendered, worker_rendered)
-    for band in sorted(layout.ROOMS):
+    for band in layout.PLACEMENTS:
         build_band(band)
     export_scene.export_all()
     print("Build complete.")
