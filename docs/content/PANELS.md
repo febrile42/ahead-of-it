@@ -1,4 +1,4 @@
-# Panels — DRAFT v3 (2026-09-24: six forks resolved)
+# Panels — DRAFT v3 (2026-09-24: forks resolved; G7.3a added)
 
 Final copy for every hotspot, in the `TONE.md` voice: **Already** (dated, numbered, first
 person, past tense) → **What it prevented** (second person, honest confidence) → **Worth it
@@ -150,6 +150,17 @@ pointed at a TV, and a colleague in another city frozen mid-sentence on the wall
 
 **Worth it later:** when everyone went home in 2020, the meetings just moved. There was
 no AV project. `E-25 E-28`
+
+### G7.3a · Product had an owner before it had a team
+`2020 · ~220 · a clean-energy company, now $3B+`
+**Already:** In 2020, at ~220 people, I took the Director of Product title with two
+product managers — one the Salesforce administrator I'd hired in 2019, one an internal
+move — so the function existed before the company was ready to staff it properly.
+
+**What it prevented:** by now there is a whiteboard of feature requests with nobody's
+name on it, and sales and engineering are pointing at each other across it.
+
+**Worth it later:** handed to a dedicated lead the next year, at ~360. `E-14`
 
 ---
 

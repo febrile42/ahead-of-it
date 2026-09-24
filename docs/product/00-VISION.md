@@ -1,6 +1,6 @@
 # 00 — Vision
 
-**Internal name:** Occupancy (a facilities word and a headcount word). Public-facing name: **TODO** (D-010).
+**Internal name:** Occupancy (a facilities word and a headcount word). **Public-facing name: "Ahead of It"** (D-010, 2026-09-24). Tagline: *Build it, then make sure it doesn't need you.*
 **URL:** resume.joshgister.com
 **Owner:** Joshua Gister. **Author of this doc:** Claude (Opus), acting as PM, 2026-09-16.
 

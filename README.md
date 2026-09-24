@@ -1,6 +1,6 @@
 # Occupancy — resume.joshgister.com
 
-> "Occupancy" is the internal project name. Public-facing name: TODO (see `docs/product/04-DECISIONS.md` D-010).
+> "Occupancy" is the internal project name. Public-facing name: **Ahead of It** (`docs/product/04-DECISIONS.md` D-010).
 
 A dynamic, non-traditional resume for Joshua Gister. Drag a headcount slider; a pixel-art
 isometric office building grows to that size and things go visibly wrong in the places they

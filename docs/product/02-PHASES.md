@@ -63,10 +63,10 @@ Deliverables
 - Art per D-024: remaining assets through the proven pipeline; stock/commission only where it failed.
 - First-party analytics decision executed (Q-5). (S)
 - Copy pass on every panel in final voice. (M)
-- **TODO: public-facing name chosen (D-010, Q-2)** and applied to title, share image, OG. (J decides, M applies)
+- Public-facing name **"Ahead of It"** (D-010, decided) applied to title, share image, OG. (S)
 
 Exit criteria
-- Public-facing name decided; "Occupancy" appears in no served string.
+- "Occupancy" appears in no served string.
 - Share image renders correctly in iMessage, Slack, LinkedIn, X previews (H checks).
 - Public-facing name applied (D-010).
 - J approves final art and copy.

@@ -172,3 +172,12 @@ you" is the OG description and the built-state toggle subtitle · F-5 G7.1's pre
 beat stays · F-6 G2.4 gains a real Worth-it-later: the 2020 move home needed no AV
 project (E-28). Trim order in `BANDS-AND-GAGS.md` stands; F-1 means G5.3/G5.6 are not a
 merge candidate unless art forces it.
+
+**D-010 (decided) · 2026-09-24 · Public-facing name: "Ahead of It".**
+Hook on the share image and OG title, always framed *Ahead of It — Josh Gister's résumé*.
+Tagline (D-027): *Build it, then make sure it doesn't need you.* Slider label: *at your
+scale.* "Occupancy" stays internal. Phase 3 naming gate is satisfied.
+
+**D-028 · 2026-09-24 · Band 220 gets a second gag: G7.3a, the PRODUCT hat goes on.**
+Q-23. Product had an owner (Director of Product, two PMs, 2020) before there was a product
+team; the hat walks off at 360 in G7.3. 26 gags + ambient; cap 28.

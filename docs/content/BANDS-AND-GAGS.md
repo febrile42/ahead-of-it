@@ -11,7 +11,7 @@ screen; this band's items are full-size, earlier ones quieter.
 |---|---|---|---|
 | **80** | 2018 | ~80 | As found: closet, post-its, the DEV queue, the floor cable, guest Wi-Fi |
 | **150** | 2019 | ~150 | Laptops managed, training, one CRM, the second office linked |
-| **220** | 2020 | ~220 | Rooms in every city |
+| **220** | 2020 | ~220 | Rooms in every city; the PRODUCT hat goes on |
 | **360** | 2021 | ~360 | The handoff; the campus receipts (phones, servers, data) |
 | **490** | 2022 | ~490 | Onboarding automated; the badge that works |
 | **610** | 2023 | ~610 | The auditor, the Wi-Fi, the org chart, three offices in a year |
@@ -31,7 +31,7 @@ Fixed geography: the closet · front door · sales pit · finance corner · conf
 first-floor corridor · top floor (from 610) · outside (street; inset office from 150; map
 from 490).
 
-Total: **25 gags + 1 ambient.** Cap 28 (G-02). ≤ 5 per band (80 and 750 are at cap).
+Total: **26 gags + 1 ambient** (G7.3a added 2026-09-24, D-028). Cap 28 (G-02). ≤ 5 per band (80 and 750 are at cap).
 
 ---
 
@@ -134,8 +134,8 @@ absence of a system — so the systems arrive this year. Dev is handed off.
 ## 220 · 2020 · *Rooms in every city*
 
 Four floors. The year everyone went home. The rooms multiply; Product is incubated
-(Director of Product, two PMs). Thin on new gags by design — the building is cumulative
-(R-03a), so everything from 80 and 150 is still on screen. See Q-23 for a possible second gag.
+(Director of Product, two PMs). The building is cumulative (R-03a), so everything from 80
+and 150 is still on screen.
 
 ### G2.4 · The dongle meeting
 - **Already:** the same kit in every room in every city — camera bar, touch panel, everyone
@@ -146,6 +146,16 @@ Four floors. The year everyone went home. The rooms multiply; Product is incubat
   a worker on each side waving.
 - **Where:** the conference room, and the inset office's.
 - **Receipt:** E-25, E-01.
+
+### G7.3a · The hat nobody wore
+- **Already:** product had an owner before there was a product team. In 2020 Josh took the
+  Director of Product title with two PMs — the 2019 Salesforce admin, and an internal move.
+  The `PRODUCT` hat goes *on* here; it walks off at 360 (G7.3).
+- **Without:** a whiteboard in the glass room titled `FEATURE REQUESTS`, full, with nobody's
+  name on it; a sales sprite and an engineering sprite pointing at each other across it.
+- **Where:** the conference room (glass wall, visible from the floor).
+- **Receipt:** E-14 (Product incubated 2020: Director of Product, Salesforce Admin → PM,
+  +1 PM internal; handed off 2021).
 
 ---
 
