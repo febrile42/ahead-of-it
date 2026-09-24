@@ -179,7 +179,9 @@ def build_worker(manifest, registry):
     manifest["worker-huddle"] = save_entry("worker-huddle", hud, worker.W, worker.H,
                                            worker.ANCHOR)
     registry["worker-huddle"] = Frames(hud, worker.ANCHOR)
-    wave = {look: poses.wave_frames(look) for look in looks}
+    wave = {}
+    for look in looks:
+        wave.update(poses.wave_side_frames(look))
     manifest["worker-wave"] = save_entry("worker-wave", wave, worker.W, worker.H,
                                          worker.ANCHOR,
                                          durations={k: poses.WAVE_MS for k in wave})
@@ -298,7 +300,7 @@ def build_sheet(static, badge_rendered, worker_rendered, registry):
                        ("courier", "right"), ("worker-watch", "b"),
                        ("sales", "point-right"), ("engineer", "point-left"),
                        ("worker-huddle", "a"), ("worker-huddle", "c-dongle"),
-                       ("worker-wave", "c"),
+                       ("worker-wave", "c-right"),
                        ("worker-hat", "e"), ("worker-hat", "e-left")):
         items.extend(registry[key].frames[frame])
 

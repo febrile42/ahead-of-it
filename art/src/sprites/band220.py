@@ -33,7 +33,10 @@ from .band80 import _thick, _rows
 # half as big again so the frozen face reads at 1x; the inset office (street) gets the
 # old size — the same kit, in a smaller room.
 TV = dict(c0=1.0, c1=23.0, r0=0.0, r1=1.2, z0=12.0, z1=31.0, block=2.0)
-TV_SMALL = dict(c0=1.0, c1=15.0, r0=0.0, r1=1.2, z0=14.0, z1=27.0, block=2.0)
+# who is on the screen: the conference room sees the inset office's person (red shirt,
+# as in the inset); the inset sees HQ's (green). (shirt, frozen shirt)
+INSET_PERSON = ("badge-red", "shirt-3-dark")
+HQ_PERSON = ("badge-green", "shirt-2-dark")
 
 
 def _tv_body(iso: Iso, t: dict):
@@ -41,7 +44,8 @@ def _tv_body(iso: Iso, t: dict):
                    top="chair-dark", left="monitor-frame", right="outline")
 
 
-def _face_fn(u, z, frozen: bool, mouth_open: bool, t: dict):
+def _face_fn(u, z, frozen: bool, mouth_open: bool, t: dict, who=HQ_PERSON,
+             wave: bool = False):
     """The remote colleague, in the TV face's own coordinates: u = c - c0 across, z up,
     normalised to a 14 x 13 screen so every size draws the same face. `frozen`
     quantises everything to `block`-unit squares (the pixelated look of a stalled
@@ -60,9 +64,19 @@ def _face_fn(u, z, frozen: bool, mouth_open: bool, t: dict):
     # across is about half its radius up — otherwise the face reads as a loaf
     sx = 14.0 / W * 2.0 * H / 13.0
     du, dz = (u - 7.0) * sx / 1.45, zb - 7.0
+    shirt = who[1] if frozen else who[0]
+    if wave:
+        # a hand up by the head, caught mid-wave (PH1-10 fix round): the forearm
+        # rising from the shoulder on the screen's right, an open hand at the top
+        if 4.4 <= du < 6.2 and 1.0 <= zb < 7.4:
+            return shirt
+        if 4.0 <= du < 6.8 and 7.4 <= zb < 10.6:
+            return "skin-3"
+        if 3.4 <= du < 4.4 and 8.6 <= zb < 9.8:
+            return "skin-3"                                     # the thumb
     # shoulders
     if zb < 3.0 and abs(du) < 5.5 - max(0.0, zb - 1.0) * 1.2:
-        return "badge-green" if not frozen else "shirt-2-dark"
+        return shirt
     # head: an oval
     if (du / 3.3) ** 2 + (dz / 4.6) ** 2 < 1.0:
         if dz > 2.4 or (abs(du) > 2.6 and dz > -1.0):
@@ -77,11 +91,12 @@ def _face_fn(u, z, frozen: bool, mouth_open: bool, t: dict):
     return "glass-dark" if not frozen else "shirt-1-dark"
 
 
-def _tv(iso: Iso, c: Canvas, frame: int, frozen: bool, t: dict):
+def _tv(iso: Iso, c: Canvas, frame: int, frozen: bool, t: dict, who=HQ_PERSON,
+        wave=False):
     f = _tv_body(iso, t)
     mouth = True if frozen else (frame == 1)
-    iso.paint(f, "L", t["r1"], lambda cc, z: _face_fn(cc - t["c0"], z, frozen, mouth, t)
-              or "monitor-frame")
+    iso.paint(f, "L", t["r1"], lambda cc, z: _face_fn(cc - t["c0"], z, frozen, mouth, t,
+                                                     who, wave) or "monitor-frame")
     if frozen:
         # buffering spinner, top right: a ring of dots, one bright dot going round
         cx, cy = iso.left_px(t["r1"], t["c1"] - 2.4, t["z1"] - 2.6)
@@ -90,16 +105,16 @@ def _tv(iso: Iso, c: Canvas, frame: int, frozen: bool, t: dict):
             c.point(cx + dx, cy + dy + dx // 2, "paper" if i == (frame * 3) % 6 else "badge-body")
 
 
-def _tv_frozen(t):
+def _tv_frozen(t, who=HQ_PERSON, wave=False):
     def draw(iso, c, frame):
-        _tv(iso, c, frame, True, t)
+        _tv(iso, c, frame, True, t, who, wave)
         return {"screen": iso.left_px(t["r1"], (t["c0"] + t["c1"]) / 2, t["z0"])}
     return draw
 
 
-def _tv_live(t):
+def _tv_live(t, who=HQ_PERSON):
     def draw(iso, c, frame):
-        _tv(iso, c, frame, False, t)
+        _tv(iso, c, frame, False, t, who)
         return {"screen": iso.left_px(t["r1"], (t["c0"] + t["c1"]) / 2, t["z0"])}
     return draw
 
@@ -255,15 +270,15 @@ def build_all() -> dict:
     wb0, wb1 = _whiteboard(False), _whiteboard(True)
     return {
         # without
-        "tv-frozen": make_anim(_tv_frozen(TV), 2, ms=250),
-        "tv-frozen-small": make_anim(_tv_frozen(TV_SMALL), 2, ms=250),
+        # both ends of the same stalled call, each frozen mid-wave (G2.4)
+        "tv-frozen": make_anim(_tv_frozen(TV, INSET_PERSON, wave=True), 2, ms=250),
+        "tv-frozen-inset": make_anim(_tv_frozen(TV, HQ_PERSON, wave=True), 2, ms=250),
         "conf-huddle": make(_conf_huddle),
         "whiteboard-requests": Sprite(wb0, (wb0.w // 2, wb0.h)),
         # built
-        "tv-live": make_anim(_tv_live(TV), 2, key="talk", ms=180),
+        "tv-live": make_anim(_tv_live(TV, INSET_PERSON), 2, key="talk", ms=180),
         "camera-bar": make(_camera_bar(TV)),
-        "tv-live-small": make_anim(_tv_live(TV_SMALL), 2, key="talk", ms=180),
-        "camera-bar-small": make(_camera_bar(TV_SMALL)),
+        "tv-live-inset": make_anim(_tv_live(TV, HQ_PERSON), 2, key="talk", ms=180),
         "conf-table": make(_conf_table),
         "whiteboard-owned": Sprite(wb1, (wb1.w // 2, wb1.h)),
     }

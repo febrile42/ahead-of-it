@@ -240,9 +240,8 @@ def _inset(band: int) -> list:
             "wall-back-l-window" if row == i["r0"] + 1 else "wall-back-l")
         P.append(_t(name, i["c0"], row, layer="base"))
     for col in range(i["c0"], i["c1"] + 1):
-        # one window; the wall to its right stays plain for band 220's screen (G2.4)
-        name = "wall-back-r-end" if col == i["c1"] else (
-            "wall-back-r-window" if col == i["c0"] else "wall-back-r")
+        # plain: band 220's screen (G2.4) fills this wall; the window is on the other
+        name = "wall-back-r-end" if col == i["c1"] else "wall-back-r"
         P.append(_t(name, col, i["r0"], layer="base"))
     for col in range(i["c0"], i["c1"] + 1):
         name = "partition-c-end" if col == i["c1"] else "partition-c"
@@ -255,8 +254,11 @@ def _inset(band: int) -> list:
     P.append(_t("worker-seated", i["c0"], i["r1"], frame="b",
                 depth=i["c0"] + i["r1"] + 1.01, states=B))
     # without: on the step outside the door, at the kerb, checking the time
+    # at 220 (quieter) she waits further down the kerb, clear of the doorway and of
+    # G2.4's inset scene
     P.append(_f("worker-watch", i["c1"] + 1.25, i["r0"] + 1.3, frame="b", depth=i["r0"] + 5.2,
-                states=W, gag="G5.1", part="inset-door", primary=False))
+                states=W, gag="G5.1", part="inset-door", primary=False,
+                quiet=dict(floor=[i["c1"] + 2.6, i["r0"] + 2.3], depth=i["r0"] + 7.9)))
     return P
 
 
@@ -400,21 +402,20 @@ def _band220() -> list:
     # the street: HQ is a storey taller
     S = "street"
     i = INSET
-    tv = (i["c0"] + 1, i["r0"])            # on the inset's back wall, right of the window
+    tv = (i["c0"], i["r0"])                # conference size, centred on the back wall
     P += [
         _t("hq-4", HQ["c1"] - 1, HQ["r1"] - 1, depth=1.0, view=S, band=220),
-        # G2.4's second part (PH1-10 item 3), in the inset office: without, the same
-        # call frozen mid-sentence on its wall, one of them each side of it waving; built,
-        # the inset's own room kit — camera bar over a screen with the face moving
-        _t("tv-frozen-small", *tv, depth=i["r0"] + 1.5, states=W, view=S, band=220,
+        # G2.4's second part (PH1-10), in the inset office. Without: the same call from
+        # the other end — HQ's person frozen mid-wave on the screen, and the inset's
+        # person beside it, side on, waving back into the stall. Nobody stands in front
+        # of the screen. Built: the inset's own kit, camera bar over a live face.
+        _t("tv-frozen-inset", *tv, depth=i["r0"] + 1.5, states=W, view=S, band=220,
            gag="G2.4", part="inset", primary=False),
-        _f("worker-wave", tv[0] - 0.3, tv[1] + 1.0, frame="c", states=W, view=S,
-           band=220, gag="G2.4", part="inset", primary=False),
-        _f("worker-wave", tv[0] + 0.55, tv[1] + 0.3, frame="a", states=W, view=S,
-           band=220, gag="G2.4", part="inset", primary=False),
-        _t("tv-live-small", *tv, depth=i["r0"] + 1.5, states=B, view=S, band=220,
+        _f("worker-wave", i["c0"] + 0.3, i["r0"] + 0.95, frame="c-right", states=W,
+           view=S, band=220, gag="G2.4", part="inset", primary=False),
+        _t("tv-live-inset", *tv, depth=i["r0"] + 1.5, states=B, view=S, band=220,
            gag="G2.4", part="inset", primary=False),
-        _t("camera-bar-small", *tv, depth=i["r0"] + 1.6, states=B, view=S, band=220,
+        _t("camera-bar", *tv, depth=i["r0"] + 1.6, states=B, view=S, band=220,
            gag="G2.4", part="inset", primary=False),
     ]
     return P

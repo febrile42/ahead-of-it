@@ -133,22 +133,6 @@
     "h": 41,
     "w": 32
   },
-  "camera-bar-small": {
-    "anchor": [
-      1,
-      41
-    ],
-    "frames": {
-      "default": [
-        {
-          "duration": 0,
-          "file": "camera-bar-small.png"
-        }
-      ]
-    },
-    "h": 41,
-    "w": 24
-  },
   "card-customers": {
     "anchor": [
       20,
@@ -1432,37 +1416,37 @@
     },
     "w": 47
   },
-  "tv-frozen-small": {
+  "tv-frozen-inset": {
     "anchor": [
       1,
-      42
+      46
     ],
     "frames": {
       "blink": [
         {
           "duration": 250,
-          "file": "tv-frozen-small-blink-0.png"
+          "file": "tv-frozen-inset-blink-0.png"
         },
         {
           "duration": 250,
-          "file": "tv-frozen-small-blink-1.png"
+          "file": "tv-frozen-inset-blink-1.png"
         }
       ],
       "default": [
         {
           "duration": 0,
-          "file": "tv-frozen-small.png"
+          "file": "tv-frozen-inset.png"
         }
       ]
     },
-    "h": 42,
+    "h": 46,
     "points": {
       "screen": [
-        15,
-        20
+        23,
+        30
       ]
     },
-    "w": 31
+    "w": 47
   },
   "tv-live": {
     "anchor": [
@@ -1496,37 +1480,37 @@
     },
     "w": 47
   },
-  "tv-live-small": {
+  "tv-live-inset": {
     "anchor": [
       1,
-      42
+      46
     ],
     "frames": {
       "default": [
         {
           "duration": 0,
-          "file": "tv-live-small.png"
+          "file": "tv-live-inset.png"
         }
       ],
       "talk": [
         {
           "duration": 180,
-          "file": "tv-live-small-talk-0.png"
+          "file": "tv-live-inset-talk-0.png"
         },
         {
           "duration": 180,
-          "file": "tv-live-small-talk-1.png"
+          "file": "tv-live-inset-talk-1.png"
         }
       ]
     },
-    "h": 42,
+    "h": 46,
     "points": {
       "screen": [
-        15,
-        20
+        23,
+        30
       ]
     },
-    "w": 31
+    "w": 47
   },
   "visitor": {
     "anchor": [
@@ -2938,54 +2922,104 @@
       24
     ],
     "frames": {
-      "a": [
+      "a-left": [
         {
           "duration": 280,
-          "file": "worker-wave-a-0.png"
+          "file": "worker-wave-a-left-0.png"
         },
         {
           "duration": 280,
-          "file": "worker-wave-a-1.png"
+          "file": "worker-wave-a-left-1.png"
         }
       ],
-      "b": [
+      "a-right": [
         {
           "duration": 280,
-          "file": "worker-wave-b-0.png"
+          "file": "worker-wave-a-right-0.png"
         },
         {
           "duration": 280,
-          "file": "worker-wave-b-1.png"
+          "file": "worker-wave-a-right-1.png"
         }
       ],
-      "c": [
+      "b-left": [
         {
           "duration": 280,
-          "file": "worker-wave-c-0.png"
+          "file": "worker-wave-b-left-0.png"
         },
         {
           "duration": 280,
-          "file": "worker-wave-c-1.png"
+          "file": "worker-wave-b-left-1.png"
         }
       ],
-      "d": [
+      "b-right": [
         {
           "duration": 280,
-          "file": "worker-wave-d-0.png"
+          "file": "worker-wave-b-right-0.png"
         },
         {
           "duration": 280,
-          "file": "worker-wave-d-1.png"
+          "file": "worker-wave-b-right-1.png"
         }
       ],
-      "e": [
+      "c-left": [
         {
           "duration": 280,
-          "file": "worker-wave-e-0.png"
+          "file": "worker-wave-c-left-0.png"
         },
         {
           "duration": 280,
-          "file": "worker-wave-e-1.png"
+          "file": "worker-wave-c-left-1.png"
+        }
+      ],
+      "c-right": [
+        {
+          "duration": 280,
+          "file": "worker-wave-c-right-0.png"
+        },
+        {
+          "duration": 280,
+          "file": "worker-wave-c-right-1.png"
+        }
+      ],
+      "d-left": [
+        {
+          "duration": 280,
+          "file": "worker-wave-d-left-0.png"
+        },
+        {
+          "duration": 280,
+          "file": "worker-wave-d-left-1.png"
+        }
+      ],
+      "d-right": [
+        {
+          "duration": 280,
+          "file": "worker-wave-d-right-0.png"
+        },
+        {
+          "duration": 280,
+          "file": "worker-wave-d-right-1.png"
+        }
+      ],
+      "e-left": [
+        {
+          "duration": 280,
+          "file": "worker-wave-e-left-0.png"
+        },
+        {
+          "duration": 280,
+          "file": "worker-wave-e-left-1.png"
+        }
+      ],
+      "e-right": [
+        {
+          "duration": 280,
+          "file": "worker-wave-e-right-0.png"
+        },
+        {
+          "duration": 280,
+          "file": "worker-wave-e-right-1.png"
         }
       ]
     },

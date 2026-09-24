@@ -3187,7 +3187,7 @@
           "depth": 8
         },
         {
-          "sprite": "wall-back-r-window",
+          "sprite": "wall-back-r",
           "frame": "default",
           "x": 53,
           "y": 125,
@@ -3224,19 +3224,19 @@
           "part": "handover"
         },
         {
-          "sprite": "tv-live-small",
+          "sprite": "tv-live-inset",
           "frame": "default",
-          "x": 69,
-          "y": 133,
+          "x": 53,
+          "y": 125,
           "depth": 6.5,
           "gagId": "G2.4",
           "part": "inset"
         },
         {
-          "sprite": "camera-bar-small",
+          "sprite": "camera-bar",
           "frame": "default",
-          "x": 69,
-          "y": 133,
+          "x": 53,
+          "y": 125,
           "depth": 6.6,
           "gagId": "G2.4",
           "part": "inset"
@@ -3302,10 +3302,10 @@
         {
           "gagId": "G2.4",
           "part": "inset",
-          "x": 69,
-          "y": 91,
-          "w": 30,
-          "h": 28,
+          "x": 53,
+          "y": 79,
+          "w": 46,
+          "h": 42,
           "primary": false
         },
         {

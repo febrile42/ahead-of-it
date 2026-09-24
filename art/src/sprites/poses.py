@@ -15,8 +15,8 @@ every look is a palette swap. Each pose is one manifest entry keyed by look (lik
                    whiteboard. `point-right` / `point-left`, 2-frame jab each. 20 x 24.
   worker-huddle    G2.4: seen from behind, hunched over the table's one laptop;
                    `<look>` and `<look>-dongle` (an arm up, holding an adapter).
-  worker-wave      G2.4 (band 220, PH1-10): from behind, facing a screen on the wall,
-                   one arm up waving at it — "can you hear me?" (2 frames). 16 x 24.
+  worker-wave      G2.4 (band 220, PH1-10): profile, beside a screen, the near arm up
+                   waving at it, mouth open (2 frames). `<look>-right` / `-left`. 16 x 24.
   worker-hat       G7.3a built: front view, a marker raised to the board, wearing the
                    `PRODUCT` hat — a paper band far wider than the head. 32 x 34.
   worker-reach     G4.2 (band 150): seated at the finance desk, reaching up for the
@@ -322,27 +322,25 @@ def huddle_frames(look_name: str) -> dict:
 WAVE_MS = 280
 
 
-def wave_frames(look_name: str) -> list[Canvas]:
-    """From behind, facing the frozen screen, the screen-right arm up and waving: the
-    hand over the head's corner (frame 0), then tipped out a pixel (frame 1)."""
-    from .worker import _head_back, _arm_front
+def wave_side_frames(look_name: str) -> dict:
+    """G2.4 (PH1-10 fix round): profile, standing beside a screen and waving at it —
+    the near arm straight up with the hand open, mouth open mid-"can you hear me?".
+    Frame 0 hand up, frame 1 tipped forward. `<look>-right` / `<look>-left`."""
     look = LOOKS[look_name]
-    out = []
+    right = []
     for i in range(2):
-        f = Fig()
-        _shadow(f)
-        _leg_front(f, "left", 0, 0)
-        _leg_front(f, "right", 0, 0)
-        _torso_front(f, 0)
-        _arm_front(f, "left", 6, 0)
-        _head_back(f, look["style"], 0)
-        if i == 0:
-            f.blob(R(13, 3, 14, 10), lambda p: "s" if p[1] <= 4 else "T", ring="outer")
-        else:
-            f.blob(R(13, 6, 14, 10), "T", ring="outer")
-            f.blob(R(14, 2, 15, 5), lambda p: "s" if p[1] <= 3 else "T", ring="outer")
-        out.append(f.to_canvas(look))
-    return out
+        f = _standing_right(look)
+        f.put(10, 6, "X")                                   # the open mouth
+        f.put(10, 7, "e")
+        tip = 12 if i == 0 else 13
+        arm = {(8, 10), (9, 10), (9, 9), (10, 9), (10, 8), (11, 8)}
+        for y in range(3, 8):
+            x = 11 if y >= 6 else tip - (1 if y >= 5 and i == 1 else 0)
+            arm |= {(x, y), (x + 1, y)}
+        hand = {(tip, 1), (tip + 1, 1), (tip, 2), (tip + 1, 2)}
+        f.blob(arm | hand, lambda p: "s" if p in hand else "T", ring="outer")
+        right.append(f.to_canvas(look))
+    return {look_name + "-right": right, look_name + "-left": [c.mirror_h() for c in right]}
 
 
 HAT_W, HAT_H = 38, 36

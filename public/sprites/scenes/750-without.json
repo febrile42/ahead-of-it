@@ -3281,7 +3281,7 @@
           "depth": 8
         },
         {
-          "sprite": "wall-back-r-window",
+          "sprite": "wall-back-r",
           "frame": "default",
           "x": 53,
           "y": 125,
@@ -3318,29 +3318,20 @@
           "part": "handover"
         },
         {
-          "sprite": "tv-frozen-small",
+          "sprite": "worker-wave",
+          "frame": "c-right",
+          "x": 43,
+          "y": 119,
+          "depth": 6.25,
+          "gagId": "G2.4",
+          "part": "inset"
+        },
+        {
+          "sprite": "tv-frozen-inset",
           "frame": "default",
-          "x": 69,
-          "y": 133,
+          "x": 53,
+          "y": 125,
           "depth": 6.5,
-          "gagId": "G2.4",
-          "part": "inset"
-        },
-        {
-          "sprite": "worker-wave",
-          "frame": "c",
-          "x": 48,
-          "y": 123,
-          "depth": 6.7,
-          "gagId": "G2.4",
-          "part": "inset"
-        },
-        {
-          "sprite": "worker-wave",
-          "frame": "a",
-          "x": 73,
-          "y": 124,
-          "depth": 6.85,
           "gagId": "G2.4",
           "part": "inset"
         },
@@ -3380,15 +3371,6 @@
           "depth": 9.95
         },
         {
-          "sprite": "worker-watch",
-          "frame": "b",
-          "x": 84,
-          "y": 145,
-          "depth": 10.2,
-          "gagId": "G5.1",
-          "part": "inset-door"
-        },
-        {
           "sprite": "truck",
           "frame": "default",
           "x": 149,
@@ -3410,16 +3392,25 @@
           "x": 53,
           "y": 157,
           "depth": 10.95
+        },
+        {
+          "sprite": "worker-watch",
+          "frame": "b",
+          "x": 90,
+          "y": 164,
+          "depth": 12.9,
+          "gagId": "G5.1",
+          "part": "inset-door"
         }
       ],
       "hotspots": [
         {
           "gagId": "G2.4",
           "part": "inset",
-          "x": 40,
-          "y": 91,
-          "w": 59,
-          "h": 33,
+          "x": 37,
+          "y": 79,
+          "w": 62,
+          "h": 42,
           "primary": false
         },
         {
@@ -3434,8 +3425,8 @@
         {
           "gagId": "G5.1",
           "part": "inset-door",
-          "x": 76,
-          "y": 121,
+          "x": 82,
+          "y": 140,
           "w": 16,
           "h": 24,
           "primary": false

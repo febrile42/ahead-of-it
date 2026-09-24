@@ -2732,7 +2732,7 @@
           "depth": 8
         },
         {
-          "sprite": "wall-back-r-window",
+          "sprite": "wall-back-r",
           "frame": "default",
           "x": 53,
           "y": 105,
