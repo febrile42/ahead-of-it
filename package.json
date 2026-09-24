@@ -1,0 +1,27 @@
+{
+  "name": "ahead-of-it",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Occupancy / \"Ahead of It\" — resume.joshgister.com. Vanilla TypeScript + Vite, no UI framework (D-009).",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build && npm run check:employer",
+    "preview": "vite preview --port 4173 --strictPort",
+    "test:unit": "vitest run",
+    "test:e2e": "playwright test",
+    "test": "npm run test:unit && npm run test:e2e",
+    "check:employer": "bash scripts/check-employer.sh",
+    "check": "npm run build && npm run test"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.63.0",
+    "typescript": "5.9.3",
+    "vite": "8.3.1",
+    "vitest": "4.1.11",
+    "wrangler": "4.138.0"
+  }
+}

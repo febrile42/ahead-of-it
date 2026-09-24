@@ -8,6 +8,13 @@ actually go wrong. Click a problem to see what it is, when it hits, and exactly 
 Josh already solved it. Flip one switch and the same building re-renders with the IT function
 built — every fixed object a real decision he made.
 
-**Status:** Phase 0 (writing). No code yet, deliberately. See `docs/product/02-PHASES.md`.
+**Status:** Phase 1 (static prototype). See `docs/STATUS.md` and `docs/product/02-PHASES.md`.
 
 Start with [`CLAUDE.md`](CLAUDE.md), then `docs/product/00-VISION.md`.
+
+## Run locally
+
+Node 22 (`.nvmrc`). `npm ci` · `npm run dev` for a live-reload dev server · `npm run build`
+builds to `dist/` and runs the employer-name check · `npm test` runs vitest then the
+Playwright smoke test against `vite preview` · `npm run check` runs build + test, the same
+gate CI will eventually run.
