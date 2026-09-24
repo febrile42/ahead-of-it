@@ -6,6 +6,9 @@ dist/
 .DS_Store
 .claude/worktrees/
 
+# scripts/run-build-content.mjs's transpile-and-run scratch file
+scripts/.build-content.generated.mjs
+
 # Vite / Playwright
 *.local
 test-results/

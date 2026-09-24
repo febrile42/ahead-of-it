@@ -1,0 +1,665 @@
+{
+  "bands": [
+    {
+      "id": 80,
+      "year": "2018",
+      "people": "~80",
+      "title": "As found",
+      "intro": "One floor, then two; the Boston build-out and move from ~9k to ~22k sq ft; a firewall at the edge; identity in the cloud; the first support hire; the first two rooms. This band's \"without\" state is not hypothetical: it is what Josh walked into."
+    },
+    {
+      "id": 150,
+      "year": "2019",
+      "people": "~150",
+      "title": "Endpoints, training, a system of record, the second office",
+      "intro": "Three floors and, for the first time, an inset: Chicago opens and the offices are linked. Hiring is the company's main activity; every new laptop and every new hire exposes the absence of a system — so the systems arrive this year. Dev is handed off."
+    },
+    {
+      "id": 220,
+      "year": "2020",
+      "people": "~220",
+      "title": "Rooms in every city",
+      "intro": "Four floors. The year everyone went home. The rooms multiply; Product is incubated (Director of Product, two PMs). The building is cumulative (R-03a), so everything from 80 and 150 is still on screen."
+    },
+    {
+      "id": 360,
+      "year": "2021",
+      "people": "~360",
+      "title": "The handoff — and the campus",
+      "intro": "Five floors. Product is handed off to its own lead. And because this is the size of the campus company (300+, nine buildings), the 2011–2015 receipts land here: the panel says \"at the campus\" and means it."
+    },
+    {
+      "id": 490,
+      "year": "2022",
+      "people": "~490",
+      "title": "Automation; the playbook proven",
+      "intro": "Six floors; Lawrence opens and Boston takes a fourth floor; the map has three pins. A Systems & Automation Engineer starts a function."
+    },
+    {
+      "id": 610,
+      "year": "2023",
+      "people": "~610",
+      "title": "Functions, layers, three offices in a year",
+      "intro": "The top floor appears. Security and Network become functions; leadership layers go in; Austin, NYC and DC open in the same year on one playbook."
+    },
+    {
+      "id": 750,
+      "year": "2024+",
+      "people": "~650→750",
+      "title": "Governance, the portfolio, the chair",
+      "intro": "The full map: six pins. Employees plateau at ~500 while contractors grow to 250 — the problems are now about judgment and money, not equipment. The top floor is where the argument ends."
+    },
+    {
+      "id": "beyond",
+      "year": null,
+      "people": null,
+      "title": "The from-zero seat inside a big company",
+      "intro": "Not a year band. Past 750 the slider has one more stop; the building stops growing and the copy turns to the reader's large organisation. One panel, opened by the band itself, plus a translation column in the checklist."
+    }
+  ],
+  "gags": [
+    {
+      "id": "G1.1",
+      "title": "Identity in the cloud, from day one",
+      "strip": {
+        "year": "2018",
+        "headcount": "~80",
+        "descriptor": "a clean-energy company, now $3B+"
+      },
+      "already": "In 2018, at ~80 people, I put identity and email in the cloud on day one — Microsoft 365 and Azure — and designed the platform for elastic scale, geographic expansion and capex-light operations. The alternative was a server room; I chose not to have one.",
+      "prevented": "at 80 your \"server room\" is a supply closet with a box fan, and it works until the Monday it doesn't. Every office you open afterwards inherits the same closet.",
+      "worthLater": "six offices opened on that design. Five are comms racks only; Lawrence — the operations site — is the one that got servers, for the OT that needs them.",
+      "receipts": [
+        "E-01",
+        "E-05"
+      ],
+      "band": 80,
+      "where": "the closet.",
+      "without": "the \"server room\" is a supply closet: router beside the paper towels, a box fan pointed at it, a cable falls out when the door opens.",
+      "built": "a small, boring rack with a label maker used on it — and it is *small* because identity went to the cloud on day one, so every later office is cheap."
+    },
+    {
+      "id": "G1.2",
+      "title": "One identity, so leaving is one switch",
+      "strip": {
+        "year": "2018",
+        "headcount": "~80",
+        "descriptor": "a clean-energy company, now $3B+"
+      },
+      "already": "From 2018, at ~80 people, one identity for everyone in Microsoft 365 and Azure, with single sign-on and multi-factor authentication enforced org-wide from the start — so a person's access was one record, not a dozen.",
+      "prevented": "by now logins are on sticky notes and in a shared spreadsheet, and offboarding is \"hope\". You find out how good it was on the first departure on bad terms.",
+      "worthLater": "SCIM provisioning was built on that identity in 2022, and the company went passwordless in 2025.",
+      "receipts": [
+        "E-01",
+        "E-03",
+        "E-29"
+      ],
+      "band": 80,
+      "where": "the sales pit, every desk.",
+      "without": "a yellow sticky note on every monitor; a worker peeling a colleague's off to log in. Offboarding is \"hope\".",
+      "built": "a tiny padlock on each monitor; a worker taps a phone to log in (SSO + MFA)."
+    },
+    {
+      "id": "G2.1",
+      "title": "A helpdesk with an owner",
+      "strip": {
+        "year": "2018",
+        "headcount": "~80",
+        "descriptor": "a clean-energy company, now $3B+"
+      },
+      "already": "The first hire I made for the function, in 2018, was a support agent. From ~80 people onward, IT requests had a queue and a person whose job it was.",
+      "prevented": "at your size someone technical has become IT by accident. The line at their desk is the visible cost; the engineering they aren't doing is the real one.",
+      "worthLater": "support grew to a team of six by 2023, one hire at a time as headcount demanded.",
+      "receipts": [
+        "E-22",
+        "E-02"
+      ],
+      "band": 80,
+      "where": "the sales pit, nearest the closet.",
+      "without": "a desk whose monitor reads `DEV`, six people in line behind it, one holding a laptop over their head like a broken appliance; the developer's own screen is a half-finished pull request.",
+      "built": "a support desk near the door with an SLA board (`Open: 3 · Avg: 1h`); the developer's screen is code again."
+    },
+    {
+      "id": "G2.2",
+      "title": "The office opened wired",
+      "strip": {
+        "year": "2018",
+        "headcount": "~80",
+        "descriptor": "a clean-energy company, now $3B+"
+      },
+      "already": "In 2018 I planned and ran the Boston build-out and move — roughly 9,000 to 22,000 sq ft — with structured cabling, building access, intrusion detection and conferencing installed before move-in. The same playbook then opened five more offices: Chicago 2019, Lawrence 2022, Austin, New York and DC in 2023.",
+      "prevented": "the week after you sign a lease, the network is whatever reached — a cable taped across the floor with a caution sign — and every move repeats it at scale unless someone plans for it.",
+      "receipts": [
+        "E-05"
+      ],
+      "band": 80,
+      "where": "the sales pit, floor.",
+      "without": "an ethernet cable taped along the floor between desks with a small yellow `CAUTION` sign; a worker steps over it every few seconds.",
+      "built": "cabling in the ceiling, a patch panel in the (now real) closet — the 2018 build-out and move, 9k → 22k sq ft."
+    },
+    {
+      "id": "G2.3",
+      "title": "A firewall five years before a network engineer",
+      "strip": {
+        "year": "2018",
+        "headcount": "~80",
+        "descriptor": "a clean-energy company, now $3B+"
+      },
+      "already": "In 2018, at ~80 people, I put a Palo Alto next-generation firewall at the edge, with guest Wi-Fi segmented from the corporate network from the start — so the network had a boundary and rules before it had a network engineer.",
+      "prevented": "at 80 there is usually one flat network: the visitor's laptop on your lobby sofa is a neighbour of the finance PC and the CEO's mailbox.",
+      "worthLater": "by the time a dedicated network engineer joined in 2023, the edge had been in place for five years.",
+      "receipts": [
+        "E-06"
+      ],
+      "band": 80,
+      "where": "front-door lobby.",
+      "without": "a visitor with a `VISITOR` sticker on the lobby sofa, laptop glowing, a dotted line from it to the closet and every desk.",
+      "built": "the dotted line from the visitor's laptop stops at a small firewall box in the closet. The visitor still has Wi-Fi; it just goes nowhere interesting."
+    },
+    {
+      "id": "G3.2",
+      "title": "Laptops known, encrypted, wipeable",
+      "strip": {
+        "year": "2019",
+        "headcount": "~150",
+        "descriptor": "a clean-energy company, now $3B+"
+      },
+      "already": "In 2019, at ~150 people, I deployed Intune for Windows and mobile: devices enrolled, encrypted and remotely wipeable, with a standard build instead of whatever arrived in the box. Jamf and Zebra joined the fleet later.",
+      "prevented": "by 150 laptops are bought on credit cards, tracked in nobody's spreadsheet, and returned — sometimes — to a trolley by the closet. The data on the one labelled \"Dave? (left)\" is a question nobody wants asked.",
+      "receipts": [
+        "E-19",
+        "E-24"
+      ],
+      "band": 150,
+      "where": "beside the closet; front door → corner office.",
+      "without": "a supermarket trolley of laptops parked by the closet, one with a sticky note `DAVE? (LEFT 2023)`; a new laptop arriving in a retailer box to the CEO's desk, bought on a credit card *(folds in v1's G1.3)*.",
+      "built": "a shelf of identical laptops, each tagged, each with a small green light (managed, encrypted, wipeable). Intune, 2019."
+    },
+    {
+      "id": "G4.2",
+      "title": "Everyone trained, every year",
+      "strip": {
+        "year": "2019",
+        "headcount": "~150",
+        "descriptor": "a clean-energy company, now $3B+"
+      },
+      "already": "In 2019 I started annual security training for the whole company, at ~150 people, with a way to report what looked wrong — and put Exchange ATP (now Defender for Office 365) and Area 1, through a managed security provider, in front of the mailboxes.",
+      "prevented": "around now the first serious phishing attempt lands in your finance inbox with a plausible invoice attached, and there is nothing between it and a wire transfer except one person's instincts.",
+      "receipts": [
+        "E-20"
+      ],
+      "band": 150,
+      "where": "finance corner (the CFO's inbox is always the target).",
+      "without": "a fishing line dangles from the ceiling in front of the finance worker's monitor with an envelope on the hook; the worker is reaching for it.",
+      "built": "the hook comes down and hits a small shield; the fish swims off; the worker has a `REPORT` button on screen. Annual security training from 2019."
+    },
+    {
+      "id": "G4.3",
+      "title": "A system of record with an owner",
+      "strip": {
+        "year": "2019",
+        "headcount": "~150",
+        "descriptor": "a clean-energy company, now $3B+"
+      },
+      "already": "In 2019, at ~150 people, I hired a Salesforce administrator — a business system with a dedicated owner — and partnered with Sales, Finance, HR and Operations leaders on the portfolio that grew around it over the following years: Salesforce, NetSuite, HRIS, Procore, Primavera P6.",
+      "prevented": "by now two of your teams each have a spreadsheet called \"CUSTOMERS (real)\", and month-end is a reconciliation project.",
+      "worthLater": "that administrator became a product manager in 2020, in the product function I was incubating.",
+      "receipts": [
+        "E-08",
+        "E-14"
+      ],
+      "band": 150,
+      "where": "sales pit / finance corner boundary.",
+      "without": "two workers back-to-back, each with a spreadsheet titled `CUSTOMERS (real)`; a third between them holding both printouts, looking from one to the other.",
+      "built": "one screen; a pipeline flowing between `CRM → ERP → HRIS` icons; the person in the middle is sitting down. A Salesforce Admin hired 2019."
+    },
+    {
+      "id": "G5.1",
+      "title": "The second office, on the network the same year",
+      "strip": {
+        "year": "2019",
+        "headcount": "~150",
+        "descriptor": "a clean-energy company, now $3B+"
+      },
+      "already": "In 2019 Chicago opened and the offices were linked by VPN the same year, at ~150 people. A few years earlier, at a $200M company on a nine-building campus, I'd linked the buildings with private fiber.",
+      "prevented": "with a second office, your network between cities is a courier account — a padded envelope with a hard drive in it, and someone at the far end checking their watch.",
+      "worthLater": "every office since — Lawrence, Austin, New York, DC — opened on the VPN from day one.",
+      "receipts": [
+        "E-27",
+        "E-23",
+        "E-05"
+      ],
+      "band": 150,
+      "where": "outside, both front doors, and the line between.",
+      "without": "a worker at HQ's door handing a courier a padded envelope with a hard-drive bulge; in the inset office a worker at *their* door checking a watch; a tiny truck moving along the dotted line between.",
+      "built": "a solid, blinking link between HQ and the inset office; both workers at desks. VPN between the offices from 2019, the year the second office opened — and, a decade earlier, private fiber between nine buildings at the campus."
+    },
+    {
+      "id": "G2.4",
+      "title": "Twenty-nine rooms, one standard",
+      "strip": {
+        "year": "2020",
+        "headcount": "~220",
+        "descriptor": "a clean-energy company, now $3B+"
+      },
+      "already": "I built twenty-nine conference rooms across Boston, Chicago, New York, DC and Lawrence to one standard, so any room behaved like every other room — the function was fixed from the first two in 2018; the kit itself was unified by the time DC opened in 2023. Most of the rooms came through 2020, at ~220 people, when everyone went home.",
+      "prevented": "by now your meetings start with four people around one laptop pointed at a TV, and a colleague in another city frozen mid-sentence on the wall.",
+      "worthLater": "when everyone went home in 2020, the meetings just moved. There was no AV project.",
+      "receipts": [
+        "E-25",
+        "E-28"
+      ],
+      "band": 220,
+      "where": "the conference room, and the inset office's.",
+      "without": "four people huddled around one laptop pointed at a wall TV with a dangling dongle; on the wall between HQ and the inset office, a pixelated face frozen mid-sentence, a worker on each side waving.",
+      "built": "the same kit in every room in every city — camera bar, touch panel, everyone seated, the remote face moving, the wave returned. Two rooms in 2018; expanded hard through 2020; 29 rooms across five cities today. *(G5.5 merged in — D-025.)*"
+    },
+    {
+      "id": "G7.3a",
+      "title": "Product had an owner before it had a team",
+      "strip": {
+        "year": "2020",
+        "headcount": "~220",
+        "descriptor": "a clean-energy company, now $3B+"
+      },
+      "already": "In 2020, at ~220 people, I took the Director of Product title with two product managers — one the Salesforce administrator I'd hired in 2019, one an internal move — so the function existed before the company was ready to staff it properly.",
+      "prevented": "by now there is a whiteboard of feature requests with nobody's name on it, and sales and engineering are pointing at each other across it.",
+      "worthLater": "handed to a dedicated lead the next year, at ~360.",
+      "receipts": [
+        "E-14"
+      ],
+      "band": 220,
+      "where": "the conference room (glass wall, visible from the floor).",
+      "without": "a whiteboard in the glass room titled `FEATURE REQUESTS`, full, with nobody's name on it; a sales sprite and an engineering sprite pointing at each other across it.",
+      "built": "product had an owner before there was a product team. In 2020 Josh took the Director of Product title with two PMs — the 2019 Salesforce admin, and an internal move. The `PRODUCT` hat goes *on* here; it walks off at 360 (G7.3)."
+    },
+    {
+      "id": "G5.3",
+      "title": "Virtualised, with a tested recovery plan",
+      "strip": {
+        "year": "2013",
+        "headcount": "300+",
+        "descriptor": "a $200M company, nine-building campus"
+      },
+      "already": "At the campus I moved the physical servers to VMware in 2013 and added Commvault with a disaster-recovery plan in 2015, on NetApp storage — and tested the restore before calling it done.",
+      "prevented": "at 300 there is a tower PC in the closet hand-labelled \"MAIN SERVER\" with a sign that says do not turn off, two fans pointed at it, and a backup that is a schedule rather than a tested restore.",
+      "receipts": [
+        "E-09"
+      ],
+      "band": 360,
+      "where": "the closet (callback to G1.1).",
+      "without": "the closet again — *two* box fans, a `DO NOT TURN OFF` sign, a tower PC hand-labelled `MAIN SERVER`; a worker touches it and everyone freezes.",
+      "built": "a real rack with a small `VIRTUALISED` badge and a second small icon offsite (DR). No fans. VMware 2013; Commvault + DR 2015, the campus."
+    },
+    {
+      "id": "G5.4",
+      "title": "Phone costs down 33%, in 2011",
+      "strip": {
+        "year": "2011",
+        "headcount": "300+",
+        "descriptor": "a $200M company, nine-building campus"
+      },
+      "already": "In 2011, at a $200M company on a nine-building campus, I led the move to VoIP: communication costs down 33%, and the remote and call-centre teams no longer tied to a desk phone.",
+      "prevented": "with legacy telecom every seat is a line on a bill, every new one is a work order, and your call-centre team sits wherever the copper is.",
+      "worthLater": "by 2014, across network, telecom and hosting, costs were down ~40% while WAN capacity was up 33%.",
+      "receipts": [
+        "E-10",
+        "E-11"
+      ],
+      "band": 360,
+      "where": "sales pit / call-centre row.",
+      "without": "a worker feeding coins into a desk phone; a wall of desk phones with cords tangled into one knot that runs into the closet.",
+      "built": "headsets, no cords, a `−33%` receipt taped to the wall. VoIP, 2011, the campus."
+    },
+    {
+      "id": "G5.6",
+      "title": "One copy of the company's data",
+      "strip": {
+        "year": "2012",
+        "headcount": "300+",
+        "descriptor": "a $200M company, nine-building campus"
+      },
+      "already": "In 2012, at a $200M company on a nine-building campus, I migrated and centralised company data onto NetApp — off workstations, portable hard drives and consumer NAS boxes.",
+      "prevented": "by now there are three drives on your desks labelled FINAL, and someone is under a desk looking for the fourth.",
+      "worthLater": "the 2013 virtualisation and the 2015 DR plan had one place to protect.",
+      "receipts": [
+        "E-09"
+      ],
+      "band": 360,
+      "where": "everywhere, inset office especially.",
+      "without": "labelled portable drives on every desk — `FINAL`, `FINAL2`, `FINAL-real`; a consumer NAS box blinking on a windowsill; a worker hunting under a desk for a drive.",
+      "built": "a single storage icon in the (real) closet; the under-desk worker sitting up. NetApp and centralisation of company data, 2012, the campus."
+    },
+    {
+      "id": "G7.3",
+      "title": "Built it, then handed it off — twice",
+      "strip": {
+        "year": "2021",
+        "headcount": "~360",
+        "descriptor": "a clean-energy company, now $3B+"
+      },
+      "already": "I incubated software development in 2018 — three developers and a product manager through a team-extension partner — and handed it to a dedicated lead in 2019. I incubated product in 2020, as Director of Product with two PMs, and handed that off in 2021, at ~360 people.",
+      "prevented": "by now the person who built the functions is the bottleneck on all of them — five hats on one head, walking carefully.",
+      "worthLater": "IT itself got leadership layers in 2023, on the same principle: build it, then make sure it doesn't need you. And before any of this, at the campus, a web team grown from four to eighty.",
+      "receipts": [
+        "E-14",
+        "E-02",
+        "E-18"
+      ],
+      "band": 360,
+      "where": "first-floor corridor.",
+      "without": "one IT manager wearing a stack of hats labelled `INFRA` `SEC` `SUPPORT` `DEV` `PRODUCT`, walking carefully. The person who built the functions is the bottleneck on all of them.",
+      "built": "five hats on five heads. `DEV` walked off to its own floor in 2019; `PRODUCT` walks off now, 2021. The original manager has one hat."
+    },
+    {
+      "id": "G3.1",
+      "title": "Day one, with a laptop and a badge",
+      "strip": {
+        "year": "2022",
+        "headcount": "~490",
+        "descriptor": "a clean-energy company, now $3B+"
+      },
+      "already": "In 2022, at ~490 people, I hired a Systems & Automation Engineer and started a function: joiner/mover/leaver operations, SSO and SCIM configuration, workstation provisioning, and the integrations between systems.",
+      "prevented": "at your size onboarding is a person, not a process. A new hire sits at a bare desk in their coat while accounts get created by hand and a laptop gets ordered when someone remembers.",
+      "worthLater": "by 2026 the same process was running for 250 contractors on top of ~500 employees.",
+      "receipts": [
+        "E-03",
+        "E-30"
+      ],
+      "band": 490,
+      "where": "the sales pit, front row.",
+      "without": "a new hire sitting at a bare desk with their coat on; a wall calendar above them flipping pages; a `WELCOME!` balloon slowly deflating.",
+      "built": "the new hire's desk has a laptop, a badge and a coffee; the calendar shows one page. Joiner/mover/leaver automation, SSO/SCIM, provisioning — 2022."
+    },
+    {
+      "id": "G6.4",
+      "title": "Access control as part of the opening",
+      "strip": {
+        "year": "2022",
+        "headcount": "~490",
+        "descriptor": "a clean-energy company, now $3B+"
+      },
+      "already": "In 2022 Lawrence opened and Boston took a fourth floor, at ~490 people, with building access, intrusion detection, cabling and conferencing specified as part of the opening rather than added after it. Badge removal was a step on the offboarding checklist — manual, but on the list.",
+      "prevented": "by now your physical access is a fob system nobody administers and a door propped open with a chair. Offboarding reaches the accounts and stops at the building.",
+      "receipts": [
+        "E-05"
+      ],
+      "band": 490,
+      "where": "front door of the inset office.",
+      "without": "a worker tapping a badge at a door that stays shut; the next door propped open with an office chair.",
+      "built": "the reader goes green; the chair is a chair again; a small camera dome over the door. Offboarding reaches the doors."
+    },
+    {
+      "id": "G3.3",
+      "title": "Nine people, four functions, leaders between them and me",
+      "strip": {
+        "year": "2023",
+        "headcount": "~610",
+        "descriptor": "a $3B+ clean-energy company"
+      },
+      "already": "By 2023, at ~610 people, IT was nine people across Infrastructure, Cybersecurity, Network, Automation and Support, and I introduced leadership layers so the function no longer ran through one person.",
+      "prevented": "at your size IT is one box off to the side of the org chart with a dotted line to whoever signs the invoices — a single point of failure with no on-call rotation and no succession.",
+      "worthLater": "eleven people by 2026.",
+      "receipts": [
+        "E-02",
+        "E-13"
+      ],
+      "band": 610,
+      "where": "first-floor corridor wall.",
+      "without": "every department is a tree; IT is one box off to the side, dotted line to Finance, one very tired sprite in it.",
+      "built": "the wall poster's IT box is a small tree — Infrastructure, Security, Support — and its line goes to Technology, not Finance."
+    },
+    {
+      "id": "G4.1",
+      "title": "A security function, before the auditor arrived",
+      "strip": {
+        "year": "2023",
+        "headcount": "~610",
+        "descriptor": "a $3B+ clean-energy company"
+      },
+      "already": "In 2023, at ~610 people, I hired an Information Security Manager and stood up the policy framework, audit readiness and cross-department compliance workflows. A Security Analyst followed in 2025.",
+      "prevented": "around this size an enterprise prospect's procurement team asks to see your security program before they'll sign, and the honest answer — with no program, no policies and no one whose job it is — is \"we don't have one\". The deal dies in procurement, not in the budget.",
+      "receipts": [
+        "E-04"
+      ],
+      "band": 610,
+      "where": "front door + sales pit (two-part; both visible).",
+      "without": "a suit with a clipboard labelled `AUDITOR` at a shut front door; in the sales pit a worker's `$` thought-bubble fades to grey.",
+      "built": "the door is open, a handshake, a first-floor desk with an `InfoSec` nameplate and a binder. InfoSec Manager 2023; Security Analyst 2025."
+    },
+    {
+      "id": "G5.2",
+      "title": "Five years of network before a network engineer",
+      "strip": {
+        "year": "2023",
+        "headcount": "~610",
+        "descriptor": "a $3B+ clean-energy company"
+      },
+      "already": "The Palo Alto had been at the edge since 2018; Ruckus and Extreme wireless and a Cisco core carried the floors. In 2023, at ~610 people, I hired a network engineer and made the network a function — someone whose job it was.",
+      "prevented": "by now the far wing of your second office runs on a consumer router on a filing cabinet, and the people out there are holding their phones in the air.",
+      "receipts": [
+        "E-06"
+      ],
+      "band": 610,
+      "where": "inset office, far wing.",
+      "without": "a cluster of workers in the far wing holding phones up, one standing on a chair; a consumer router blinking sadly on a filing cabinet.",
+      "built": "ceiling APs at regular intervals; everyone seated. Ruckus/Extreme wireless, Cisco core; a Network Engineer starts the function, 2023."
+    },
+    {
+      "id": "G6.3",
+      "title": "Three offices in one year, one playbook",
+      "strip": {
+        "year": "2023",
+        "headcount": "~610",
+        "descriptor": "a $3B+ clean-energy company"
+      },
+      "already": "In 2023 Austin, New York and Washington DC opened in the same year, at ~610 people, each with structured cabling, building access, intrusion detection and conferencing specified before move-in. Six offices in total, over 100,000 sq ft. Years earlier — 2015 to 2017, at a $200M company on a nine-building campus — two new facilities of 200,000+ sq ft.",
+      "prevented": "by now a new office is a signed lease and a moving truck, and IT is one person in the doorway of an empty shell holding a single cable, three weeks before people arrive.",
+      "receipts": [
+        "E-05",
+        "E-11"
+      ],
+      "band": 610,
+      "where": "outside, new pin on the map.",
+      "without": "outside, a moving truck at an empty building shell (`100,000 SQ FT` on a banner); one worker in the doorway holding a single ethernet cable, looking up.",
+      "built": "the new shell has cable trays, a badge reader, a camera dome and a room with a camera bar; the worker in the doorway holds a clipboard with everything ticked."
+    },
+    {
+      "id": "G6.1",
+      "title": "A portfolio, not a pile",
+      "strip": {
+        "year": "2024",
+        "headcount": "~650 → 750",
+        "descriptor": "a $3B+ clean-energy company"
+      },
+      "already": "The SaaS portfolio has been a partnership with Sales, Finance, HR and Operations leaders since 2018; the major consolidation and integration work landed in 2024. The renewals and licensing audits of the same year are the next panel.",
+      "prevented": "by now every one of your departments has solved its own problem with its own subscription, two of them are nearly the same product, and nobody can say what the company pays for twice.",
+      "receipts": [
+        "E-08"
+      ],
+      "band": 750,
+      "where": "everywhere.",
+      "without": "a different logo balloon over every head, two that are *almost* the same, balloons drifting up into the ceiling. Nobody knows what the company pays for, twice.",
+      "built": "a handful of shared balloons, tethered; a small `PORTFOLIO` board in the corridor."
+    },
+    {
+      "id": "G6.2",
+      "title": "$500,000+ back, in one year",
+      "strip": {
+        "year": "2024",
+        "headcount": "~650 → 750",
+        "descriptor": "a $3B+ clean-energy company"
+      },
+      "already": "I owned enterprise IT budgeting and vendor strategy. In 2024 that produced over $500,000 in savings, most of it recurring, through renegotiation, renewals and licensing audits — the same year as the portfolio consolidation in the previous panel.",
+      "prevented": "by now contracts auto-renew because nobody owns them, and your finance corner is under a slope of paper with a hand sticking out.",
+      "receipts": [
+        "E-07"
+      ],
+      "band": 750,
+      "where": "finance corner.",
+      "without": "the finance corner buried under a slope of paper, each sheet a logo and a date, a hand with a pen sticking out, top sheet `AUTO-RENEWED`.",
+      "built": "a tidy renewal calendar on the wall; the finance worker upright; a framed receipt reading `$500,000+ · 2024`."
+    },
+    {
+      "id": "G7.1",
+      "title": "The policy arrived with the tool",
+      "strip": {
+        "year": "2025",
+        "headcount": "~700",
+        "descriptor": "a $3B+ clean-energy company"
+      },
+      "already": "In 2025, at ~700 people, I introduced ChatGPT to the whole organisation and the governance with it — tool evaluation, usage policy, vendor management and cost controls — rather than writing policy to chase a tool people already had. Glean followed in 2026, and Claude mid-year.",
+      "prevented": "by now someone is already pasting confidential documents into an assistant on a personal account, and the company card is next.",
+      "receipts": [
+        "E-12"
+      ],
+      "band": 750,
+      "where": "sales pit, open floor.",
+      "without": "a cheerful robot wandering the floor, badge `UNVETTED`, happily eating a stack of `CONFIDENTIAL` documents while another worker hands it the company card.",
+      "built": "the robot's badge reads `APPROVED`; it wears a tiny policy document as a lanyard; documents pass through a small gate first; the company card is back in Finance."
+    },
+    {
+      "id": "G7.2",
+      "title": "A chair at the table",
+      "strip": {
+        "year": "2022→",
+        "headcount": "~490→750",
+        "descriptor": "a $3B+ clean-energy company"
+      },
+      "already": "Since the second half of 2022 I have reported to the SVP of Product & Technology and contributed to strategic planning and cross-functional initiatives across the company — the technology voice in the room where the three-year plan gets drawn.",
+      "prevented": "by now the plan gets drawn in a room with six chairs, and technology is a change request that arrives after the decision — usually with a date already on it.",
+      "worthLater": "Dev in 2019, Product in 2021, IT's own leaders in 2023 — three functions handed over, so the floor runs without me in that meeting.",
+      "receipts": [
+        "E-13",
+        "E-14",
+        "E-02"
+      ],
+      "band": 750,
+      "where": "top floor.",
+      "without": "top floor, glass room, whiteboard `NEXT 3 YEARS`, six chairs, five people; the empty chair's nameplate reads `TECHNOLOGY`.",
+      "built": "the chair is occupied — **the only place Josh appears, sitting in a meeting** (D-007). Below, the floor runs without him."
+    },
+    {
+      "id": "G7.4",
+      "title": "Someone whose job is the knowledge",
+      "strip": {
+        "year": "2026",
+        "headcount": "~750",
+        "descriptor": "a $3B+ clean-energy company"
+      },
+      "already": "In 2026, at ~750 people, the company's Business Librarian — a role it had had since 2020 — moved into the IT function: knowledge management next to the systems that hold the knowledge, the same year Glean gave the company one place to search.",
+      "prevented": "by now your real procedures live in people's heads and in seven versions of a document, and every departure takes some of them along.",
+      "receipts": [
+        "E-26",
+        "E-12"
+      ],
+      "band": 750,
+      "where": "first-floor corridor, near the org chart.",
+      "without": "a worker holding `HOW TO DO THE THING (v3?)`, asking a colleague, who points at a third, who points at a padlocked filing cabinet; a wiki icon with cobwebs.",
+      "built": "one worker at a desk with a `LIBRARY` sign; the wiki icon is clean; the page in the first worker's hand says `v1 · current`. A Business Librarian, 2026."
+    }
+  ],
+  "beyond": {
+    "panel": {
+      "id": "B",
+      "title": "Nobody builds IT from zero at your size",
+      "strip": {
+        "year": "1,000+",
+        "headcount": "your company",
+        "descriptor": "every receipt in this building, translated"
+      },
+      "already": "Everything in this building was decided ahead of need — at 80, at 150, at 600 — by one person who stayed long enough to see the 2018 decisions carry 750 people across six cities.",
+      "prevented": "nobody builds IT from zero at your size. Except every time you acquire a company, open a region, stand up a business unit, or a new category of tool arrives before anyone owns it. Each of those is a from-zero build inside a big company, with the same failure modes as the closet and the sticky notes — and more at stake.",
+      "worthLater": "the checklist below maps each receipt to what it looks like at yours.",
+      "receipts": [
+        "E-01",
+        "E-02",
+        "E-03",
+        "E-04",
+        "E-05",
+        "E-06",
+        "E-07",
+        "E-08",
+        "E-09",
+        "E-10",
+        "E-11",
+        "E-12",
+        "E-13",
+        "E-14",
+        "E-15",
+        "E-16",
+        "E-17",
+        "E-18",
+        "E-19",
+        "E-20",
+        "E-21",
+        "E-22",
+        "E-23",
+        "E-24",
+        "E-25",
+        "E-26",
+        "E-27",
+        "E-28",
+        "E-29",
+        "E-30"
+      ]
+    },
+    "translation": [
+      {
+        "receipt": "Six site builds; three in one year on one playbook (G2.2, G6.3, G6.4)",
+        "atScale": "the site-integration playbook for every acquisition and new region"
+      },
+      {
+        "receipt": "AI governance shipped *with* the tool, 2025 (G7.1)",
+        "atScale": "the same problem at any size; policy with the rollout, not after it"
+      },
+      {
+        "receipt": "Dev and Product incubated, then handed off (G7.3, G7.3a)",
+        "atScale": "the internal-startup pattern: stand it up, staff it, give it away"
+      },
+      {
+        "receipt": "Leadership layers at 610 (G3.3)",
+        "atScale": "org design when a function outgrows its founder"
+      },
+      {
+        "receipt": "$500,000+ a year back from vendors (G6.2)",
+        "atScale": "the licensing and renewal program every enterprise runs annually"
+      },
+      {
+        "receipt": "A security function and audit readiness before the ask (G4.1)",
+        "atScale": "the readiness work that precedes any certification"
+      },
+      {
+        "receipt": "Cloud identity in 2018; passwordless in 2025 (G1.1, G1.2)",
+        "atScale": "identity as the platform; everything else plugs in"
+      },
+      {
+        "receipt": "JML automation covering 250 contractors (G3.1)",
+        "atScale": "joiner/mover/leaver at the scale of a workforce that churns"
+      },
+      {
+        "receipt": "Nine functions, one building, eight years (all)",
+        "atScale": "the person you put on the thing that doesn't exist yet"
+      }
+    ]
+  },
+  "copy": {
+    "toggleToWithout": "See it without him",
+    "toggleToBuilt": "What he'd already built",
+    "nudge": "Now see what this looks like without him.",
+    "shareCaption": "By the time the company was your size, Josh had already fixed this.",
+    "ogTitle": "Ahead of It — Josh Gister's résumé",
+    "sliderLabel": "at your scale",
+    "ogDescription": "Build it, then make sure it doesn't need you.",
+    "contact": {
+      "linkedin": "https://www.linkedin.com/in/joshgister/",
+      "email": {
+        "user": "joshua.gister",
+        "domain": "gmail.com"
+      }
+    }
+  },
+  "ambient": {
+    "hover": "Someone is always on call. In the built state, it's a rotation."
+  }
+}
