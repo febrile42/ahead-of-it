@@ -219,3 +219,19 @@ Ensure you are using Opus 5.5 for art style and animation as it is superior." So
 pipeline stays (`art/`), and every sprite-drawing or animation brief is executed by `opus`,
 not sonnet. Known weaknesses to fix first: desk/chair silhouette, front-view stride, no
 ground shadows. Stock/commission fallbacks remain on paper only.
+
+**D-035 · 2026-09-24 · The art pipeline exports scene files; the web is a dumb painter.**
+PH1-04's scene was a flat elevation of floor strips, not the isometric room the art pass
+draws (R-02). Rather than port composition to TypeScript, the art side exports per
+band × state a placement list with explicit hotspot rects, depth, manifest-keyed
+sprite/frame references, baked overlay sprites for procedural marks, and `views[]` from
+day one; the art paints its own previews from that export, so the web canvas must match
+pixel-for-pixel (a test). Contract: `docs/product/SCENE-FORMAT.md`. Cumulative composition
+(R-03a) is the art side's job. Split: PH1-08a spike (opus), PH1-08b export (sonnet, after
+PH1-07), PH1-09 painter (sonnet, after PH1-04 fixes). PH1-04's interaction plumbing merges
+with fixes; its `slots/layout/assembler` are replaced.
+
+**D-036 · (pending PH1-08a) · Floor / width convention for views.** Proposed: views ≤ 390
+native px wide; one view per gag-carrying floor plus an exterior stack sprite as switcher;
+inset in the ground view from 150; map as an exterior overlay from 490; ≥44 CSS px hotspot
+spacing enforced. Decided after the spike's mocks.
