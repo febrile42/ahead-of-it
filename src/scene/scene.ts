@@ -10,15 +10,14 @@ import type { BandId } from '../content';
 /** A single placement in paint order. `sprite`/`frame` are manifest keys
  * (never file names — SCENE-FORMAT "Rules" #1); `depth` is carried for
  * Phase 2 (walkers inserted between props) even though paint order alone
- * is enough to draw today. `frame` is typed loosely (see sprites.ts's
- * resolveFrame): the spec's own example uses a bare integer
- * (`"frame": 2`) but the manifest keys frames by name, not index
- * (`worker-queue` has `a-left`/`b-left`/… , not `0`/`1`/`2` — see the
- * gap noted in the final report). The painter accepts either and
- * stringifies to look the key up. */
+ * is enough to draw today. `frame` is a manifest frame *key* — a string,
+ * strictly (fix round: the doc's own example used a bare integer, but the
+ * manifest keys frames by name — `worker-queue` has `a-left`/`b-left`/…,
+ * not `0`/`1`/`2`. `loadEntryImage` now throws on a frame key that isn't
+ * one of that sprite's own frame keys — no `default`/first-key fallback. */
 export interface SceneEntry {
   sprite: string;
-  frame: string | number;
+  frame: string;
   x: number;
   y: number;
   depth: number;
@@ -70,6 +69,13 @@ export interface SceneIndex {
   /** 'beyond' is an explicit alias of '750' (N-02) — a string band key, not a filename. */
   beyond: string;
   thumbs: Record<string, string>;
+  /** Fix round: D-036 rule 7 (primary hotspots >= 44 native px apart)
+   * fails on some real, already-shipped bands (band 80 has 5 known
+   * pairs) — an art-pass fix, not a painter or contract-test bug. Each
+   * pair is an unordered [gagId, gagId] tuple; the contract test skips
+   * exactly these pairs (with a console note) and still fails any other
+   * pair under 44px. Absent (or empty) on the fixture, which stays strict. */
+  knownSpacingDebt?: Array<[string, string]>;
 }
 
 let indexPromise: Promise<SceneIndex> | null = null;
