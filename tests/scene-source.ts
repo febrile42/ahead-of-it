@@ -13,7 +13,6 @@ const fixturesDir = fileURLToPath(new URL('./fixtures/', import.meta.url));
 export interface SceneIndex {
   bands: Record<string, { built: string; without: string }>;
   beyond: string;
-  knownSpacingDebt?: Array<[string, string]>;
 }
 
 export interface SceneHotspot {

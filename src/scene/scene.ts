@@ -69,13 +69,6 @@ export interface SceneIndex {
   /** 'beyond' is an explicit alias of '750' (N-02) — a string band key, not a filename. */
   beyond: string;
   thumbs: Record<string, string>;
-  /** Fix round: D-036 rule 7 (primary hotspots >= 44 native px apart)
-   * fails on some real, already-shipped bands (band 80 has 5 known
-   * pairs) — an art-pass fix, not a painter or contract-test bug. Each
-   * pair is an unordered [gagId, gagId] tuple; the contract test skips
-   * exactly these pairs (with a console note) and still fails any other
-   * pair under 44px. Absent (or empty) on the fixture, which stays strict. */
-  knownSpacingDebt?: Array<[string, string]>;
 }
 
 let indexPromise: Promise<SceneIndex> | null = null;
