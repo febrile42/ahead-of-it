@@ -237,11 +237,26 @@ A gag's key object must read at native size, not only in the 4× preview:
   front door (`hq-door`, `open` / `closed`, an awning) on the front-left face; the road
   runs out of the door toward the viewer and round to the inset office's doorway.
 - **Trolley (G3.2).** Chrome wire — a light grid over a basket full of dark laptops,
-  so it reads as wire, not a box — a raised red handle, castors, the note on the heap.
-- **G2.4.** The conference TV is 22 x 19 units; the face is drawn at screen aspect (a
-  face unit is 2 px wide, 1 px tall) and the freeze quantises to squares on screen.
-  The adapter is `sticky` yellow. The inset office carries the second part:
-  `tv-frozen-small` with two `worker-wave` (from behind, arm up) each side of it, or
-  `tv-live-small` under `camera-bar-small`.
+  so it reads as wire, not a box — raised on a chassis (rails, legs, a castor at each
+  corner, daylight under it), two lids open and leaning back, the handle and its red
+  grip at the +c end where only floor is behind it, the note low on the near side.
+- **Cable (G2.2).** One continuous 2 px blue cable, outlined, with short grey tape
+  strips about every 6 px (`TAPE_EVERY`), routed across open floor well inside the
+  slab; the step-over straddles it at the crossing, beside the CAUTION sign.
+- **G2.4.** Conference-size TV (22 x 19 units) in both rooms; faces drawn at screen
+  aspect (a face unit is 2 px wide, 1 px tall), freeze blocks square on screen. Both
+  ends of the stalled call are frozen mid-wave: the conference TV shows the inset's
+  person (red), `tv-frozen-inset` shows HQ's (green). In the inset, nobody stands in
+  front of the screen; `worker-wave` (profile, near arm up, mouth open) stands beside
+  it. Built: `tv-live-inset` under `camera-bar`, and `worker-seated-wave` on a bare
+  `chair` facing it. The adapter is `sticky` yellow.
+- **G4.2.** The finance desk stands a tile off the wall; a long rod angles down over
+  the wall top; the line ends in a J-hook (ring eye, shank, bend, barbed point) with
+  the envelope hanging from its bend above the screen, and `worker-reach`'s arm is a
+  2 px diagonal up to it. Arm hooks in `seated_frame` draw on the desk canvas.
+- **G1.2.** Post-its are outlined paper squares stuck on the monitor's corners and
+  overhanging its edge, never screen pixels; `worker-peel` takes the bottom-left one
+  (`NOTE_PEEL`).
 - **The hat (G7.3a).** A rounded red crown, a white band with PRODUCT in the glyphs,
-  a brim wider than both, set on the crown of the head so the face shows (38 x 36).
+  a brim wider than both, set on the crown of the head so the face shows (38 x 36);
+  the wearer stands clear of the board's OWNER: line.
