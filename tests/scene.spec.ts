@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
+import { expectedHotspotCount, hasRealScenes, interceptFixtureScenes } from './scene-source';
 
 // Duplicated rather than imported from src/scene/bands: that module pulls
 // in src/content/content.json, and Playwright's own Node ESM loader (this
@@ -22,50 +23,11 @@ const content = JSON.parse(readFileSync(new URL('../src/content/content.json', i
 
 // PH1-09/D-035: hotspot geometry is no longer computed in the web (that
 // was src/scene/slots.ts, deleted) — it comes straight from the art
-// pipeline's exported scene file (docs/product/SCENE-FORMAT.md). PH1-08b
-// hasn't landed, so public/sprites/scenes/ doesn't exist in this
-// worktree: `interceptFixtureScenes` serves the hand-written band-80
-// fixture (tests/fixtures/) at the same URLs the app fetches in
-// production. Every other band has no scene file at all yet, which is
-// expected to render the "not drawn yet" placeholder (src/main.ts's
-// renderMissingScene) rather than crash — see the band-loop tests below.
-const FIXTURE_INDEX = JSON.parse(
-  readFileSync(new URL('./fixtures/index.json', import.meta.url), 'utf-8')
-) as { bands: Record<string, { built: string; without: string }> };
-
-const FIXTURE_SCENES: Record<string, unknown> = {
-  '80-built.json': JSON.parse(readFileSync(new URL('./fixtures/80-built.json', import.meta.url), 'utf-8')),
-  '80-without.json': JSON.parse(readFileSync(new URL('./fixtures/80-without.json', import.meta.url), 'utf-8')),
-};
-
-async function interceptFixtureScenes(page: Page) {
-  await page.route('**/sprites/scenes/index.json', async (route) => {
-    await route.fulfill({ contentType: 'application/json', body: JSON.stringify(FIXTURE_INDEX) });
-  });
-  for (const [fileName, body] of Object.entries(FIXTURE_SCENES)) {
-    await page.route(`**/sprites/scenes/${fileName}`, async (route) => {
-      await route.fulfill({ contentType: 'application/json', body: JSON.stringify(body) });
-    });
-  }
-  // Everything else under sprites/scenes/ (every band but 80) has no
-  // fixture and no real export yet — let the request fall through to the
-  // dev/preview server, where it 404s (same-origin) and src/main.ts's
-  // renderMissingScene takes over.
-}
-
-function fixtureHotspotCount(band: BandId, state: 'built' | 'without'): number {
-  if (band !== 80) return 0; // no fixture for any other band yet — the placeholder draws zero hotspots
-  const scene = FIXTURE_SCENES[`80-${state}.json`] as { views: Array<{ hotspots: unknown[] }> };
-  return scene.views[0].hotspots.length;
-}
-
-// PH1-09 acceptance: every band x both states renders at 390px without
-// crashing; where a scene file exists (band 80, via the fixture), every
-// hotspot is present, focusable, >=44px and centred on its rect; bands
-// with no scene file yet render the placeholder with zero hotspots
-// (expected — see the fixture comment above). Toggling changes the
-// canvas; no request leaves origin. Also generates the three required
-// screenshots (80/150/750, both states) under tests/screenshots/.
+// pipeline's exported scene file (docs/product/SCENE-FORMAT.md).
+// `interceptFixtureScenes` (tests/scene-source.ts) only serves the
+// hand-written band-80 fixture when the real export doesn't exist yet —
+// once public/sprites/scenes/ lands for real (fix round item 2), this
+// suite asserts real geometry with no changes needed here.
 
 const VIEWPORT = { width: 390, height: 900 };
 
@@ -136,7 +98,7 @@ test.describe('every band x both states (PH1-09 acceptance)', () => {
 
         const layerHandle = page.locator('#hotspots-layer');
         const hotspots = page.locator('.hotspot');
-        await expect(hotspots).toHaveCount(fixtureHotspotCount(band, state));
+        await expect(hotspots).toHaveCount(expectedHotspotCount(band, state));
 
         const bufferW = Number(await layerHandle.getAttribute('data-buffer-w'));
         const count = await hotspots.count();
@@ -212,10 +174,11 @@ test.describe('email is never a joined string in the page', () => {
 });
 
 test.describe('screenshots (acceptance: bands 80/150/750, both states)', () => {
-  // Only band 80 has a scene file (the fixture); 150 and 750 render the
-  // "not drawn yet" placeholder — expected until PH1-08b lands, and
-  // exactly what the opus reviewer should see when reading these against
-  // art/preview/.
+  // With no real export, only band 80 has a scene file (the fixture);
+  // 150 and 750 render the "not drawn yet" placeholder — expected until
+  // PH1-08b lands. Once it does (hasRealScenes()), all three should show
+  // real (or, for 750 until later art, placeholder) content per whatever
+  // public/sprites/scenes/ actually has — no change needed here either way.
   for (const band of [80, 150, 750] as const) {
     for (const state of ['built', 'without'] as const) {
       test(`screenshot band ${band} / ${state}`, async ({ page }) => {
@@ -229,4 +192,14 @@ test.describe('screenshots (acceptance: bands 80/150/750, both states)', () => {
       });
     }
   }
+});
+
+test.describe('scene source (fix round item 2 sanity)', () => {
+  test('records which source this run actually used', async () => {
+    // Not an assertion on behaviour — just makes it obvious from the
+    // report which mode the suite ran in, since the same tests above
+    // cover both.
+    // eslint-disable-next-line no-console
+    console.info(`scene.spec.ts ran against ${hasRealScenes() ? 'the real public/sprites/scenes' : 'tests/fixtures'}`);
+  });
 });

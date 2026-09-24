@@ -1,22 +1,11 @@
-import { readFileSync } from 'node:fs';
 import { expect, test } from '@playwright/test';
-import type { Page } from '@playwright/test';
+import { interceptFixtureScenes } from './scene-source';
 
 // PH1-09/D-035: the default band (80) needs a real scene file to measure
-// CLS/scroll against something other than the "not drawn yet" placeholder
-// — public/sprites/scenes/ doesn't exist yet (PH1-08b hasn't landed), so
-// this serves the hand-written fixture at the URL the app actually
-// fetches. See tests/scene.spec.ts for the fuller version of this shim.
-async function interceptFixtureScenes(page: Page) {
-  const index = readFileSync(new URL('./fixtures/index.json', import.meta.url), 'utf-8');
-  const built = readFileSync(new URL('./fixtures/80-built.json', import.meta.url), 'utf-8');
-  await page.route('**/sprites/scenes/index.json', (route) =>
-    route.fulfill({ contentType: 'application/json', body: index })
-  );
-  await page.route('**/sprites/scenes/80-built.json', (route) =>
-    route.fulfill({ contentType: 'application/json', body: built })
-  );
-}
+// CLS/scroll against something other than the "not drawn yet" placeholder.
+// `interceptFixtureScenes` (tests/scene-source.ts) only serves the
+// hand-written fixture when public/sprites/scenes/ doesn't exist yet — it
+// never masks a real export.
 
 // PH1-04 review S1/S2: everything above the canvas (slider, readout,
 // ticks, toggle, tagline) used to be built by JS into empty roots, and the
