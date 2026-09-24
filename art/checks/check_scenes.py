@@ -12,7 +12,9 @@ Checks:
                          non-`ground` view holds >= 1 primary hotspot (rule 2); size
                          w<=360, h<=240 (rule 3); `focus` in bounds of its view (the
                          mastermind's ruling: focus is "the region to scroll to on a
-                         narrow viewport", not required to equal the whole view).
+                         narrow viewport", not required to equal the whole view); every
+                         view has a non-empty string `label` (SCENE-FORMAT.md — a
+                         missing one showed as "undefined (N)" in the view tab row).
   5. hotspot bounds     — every hotspot rect sits inside its view's canvas.
   6. one primary        — exactly one primary hotspot per gag per (band, state, its
                          views); D-036 rule 4.
@@ -187,6 +189,10 @@ def main():
                 fw, fh = focus.get("w"), focus.get("h")
                 if None in (fx, fy, fw, fh) or fx < 0 or fy < 0 or fx + fw > w or fy + fh > h:
                     fail(f"{fname}:{vid} — focus {focus} not in bounds of view {w}x{h}")
+
+                label = v.get("label")
+                if not isinstance(label, str) or not label.strip():
+                    fail(f"{fname}:{vid} — missing/empty label {label!r} (SCENE-FORMAT.md)")
 
                 hs = v.get("hotspots", [])
                 if vid != "ground" and not any(h_.get("primary") for h_ in hs):

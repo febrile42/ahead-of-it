@@ -5,6 +5,7 @@
   "views": [
     {
       "id": "ground",
+      "label": "Ground floor",
       "size": {
         "w": 300,
         "h": 214

@@ -5,6 +5,7 @@
   "views": [
     {
       "id": "ground",
+      "label": "Ground floor",
       "size": {
         "w": 330,
         "h": 222
@@ -1755,6 +1756,7 @@
     },
     {
       "id": "floor-2",
+      "label": "Floor 2",
       "size": {
         "w": 225,
         "h": 233
@@ -2956,6 +2958,7 @@
     },
     {
       "id": "street",
+      "label": "Street",
       "size": {
         "w": 200,
         "h": 148

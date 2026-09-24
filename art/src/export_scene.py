@@ -131,6 +131,20 @@ def _sort_views(vlist: list) -> list:
     return sorted(vlist, key=lambda v: VIEW_ORDER.index(v["id"]))
 
 
+def _view_label(view_id: str) -> str:
+    """SCENE-FORMAT.md requires a human `label` on every view (the tab row reads it
+    directly — without it the site showed "undefined (N)")."""
+    if view_id == "ground":
+        return "Ground floor"
+    if view_id == "top":
+        return "Top floor"
+    if view_id == "street":
+        return "Street"
+    if view_id.startswith("floor-"):
+        return f"Floor {view_id.split('-', 1)[1]}"
+    raise ValueError(f"no label rule for view id {view_id!r}")
+
+
 # ---------------------------------------------------------------------------
 # geometry helpers
 # ---------------------------------------------------------------------------
@@ -388,7 +402,7 @@ def export_band(lib: compose.Library, band: int, band_new_gags: set) -> dict:
             n_primary_own = sum(1 for h_ in hs if h_["primary"] and h_["gagId"] in band_new_gags)
             primaries_by_view[view_id] = n_primary_own
             vlist.append({
-                "id": view_id, "size": {"w": w, "h": h},
+                "id": view_id, "label": _view_label(view_id), "size": {"w": w, "h": h},
                 "focus": {"x": 0, "y": 0, "w": w, "h": h},
                 "entries": per_state[state]["entries"],
                 "hotspots": hs,
@@ -456,7 +470,7 @@ def export_placeholder_band(lib: compose.Library, band: int, cumulative_new: lis
                     w = max(w, bx + PLACEHOLDER_BOX + 8)
                     h = max(h, by + PLACEHOLDER_BOX + 8)
                 vlist.append({
-                    "id": view_id, "size": {"w": w, "h": h},
+                    "id": view_id, "label": _view_label(view_id), "size": {"w": w, "h": h},
                     "focus": {"x": 0, "y": 0, "w": w, "h": h},
                     "default": view_id == "ground",
                     "entries": entries, "hotspots": hs,
