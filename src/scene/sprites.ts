@@ -57,3 +57,29 @@ export async function loadSpriteFrame(
   const image = await loadImage(frames[0].file);
   return { image, entry };
 }
+
+/**
+ * PH1-09: resolves a scene entry's `{sprite, frame}` (SCENE-FORMAT — a
+ * manifest key plus a frame reference, never a file name) to an image.
+ * `frame` is stringified and looked up as a manifest frame *key*
+ * (`entry.frames[String(frame)]`, e.g. "green"/"red"/"a-left"), falling
+ * back to `"default"` and then whatever key the manifest lists first —
+ * SCENE-FORMAT's own example gives a bare integer (`"frame": 2`) but the
+ * manifest keys frames by name, not index, so this is the closest
+ * faithful reading; see the PH1-09 report for the gap. Phase 1 has no
+ * animation yet, so (like loadSpriteFrame) only the *first* image in the
+ * resolved key's array is drawn.
+ */
+export async function loadEntryImage(
+  manifest: SpriteManifest,
+  sprite: string,
+  frame: string | number
+): Promise<{ image: HTMLImageElement; entry: SpriteManifestEntry }> {
+  const entry = manifest[sprite];
+  if (!entry) throw new Error(`unknown sprite "${sprite}" in manifest (scene file references it)`);
+  const requested = String(frame);
+  const key = entry.frames[requested] ? requested : entry.frames.default ? 'default' : Object.keys(entry.frames)[0];
+  const frames = entry.frames[key];
+  const image = await loadImage(frames[0].file);
+  return { image, entry };
+}
