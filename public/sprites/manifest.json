@@ -1,0 +1,154 @@
+{
+  "badge-reader": {
+    "anchor": [
+      6,
+      20
+    ],
+    "frames": {
+      "green": [
+        {
+          "duration": 0,
+          "file": "badge-reader-green.png"
+        }
+      ],
+      "red": [
+        {
+          "duration": 0,
+          "file": "badge-reader-red.png"
+        }
+      ]
+    },
+    "h": 20,
+    "w": 12
+  },
+  "desk": {
+    "anchor": [
+      16,
+      32
+    ],
+    "frames": {
+      "default": [
+        {
+          "duration": 0,
+          "file": "desk.png"
+        }
+      ]
+    },
+    "h": 32,
+    "w": 32
+  },
+  "floor": {
+    "anchor": [
+      16,
+      16
+    ],
+    "frames": {
+      "default": [
+        {
+          "duration": 0,
+          "file": "floor.png"
+        }
+      ]
+    },
+    "h": 16,
+    "w": 32
+  },
+  "wall": {
+    "anchor": [
+      16,
+      48
+    ],
+    "frames": {
+      "default": [
+        {
+          "duration": 0,
+          "file": "wall.png"
+        }
+      ]
+    },
+    "h": 48,
+    "w": 32
+  },
+  "worker": {
+    "anchor": [
+      8,
+      24
+    ],
+    "frames": {
+      "down": [
+        {
+          "duration": 120,
+          "file": "worker-down-0.png"
+        },
+        {
+          "duration": 120,
+          "file": "worker-down-1.png"
+        },
+        {
+          "duration": 120,
+          "file": "worker-down-2.png"
+        },
+        {
+          "duration": 120,
+          "file": "worker-down-3.png"
+        }
+      ],
+      "left": [
+        {
+          "duration": 120,
+          "file": "worker-left-0.png"
+        },
+        {
+          "duration": 120,
+          "file": "worker-left-1.png"
+        },
+        {
+          "duration": 120,
+          "file": "worker-left-2.png"
+        },
+        {
+          "duration": 120,
+          "file": "worker-left-3.png"
+        }
+      ],
+      "right": [
+        {
+          "duration": 120,
+          "file": "worker-right-0.png"
+        },
+        {
+          "duration": 120,
+          "file": "worker-right-1.png"
+        },
+        {
+          "duration": 120,
+          "file": "worker-right-2.png"
+        },
+        {
+          "duration": 120,
+          "file": "worker-right-3.png"
+        }
+      ],
+      "up": [
+        {
+          "duration": 120,
+          "file": "worker-up-0.png"
+        },
+        {
+          "duration": 120,
+          "file": "worker-up-1.png"
+        },
+        {
+          "duration": 120,
+          "file": "worker-up-2.png"
+        },
+        {
+          "duration": 120,
+          "file": "worker-up-3.png"
+        }
+      ]
+    },
+    "h": 24,
+    "w": 16
+  }
+}
