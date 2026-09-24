@@ -1,5 +1,9 @@
+import { existsSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { expect, test } from '@playwright/test';
 import { interceptFixtureScenes } from './scene-source';
+
+const G2_1_THUMB_PATH = fileURLToPath(new URL('../public/sprites/thumbs/G2.1.png', import.meta.url));
 
 // PH1-04 review acceptance: keyboard behaviour at the slider's last stop
 // and the panel (B4), and a screenshot of the G2.1 panel showing the
@@ -94,6 +98,12 @@ test.describe('panel copy (B5): inline beat labels', () => {
 
 test.describe('panel thumbnail (fix round item 8 / review fix 5)', () => {
   test('a missing thumb hides the frame instead of showing a broken image', async ({ page }) => {
+    // Made deterministic (fix round item 2 of the second pass): this
+    // used to rely on public/sprites/thumbs/G2.1.png not existing in
+    // this worktree, which broke the moment PH1-08b started shipping
+    // real thumbs. A forced 404 exercises the same onerror path
+    // regardless of whether the real file exists here or not.
+    await page.route('**/sprites/thumbs/G2.1.png', (route) => route.fulfill({ status: 404, body: '' }));
     await interceptFixtureScenes(page);
     await page.setViewportSize(VIEWPORT);
     await page.goto('/');
@@ -104,13 +114,36 @@ test.describe('panel thumbnail (fix round item 8 / review fix 5)', () => {
     const img = thumb.locator('img');
     await expect(img).toHaveAttribute('src', '/sprites/thumbs/G2.1.png');
 
-    // public/sprites/thumbs/ doesn't exist yet in this worktree, so this
-    // is a real 404, not a simulated one — thumbImg.onerror (panel.ts)
-    // should hide the whole frame once it fires.
+    // thumbImg.onerror (panel.ts) should hide the whole frame once the
+    // forced 404 fires.
     await expect(thumb).toBeHidden();
     // `naturalWidth === 0` is the DOM's own signal that the <img> never
     // successfully decoded a bitmap — asserting on it, not just the CSS
     // hidden state, rules out "hidden but actually loaded fine".
     expect(await img.evaluate((el) => (el as HTMLImageElement).naturalWidth)).toBe(0);
+  });
+
+  test('a real thumb is shown, not hidden', async ({ page }) => {
+    // Only meaningful once PH1-08b has actually shipped this file — an
+    // explicit, named skip otherwise (not a silent pass and not a
+    // failure against a worktree that legitimately doesn't have it yet).
+    test.skip(
+      !existsSync(G2_1_THUMB_PATH),
+      'public/sprites/thumbs/G2.1.png does not exist in this worktree yet (PH1-08b hasn\'t shipped it here)'
+    );
+
+    await interceptFixtureScenes(page);
+    await page.setViewportSize(VIEWPORT);
+    await page.goto('/');
+    await page.waitForFunction(() => document.body.dataset.renderedToken !== undefined);
+
+    await page.locator('[data-gag-id="G2.1"]').click();
+    const thumb = page.locator('.panel__thumb');
+    const img = thumb.locator('img');
+    await expect(img).toHaveAttribute('src', '/sprites/thumbs/G2.1.png');
+
+    await expect(thumb).toBeVisible();
+    await expect(img).toBeVisible();
+    expect(await img.evaluate((el) => (el as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
   });
 });
