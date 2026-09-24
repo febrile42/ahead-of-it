@@ -707,6 +707,13 @@
           "part": "closet"
         },
         {
+          "sprite": "partition-c",
+          "frame": "default",
+          "x": 118,
+          "y": 92,
+          "depth": 2.05
+        },
+        {
           "sprite": "box-fan",
           "frame": "default",
           "x": 124,
@@ -716,6 +723,13 @@
           "part": "closet"
         },
         {
+          "sprite": "partition-r-door-open",
+          "frame": "default",
+          "x": 150,
+          "y": 92,
+          "depth": 2.5
+        },
+        {
           "sprite": "cable-spill",
           "frame": "default",
           "x": 166,
@@ -723,11 +737,11 @@
           "depth": 2.6
         },
         {
-          "sprite": "partition-c",
+          "sprite": "cable-floor-r",
           "frame": "default",
           "x": 118,
-          "y": 92,
-          "depth": 2.05
+          "y": 108,
+          "depth": 3.0
         },
         {
           "sprite": "partition-c",
@@ -737,13 +751,6 @@
           "depth": 3.05
         },
         {
-          "sprite": "partition-r-door-open",
-          "frame": "default",
-          "x": 150,
-          "y": 92,
-          "depth": 2.5
-        },
-        {
           "sprite": "partition-r-end",
           "frame": "default",
           "x": 134,
@@ -751,67 +758,22 @@
           "depth": 3.1
         },
         {
-          "sprite": "desk-postit",
+          "sprite": "sofa",
           "frame": "default",
-          "x": 150,
-          "y": 140,
-          "depth": 8,
-          "gagId": "G1.2",
-          "part": "pit"
+          "x": 102,
+          "y": 100,
+          "depth": 3.5,
+          "gagId": "G2.3",
+          "part": "lobby"
         },
         {
-          "sprite": "worker-seated",
-          "frame": "a",
-          "x": 150,
-          "y": 140,
-          "depth": 8.01,
-          "gagId": "G1.2",
-          "part": "pit"
-        },
-        {
-          "sprite": "desk-postit",
+          "sprite": "visitor",
           "frame": "default",
-          "x": 182,
-          "y": 156,
-          "depth": 10,
-          "gagId": "G1.2",
-          "part": "pit"
-        },
-        {
-          "sprite": "worker-peel",
-          "frame": "e",
-          "x": 182,
-          "y": 156,
-          "depth": 10.01,
-          "gagId": "G1.2",
-          "part": "pit"
-        },
-        {
-          "sprite": "desk-postit",
-          "frame": "default",
-          "x": 118,
-          "y": 156,
-          "depth": 10,
-          "gagId": "G1.2",
-          "part": "pit"
-        },
-        {
-          "sprite": "desk-postit",
-          "frame": "default",
-          "x": 150,
-          "y": 172,
-          "depth": 12,
-          "gagId": "G1.2",
-          "part": "pit"
-        },
-        {
-          "sprite": "worker-seated",
-          "frame": "d",
-          "x": 150,
-          "y": 172,
-          "depth": 12.01,
-          "gagId": "G1.2",
-          "part": "pit"
+          "x": 100,
+          "y": 100,
+          "depth": 3.9,
+          "gagId": "G2.3",
+          "part": "lobby"
         },
         {
           "sprite": "desk-dev",
@@ -823,11 +785,39 @@
           "part": "queue"
         },
         {
+          "sprite": "cable-floor-r",
+          "frame": "default",
+          "x": 102,
+          "y": 116,
+          "depth": 4.0
+        },
+        {
           "sprite": "worker-seated",
           "frame": "b",
           "x": 182,
           "y": 108,
           "depth": 4.01
+        },
+        {
+          "sprite": "cable-floor-turn",
+          "frame": "default",
+          "x": 86,
+          "y": 124,
+          "depth": 5.0
+        },
+        {
+          "sprite": "cable-floor-c",
+          "frame": "default",
+          "x": 102,
+          "y": 132,
+          "depth": 6.0
+        },
+        {
+          "sprite": "plant",
+          "frame": "default",
+          "x": 38,
+          "y": 132,
+          "depth": 6.4
         },
         {
           "sprite": "worker-c",
@@ -837,6 +827,13 @@
           "depth": 6.6,
           "gagId": "G2.1",
           "part": "queue"
+        },
+        {
+          "sprite": "cable-floor-c",
+          "frame": "default",
+          "x": 118,
+          "y": 140,
+          "depth": 7.0
         },
         {
           "sprite": "worker-queue",
@@ -857,6 +854,31 @@
           "part": "queue"
         },
         {
+          "sprite": "desk-postit",
+          "frame": "default",
+          "x": 150,
+          "y": 140,
+          "depth": 8,
+          "gagId": "G1.2",
+          "part": "pit"
+        },
+        {
+          "sprite": "cable-floor-c",
+          "frame": "default",
+          "x": 134,
+          "y": 148,
+          "depth": 8.0
+        },
+        {
+          "sprite": "worker-seated",
+          "frame": "a",
+          "x": 150,
+          "y": 140,
+          "depth": 8.01,
+          "gagId": "G1.2",
+          "part": "pit"
+        },
+        {
           "sprite": "worker-d",
           "frame": "idle-left",
           "x": 217,
@@ -864,6 +886,13 @@
           "depth": 8.46,
           "gagId": "G2.1",
           "part": "queue"
+        },
+        {
+          "sprite": "cable-floor-c",
+          "frame": "default",
+          "x": 150,
+          "y": 156,
+          "depth": 9.0
         },
         {
           "sprite": "worker-b",
@@ -884,53 +913,22 @@
           "part": "queue"
         },
         {
-          "sprite": "cable-floor-r",
+          "sprite": "desk-postit",
           "frame": "default",
-          "x": 118,
-          "y": 108,
-          "depth": 3.0
-        },
-        {
-          "sprite": "cable-floor-r",
-          "frame": "default",
-          "x": 102,
-          "y": 116,
-          "depth": 4.0
-        },
-        {
-          "sprite": "cable-floor-turn",
-          "frame": "default",
-          "x": 86,
-          "y": 124,
-          "depth": 5.0
-        },
-        {
-          "sprite": "cable-floor-c",
-          "frame": "default",
-          "x": 102,
-          "y": 132,
-          "depth": 6.0
-        },
-        {
-          "sprite": "cable-floor-c",
-          "frame": "default",
-          "x": 118,
-          "y": 140,
-          "depth": 7.0
-        },
-        {
-          "sprite": "cable-floor-c",
-          "frame": "default",
-          "x": 134,
-          "y": 148,
-          "depth": 8.0
-        },
-        {
-          "sprite": "cable-floor-c",
-          "frame": "default",
-          "x": 150,
+          "x": 182,
           "y": 156,
-          "depth": 9.0
+          "depth": 10,
+          "gagId": "G1.2",
+          "part": "pit"
+        },
+        {
+          "sprite": "desk-postit",
+          "frame": "default",
+          "x": 118,
+          "y": 156,
+          "depth": 10,
+          "gagId": "G1.2",
+          "part": "pit"
         },
         {
           "sprite": "cable-floor-c",
@@ -940,18 +938,20 @@
           "depth": 10.0
         },
         {
+          "sprite": "worker-peel",
+          "frame": "e",
+          "x": 182,
+          "y": 156,
+          "depth": 10.01,
+          "gagId": "G1.2",
+          "part": "pit"
+        },
+        {
           "sprite": "cable-floor-c",
           "frame": "default",
           "x": 182,
           "y": 172,
           "depth": 11.0
-        },
-        {
-          "sprite": "cable-floor-c",
-          "frame": "default",
-          "x": 198,
-          "y": 180,
-          "depth": 12.0
         },
         {
           "sprite": "sign-caution",
@@ -963,36 +963,36 @@
           "part": "cable"
         },
         {
+          "sprite": "desk-postit",
+          "frame": "default",
+          "x": 150,
+          "y": 172,
+          "depth": 12,
+          "gagId": "G1.2",
+          "part": "pit"
+        },
+        {
+          "sprite": "cable-floor-c",
+          "frame": "default",
+          "x": 198,
+          "y": 180,
+          "depth": 12.0
+        },
+        {
+          "sprite": "worker-seated",
+          "frame": "d",
+          "x": 150,
+          "y": 172,
+          "depth": 12.01,
+          "gagId": "G1.2",
+          "part": "pit"
+        },
+        {
           "sprite": "worker-c",
           "frame": "step-right",
           "x": 190,
           "y": 169,
           "depth": 12.6
-        },
-        {
-          "sprite": "sofa",
-          "frame": "default",
-          "x": 102,
-          "y": 100,
-          "depth": 3.5,
-          "gagId": "G2.3",
-          "part": "lobby"
-        },
-        {
-          "sprite": "plant",
-          "frame": "default",
-          "x": 38,
-          "y": 132,
-          "depth": 6.4
-        },
-        {
-          "sprite": "visitor",
-          "frame": "default",
-          "x": 100,
-          "y": 100,
-          "depth": 3.9,
-          "gagId": "G2.3",
-          "part": "lobby"
         },
         {
           "sprite": "fx-net-80-without-0-0-300-214",

@@ -738,247 +738,6 @@
           "depth": 7
         },
         {
-          "sprite": "rack",
-          "frame": "default",
-          "x": 120,
-          "y": 70,
-          "depth": 0.8,
-          "gagId": "G1.1",
-          "part": "closet"
-        },
-        {
-          "sprite": "firewall",
-          "frame": "default",
-          "x": 120,
-          "y": 70,
-          "depth": 0.81,
-          "gagId": "G1.1",
-          "part": "closet"
-        },
-        {
-          "sprite": "partition-c",
-          "frame": "default",
-          "x": 104,
-          "y": 78,
-          "depth": 2.05
-        },
-        {
-          "sprite": "partition-c",
-          "frame": "default",
-          "x": 120,
-          "y": 86,
-          "depth": 3.05
-        },
-        {
-          "sprite": "partition-r-door-closed",
-          "frame": "default",
-          "x": 136,
-          "y": 78,
-          "depth": 2.5
-        },
-        {
-          "sprite": "partition-r-end",
-          "frame": "default",
-          "x": 120,
-          "y": 86,
-          "depth": 3.1
-        },
-        {
-          "sprite": "desk-padlock",
-          "frame": "default",
-          "x": 136,
-          "y": 126,
-          "depth": 8,
-          "gagId": "G1.2",
-          "part": "pit"
-        },
-        {
-          "sprite": "worker-seated",
-          "frame": "a",
-          "x": 136,
-          "y": 126,
-          "depth": 8.01,
-          "gagId": "G1.2",
-          "part": "pit"
-        },
-        {
-          "sprite": "desk-padlock",
-          "frame": "default",
-          "x": 168,
-          "y": 142,
-          "depth": 10,
-          "gagId": "G1.2",
-          "part": "pit"
-        },
-        {
-          "sprite": "worker-seated",
-          "frame": "c",
-          "x": 168,
-          "y": 142,
-          "depth": 10.01,
-          "gagId": "G1.2",
-          "part": "pit"
-        },
-        {
-          "sprite": "desk-padlock",
-          "frame": "default",
-          "x": 104,
-          "y": 142,
-          "depth": 10,
-          "gagId": "G1.2",
-          "part": "pit"
-        },
-        {
-          "sprite": "worker-seated",
-          "frame": "e",
-          "x": 104,
-          "y": 142,
-          "depth": 10.01,
-          "gagId": "G1.2",
-          "part": "pit"
-        },
-        {
-          "sprite": "desk-padlock",
-          "frame": "default",
-          "x": 136,
-          "y": 158,
-          "depth": 12,
-          "gagId": "G1.2",
-          "part": "pit"
-        },
-        {
-          "sprite": "worker-seated",
-          "frame": "d",
-          "x": 136,
-          "y": 158,
-          "depth": 12.01,
-          "gagId": "G1.2",
-          "part": "pit"
-        },
-        {
-          "sprite": "desk-dev-built",
-          "frame": "default",
-          "x": 168,
-          "y": 94,
-          "depth": 4
-        },
-        {
-          "sprite": "worker-seated",
-          "frame": "b",
-          "x": 168,
-          "y": 94,
-          "depth": 4.01
-        },
-        {
-          "sprite": "desk",
-          "frame": "default",
-          "x": 56,
-          "y": 118,
-          "depth": 7,
-          "gagId": "G2.1",
-          "part": "helpdesk"
-        },
-        {
-          "sprite": "worker-seated",
-          "frame": "e",
-          "x": 56,
-          "y": 118,
-          "depth": 7.01,
-          "gagId": "G2.1",
-          "part": "helpdesk"
-        },
-        {
-          "sprite": "sla-board",
-          "frame": "default",
-          "x": 73,
-          "y": 101,
-          "depth": 5.85,
-          "gagId": "G2.1",
-          "part": "helpdesk"
-        },
-        {
-          "sprite": "sofa",
-          "frame": "default",
-          "x": 88,
-          "y": 86,
-          "depth": 3.5,
-          "gagId": "G2.3",
-          "part": "lobby"
-        },
-        {
-          "sprite": "plant",
-          "frame": "default",
-          "x": 24,
-          "y": 118,
-          "depth": 6.4
-        },
-        {
-          "sprite": "visitor",
-          "frame": "default",
-          "x": 86,
-          "y": 86,
-          "depth": 3.9,
-          "gagId": "G2.3",
-          "part": "lobby"
-        },
-        {
-          "sprite": "laptop-shelf",
-          "frame": "default",
-          "x": 184,
-          "y": 102,
-          "depth": 5
-        },
-        {
-          "sprite": "desk-turned",
-          "frame": "default",
-          "x": 200,
-          "y": 190,
-          "depth": 16,
-          "gagId": "G4.3",
-          "part": "desks"
-        },
-        {
-          "sprite": "worker-seated-turned",
-          "frame": "c",
-          "x": 200,
-          "y": 190,
-          "depth": 16.01,
-          "gagId": "G4.3",
-          "part": "desks"
-        },
-        {
-          "sprite": "sign-pipeline",
-          "frame": "default",
-          "x": 216,
-          "y": 192,
-          "depth": 17.24,
-          "gagId": "G4.3",
-          "part": "desks"
-        },
-        {
-          "sprite": "partition-c",
-          "frame": "default",
-          "x": 40,
-          "y": 126,
-          "depth": 8.95
-        },
-        {
-          "sprite": "partition-c-door-open",
-          "frame": "default",
-          "x": 56,
-          "y": 134,
-          "depth": 9.6,
-          "gagId": "G5.1",
-          "part": "handover"
-        },
-        {
-          "sprite": "partition-c-end",
-          "frame": "default",
-          "x": 72,
-          "y": 142,
-          "depth": 10.95
-        },
-        {
           "sprite": "road-r",
           "frame": "default",
           "x": 40,
@@ -1033,6 +792,247 @@
           "x": -8,
           "y": 171,
           "depth": 13
+        },
+        {
+          "sprite": "rack",
+          "frame": "default",
+          "x": 120,
+          "y": 70,
+          "depth": 0.8,
+          "gagId": "G1.1",
+          "part": "closet"
+        },
+        {
+          "sprite": "firewall",
+          "frame": "default",
+          "x": 120,
+          "y": 70,
+          "depth": 0.81,
+          "gagId": "G1.1",
+          "part": "closet"
+        },
+        {
+          "sprite": "partition-c",
+          "frame": "default",
+          "x": 104,
+          "y": 78,
+          "depth": 2.05
+        },
+        {
+          "sprite": "partition-r-door-closed",
+          "frame": "default",
+          "x": 136,
+          "y": 78,
+          "depth": 2.5
+        },
+        {
+          "sprite": "partition-c",
+          "frame": "default",
+          "x": 120,
+          "y": 86,
+          "depth": 3.05
+        },
+        {
+          "sprite": "partition-r-end",
+          "frame": "default",
+          "x": 120,
+          "y": 86,
+          "depth": 3.1
+        },
+        {
+          "sprite": "sofa",
+          "frame": "default",
+          "x": 88,
+          "y": 86,
+          "depth": 3.5,
+          "gagId": "G2.3",
+          "part": "lobby"
+        },
+        {
+          "sprite": "visitor",
+          "frame": "default",
+          "x": 86,
+          "y": 86,
+          "depth": 3.9,
+          "gagId": "G2.3",
+          "part": "lobby"
+        },
+        {
+          "sprite": "desk-dev-built",
+          "frame": "default",
+          "x": 168,
+          "y": 94,
+          "depth": 4
+        },
+        {
+          "sprite": "worker-seated",
+          "frame": "b",
+          "x": 168,
+          "y": 94,
+          "depth": 4.01
+        },
+        {
+          "sprite": "laptop-shelf",
+          "frame": "default",
+          "x": 184,
+          "y": 102,
+          "depth": 5
+        },
+        {
+          "sprite": "sla-board",
+          "frame": "default",
+          "x": 73,
+          "y": 101,
+          "depth": 5.85,
+          "gagId": "G2.1",
+          "part": "helpdesk"
+        },
+        {
+          "sprite": "plant",
+          "frame": "default",
+          "x": 24,
+          "y": 118,
+          "depth": 6.4
+        },
+        {
+          "sprite": "desk",
+          "frame": "default",
+          "x": 56,
+          "y": 118,
+          "depth": 7,
+          "gagId": "G2.1",
+          "part": "helpdesk"
+        },
+        {
+          "sprite": "worker-seated",
+          "frame": "e",
+          "x": 56,
+          "y": 118,
+          "depth": 7.01,
+          "gagId": "G2.1",
+          "part": "helpdesk"
+        },
+        {
+          "sprite": "desk-padlock",
+          "frame": "default",
+          "x": 136,
+          "y": 126,
+          "depth": 8,
+          "gagId": "G1.2",
+          "part": "pit"
+        },
+        {
+          "sprite": "worker-seated",
+          "frame": "a",
+          "x": 136,
+          "y": 126,
+          "depth": 8.01,
+          "gagId": "G1.2",
+          "part": "pit"
+        },
+        {
+          "sprite": "partition-c",
+          "frame": "default",
+          "x": 40,
+          "y": 126,
+          "depth": 8.95
+        },
+        {
+          "sprite": "partition-c-door-open",
+          "frame": "default",
+          "x": 56,
+          "y": 134,
+          "depth": 9.6,
+          "gagId": "G5.1",
+          "part": "handover"
+        },
+        {
+          "sprite": "desk-padlock",
+          "frame": "default",
+          "x": 168,
+          "y": 142,
+          "depth": 10,
+          "gagId": "G1.2",
+          "part": "pit"
+        },
+        {
+          "sprite": "desk-padlock",
+          "frame": "default",
+          "x": 104,
+          "y": 142,
+          "depth": 10,
+          "gagId": "G1.2",
+          "part": "pit"
+        },
+        {
+          "sprite": "worker-seated",
+          "frame": "c",
+          "x": 168,
+          "y": 142,
+          "depth": 10.01,
+          "gagId": "G1.2",
+          "part": "pit"
+        },
+        {
+          "sprite": "worker-seated",
+          "frame": "e",
+          "x": 104,
+          "y": 142,
+          "depth": 10.01,
+          "gagId": "G1.2",
+          "part": "pit"
+        },
+        {
+          "sprite": "partition-c-end",
+          "frame": "default",
+          "x": 72,
+          "y": 142,
+          "depth": 10.95
+        },
+        {
+          "sprite": "desk-padlock",
+          "frame": "default",
+          "x": 136,
+          "y": 158,
+          "depth": 12,
+          "gagId": "G1.2",
+          "part": "pit"
+        },
+        {
+          "sprite": "worker-seated",
+          "frame": "d",
+          "x": 136,
+          "y": 158,
+          "depth": 12.01,
+          "gagId": "G1.2",
+          "part": "pit"
+        },
+        {
+          "sprite": "desk-turned",
+          "frame": "default",
+          "x": 200,
+          "y": 190,
+          "depth": 16,
+          "gagId": "G4.3",
+          "part": "desks"
+        },
+        {
+          "sprite": "worker-seated-turned",
+          "frame": "c",
+          "x": 200,
+          "y": 190,
+          "depth": 16.01,
+          "gagId": "G4.3",
+          "part": "desks"
+        },
+        {
+          "sprite": "sign-pipeline",
+          "frame": "default",
+          "x": 216,
+          "y": 192,
+          "depth": 17.24,
+          "gagId": "G4.3",
+          "part": "desks"
         },
         {
           "sprite": "fx-net-150-built-140-10-355-240",
@@ -1669,24 +1669,6 @@
           "depth": 12
         },
         {
-          "sprite": "desk-padlock",
-          "frame": "default",
-          "x": 8,
-          "y": 92,
-          "depth": 10,
-          "gagId": "G1.2",
-          "part": "pit"
-        },
-        {
-          "sprite": "worker-seated",
-          "frame": "c",
-          "x": 8,
-          "y": 92,
-          "depth": 10.01,
-          "gagId": "G1.2",
-          "part": "pit"
-        },
-        {
           "sprite": "desk-dev-built",
           "frame": "default",
           "x": 8,
@@ -1708,11 +1690,13 @@
           "depth": 5
         },
         {
-          "sprite": "desk",
+          "sprite": "desk-padlock",
           "frame": "default",
-          "x": 136,
-          "y": 108,
-          "depth": 12
+          "x": 8,
+          "y": 92,
+          "depth": 10,
+          "gagId": "G1.2",
+          "part": "pit"
         },
         {
           "sprite": "desk",
@@ -1734,6 +1718,15 @@
         },
         {
           "sprite": "worker-seated",
+          "frame": "c",
+          "x": 8,
+          "y": 92,
+          "depth": 10.01,
+          "gagId": "G1.2",
+          "part": "pit"
+        },
+        {
+          "sprite": "worker-seated",
           "frame": "a",
           "x": 104,
           "y": 92,
@@ -1742,13 +1735,11 @@
           "part": "desk"
         },
         {
-          "sprite": "card-report",
+          "sprite": "desk",
           "frame": "default",
-          "x": 111,
-          "y": 68,
-          "depth": 10.01,
-          "gagId": "G4.2",
-          "part": "desk"
+          "x": 136,
+          "y": 108,
+          "depth": 12
         },
         {
           "sprite": "desk",
@@ -1760,20 +1751,20 @@
           "part": "desks"
         },
         {
-          "sprite": "worker-seated",
-          "frame": "e",
-          "x": 72,
-          "y": 140,
-          "depth": 16.01,
-          "gagId": "G4.3",
-          "part": "desks"
-        },
-        {
           "sprite": "desk-turned",
           "frame": "default",
           "x": 40,
           "y": 140,
           "depth": 16,
+          "gagId": "G4.3",
+          "part": "desks"
+        },
+        {
+          "sprite": "worker-seated",
+          "frame": "e",
+          "x": 72,
+          "y": 140,
+          "depth": 16.01,
           "gagId": "G4.3",
           "part": "desks"
         },
@@ -1794,6 +1785,15 @@
           "depth": 17.24,
           "gagId": "G4.3",
           "part": "desks"
+        },
+        {
+          "sprite": "card-report",
+          "frame": "default",
+          "x": 111,
+          "y": 68,
+          "depth": 10.01,
+          "gagId": "G4.2",
+          "part": "desk"
         }
       ],
       "hotspots": [
@@ -2014,81 +2014,6 @@
           "x": 139,
           "y": 68,
           "depth": 7
-        },
-        {
-          "sprite": "desk",
-          "frame": "default",
-          "x": 171,
-          "y": 68,
-          "depth": 7,
-          "gagId": "G2.1",
-          "part": "helpdesk"
-        },
-        {
-          "sprite": "worker-seated",
-          "frame": "e",
-          "x": 171,
-          "y": 68,
-          "depth": 7.01,
-          "gagId": "G2.1",
-          "part": "helpdesk"
-        },
-        {
-          "sprite": "sla-board",
-          "frame": "default",
-          "x": 188,
-          "y": 51,
-          "depth": 5.85,
-          "gagId": "G2.1",
-          "part": "helpdesk"
-        },
-        {
-          "sprite": "sofa",
-          "frame": "default",
-          "x": 203,
-          "y": 36,
-          "depth": 3.5,
-          "gagId": "G2.3",
-          "part": "lobby"
-        },
-        {
-          "sprite": "plant",
-          "frame": "default",
-          "x": 139,
-          "y": 68,
-          "depth": 6.4
-        },
-        {
-          "sprite": "visitor",
-          "frame": "default",
-          "x": 201,
-          "y": 36,
-          "depth": 3.9,
-          "gagId": "G2.3",
-          "part": "lobby"
-        },
-        {
-          "sprite": "partition-c",
-          "frame": "default",
-          "x": 155,
-          "y": 76,
-          "depth": 8.95
-        },
-        {
-          "sprite": "partition-c-door-open",
-          "frame": "default",
-          "x": 171,
-          "y": 84,
-          "depth": 9.6,
-          "gagId": "G5.1",
-          "part": "handover"
-        },
-        {
-          "sprite": "partition-c-end",
-          "frame": "default",
-          "x": 187,
-          "y": 92,
-          "depth": 10.95
         },
         {
           "sprite": "road-r",
@@ -2315,46 +2240,63 @@
           "depth": 10
         },
         {
-          "sprite": "partition-c",
+          "sprite": "sofa",
           "frame": "default",
-          "x": 27,
-          "y": 92,
-          "depth": 10.95
+          "x": 203,
+          "y": 36,
+          "depth": 3.5,
+          "gagId": "G2.3",
+          "part": "lobby"
+        },
+        {
+          "sprite": "visitor",
+          "frame": "default",
+          "x": 201,
+          "y": 36,
+          "depth": 3.9,
+          "gagId": "G2.3",
+          "part": "lobby"
+        },
+        {
+          "sprite": "sla-board",
+          "frame": "default",
+          "x": 188,
+          "y": 51,
+          "depth": 5.85,
+          "gagId": "G2.1",
+          "part": "helpdesk"
+        },
+        {
+          "sprite": "plant",
+          "frame": "default",
+          "x": 139,
+          "y": 68,
+          "depth": 6.4
+        },
+        {
+          "sprite": "desk",
+          "frame": "default",
+          "x": 171,
+          "y": 68,
+          "depth": 7,
+          "gagId": "G2.1",
+          "part": "helpdesk"
+        },
+        {
+          "sprite": "worker-seated",
+          "frame": "e",
+          "x": 171,
+          "y": 68,
+          "depth": 7.01,
+          "gagId": "G2.1",
+          "part": "helpdesk"
         },
         {
           "sprite": "partition-c",
           "frame": "default",
-          "x": 43,
-          "y": 100,
-          "depth": 11.95
-        },
-        {
-          "sprite": "partition-c-end",
-          "frame": "default",
-          "x": 59,
-          "y": 108,
-          "depth": 12.95
-        },
-        {
-          "sprite": "partition-r",
-          "frame": "default",
-          "x": 91,
-          "y": 92,
-          "depth": 10.95
-        },
-        {
-          "sprite": "partition-r-doorway",
-          "frame": "default",
-          "x": 75,
-          "y": 100,
-          "depth": 11.95
-        },
-        {
-          "sprite": "partition-r-end",
-          "frame": "default",
-          "x": 59,
-          "y": 108,
-          "depth": 12.95
+          "x": 155,
+          "y": 76,
+          "depth": 8.95
         },
         {
           "sprite": "desk",
@@ -2369,6 +2311,64 @@
           "x": 75,
           "y": 84,
           "depth": 9.01
+        },
+        {
+          "sprite": "partition-c-door-open",
+          "frame": "default",
+          "x": 171,
+          "y": 84,
+          "depth": 9.6,
+          "gagId": "G5.1",
+          "part": "handover"
+        },
+        {
+          "sprite": "partition-c-end",
+          "frame": "default",
+          "x": 187,
+          "y": 92,
+          "depth": 10.95
+        },
+        {
+          "sprite": "partition-c",
+          "frame": "default",
+          "x": 27,
+          "y": 92,
+          "depth": 10.95
+        },
+        {
+          "sprite": "partition-r",
+          "frame": "default",
+          "x": 91,
+          "y": 92,
+          "depth": 10.95
+        },
+        {
+          "sprite": "partition-c",
+          "frame": "default",
+          "x": 43,
+          "y": 100,
+          "depth": 11.95
+        },
+        {
+          "sprite": "partition-r-doorway",
+          "frame": "default",
+          "x": 75,
+          "y": 100,
+          "depth": 11.95
+        },
+        {
+          "sprite": "partition-c-end",
+          "frame": "default",
+          "x": 59,
+          "y": 108,
+          "depth": 12.95
+        },
+        {
+          "sprite": "partition-r-end",
+          "frame": "default",
+          "x": 59,
+          "y": 108,
+          "depth": 12.95
         }
       ],
       "hotspots": [

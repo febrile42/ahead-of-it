@@ -1131,308 +1131,6 @@
           "depth": 14
         },
         {
-          "sprite": "rack",
-          "frame": "default",
-          "x": 120,
-          "y": 70,
-          "depth": 0.8,
-          "gagId": "G1.1",
-          "part": "closet"
-        },
-        {
-          "sprite": "firewall",
-          "frame": "default",
-          "x": 120,
-          "y": 70,
-          "depth": 0.81,
-          "gagId": "G1.1",
-          "part": "closet"
-        },
-        {
-          "sprite": "partition-c",
-          "frame": "default",
-          "x": 104,
-          "y": 78,
-          "depth": 2.05
-        },
-        {
-          "sprite": "partition-c",
-          "frame": "default",
-          "x": 120,
-          "y": 86,
-          "depth": 3.05
-        },
-        {
-          "sprite": "partition-r-door-closed",
-          "frame": "default",
-          "x": 136,
-          "y": 78,
-          "depth": 2.5
-        },
-        {
-          "sprite": "partition-r-end",
-          "frame": "default",
-          "x": 120,
-          "y": 86,
-          "depth": 3.1
-        },
-        {
-          "sprite": "desk-padlock",
-          "frame": "default",
-          "x": 136,
-          "y": 126,
-          "depth": 8,
-          "gagId": "G1.2",
-          "part": "pit"
-        },
-        {
-          "sprite": "worker-seated",
-          "frame": "a",
-          "x": 136,
-          "y": 126,
-          "depth": 8.01,
-          "gagId": "G1.2",
-          "part": "pit"
-        },
-        {
-          "sprite": "desk-padlock",
-          "frame": "default",
-          "x": 168,
-          "y": 142,
-          "depth": 10,
-          "gagId": "G1.2",
-          "part": "pit"
-        },
-        {
-          "sprite": "worker-seated",
-          "frame": "c",
-          "x": 168,
-          "y": 142,
-          "depth": 10.01,
-          "gagId": "G1.2",
-          "part": "pit"
-        },
-        {
-          "sprite": "desk-padlock",
-          "frame": "default",
-          "x": 104,
-          "y": 142,
-          "depth": 10,
-          "gagId": "G1.2",
-          "part": "pit"
-        },
-        {
-          "sprite": "worker-seated",
-          "frame": "e",
-          "x": 104,
-          "y": 142,
-          "depth": 10.01,
-          "gagId": "G1.2",
-          "part": "pit"
-        },
-        {
-          "sprite": "desk-padlock",
-          "frame": "default",
-          "x": 136,
-          "y": 158,
-          "depth": 12,
-          "gagId": "G1.2",
-          "part": "pit"
-        },
-        {
-          "sprite": "worker-seated",
-          "frame": "d",
-          "x": 136,
-          "y": 158,
-          "depth": 12.01,
-          "gagId": "G1.2",
-          "part": "pit"
-        },
-        {
-          "sprite": "desk-dev-built",
-          "frame": "default",
-          "x": 168,
-          "y": 94,
-          "depth": 4
-        },
-        {
-          "sprite": "worker-seated",
-          "frame": "b",
-          "x": 168,
-          "y": 94,
-          "depth": 4.01
-        },
-        {
-          "sprite": "desk",
-          "frame": "default",
-          "x": 56,
-          "y": 118,
-          "depth": 7,
-          "gagId": "G2.1",
-          "part": "helpdesk"
-        },
-        {
-          "sprite": "worker-seated",
-          "frame": "e",
-          "x": 56,
-          "y": 118,
-          "depth": 7.01,
-          "gagId": "G2.1",
-          "part": "helpdesk"
-        },
-        {
-          "sprite": "sla-board",
-          "frame": "default",
-          "x": 73,
-          "y": 101,
-          "depth": 5.85,
-          "gagId": "G2.1",
-          "part": "helpdesk"
-        },
-        {
-          "sprite": "sofa",
-          "frame": "default",
-          "x": 88,
-          "y": 86,
-          "depth": 3.5,
-          "gagId": "G2.3",
-          "part": "lobby"
-        },
-        {
-          "sprite": "plant",
-          "frame": "default",
-          "x": 24,
-          "y": 118,
-          "depth": 6.4
-        },
-        {
-          "sprite": "visitor",
-          "frame": "default",
-          "x": 86,
-          "y": 86,
-          "depth": 3.9,
-          "gagId": "G2.3",
-          "part": "lobby"
-        },
-        {
-          "sprite": "laptop-shelf",
-          "frame": "default",
-          "x": 184,
-          "y": 102,
-          "depth": 5
-        },
-        {
-          "sprite": "desk",
-          "frame": "default",
-          "x": 296,
-          "y": 158,
-          "depth": 12
-        },
-        {
-          "sprite": "desk",
-          "frame": "default",
-          "x": 264,
-          "y": 142,
-          "depth": 10,
-          "gagId": "G4.2",
-          "part": "desk"
-        },
-        {
-          "sprite": "fishing-shield",
-          "frame": "default",
-          "x": 264,
-          "y": 142,
-          "depth": 10.005,
-          "gagId": "G4.2",
-          "part": "desk"
-        },
-        {
-          "sprite": "worker-seated",
-          "frame": "a",
-          "x": 264,
-          "y": 142,
-          "depth": 10.01,
-          "gagId": "G4.2",
-          "part": "desk"
-        },
-        {
-          "sprite": "card-report",
-          "frame": "default",
-          "x": 271,
-          "y": 118,
-          "depth": 10.01,
-          "gagId": "G4.2",
-          "part": "desk"
-        },
-        {
-          "sprite": "desk",
-          "frame": "default",
-          "x": 232,
-          "y": 190,
-          "depth": 16,
-          "gagId": "G4.3",
-          "part": "desks"
-        },
-        {
-          "sprite": "worker-seated",
-          "frame": "e",
-          "x": 232,
-          "y": 190,
-          "depth": 16.01,
-          "gagId": "G4.3",
-          "part": "desks"
-        },
-        {
-          "sprite": "desk-turned",
-          "frame": "default",
-          "x": 200,
-          "y": 190,
-          "depth": 16,
-          "gagId": "G4.3",
-          "part": "desks"
-        },
-        {
-          "sprite": "worker-seated-turned",
-          "frame": "c",
-          "x": 200,
-          "y": 190,
-          "depth": 16.01,
-          "gagId": "G4.3",
-          "part": "desks"
-        },
-        {
-          "sprite": "sign-pipeline",
-          "frame": "default",
-          "x": 216,
-          "y": 192,
-          "depth": 17.24,
-          "gagId": "G4.3",
-          "part": "desks"
-        },
-        {
-          "sprite": "partition-c",
-          "frame": "default",
-          "x": 40,
-          "y": 126,
-          "depth": 8.95
-        },
-        {
-          "sprite": "partition-c-door-open",
-          "frame": "default",
-          "x": 56,
-          "y": 134,
-          "depth": 9.6,
-          "gagId": "G5.1",
-          "part": "handover"
-        },
-        {
-          "sprite": "partition-c-end",
-          "frame": "default",
-          "x": 72,
-          "y": 142,
-          "depth": 10.95
-        },
-        {
           "sprite": "road-r",
           "frame": "default",
           "x": 40,
@@ -1507,6 +1205,282 @@
           "part": "room"
         },
         {
+          "sprite": "rack",
+          "frame": "default",
+          "x": 120,
+          "y": 70,
+          "depth": 0.8,
+          "gagId": "G1.1",
+          "part": "closet"
+        },
+        {
+          "sprite": "firewall",
+          "frame": "default",
+          "x": 120,
+          "y": 70,
+          "depth": 0.81,
+          "gagId": "G1.1",
+          "part": "closet"
+        },
+        {
+          "sprite": "partition-c",
+          "frame": "default",
+          "x": 104,
+          "y": 78,
+          "depth": 2.05
+        },
+        {
+          "sprite": "partition-r-door-closed",
+          "frame": "default",
+          "x": 136,
+          "y": 78,
+          "depth": 2.5
+        },
+        {
+          "sprite": "partition-c",
+          "frame": "default",
+          "x": 120,
+          "y": 86,
+          "depth": 3.05
+        },
+        {
+          "sprite": "partition-r-end",
+          "frame": "default",
+          "x": 120,
+          "y": 86,
+          "depth": 3.1
+        },
+        {
+          "sprite": "sofa",
+          "frame": "default",
+          "x": 88,
+          "y": 86,
+          "depth": 3.5,
+          "gagId": "G2.3",
+          "part": "lobby"
+        },
+        {
+          "sprite": "visitor",
+          "frame": "default",
+          "x": 86,
+          "y": 86,
+          "depth": 3.9,
+          "gagId": "G2.3",
+          "part": "lobby"
+        },
+        {
+          "sprite": "desk-dev-built",
+          "frame": "default",
+          "x": 168,
+          "y": 94,
+          "depth": 4
+        },
+        {
+          "sprite": "worker-seated",
+          "frame": "b",
+          "x": 168,
+          "y": 94,
+          "depth": 4.01
+        },
+        {
+          "sprite": "laptop-shelf",
+          "frame": "default",
+          "x": 184,
+          "y": 102,
+          "depth": 5
+        },
+        {
+          "sprite": "sla-board",
+          "frame": "default",
+          "x": 73,
+          "y": 101,
+          "depth": 5.85,
+          "gagId": "G2.1",
+          "part": "helpdesk"
+        },
+        {
+          "sprite": "plant",
+          "frame": "default",
+          "x": 24,
+          "y": 118,
+          "depth": 6.4
+        },
+        {
+          "sprite": "desk",
+          "frame": "default",
+          "x": 56,
+          "y": 118,
+          "depth": 7,
+          "gagId": "G2.1",
+          "part": "helpdesk"
+        },
+        {
+          "sprite": "worker-seated",
+          "frame": "e",
+          "x": 56,
+          "y": 118,
+          "depth": 7.01,
+          "gagId": "G2.1",
+          "part": "helpdesk"
+        },
+        {
+          "sprite": "desk-padlock",
+          "frame": "default",
+          "x": 136,
+          "y": 126,
+          "depth": 8,
+          "gagId": "G1.2",
+          "part": "pit"
+        },
+        {
+          "sprite": "worker-seated",
+          "frame": "a",
+          "x": 136,
+          "y": 126,
+          "depth": 8.01,
+          "gagId": "G1.2",
+          "part": "pit"
+        },
+        {
+          "sprite": "partition-c",
+          "frame": "default",
+          "x": 40,
+          "y": 126,
+          "depth": 8.95
+        },
+        {
+          "sprite": "partition-c-door-open",
+          "frame": "default",
+          "x": 56,
+          "y": 134,
+          "depth": 9.6,
+          "gagId": "G5.1",
+          "part": "handover"
+        },
+        {
+          "sprite": "desk-padlock",
+          "frame": "default",
+          "x": 168,
+          "y": 142,
+          "depth": 10,
+          "gagId": "G1.2",
+          "part": "pit"
+        },
+        {
+          "sprite": "desk-padlock",
+          "frame": "default",
+          "x": 104,
+          "y": 142,
+          "depth": 10,
+          "gagId": "G1.2",
+          "part": "pit"
+        },
+        {
+          "sprite": "desk",
+          "frame": "default",
+          "x": 264,
+          "y": 142,
+          "depth": 10,
+          "gagId": "G4.2",
+          "part": "desk"
+        },
+        {
+          "sprite": "fishing-shield",
+          "frame": "default",
+          "x": 264,
+          "y": 142,
+          "depth": 10.005,
+          "gagId": "G4.2",
+          "part": "desk"
+        },
+        {
+          "sprite": "worker-seated",
+          "frame": "c",
+          "x": 168,
+          "y": 142,
+          "depth": 10.01,
+          "gagId": "G1.2",
+          "part": "pit"
+        },
+        {
+          "sprite": "worker-seated",
+          "frame": "e",
+          "x": 104,
+          "y": 142,
+          "depth": 10.01,
+          "gagId": "G1.2",
+          "part": "pit"
+        },
+        {
+          "sprite": "worker-seated",
+          "frame": "a",
+          "x": 264,
+          "y": 142,
+          "depth": 10.01,
+          "gagId": "G4.2",
+          "part": "desk"
+        },
+        {
+          "sprite": "partition-c-end",
+          "frame": "default",
+          "x": 72,
+          "y": 142,
+          "depth": 10.95
+        },
+        {
+          "sprite": "desk-padlock",
+          "frame": "default",
+          "x": 136,
+          "y": 158,
+          "depth": 12,
+          "gagId": "G1.2",
+          "part": "pit"
+        },
+        {
+          "sprite": "desk",
+          "frame": "default",
+          "x": 296,
+          "y": 158,
+          "depth": 12
+        },
+        {
+          "sprite": "desk",
+          "frame": "default",
+          "x": 232,
+          "y": 158,
+          "depth": 12
+        },
+        {
+          "sprite": "worker-seated",
+          "frame": "d",
+          "x": 136,
+          "y": 158,
+          "depth": 12.01,
+          "gagId": "G1.2",
+          "part": "pit"
+        },
+        {
+          "sprite": "worker-seated",
+          "frame": "a",
+          "x": 232,
+          "y": 158,
+          "depth": 12.01
+        },
+        {
+          "sprite": "glass-r",
+          "frame": "default",
+          "x": 296,
+          "y": 158,
+          "depth": 12.95
+        },
+        {
+          "sprite": "glass-r-door",
+          "frame": "default",
+          "x": 280,
+          "y": 166,
+          "depth": 13.95
+        },
+        {
           "sprite": "conf-table",
           "frame": "default",
           "x": 296,
@@ -1525,6 +1499,20 @@
           "part": "room"
         },
         {
+          "sprite": "glass-r",
+          "frame": "default",
+          "x": 264,
+          "y": 174,
+          "depth": 14.95
+        },
+        {
+          "sprite": "desk",
+          "frame": "default",
+          "x": 152,
+          "y": 182,
+          "depth": 15
+        },
+        {
           "sprite": "worker-seated",
           "frame": "c",
           "x": 312,
@@ -1532,6 +1520,56 @@
           "depth": 15.01,
           "gagId": "G2.4",
           "part": "room"
+        },
+        {
+          "sprite": "worker-seated",
+          "frame": "b",
+          "x": 152,
+          "y": 182,
+          "depth": 15.01
+        },
+        {
+          "sprite": "glass-c-corner",
+          "frame": "default",
+          "x": 280,
+          "y": 182,
+          "depth": 15.95
+        },
+        {
+          "sprite": "desk",
+          "frame": "default",
+          "x": 232,
+          "y": 190,
+          "depth": 16,
+          "gagId": "G4.3",
+          "part": "desks"
+        },
+        {
+          "sprite": "desk-turned",
+          "frame": "default",
+          "x": 200,
+          "y": 190,
+          "depth": 16,
+          "gagId": "G4.3",
+          "part": "desks"
+        },
+        {
+          "sprite": "worker-seated",
+          "frame": "e",
+          "x": 232,
+          "y": 190,
+          "depth": 16.01,
+          "gagId": "G4.3",
+          "part": "desks"
+        },
+        {
+          "sprite": "worker-seated-turned",
+          "frame": "c",
+          "x": 200,
+          "y": 190,
+          "depth": 16.01,
+          "gagId": "G4.3",
+          "part": "desks"
         },
         {
           "sprite": "worker-seated",
@@ -1543,6 +1581,13 @@
           "part": "room"
         },
         {
+          "sprite": "glass-c",
+          "frame": "default",
+          "x": 296,
+          "y": 190,
+          "depth": 16.95
+        },
+        {
           "sprite": "worker-seated",
           "frame": "d",
           "x": 344,
@@ -1552,39 +1597,13 @@
           "part": "room"
         },
         {
-          "sprite": "glass-r",
+          "sprite": "sign-pipeline",
           "frame": "default",
-          "x": 296,
-          "y": 158,
-          "depth": 12.95
-        },
-        {
-          "sprite": "glass-r-door",
-          "frame": "default",
-          "x": 280,
-          "y": 166,
-          "depth": 13.95
-        },
-        {
-          "sprite": "glass-r",
-          "frame": "default",
-          "x": 264,
-          "y": 174,
-          "depth": 14.95
-        },
-        {
-          "sprite": "glass-c-corner",
-          "frame": "default",
-          "x": 280,
-          "y": 182,
-          "depth": 15.95
-        },
-        {
-          "sprite": "glass-c",
-          "frame": "default",
-          "x": 296,
-          "y": 190,
-          "depth": 16.95
+          "x": 216,
+          "y": 192,
+          "depth": 17.24,
+          "gagId": "G4.3",
+          "part": "desks"
         },
         {
           "sprite": "glass-c",
@@ -1619,34 +1638,6 @@
           "part": "board"
         },
         {
-          "sprite": "desk",
-          "frame": "default",
-          "x": 232,
-          "y": 158,
-          "depth": 12
-        },
-        {
-          "sprite": "worker-seated",
-          "frame": "a",
-          "x": 232,
-          "y": 158,
-          "depth": 12.01
-        },
-        {
-          "sprite": "desk",
-          "frame": "default",
-          "x": 152,
-          "y": 182,
-          "depth": 15
-        },
-        {
-          "sprite": "worker-seated",
-          "frame": "b",
-          "x": 152,
-          "y": 182,
-          "depth": 15.01
-        },
-        {
           "sprite": "fx-net-220-built-140-10-470-220",
           "frame": "default",
           "x": 0,
@@ -1654,6 +1645,15 @@
           "depth": 900,
           "gagId": "G2.3",
           "part": "lobby"
+        },
+        {
+          "sprite": "card-report",
+          "frame": "default",
+          "x": 271,
+          "y": 118,
+          "depth": 10.01,
+          "gagId": "G4.2",
+          "part": "desk"
         }
       ],
       "hotspots": [
@@ -2601,22 +2601,22 @@
           "depth": 16
         },
         {
-          "sprite": "desk-padlock",
+          "sprite": "tv-live",
           "frame": "default",
-          "x": 8,
-          "y": 92,
-          "depth": 10,
-          "gagId": "G1.2",
-          "part": "pit"
+          "x": 168,
+          "y": 124,
+          "depth": 0.5,
+          "gagId": "G2.4",
+          "part": "room"
         },
         {
-          "sprite": "worker-seated",
-          "frame": "c",
-          "x": 8,
-          "y": 92,
-          "depth": 10.01,
-          "gagId": "G1.2",
-          "part": "pit"
+          "sprite": "camera-bar",
+          "frame": "default",
+          "x": 168,
+          "y": 124,
+          "depth": 0.6,
+          "gagId": "G2.4",
+          "part": "room"
         },
         {
           "sprite": "desk-dev-built",
@@ -2640,11 +2640,13 @@
           "depth": 5
         },
         {
-          "sprite": "desk",
+          "sprite": "desk-padlock",
           "frame": "default",
-          "x": 136,
-          "y": 108,
-          "depth": 12
+          "x": 8,
+          "y": 92,
+          "depth": 10,
+          "gagId": "G1.2",
+          "part": "pit"
         },
         {
           "sprite": "desk",
@@ -2666,6 +2668,15 @@
         },
         {
           "sprite": "worker-seated",
+          "frame": "c",
+          "x": 8,
+          "y": 92,
+          "depth": 10.01,
+          "gagId": "G1.2",
+          "part": "pit"
+        },
+        {
+          "sprite": "worker-seated",
           "frame": "a",
           "x": 104,
           "y": 92,
@@ -2674,76 +2685,39 @@
           "part": "desk"
         },
         {
-          "sprite": "card-report",
+          "sprite": "desk",
           "frame": "default",
-          "x": 111,
-          "y": 68,
-          "depth": 10.01,
-          "gagId": "G4.2",
-          "part": "desk"
+          "x": 136,
+          "y": 108,
+          "depth": 12
         },
         {
           "sprite": "desk",
           "frame": "default",
           "x": 72,
-          "y": 140,
-          "depth": 16,
-          "gagId": "G4.3",
-          "part": "desks"
+          "y": 108,
+          "depth": 12
         },
         {
           "sprite": "worker-seated",
-          "frame": "e",
+          "frame": "a",
           "x": 72,
-          "y": 140,
-          "depth": 16.01,
-          "gagId": "G4.3",
-          "part": "desks"
+          "y": 108,
+          "depth": 12.01
         },
         {
-          "sprite": "desk-turned",
+          "sprite": "glass-r",
           "frame": "default",
-          "x": 40,
-          "y": 140,
-          "depth": 16,
-          "gagId": "G4.3",
-          "part": "desks"
+          "x": 136,
+          "y": 108,
+          "depth": 12.95
         },
         {
-          "sprite": "worker-seated-turned",
-          "frame": "c",
-          "x": 40,
-          "y": 140,
-          "depth": 16.01,
-          "gagId": "G4.3",
-          "part": "desks"
-        },
-        {
-          "sprite": "sign-pipeline",
+          "sprite": "glass-r-door",
           "frame": "default",
-          "x": 56,
-          "y": 142,
-          "depth": 17.24,
-          "gagId": "G4.3",
-          "part": "desks"
-        },
-        {
-          "sprite": "tv-live",
-          "frame": "default",
-          "x": 168,
-          "y": 124,
-          "depth": 0.5,
-          "gagId": "G2.4",
-          "part": "room"
-        },
-        {
-          "sprite": "camera-bar",
-          "frame": "default",
-          "x": 168,
-          "y": 124,
-          "depth": 0.6,
-          "gagId": "G2.4",
-          "part": "room"
+          "x": 120,
+          "y": 116,
+          "depth": 13.95
         },
         {
           "sprite": "conf-table",
@@ -2764,6 +2738,20 @@
           "part": "room"
         },
         {
+          "sprite": "glass-r",
+          "frame": "default",
+          "x": 104,
+          "y": 124,
+          "depth": 14.95
+        },
+        {
+          "sprite": "desk",
+          "frame": "default",
+          "x": -8,
+          "y": 132,
+          "depth": 15
+        },
+        {
           "sprite": "worker-seated",
           "frame": "c",
           "x": 152,
@@ -2771,6 +2759,56 @@
           "depth": 15.01,
           "gagId": "G2.4",
           "part": "room"
+        },
+        {
+          "sprite": "worker-seated",
+          "frame": "b",
+          "x": -8,
+          "y": 132,
+          "depth": 15.01
+        },
+        {
+          "sprite": "glass-c-corner",
+          "frame": "default",
+          "x": 120,
+          "y": 132,
+          "depth": 15.95
+        },
+        {
+          "sprite": "desk",
+          "frame": "default",
+          "x": 72,
+          "y": 140,
+          "depth": 16,
+          "gagId": "G4.3",
+          "part": "desks"
+        },
+        {
+          "sprite": "desk-turned",
+          "frame": "default",
+          "x": 40,
+          "y": 140,
+          "depth": 16,
+          "gagId": "G4.3",
+          "part": "desks"
+        },
+        {
+          "sprite": "worker-seated",
+          "frame": "e",
+          "x": 72,
+          "y": 140,
+          "depth": 16.01,
+          "gagId": "G4.3",
+          "part": "desks"
+        },
+        {
+          "sprite": "worker-seated-turned",
+          "frame": "c",
+          "x": 40,
+          "y": 140,
+          "depth": 16.01,
+          "gagId": "G4.3",
+          "part": "desks"
         },
         {
           "sprite": "worker-seated",
@@ -2782,6 +2820,13 @@
           "part": "room"
         },
         {
+          "sprite": "glass-c",
+          "frame": "default",
+          "x": 136,
+          "y": 140,
+          "depth": 16.95
+        },
+        {
           "sprite": "worker-seated",
           "frame": "d",
           "x": 184,
@@ -2791,39 +2836,13 @@
           "part": "room"
         },
         {
-          "sprite": "glass-r",
+          "sprite": "sign-pipeline",
           "frame": "default",
-          "x": 136,
-          "y": 108,
-          "depth": 12.95
-        },
-        {
-          "sprite": "glass-r-door",
-          "frame": "default",
-          "x": 120,
-          "y": 116,
-          "depth": 13.95
-        },
-        {
-          "sprite": "glass-r",
-          "frame": "default",
-          "x": 104,
-          "y": 124,
-          "depth": 14.95
-        },
-        {
-          "sprite": "glass-c-corner",
-          "frame": "default",
-          "x": 120,
-          "y": 132,
-          "depth": 15.95
-        },
-        {
-          "sprite": "glass-c",
-          "frame": "default",
-          "x": 136,
-          "y": 140,
-          "depth": 16.95
+          "x": 56,
+          "y": 142,
+          "depth": 17.24,
+          "gagId": "G4.3",
+          "part": "desks"
         },
         {
           "sprite": "glass-c",
@@ -2858,32 +2877,13 @@
           "part": "board"
         },
         {
-          "sprite": "desk",
+          "sprite": "card-report",
           "frame": "default",
-          "x": 72,
-          "y": 108,
-          "depth": 12
-        },
-        {
-          "sprite": "worker-seated",
-          "frame": "a",
-          "x": 72,
-          "y": 108,
-          "depth": 12.01
-        },
-        {
-          "sprite": "desk",
-          "frame": "default",
-          "x": -8,
-          "y": 132,
-          "depth": 15
-        },
-        {
-          "sprite": "worker-seated",
-          "frame": "b",
-          "x": -8,
-          "y": 132,
-          "depth": 15.01
+          "x": 111,
+          "y": 68,
+          "depth": 10.01,
+          "gagId": "G4.2",
+          "part": "desk"
         }
       ],
       "hotspots": [
@@ -3144,81 +3144,6 @@
           "depth": 7
         },
         {
-          "sprite": "desk",
-          "frame": "default",
-          "x": 171,
-          "y": 68,
-          "depth": 7,
-          "gagId": "G2.1",
-          "part": "helpdesk"
-        },
-        {
-          "sprite": "worker-seated",
-          "frame": "e",
-          "x": 171,
-          "y": 68,
-          "depth": 7.01,
-          "gagId": "G2.1",
-          "part": "helpdesk"
-        },
-        {
-          "sprite": "sla-board",
-          "frame": "default",
-          "x": 188,
-          "y": 51,
-          "depth": 5.85,
-          "gagId": "G2.1",
-          "part": "helpdesk"
-        },
-        {
-          "sprite": "sofa",
-          "frame": "default",
-          "x": 203,
-          "y": 36,
-          "depth": 3.5,
-          "gagId": "G2.3",
-          "part": "lobby"
-        },
-        {
-          "sprite": "plant",
-          "frame": "default",
-          "x": 139,
-          "y": 68,
-          "depth": 6.4
-        },
-        {
-          "sprite": "visitor",
-          "frame": "default",
-          "x": 201,
-          "y": 36,
-          "depth": 3.9,
-          "gagId": "G2.3",
-          "part": "lobby"
-        },
-        {
-          "sprite": "partition-c",
-          "frame": "default",
-          "x": 155,
-          "y": 76,
-          "depth": 8.95
-        },
-        {
-          "sprite": "partition-c-door-open",
-          "frame": "default",
-          "x": 171,
-          "y": 84,
-          "depth": 9.6,
-          "gagId": "G5.1",
-          "part": "handover"
-        },
-        {
-          "sprite": "partition-c-end",
-          "frame": "default",
-          "x": 187,
-          "y": 92,
-          "depth": 10.95
-        },
-        {
           "sprite": "road-r",
           "frame": "default",
           "x": 155,
@@ -3443,46 +3368,63 @@
           "depth": 10
         },
         {
-          "sprite": "partition-c",
+          "sprite": "sofa",
           "frame": "default",
-          "x": 27,
-          "y": 92,
-          "depth": 10.95
+          "x": 203,
+          "y": 36,
+          "depth": 3.5,
+          "gagId": "G2.3",
+          "part": "lobby"
+        },
+        {
+          "sprite": "visitor",
+          "frame": "default",
+          "x": 201,
+          "y": 36,
+          "depth": 3.9,
+          "gagId": "G2.3",
+          "part": "lobby"
+        },
+        {
+          "sprite": "sla-board",
+          "frame": "default",
+          "x": 188,
+          "y": 51,
+          "depth": 5.85,
+          "gagId": "G2.1",
+          "part": "helpdesk"
+        },
+        {
+          "sprite": "plant",
+          "frame": "default",
+          "x": 139,
+          "y": 68,
+          "depth": 6.4
+        },
+        {
+          "sprite": "desk",
+          "frame": "default",
+          "x": 171,
+          "y": 68,
+          "depth": 7,
+          "gagId": "G2.1",
+          "part": "helpdesk"
+        },
+        {
+          "sprite": "worker-seated",
+          "frame": "e",
+          "x": 171,
+          "y": 68,
+          "depth": 7.01,
+          "gagId": "G2.1",
+          "part": "helpdesk"
         },
         {
           "sprite": "partition-c",
           "frame": "default",
-          "x": 43,
-          "y": 100,
-          "depth": 11.95
-        },
-        {
-          "sprite": "partition-c-end",
-          "frame": "default",
-          "x": 59,
-          "y": 108,
-          "depth": 12.95
-        },
-        {
-          "sprite": "partition-r",
-          "frame": "default",
-          "x": 91,
-          "y": 92,
-          "depth": 10.95
-        },
-        {
-          "sprite": "partition-r-doorway",
-          "frame": "default",
-          "x": 75,
-          "y": 100,
-          "depth": 11.95
-        },
-        {
-          "sprite": "partition-r-end",
-          "frame": "default",
-          "x": 59,
-          "y": 108,
-          "depth": 12.95
+          "x": 155,
+          "y": 76,
+          "depth": 8.95
         },
         {
           "sprite": "desk",
@@ -3497,6 +3439,64 @@
           "x": 75,
           "y": 84,
           "depth": 9.01
+        },
+        {
+          "sprite": "partition-c-door-open",
+          "frame": "default",
+          "x": 171,
+          "y": 84,
+          "depth": 9.6,
+          "gagId": "G5.1",
+          "part": "handover"
+        },
+        {
+          "sprite": "partition-c-end",
+          "frame": "default",
+          "x": 187,
+          "y": 92,
+          "depth": 10.95
+        },
+        {
+          "sprite": "partition-c",
+          "frame": "default",
+          "x": 27,
+          "y": 92,
+          "depth": 10.95
+        },
+        {
+          "sprite": "partition-r",
+          "frame": "default",
+          "x": 91,
+          "y": 92,
+          "depth": 10.95
+        },
+        {
+          "sprite": "partition-c",
+          "frame": "default",
+          "x": 43,
+          "y": 100,
+          "depth": 11.95
+        },
+        {
+          "sprite": "partition-r-doorway",
+          "frame": "default",
+          "x": 75,
+          "y": 100,
+          "depth": 11.95
+        },
+        {
+          "sprite": "partition-c-end",
+          "frame": "default",
+          "x": 59,
+          "y": 108,
+          "depth": 12.95
+        },
+        {
+          "sprite": "partition-r-end",
+          "frame": "default",
+          "x": 59,
+          "y": 108,
+          "depth": 12.95
         }
       ],
       "hotspots": [

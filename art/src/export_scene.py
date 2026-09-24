@@ -38,6 +38,7 @@ _REPO_ROOT = os.path.dirname(os.path.dirname(_HERE))
 SPRITES_DIR = os.path.join(_REPO_ROOT, "public", "sprites")
 SCENES_DIR = os.path.join(SPRITES_DIR, "scenes")
 THUMBS_DIR = os.path.join(SPRITES_DIR, "thumbs")
+PREVIEW_VIEWS_DIR = os.path.join(_REPO_ROOT, "art", "preview", "views")
 
 STATES = ("without", "built")
 DRAWN_BANDS = (80, 150, 220)
@@ -88,6 +89,19 @@ GAG_HOME_VIEW = {
     "G2.3": "ground", "G3.2": "ground", "G4.2": "floor-2", "G4.3": "floor-2",
     "G2.4": "floor-2", "G7.3a": "floor-2", "G5.1": "street",
 }
+
+# debt: art pass 4 (PH1-10) re-spaces band 80 ground; delete this set then. These 5
+# unordered gag pairs from band 80's own 5 gags sit 25-40 native px apart at their
+# real drawn positions (propagated to every later band, since they're cumulative —
+# R-03a), under D-036 rule 7's 44px floor. Rule 7 is not relaxed for them (mastermind
+# ruling, PH1-08b fix round): check_scenes.py warns instead of failing on exactly this
+# set, fails on anything else under 44px, and fails if a listed pair is ever >= 44px
+# everywhere (so the debt can't go stale once art pass 4 lands). Mirrored into
+# index.json's `knownSpacingDebt` so the web's contract test can share this one list.
+KNOWN_SPACING_DEBT = [
+    ("G1.1", "G3.2"), ("G1.2", "G2.1"), ("G1.2", "G2.2"),
+    ("G2.1", "G2.3"), ("G2.1", "G3.2"),
+]
 
 # D-036 rule 4's view assignment for gags with no composer yet (no geometry to derive
 # a view from, so the table is authoritative here).
@@ -234,45 +248,65 @@ def _view_size(band: int, view_id: str, rect) -> tuple[int, int, int, int]:
 
 def _entries_for_view(lib: compose.Library, placements: list, lines: list, band: int,
                        state: str, rect) -> list:
+    """Entries in true paint order — the same bucketing `compose.render` uses: `base`
+    (list order), then `main` (sorted by `(depth, order)`), then `over` (list order) —
+    so a painter that just draws the array in order (as the contract says the web
+    painter does) reproduces the same picture. Sprites whose bbox only partly overlaps
+    the view are kept (the painter clips); only sprites entirely outside are dropped."""
     x0, y0, x1, y1 = rect
-    out = []
-    order = 0
+    base, main, over = [], [], []
     for q in placements:
         bx0, by0, bx1, by1 = _bbox(lib, q)
         if bx1 <= x0 or bx0 >= x1 or by1 <= y0 or by0 >= y1:
             continue
         entry = {
             "sprite": q["sprite"], "frame": q.get("frame", "default"),
-            "x": q["x"] - x0, "y": q["y"] - y0, "depth": round(q.get("depth", order), 3),
+            "x": q["x"] - x0, "y": q["y"] - y0,
+            "depth": round(q.get("depth", q.get("order", 0)), 3),
         }
         if q.get("gag"):
             entry["gagId"] = q["gag"]
             entry["part"] = q.get("part", "main")
         if "alpha" in q:
             entry["alpha"] = q["alpha"]
-        out.append(entry)
-        order += 1
+        layer = q.get("layer", "main")
+        if layer == "base":
+            base.append(entry)
+        elif layer == "over":
+            over.append((q.get("order", 0), entry))
+        else:
+            main.append((entry["depth"], q.get("order", 0), entry))
+    main.sort(key=lambda t: (t[0], t[1]))
+
     # band 80's "on the network" dotted lines: baked to one overlay sprite per view
-    # that actually shows any of them (A3 — the painter draws images only).
+    # that actually shows any of them (A3 — the painter draws images only), inserted
+    # into `over` at the position of the *first* baked line's own `order` — `compose.
+    # resolve()` assigns `order` to lines too, so this reproduces `compose.render`'s
+    # true interleaving of lines with other `over`-layer sprites (e.g. G4.3's
+    # `card-customers`) instead of always drawing the bake last.
     if lines:
         by_id = {p["id"]: p for p in placements if "id" in p}
-        seg = []
+        seg, orders = [], []
         for ln in lines:
             try:
                 p0 = _point_of(lib, by_id, ln["from"])
                 p1 = _point_of(lib, by_id, ln["to"])
             except KeyError:
                 continue
+            if max(p0[0], p1[0]) <= x0 or min(p0[0], p1[0]) >= x1 \
+                    or max(p0[1], p1[1]) <= y0 or min(p0[1], p1[1]) >= y1:
+                continue
             seg.append((p0, p1, ln.get("colour", "net"), ln.get("halo", "outline")))
-        seg = [(p0, p1, c, h) for (p0, p1, c, h) in seg
-               if not (max(p0[0], p1[0]) <= x0 or min(p0[0], p1[0]) >= x1
-                       or max(p0[1], p1[1]) <= y0 or min(p0[1], p1[1]) >= y1)]
+            orders.append(ln.get("order", 0))
         if seg:
             name = f"fx-net-{band}-{state}-{_slug(rect)}"
             _bake_overlay(lib, seg, x0, y0, x1 - x0, y1 - y0, name)
-            out.append({"sprite": name, "frame": "default", "x": 0, "y": 0, "depth": 900,
-                        "gagId": "G2.3", "part": "lobby"})
-    return out
+            bake_entry = {"sprite": name, "frame": "default", "x": 0, "y": 0,
+                          "depth": 900, "gagId": "G2.3", "part": "lobby"}
+            over.append((min(orders), bake_entry))
+
+    over.sort(key=lambda t: t[0])
+    return base + [e for (_d, _o, e) in main] + [e for (_o, e) in over]
 
 
 def _slug(rect) -> str:
@@ -441,10 +475,77 @@ def export_placeholder_band(lib: compose.Library, band: int, cumulative_new: lis
 # ---------------------------------------------------------------------------
 
 def _render_full_1x(lib: compose.Library, band: int, state: str) -> Image.Image:
+    """The full plate at native scale, *as the site would draw it* — unlike
+    `art/build.py`'s own preview renderer, this drops `preview_only` sprites (style.md:
+    "not drawn by the site renderer"), so it's the right ground truth for both thumbs
+    (R-04, shipped/site content) and the pixel-parity check. `art/preview/*.png` itself
+    is untouched — it's rendered by `art/build.py`'s own, separate call to
+    `compose.render`, which this function does not replace."""
     room = layout.ROOMS[band]
     resolved = compose.resolve(lib, layout.scene(band, state), room["origin"])
+    resolved = [q for q in resolved
+                if "line" in q or not lib.manifest.get(q["sprite"], {}).get("preview_only")]
     c = compose.render(lib, resolved, room["size"])
     return c.img
+
+
+# ---------------------------------------------------------------------------
+# the reference painter — exactly what the contract says the web painter does:
+# draw `entries` in array order, sprite anchor handling identical to `compose.paste`,
+# clipped to the view's canvas. Used both to write art/preview/views/*.png (so there
+# is something to look at) and, independently, by check_scenes.py's parity check
+# (deliverable "the web canvas at scale 1 must match... pixel for pixel").
+# ---------------------------------------------------------------------------
+
+def paint_entries(lib: compose.Library, entries: list, w: int, h: int) -> Image.Image:
+    img = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    for e in entries:
+        sprite_img = lib.image(e["sprite"], e.get("frame", "default"), e.get("index", 0))
+        ax, ay = lib.anchor(e["sprite"])
+        x0, y0 = e["x"] - ax, e["y"] - ay
+        x1, y1 = x0 + sprite_img.width, y0 + sprite_img.height
+        # clip to canvas — entries partly (or wholly) outside the view are expected
+        # (mastermind ruling): the painter clips rather than the exporter filtering.
+        cx0, cy0 = max(x0, 0), max(y0, 0)
+        cx1, cy1 = min(x1, w), min(y1, h)
+        if cx0 >= cx1 or cy0 >= cy1:
+            continue
+        piece = sprite_img.crop((cx0 - x0, cy0 - y0, cx1 - x0, cy1 - y0))
+        alpha = e.get("alpha", 1.0)
+        if alpha != 1.0:
+            piece = piece.copy()
+            piece.putalpha(piece.getchannel("A").point(lambda v: int(v * alpha)))
+        img.alpha_composite(piece, (cx0, cy0))
+    return img
+
+
+def reference_crop(lib: compose.Library, band: int, state: str, rect) -> Image.Image:
+    """The same view rect cropped straight out of the native-scale full-plate render
+    (`compose.render` over the *whole* room — not the upscaled `art/preview/` PNG).
+    This is the ground truth the painted view must match pixel-for-pixel."""
+    x0, y0, x1, y1 = rect
+    full = _render_full_1x(lib, band, state)
+    return full.crop((x0, y0, x1, y1))
+
+
+def export_view_previews(lib: compose.Library) -> list:
+    """Write art/preview/views/<band>-<state>-<viewId>@1x.png for every drawn band and
+    view, painted with `paint_entries` from the exported JSON (not re-derived), so the
+    art side's own preview and the parity check use the same painter."""
+    os.makedirs(PREVIEW_VIEWS_DIR, exist_ok=True)
+    written = []
+    for band in DRAWN_BANDS:
+        for state in STATES:
+            path = os.path.join(SCENES_DIR, f"{band}-{state}.json")
+            with open(path) as f:
+                doc = json.load(f)
+            for v in doc["views"]:
+                w, h = v["size"]["w"], v["size"]["h"]
+                img = paint_entries(lib, v["entries"], w, h)
+                fname = f"{band}-{state}-{v['id']}@1x.png"
+                img.save(os.path.join(PREVIEW_VIEWS_DIR, fname))
+                written.append(fname)
+    return written
 
 
 def export_thumbs(lib: compose.Library) -> dict:
@@ -484,7 +585,8 @@ def export_all():
     os.makedirs(THUMBS_DIR, exist_ok=True)
     lib = compose.Library(SPRITES_DIR)
 
-    index = {"schema": 1, "bands": {}, "beyond": "750", "thumbs": {}}
+    index = {"schema": 1, "bands": {}, "beyond": "750", "thumbs": {},
+              "knownSpacingDebt": [list(pair) for pair in KNOWN_SPACING_DEBT]}
 
     cumulative = []
     for band in ALL_BANDS:
@@ -497,7 +599,13 @@ def export_all():
             files = export_placeholder_band(lib, band, cumulative)
         index["bands"][str(band)] = files
 
+    # `lib.manifest` was loaded once, before any overlay sprite was baked; merge the
+    # bake-time additions into it now so thumbs/view-preview rendering (which look
+    # sprites up through `lib`) can resolve them too.
+    lib.manifest.update(_manifest_additions)
+
     index["thumbs"] = export_thumbs(lib)
+    export_view_previews(lib)
 
     # manifest additions (dotted-line overlay sprites) get merged into the shipped
     # manifest so `{sprite, frame}` references resolve (A2/the manifest check).

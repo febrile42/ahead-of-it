@@ -777,13 +777,6 @@
           "depth": 2.05
         },
         {
-          "sprite": "partition-c",
-          "frame": "default",
-          "x": 134,
-          "y": 100,
-          "depth": 3.05
-        },
-        {
           "sprite": "partition-r-door-closed",
           "frame": "default",
           "x": 150,
@@ -791,11 +784,84 @@
           "depth": 2.5
         },
         {
+          "sprite": "partition-c",
+          "frame": "default",
+          "x": 134,
+          "y": 100,
+          "depth": 3.05
+        },
+        {
           "sprite": "partition-r-end",
           "frame": "default",
           "x": 134,
           "y": 100,
           "depth": 3.1
+        },
+        {
+          "sprite": "sofa",
+          "frame": "default",
+          "x": 102,
+          "y": 100,
+          "depth": 3.5,
+          "gagId": "G2.3",
+          "part": "lobby"
+        },
+        {
+          "sprite": "visitor",
+          "frame": "default",
+          "x": 100,
+          "y": 100,
+          "depth": 3.9,
+          "gagId": "G2.3",
+          "part": "lobby"
+        },
+        {
+          "sprite": "desk-dev-built",
+          "frame": "default",
+          "x": 182,
+          "y": 108,
+          "depth": 4
+        },
+        {
+          "sprite": "worker-seated",
+          "frame": "b",
+          "x": 182,
+          "y": 108,
+          "depth": 4.01
+        },
+        {
+          "sprite": "sla-board",
+          "frame": "default",
+          "x": 87,
+          "y": 115,
+          "depth": 5.85,
+          "gagId": "G2.1",
+          "part": "helpdesk"
+        },
+        {
+          "sprite": "plant",
+          "frame": "default",
+          "x": 38,
+          "y": 132,
+          "depth": 6.4
+        },
+        {
+          "sprite": "desk",
+          "frame": "default",
+          "x": 70,
+          "y": 132,
+          "depth": 7,
+          "gagId": "G2.1",
+          "part": "helpdesk"
+        },
+        {
+          "sprite": "worker-seated",
+          "frame": "e",
+          "x": 70,
+          "y": 132,
+          "depth": 7.01,
+          "gagId": "G2.1",
+          "part": "helpdesk"
         },
         {
           "sprite": "desk-padlock",
@@ -816,9 +882,27 @@
           "part": "pit"
         },
         {
+          "sprite": "worker",
+          "frame": "idle-left",
+          "x": 76,
+          "y": 134,
+          "depth": 8.3,
+          "gagId": "G2.1",
+          "part": "helpdesk"
+        },
+        {
           "sprite": "desk-padlock",
           "frame": "default",
           "x": 182,
+          "y": 156,
+          "depth": 10,
+          "gagId": "G1.2",
+          "part": "pit"
+        },
+        {
+          "sprite": "desk-padlock",
+          "frame": "default",
+          "x": 118,
           "y": 156,
           "depth": 10,
           "gagId": "G1.2",
@@ -830,15 +914,6 @@
           "x": 182,
           "y": 156,
           "depth": 10.01,
-          "gagId": "G1.2",
-          "part": "pit"
-        },
-        {
-          "sprite": "desk-padlock",
-          "frame": "default",
-          "x": 118,
-          "y": 156,
-          "depth": 10,
           "gagId": "G1.2",
           "part": "pit"
         },
@@ -870,56 +945,6 @@
           "part": "pit"
         },
         {
-          "sprite": "desk-dev-built",
-          "frame": "default",
-          "x": 182,
-          "y": 108,
-          "depth": 4
-        },
-        {
-          "sprite": "worker-seated",
-          "frame": "b",
-          "x": 182,
-          "y": 108,
-          "depth": 4.01
-        },
-        {
-          "sprite": "desk",
-          "frame": "default",
-          "x": 70,
-          "y": 132,
-          "depth": 7,
-          "gagId": "G2.1",
-          "part": "helpdesk"
-        },
-        {
-          "sprite": "worker-seated",
-          "frame": "e",
-          "x": 70,
-          "y": 132,
-          "depth": 7.01,
-          "gagId": "G2.1",
-          "part": "helpdesk"
-        },
-        {
-          "sprite": "sla-board",
-          "frame": "default",
-          "x": 87,
-          "y": 115,
-          "depth": 5.85,
-          "gagId": "G2.1",
-          "part": "helpdesk"
-        },
-        {
-          "sprite": "worker",
-          "frame": "idle-left",
-          "x": 76,
-          "y": 134,
-          "depth": 8.3,
-          "gagId": "G2.1",
-          "part": "helpdesk"
-        },
-        {
           "sprite": "worker-c",
           "frame": "right",
           "x": 190,
@@ -927,31 +952,6 @@
           "depth": 12.6,
           "gagId": "G2.1",
           "part": "helpdesk"
-        },
-        {
-          "sprite": "sofa",
-          "frame": "default",
-          "x": 102,
-          "y": 100,
-          "depth": 3.5,
-          "gagId": "G2.3",
-          "part": "lobby"
-        },
-        {
-          "sprite": "plant",
-          "frame": "default",
-          "x": 38,
-          "y": 132,
-          "depth": 6.4
-        },
-        {
-          "sprite": "visitor",
-          "frame": "default",
-          "x": 100,
-          "y": 100,
-          "depth": 3.9,
-          "gagId": "G2.3",
-          "part": "lobby"
         },
         {
           "sprite": "fx-net-80-built-0-0-300-214",

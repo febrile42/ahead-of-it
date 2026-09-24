@@ -17,12 +17,21 @@ Checks:
   6. one primary        — exactly one primary hotspot per gag per (band, state, its
                          views); D-036 rule 4.
   7. spacing            — primary hotspot centres >= 44 native px apart within a view
-                         (rule 7).
+                         (rule 7); `KNOWN_SPACING_DEBT` pairs (art pass 4 territory)
+                         print as a warning instead of failing, and fail if the debt
+                         has gone stale (the pair is now >= 44px everywhere).
   8. beyond alias       — index.json's `beyond` points at band 750.
+  9. pixel parity       — for every drawn band x state x view, painting the exported
+                         `entries` in array order (exactly the contract's painter:
+                         anchor-adjusted, clipped to the canvas) reproduces the same
+                         rect cropped out of `compose.render`'s native-scale render of
+                         the whole plate, byte-for-byte in RGBA. Catches wrong entry
+                         order, missing entries, wrong offsets — the actual "web ==
+                         art" guarantee D-035 promises, not just a shared code path.
 
 Usage: python3 art/checks/check_scenes.py
-Exit 0 if every check passes; exit 1 and print every failure otherwise (not just the
-first — a reviewer needs the whole list).
+Exit 0 if every check passes (warnings still print); exit 1 and print every failure
+otherwise (not just the first — a reviewer needs the whole list).
 """
 from __future__ import annotations
 
@@ -34,13 +43,19 @@ import sys
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
 _REPO_ROOT = os.path.dirname(os.path.dirname(_HERE))
+sys.path.insert(0, _REPO_ROOT)
+
+from art.src import compose, export_scene  # noqa: E402
+
 SPRITES_DIR = os.path.join(_REPO_ROOT, "public", "sprites")
 SCENES_DIR = os.path.join(SPRITES_DIR, "scenes")
 
 VIEW_ORDER = ["ground", "floor-2", "floor-3", "floor-4", "floor-5", "floor-6", "top", "street"]
 SPACING_MIN = 44
+KNOWN_SPACING_DEBT = {frozenset(p) for p in export_scene.KNOWN_SPACING_DEBT}
 
 failures: list[str] = []
+warnings: list[str] = []
 
 
 def fail(msg: str):
@@ -50,6 +65,34 @@ def fail(msg: str):
 def load_json(path):
     with open(path) as f:
         return json.load(f)
+
+
+def check_pixel_parity():
+    """D-035's real guarantee: for every drawn band x state x view, painting the
+    exported `entries` in array order — exactly the contract's painter (anchor-adjusted,
+    clipped to the view canvas) — reproduces the same rect cropped out of
+    `compose.render`'s native-scale render of the whole plate, byte-for-byte in RGBA.
+    Independent of the exporter's own internals: it re-derives the reference render
+    itself rather than trusting anything export_scene.py precomputed."""
+    lib = compose.Library(SPRITES_DIR)
+    for band in export_scene.DRAWN_BANDS:
+        for state in export_scene.STATES:
+            path = os.path.join(SCENES_DIR, f"{band}-{state}.json")
+            doc = load_json(path)
+            for v in doc["views"]:
+                w, h = v["size"]["w"], v["size"]["h"]
+                rect = export_scene.VIEW_CROPS[band]
+                crop_rect = next((r for (vid, r) in rect if vid == v["id"]), None)
+                if crop_rect is None:
+                    crop_rect = (0, 0, w, h)
+                painted = export_scene.paint_entries(lib, v["entries"], w, h)
+                reference = export_scene.reference_crop(lib, band, state, crop_rect)
+                if painted.tobytes() != reference.tobytes():
+                    diffs = sum(1 for a, b in zip(painted.getdata(), reference.getdata())
+                                if a != b)
+                    fail(f"{band}-{state}.json:{v['id']} — pixel parity: painted view "
+                         f"!= native-scale crop of compose.render ({diffs} pixels differ "
+                         f"of {w * h})")
 
 
 def check_determinism():
@@ -90,6 +133,13 @@ def main():
     expected_bands = {"80", "150", "220", "360", "490", "610", "750"}
     if set(bands) != expected_bands:
         fail(f"index.json bands — got {sorted(bands)}, want {sorted(expected_bands)}")
+
+    index_debt = {frozenset(p) for p in index.get("knownSpacingDebt", [])}
+    if index_debt != KNOWN_SPACING_DEBT:
+        fail("index.json knownSpacingDebt does not match export_scene.KNOWN_SPACING_DEBT "
+             f"— index has {sorted(map(sorted, index_debt))}, "
+             f"module has {sorted(map(sorted, KNOWN_SPACING_DEBT))}")
+    debt_seen_failing: set = set()
 
     # cumulative gag -> introducing band, from src/content/content.json (ground truth)
     content = load_json(os.path.join(_REPO_ROOT, "src", "content", "content.json"))
@@ -176,8 +226,15 @@ def main():
                 for (ga, xa, ya), (gb, xb, yb) in itertools.combinations(primary_pts, 2):
                     d = math.hypot(xa - xb, ya - yb)
                     if d < SPACING_MIN:
-                        fail(f"{fname}:{vid} — primary hotspots {ga}/{gb} only "
-                             f"{d:.1f}px apart (< {SPACING_MIN}, D-036 rule 7)")
+                        pair = frozenset((ga, gb))
+                        if pair in KNOWN_SPACING_DEBT:
+                            debt_seen_failing.add(pair)
+                            warnings.append(
+                                f"{fname}:{vid} — WARNING (known debt, art pass 4) "
+                                f"{ga}/{gb} only {d:.1f}px apart (< {SPACING_MIN})")
+                        else:
+                            fail(f"{fname}:{vid} — primary hotspots {ga}/{gb} only "
+                                 f"{d:.1f}px apart (< {SPACING_MIN}, D-036 rule 7)")
 
             # exactly one primary hotspot per gag, across the whole doc (D-036 rule 4)
             for gag, n in doc_primary_count.items():
@@ -190,7 +247,20 @@ def main():
             if missing:
                 fail(f"{fname} — gags due by band {band} with no hotspot: {sorted(missing)}")
 
+    # a debt entry that never actually failed anywhere has gone stale — the point of
+    # KNOWN_SPACING_DEBT is that it can't silently keep excusing something already fixed
+    for pair in KNOWN_SPACING_DEBT - debt_seen_failing:
+        fail(f"KNOWN_SPACING_DEBT {sorted(pair)} is >= {SPACING_MIN}px apart in every "
+             f"file now — remove it from KNOWN_SPACING_DEBT (art pass 4 landed)")
+
+    check_pixel_parity()
     check_determinism()
+
+    if warnings:
+        print(f"{len(warnings)} warning(s):\n")
+        for w in warnings:
+            print(" -", w)
+        print()
 
     if failures:
         print(f"FAIL — {len(failures)} check(s) failed:\n")
@@ -198,7 +268,8 @@ def main():
             print(" -", f)
         sys.exit(1)
     print("PASS — scene export checks: views, manifest refs, coverage, bounds, "
-          "spacing, beyond alias, determinism.")
+          "spacing (known debt warned, not failed), beyond alias, pixel parity, "
+          "determinism.")
 
 
 if __name__ == "__main__":
