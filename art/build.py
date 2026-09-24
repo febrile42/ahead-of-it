@@ -21,7 +21,7 @@ sys.path.insert(0, _REPO_ROOT)
 from art.src.dsl import Canvas, save_png, scale_nn
 from art.src import iso
 from art.src.sprites import floor, wall, desk, worker, badge_reader, room, band80, poses
-from art.src.sprites import band150
+from art.src.sprites import band150, band220
 from art.src import compose, layout
 from art.src.vox import Sprite
 
@@ -167,6 +167,25 @@ def build_worker(manifest, registry):
                                           worker.ANCHOR,
                                           durations={k: poses.WATCH_MS for k in watch})
     registry["worker-watch"] = Frames(watch, worker.ANCHOR)
+    for kind in ("sales", "engineer"):
+        pf = poses.point_frames(kind)
+        manifest[kind] = save_entry(kind, pf, poses.POINT_W, poses.POINT_H,
+                                    poses.POINT_ANCHOR,
+                                    durations={k: poses.POINT_MS for k in pf})
+        registry[kind] = Frames(pf, poses.POINT_ANCHOR)
+    hud = {}
+    for look in looks:
+        hud.update(poses.huddle_frames(look))
+    manifest["worker-huddle"] = save_entry("worker-huddle", hud, worker.W, worker.H,
+                                           worker.ANCHOR)
+    registry["worker-huddle"] = Frames(hud, worker.ANCHOR)
+    hat = {}
+    for look in looks:
+        hat[look] = [poses.hat_frame(look)]
+        hat[look + "-left"] = [poses.hat_frame(look, "left")]
+    manifest["worker-hat"] = save_entry("worker-hat", hat, poses.HAT_W, poses.HAT_H,
+                                        poses.HAT_ANCHOR)
+    registry["worker-hat"] = Frames(hat, poses.HAT_ANCHOR)
     vis = worker.visitor_frame()
     pts = {"net": worker.VISITOR_NET}
     manifest["visitor"] = save_entry("visitor", {"default": [vis]}, vis.w, vis.h,
@@ -202,7 +221,8 @@ def save_sprite(manifest, registry, name, spr):
 
 
 def build_props(manifest, registry):
-    for group in (room.build_all(), band80.build_all(), band150.build_all()):
+    for group in (room.build_all(), band80.build_all(), band150.build_all(),
+                  band220.build_all()):
         for name, spr in group.items():
             save_sprite(manifest, registry, name, spr)
 
@@ -258,9 +278,23 @@ def build_sheet(static, badge_rendered, worker_rendered, registry):
     items.append(registry["visitor"].canvas)
     for name in ("desk-postit", "desk-padlock", "desk-dev", "desk-dev-built"):
         items.append(registry[name].canvas)
-    for group in (room.build_all(), band80.build_all()):
+    for group in (room.build_all(), band80.build_all(), band150.build_all(),
+                  band220.build_all()):
         for name in group:
             items.append(registry[name].canvas)
+    # PH1-07 poses, one look each (all five ship): every frame, so the animation is
+    # judgeable; desk-canvas poses are shown at their desk
+    for fr in registry["worker-reach"].frames["a"]:
+        seat = Canvas(desk.W, desk.H)
+        seat.paste(registry["desk"].canvas, 0, 0)
+        seat.paste(fr, 0, 0)
+        items.append(seat)
+    for key, frame in (("worker-printouts", "c"), ("worker-give", "e-left"),
+                       ("courier", "right"), ("worker-watch", "b"),
+                       ("sales", "point-right"), ("engineer", "point-left"),
+                       ("worker-huddle", "a"), ("worker-huddle", "c-dongle"),
+                       ("worker-hat", "e"), ("worker-hat", "e-left")):
+        items.extend(registry[key].frames[frame])
 
     # trim to drawn pixels for the sheet only (wall-mounted props keep empty canvas
     # below them so their anchor stays inside; the shipped PNGs are untouched)

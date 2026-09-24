@@ -3,7 +3,7 @@ that `compose.py` renders from the manifest and the shipped PNGs. PH1-08 can dum
 `scene(band, state)` to JSON as it stands.
 
 **Cumulative (R-03a, D-026).** The building grows; nothing in it moves. Band 150's plate
-is band 80's 9 x 7 extended to 12 columns, later bands' further; every band-80 placement
+is band 80's 9 x 7 extended to 12 columns, band 220's to 16; every band-80 placement
 keeps its tile in every later band. `scene(B, state)` is every placement whose `band`
 <= B and whose `states` include `state`.
 
@@ -13,8 +13,8 @@ own — "drop" (secondary actors and crowd members beyond the few that tell the 
 preview-only callouts) or a dict of overrides. The current band's items are full-size.
 Concretely: the DEV queue shrinks from six to three (the laptop overhead stays); the
 note-peeler, the cable-stepper, the VISITOR callout, the person at the support desk and
-the walker on the cleared floor drop; band 150's doorstep handover is marked to drop
-from band 220 (the van on the road and the worker checking a watch still tell G5.1).
+the walker on the cleared floor drop; at 220, band 150's doorstep handover drops (the
+van on the road and the worker checking a watch still tell G5.1).
 
 Billboard labels (notes, cards) go in the "over" layer, after the network lines, so
 text always reads (style.md "On the network").
@@ -36,6 +36,9 @@ ROOMS = {
     150: dict(cols=12, rows=7, size=(520, 340), origin=(260, 80),
               back_l={3: "wall-back-l-window", 5: "wall-back-l-door"},
               back_r_windows=(3, 5, 7, 10)),
+    220: dict(cols=16, rows=7, size=(600, 360), origin=(260, 80),
+              back_l={3: "wall-back-l-window", 5: "wall-back-l-door"},
+              back_r_windows=(3, 5, 7, 10, 15)),
 }
 
 
@@ -261,7 +264,54 @@ def _band150() -> list:
     return P
 
 
-PLACEMENTS = {80: _band80(), 150: _band150()}
+# -- band 220: the plate grows to 16 columns; a glass conference room in the corner ----
+
+GLASS = dict(c0=12, c1=15, r0=0, r1=2)
+WB = (14.3, 5.2)      # the whiteboard's feet
+
+
+def _band220() -> list:
+    g = GLASS
+    P = []
+    # G2.4: the room, the TV, the table
+    P += [
+        _t("tv-frozen", 13, 0, depth=0.5, states=W),
+        _t("tv-live", 13, 0, depth=0.5, states=B),
+        _t("camera-bar", 13, 0, depth=0.6, states=B),
+        _t("conf-table", g["c0"], 1, states=B),
+        _t("conf-huddle", g["c0"], 1, states=W),
+    ]
+    for col, look in zip(range(g["c0"], g["c1"] + 1), "aced"):
+        P.append(_t("worker-seated", col, 1, frame=look, depth=col + 2.01, states=B))
+    # two at each end of the table, the gap left open so the one laptop shows
+    for (fc, fr), fr_key in (((12.85, 2.3), "a"), ((13.4, 2.45), "c-dongle"),
+                             ((14.75, 2.4), "e"), ((15.3, 2.25), "d")):
+        P.append(_f("worker-huddle", fc, fr, frame=fr_key, states=W))
+    for row in range(g["r0"], g["r1"] + 1):
+        P.append(_t("glass-r-door" if row == 1 else "glass-r", g["c0"] - 1, row,
+                    depth=g["c0"] - 1 + row + 1.95))
+    for col in range(g["c0"], g["c1"] + 1):
+        name = {g["c0"]: "glass-c-corner", g["c1"]: "glass-c-end"}.get(col, "glass-c")
+        P.append(_t(name, col, g["r1"], depth=col + g["r1"] + 1.95))
+    # G7.3a: out on the open floor in front of the new bay, clear of the glass: the
+    # whiteboard between them, the two pointing at each other across it / the hat
+    P += [
+        _f("whiteboard-requests", WB[0], WB[1], states=W, id="wb"),
+        _f("whiteboard-owned", WB[0], WB[1], states=B),
+        _f("sales", WB[0] - 1.0, WB[1] + 0.9, frame="point-right", states=W),
+        _f("engineer", WB[0] + 1.2, WB[1] - 0.6, frame="point-left", states=W),
+        _f("worker-hat", WB[0] + 1.6, WB[1] - 0.5, frame="e-left", states=B),
+    ]
+    # more of the floor: two desks in the new bay
+    for (col, row), look in (((9, 2), "a"), ((8, 6), "b")):
+        P.append(_t("desk", col, row))
+        P.append(_t("worker-seated", col, row, frame=look, depth=col + row + 1.01))
+    for p in P:
+        p.setdefault("band", 220)
+    return P
+
+
+PLACEMENTS = {80: _band80(), 150: _band150(), 220: _band220()}
 
 
 def scene(band: int, state: str) -> list:

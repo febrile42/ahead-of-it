@@ -196,3 +196,26 @@ A gag's key object must read at native size, not only in the 4× preview:
   a sheet in each hand, looking left then right), `worker-give` (24 × 24, profile, padded
   envelope out; `<look>-left/-right`), `courier` (same canvas; brown uniform and cap),
   `worker-watch` (forearm across the chest, eyes down, then up). All in `poses.py`.
+
+## Band 220 (PH1-07)
+
+- **The plate grows, nothing moves** (R-03a). `layout.py` holds every room as data; band
+  220 is band 150's plate extended to 16 columns. Earlier bands' items keep their tiles
+  and drop to their minimum legible form (`quiet`); the current band's gags are full.
+- **Glass is cut away** like any wall that would hide a room: aluminium sill, panes to
+  11 units with a frosted band and one glint, a `glass-highlight` cut top. Only thin
+  things stand full height: the room's front corner posts (`glass-c-corner`,
+  `glass-c-end`) and the door frame (`glass-r-door`). Full-height glass with glints
+  made the people inside unreadable.
+- **The conference room** (12..15, 0..2): without, four workers from behind
+  (`worker-huddle`, one `-dongle` with an adapter held up) at the table's two ends so
+  the single laptop and its cable up to the frozen, pixelated face (`tv-frozen`, spinner
+  `blink`) stay visible; built, four seated, `camera-bar` over `tv-live` (`talk`).
+- **G7.3a** stands on open floor in front of the new bay, clear of the glass and of
+  G4.3: `whiteboard-requests` (FEATURE / REQUESTS / OWNER:?) with `sales` (shirt, red
+  tie) and `engineer` (grey hoodie, headphones) pointing at each other across it;
+  built, `whiteboard-owned` and `worker-hat` (`<look>-left`: marker hand on screen left;
+  the body mirrors, the hat text is drawn after so it never does).
+- **Depth by hand.** Long props break the col + row sort; anything outside the glass
+  keeps fc + fr > 19 so it draws after the front glass.
+- **Glyphs.** `W` is 5 wide (3-wide read as `H`), as `M`.

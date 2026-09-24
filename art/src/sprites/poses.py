@@ -10,6 +10,13 @@ every look is a palette swap. Each pose is one manifest entry keyed by look (lik
                    canvas and keys as worker-give (one look).
   worker-watch     G5.1: front view at the inset office's door, forearm up, checking
                    a watch (frame 0), then looking up the road (frame 1).
+  sales, engineer  G7.3a (band 220): two outfits that say which side they're on (shirt
+                   and tie; hoodie and headphones), pointing at each other across the
+                   whiteboard. `point-right` / `point-left`, 2-frame jab each. 20 x 24.
+  worker-huddle    G2.4: seen from behind, hunched over the table's one laptop;
+                   `<look>` and `<look>-dongle` (an arm up, holding an adapter).
+  worker-hat       G7.3a built: front view, a marker raised to the board, wearing the
+                   `PRODUCT` hat — a paper band far wider than the head. 32 x 34.
   worker-reach     G4.2 (band 150): seated at the finance desk, reaching up for the
                    envelope on the hook. Desk canvas + anchor.
   worker-peel      G1.2 (band 80): standing at a colleague's desk, peeling the password
@@ -246,3 +253,112 @@ def watch_frames(look_name: str) -> list[Canvas]:
         f.put(7, 11, "Y")
         out.append(f.to_canvas(look))
     return out
+
+
+# -- G7.3a / G2.4 (band 220) -------------------------------------------------------------
+
+POINT_W, POINT_H = 20, 24
+POINT_ANCHOR = (8, 24)
+POINT_MS = 350
+
+SALES_LOOK = dict(t="paper", T="wall-shadow", p="pants-1", s="skin-1", h="hair-1",
+                  style="short")
+ENGINEER_LOOK = dict(t="chair-mid", T="chair-dark", p="shirt-1-dark", s="skin-3",
+                     h="desk-wood", style="short")
+
+
+def _point_right(look: dict, kind: str, jab: int) -> Canvas:
+    f = Fig(POINT_W, POINT_H)
+    body = _standing_right(look)
+    if kind == "sales":
+        for y in range(10, 15):                  # the tie
+            body.px[(8, y)] = "X"
+        body.px[(9, 10)] = "X"
+    else:
+        # headphones: a band over the crown, a cup over the ear
+        for (x, y) in ((4, 1), (5, 0), (6, 0), (7, 0), (8, 0), (9, 1)):
+            body.put(x, y, "o")
+        body.blob(R(5, 4, 6, 6), "L", ring=True)
+    _place(f, body, 0, 0)
+    # the pointing arm, straight out at shoulder height, index finger extended
+    x1 = 17 + jab
+    f.blob({(x, y) for x in range(10, x1) for y in (10, 11)},
+           lambda p: "s" if p[0] >= x1 - 2 else "t", ring="outer")
+    f.blob({(x1, 10)}, "s", ring="outer")
+    return f.to_canvas(look)
+
+
+def point_frames(kind: str) -> dict:
+    look = SALES_LOOK if kind == "sales" else ENGINEER_LOOK
+    right = [_point_right(look, kind, j) for j in (0, 1)]
+    return {"point-right": right, "point-left": [c.mirror_h() for c in right]}
+
+
+def huddle_frames(look_name: str) -> dict:
+    """From behind, leaning in over the table: head dropped a pixel, shoulders up,
+    arms forward out of sight. `-dongle`: one arm up, an adapter in the hand."""
+    from .worker import _head_back, _arm_front
+    look = LOOKS[look_name]
+    out = {}
+    for dongle in (False, True):
+        f = Fig()
+        _shadow(f)
+        _leg_front(f, "left", 0, 0)
+        _leg_front(f, "right", 0, 0)
+        _torso_front(f, 1)
+        _arm_front(f, "left", 4, 1, hand=False)
+        if not dongle:
+            _arm_front(f, "right", 4, 1, hand=False)
+        _head_back(f, look["style"], 2)
+        if dongle:
+            f.blob(R(13, 2, 14, 10), lambda p: "s" if p[1] <= 3 else "T", ring="outer")
+            f.blob(R(12, 0, 15, 1), "V", ring=True)    # the adapter, held up
+        out[look_name + ("-dongle" if dongle else "")] = [f.to_canvas(look)]
+    return out
+
+
+HAT_W, HAT_H = 32, 34
+HAT_ANCHOR = (16, 34)
+
+
+def hat_frame(look_name: str, side: str = "right") -> Canvas:
+    """Front view at the whiteboard, marker hand up by the board (screen `side`), and
+    the hat: a red crown with a paper band reading PRODUCT, wider than the head —
+    the comic size of a thing everyone can now see. The body mirrors; the hat is drawn
+    after, so its text never does."""
+    from ..glyphs import GLYPHS, text_width
+    from .worker import _arm_front
+    look = LOOKS[look_name]
+    f = Fig(HAT_W, HAT_H)
+    body = Fig()
+    _shadow(body)
+    _leg_front(body, "left", 0, 0)
+    _leg_front(body, "right", 0, 0)
+    _torso_front(body, 0)
+    _arm_front(body, "left", 6, 0)
+    _head_front(body, look["style"], 0)
+    _place(f, body, 8, HAT_H - 24)
+    oy = HAT_H - 24
+    # marker arm up and out toward the board on the right
+    f.blob({(21, oy + 9), (22, oy + 9), (22, oy + 8), (23, oy + 8), (23, oy + 7),
+            (24, oy + 7), (24, oy + 6), (25, oy + 6)},
+           lambda p: "s" if p[0] >= 24 else "T", ring="outer")
+    f.put(26, oy + 5, "X")                    # the marker cap
+    if side == "left":
+        f.px = {(HAT_W - 1 - x, y): r for (x, y), r in f.px.items()}
+    # the hat: crown sits on the head, band across the front
+    text = "PRODUCT"
+    tw = text_width(text)
+    bx0 = (HAT_W - (tw + 4)) // 2
+    by0 = oy - 3
+    f.blob(R(bx0 + 7, by0 - 5, bx0 + tw - 4, by0 - 1), "X")            # crown
+    band = R(bx0, by0, bx0 + tw + 3, by0 + 6)
+    f.blob(band, "V")
+    gx = bx0 + 2
+    for ch in text:
+        for dy, row in enumerate(GLYPHS[ch]):
+            for dx, px in enumerate(row):
+                if px == "#":
+                    f.put(gx + dx, by0 + 1 + dy, "k")
+        gx += len(GLYPHS[ch][0]) + 1
+    return f.to_canvas(look)

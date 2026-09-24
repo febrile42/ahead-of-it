@@ -2,7 +2,7 @@
 
 Brief PH1-06: text in the pixels is drawn as glyphs, never with a font file. Each glyph
 is 5 rows of 3 characters ('#' = ink); `I`, `1`, `:` and space are narrower, `N`
-is 4 wide (a 3-wide N reads as a lowercase n) and `M` 5 (a 3-wide M reads as H). Letters are
+is 4 wide (a 3-wide N reads as a lowercase n) and `M`, `W` 5 (3-wide, both read as H). Letters are
 separated by one blank column. Only what the art needs is defined; `draw` raises on
 anything else so a typo can't silently render as a gap.
 """
@@ -31,7 +31,7 @@ GLYPHS = {
     "T": ["###", ".#.", ".#.", ".#.", ".#."],
     "U": ["#.#", "#.#", "#.#", "#.#", "###"],
     "V": ["#.#", "#.#", "#.#", ".#.", ".#."],
-    "W": ["#.#", "#.#", "###", "###", "#.#"],
+    "W": ["#...#", "#...#", "#.#.#", "##.##", "#...#"],   # PH1-07: 3-wide read as H
     "Y": ["#.#", "#.#", ".#.", ".#.", ".#."],
     "0": [".#.", "#.#", "#.#", "#.#", ".#."],
     "1": [".#", "##", ".#", ".#", ".#"],

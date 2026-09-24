@@ -176,6 +176,74 @@ def _partition_r_doorway(iso: Iso):
             right="wall-trim")
 
 
+# -- glass walls (PH1-07, band 220's conference room) -------------------------------
+
+GLASS_H = 30        # full height: posts and door frames
+GLASS_CUT = 11      # the panes, cut away just above table height
+
+
+def _glass(iso: Iso, along: str, door=False, end=False, corner=False):
+    """A glass wall on the tile's front-left edge (along "c", at r = 8) or front-right
+    edge (along "r", at c = 8), **cut away** like every wall that would hide a room's
+    contents (style.md "Cutaway rooms"): an aluminium sill, panes to GLASS_CUT with a
+    frosted band and one glint each, and a `glass-highlight` cut top. What still stands
+    full height is thin — the room's front corner posts (`corner`: at u = 0, `end`: at
+    u = 8) and a door frame (`door`) — so the room reads as glass to the ceiling without
+    anything but a 1 px line crossing the people inside. u runs 0..8 along the wall
+    (for "r" walls, from the front end back)."""
+    spans = [(0, 1.9), (6.1, 8)] if door else [(0, 8)]      # the doorway is open
+    faces = {}
+    for u0, u1 in spans:
+        if along == "c":
+            faces.update(iso.box_faces(u0, 8 - PART_T, 0, u1, 8, GLASS_CUT))
+        else:
+            faces.update(iso.box_faces(8, 8 - u1, 0, 8 + PART_T, 8 - u0, GLASS_CUT))
+    face, plane = ("L", 8) if along == "c" else ("R", 8 + PART_T)
+
+    def fn(u, z):
+        if z < 1.5:
+            return "badge-body"                    # sill
+        if u < 0.7 or (end and u >= 7.3) or (door and (1.5 <= u < 1.9 or 6.1 <= u < 6.5)):
+            return "badge-body"                    # mullions
+        if 5.0 <= z < 7.0:
+            return "glass"                         # frosted band
+        g = u * 2 + z
+        if 9.0 <= g < 10.0 and z >= 2:
+            return "glass-highlight"               # one glint per pane
+        return None
+    if face == "L":
+        iso.paint(faces, "L", plane, lambda c, z: fn(c, z))
+    else:
+        iso.paint(faces, "R", plane, lambda r, z: fn(8 - r, z))
+    for (x, y), f in faces.items():
+        if f == "T":
+            iso.c.point(x, y, "glass-highlight")   # the cut top
+    for (x, y), f in faces.items():               # sill line under it all
+        if f == face and (x, y + 1) not in faces:
+            iso.c.point(x, y, "outline")
+
+    def post(u0, u1, z1):
+        if along == "c":
+            iso.box(u0, 8 - PART_T, 0, u1, 8, z1, top="badge-body", left="badge-body",
+                    right="wall-shadow", outline=None)
+        else:
+            iso.box(8, 8 - u1, 0, 8 + PART_T, 8 - u0, z1, top="badge-body",
+                    left="badge-body", right="wall-shadow", outline=None)
+    if corner:
+        post(0, 0.7, GLASS_H)
+    if end:
+        post(7.3, 8, GLASS_H)
+    if door:
+        post(1.5, 1.9, 24)
+        post(6.1, 6.5, 24)
+        if along == "c":
+            iso.box(1.5, 8 - PART_T, 23, 6.5, 8, 24.5, top="badge-body",
+                    left="badge-body", right="wall-shadow", outline=None)
+        else:
+            iso.box(8, 1.5, 23, 8 + PART_T, 6.5, 24.5, top="badge-body",
+                    left="badge-body", right="wall-shadow", outline=None)
+
+
 def _slab_l(iso: Iso):
     iso.box(0, 7.9, -5, 8, 8, 0, top=None, left="floor-left", right="floor-right",
             outline=None)
@@ -212,6 +280,11 @@ def build_all() -> dict:
         "partition-r-door-closed": make(lambda iso, c: _partition_r(iso, "closed")),
         "partition-c-door-open": make(lambda iso, c: _partition_c_door(iso)),
         "partition-r-doorway": make(lambda iso, c: _partition_r_doorway(iso)),
+        "glass-c": make(lambda iso, c: _glass(iso, "c")),
+        "glass-c-corner": make(lambda iso, c: _glass(iso, "c", corner=True)),
+        "glass-c-end": make(lambda iso, c: _glass(iso, "c", end=True)),
+        "glass-r": make(lambda iso, c: _glass(iso, "r")),
+        "glass-r-door": make(lambda iso, c: _glass(iso, "r", door=True)),
         "slab-l": make(lambda iso, c: _slab_l(iso)),
         "slab-r": make(lambda iso, c: _slab_r(iso)),
     }

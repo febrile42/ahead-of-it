@@ -117,6 +117,22 @@
     "h": 51,
     "w": 20
   },
+  "camera-bar": {
+    "anchor": [
+      1,
+      41
+    ],
+    "frames": {
+      "default": [
+        {
+          "duration": 0,
+          "file": "camera-bar.png"
+        }
+      ]
+    },
+    "h": 41,
+    "w": 24
+  },
   "card-customers": {
     "anchor": [
       20,
@@ -180,6 +196,38 @@
       ]
     },
     "w": 36
+  },
+  "conf-huddle": {
+    "anchor": [
+      27,
+      28
+    ],
+    "frames": {
+      "default": [
+        {
+          "duration": 0,
+          "file": "conf-huddle.png"
+        }
+      ]
+    },
+    "h": 56,
+    "w": 98
+  },
+  "conf-table": {
+    "anchor": [
+      13,
+      28
+    ],
+    "frames": {
+      "default": [
+        {
+          "duration": 0,
+          "file": "conf-table.png"
+        }
+      ]
+    },
+    "h": 47,
+    "w": 84
   },
   "courier": {
     "anchor": [
@@ -421,6 +469,36 @@
     },
     "w": 32
   },
+  "engineer": {
+    "anchor": [
+      8,
+      24
+    ],
+    "frames": {
+      "point-left": [
+        {
+          "duration": 350,
+          "file": "engineer-point-left-0.png"
+        },
+        {
+          "duration": 350,
+          "file": "engineer-point-left-1.png"
+        }
+      ],
+      "point-right": [
+        {
+          "duration": 350,
+          "file": "engineer-point-right-0.png"
+        },
+        {
+          "duration": 350,
+          "file": "engineer-point-right-1.png"
+        }
+      ]
+    },
+    "h": 24,
+    "w": 20
+  },
   "firewall": {
     "anchor": [
       2,
@@ -528,6 +606,86 @@
     },
     "h": 16,
     "w": 32
+  },
+  "glass-c": {
+    "anchor": [
+      16,
+      20
+    ],
+    "frames": {
+      "default": [
+        {
+          "duration": 0,
+          "file": "glass-c.png"
+        }
+      ]
+    },
+    "h": 20,
+    "w": 17
+  },
+  "glass-c-corner": {
+    "anchor": [
+      16,
+      39
+    ],
+    "frames": {
+      "default": [
+        {
+          "duration": 0,
+          "file": "glass-c-corner.png"
+        }
+      ]
+    },
+    "h": 39,
+    "w": 17
+  },
+  "glass-c-end": {
+    "anchor": [
+      16,
+      32
+    ],
+    "frames": {
+      "default": [
+        {
+          "duration": 0,
+          "file": "glass-c-end.png"
+        }
+      ]
+    },
+    "h": 32,
+    "w": 18
+  },
+  "glass-r": {
+    "anchor": [
+      1,
+      19
+    ],
+    "frames": {
+      "default": [
+        {
+          "duration": 0,
+          "file": "glass-r.png"
+        }
+      ]
+    },
+    "h": 20,
+    "w": 19
+  },
+  "glass-r-door": {
+    "anchor": [
+      1,
+      31
+    ],
+    "frames": {
+      "default": [
+        {
+          "duration": 0,
+          "file": "glass-r-door.png"
+        }
+      ]
+    },
+    "h": 32,
+    "w": 19
   },
   "laptop-shelf": {
     "anchor": [
@@ -863,6 +1021,36 @@
     "h": 14,
     "w": 24
   },
+  "sales": {
+    "anchor": [
+      8,
+      24
+    ],
+    "frames": {
+      "point-left": [
+        {
+          "duration": 350,
+          "file": "sales-point-left-0.png"
+        },
+        {
+          "duration": 350,
+          "file": "sales-point-left-1.png"
+        }
+      ],
+      "point-right": [
+        {
+          "duration": 350,
+          "file": "sales-point-right-0.png"
+        },
+        {
+          "duration": 350,
+          "file": "sales-point-right-1.png"
+        }
+      ]
+    },
+    "h": 24,
+    "w": 20
+  },
   "sign-caution": {
     "anchor": [
       8,
@@ -1023,6 +1211,70 @@
     },
     "h": 22,
     "w": 24
+  },
+  "tv-frozen": {
+    "anchor": [
+      1,
+      42
+    ],
+    "frames": {
+      "blink": [
+        {
+          "duration": 250,
+          "file": "tv-frozen-blink-0.png"
+        },
+        {
+          "duration": 250,
+          "file": "tv-frozen-blink-1.png"
+        }
+      ],
+      "default": [
+        {
+          "duration": 0,
+          "file": "tv-frozen.png"
+        }
+      ]
+    },
+    "h": 42,
+    "points": {
+      "screen": [
+        15,
+        20
+      ]
+    },
+    "w": 31
+  },
+  "tv-live": {
+    "anchor": [
+      1,
+      42
+    ],
+    "frames": {
+      "default": [
+        {
+          "duration": 0,
+          "file": "tv-live.png"
+        }
+      ],
+      "talk": [
+        {
+          "duration": 180,
+          "file": "tv-live-talk-0.png"
+        },
+        {
+          "duration": 180,
+          "file": "tv-live-talk-1.png"
+        }
+      ]
+    },
+    "h": 42,
+    "points": {
+      "screen": [
+        15,
+        20
+      ]
+    },
+    "w": 31
   },
   "visitor": {
     "anchor": [
@@ -1189,6 +1441,38 @@
     },
     "h": 59,
     "w": 6
+  },
+  "whiteboard-owned": {
+    "anchor": [
+      18,
+      43
+    ],
+    "frames": {
+      "default": [
+        {
+          "duration": 0,
+          "file": "whiteboard-owned.png"
+        }
+      ]
+    },
+    "h": 43,
+    "w": 37
+  },
+  "whiteboard-requests": {
+    "anchor": [
+      18,
+      43
+    ],
+    "frames": {
+      "default": [
+        {
+          "duration": 0,
+          "file": "whiteboard-requests.png"
+        }
+      ]
+    },
+    "h": 43,
+    "w": 37
   },
   "wifi": {
     "anchor": [
@@ -1865,6 +2149,146 @@
     },
     "h": 24,
     "w": 24
+  },
+  "worker-hat": {
+    "anchor": [
+      16,
+      34
+    ],
+    "frames": {
+      "a": [
+        {
+          "duration": 0,
+          "file": "worker-hat-a.png"
+        }
+      ],
+      "a-left": [
+        {
+          "duration": 0,
+          "file": "worker-hat-a-left.png"
+        }
+      ],
+      "b": [
+        {
+          "duration": 0,
+          "file": "worker-hat-b.png"
+        }
+      ],
+      "b-left": [
+        {
+          "duration": 0,
+          "file": "worker-hat-b-left.png"
+        }
+      ],
+      "c": [
+        {
+          "duration": 0,
+          "file": "worker-hat-c.png"
+        }
+      ],
+      "c-left": [
+        {
+          "duration": 0,
+          "file": "worker-hat-c-left.png"
+        }
+      ],
+      "d": [
+        {
+          "duration": 0,
+          "file": "worker-hat-d.png"
+        }
+      ],
+      "d-left": [
+        {
+          "duration": 0,
+          "file": "worker-hat-d-left.png"
+        }
+      ],
+      "e": [
+        {
+          "duration": 0,
+          "file": "worker-hat-e.png"
+        }
+      ],
+      "e-left": [
+        {
+          "duration": 0,
+          "file": "worker-hat-e-left.png"
+        }
+      ]
+    },
+    "h": 34,
+    "w": 32
+  },
+  "worker-huddle": {
+    "anchor": [
+      8,
+      24
+    ],
+    "frames": {
+      "a": [
+        {
+          "duration": 0,
+          "file": "worker-huddle-a.png"
+        }
+      ],
+      "a-dongle": [
+        {
+          "duration": 0,
+          "file": "worker-huddle-a-dongle.png"
+        }
+      ],
+      "b": [
+        {
+          "duration": 0,
+          "file": "worker-huddle-b.png"
+        }
+      ],
+      "b-dongle": [
+        {
+          "duration": 0,
+          "file": "worker-huddle-b-dongle.png"
+        }
+      ],
+      "c": [
+        {
+          "duration": 0,
+          "file": "worker-huddle-c.png"
+        }
+      ],
+      "c-dongle": [
+        {
+          "duration": 0,
+          "file": "worker-huddle-c-dongle.png"
+        }
+      ],
+      "d": [
+        {
+          "duration": 0,
+          "file": "worker-huddle-d.png"
+        }
+      ],
+      "d-dongle": [
+        {
+          "duration": 0,
+          "file": "worker-huddle-d-dongle.png"
+        }
+      ],
+      "e": [
+        {
+          "duration": 0,
+          "file": "worker-huddle-e.png"
+        }
+      ],
+      "e-dongle": [
+        {
+          "duration": 0,
+          "file": "worker-huddle-e-dongle.png"
+        }
+      ]
+    },
+    "h": 24,
+    "w": 16
   },
   "worker-peel": {
     "anchor": [

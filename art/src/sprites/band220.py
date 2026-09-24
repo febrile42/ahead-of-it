@@ -1,0 +1,247 @@
+"""Band 220 props (PH1-07), both states. `docs/content/BANDS-AND-GAGS.md` §220.
+
+The conference room is glass (`glass-*` in room.py) in the back-right corner of band
+220's 16-column plate, tiles (12..15, 0..2); its TV hangs on the back-right wall over
+tiles 13..14, the table runs along row 1. Anchors as everywhere else: the front vertex of
+the tile the sprite is placed on (`tv-*`: tile (13, 0); `conf-*`: tile (12, 1), the
+table's rear-most tile). Positions live in `layout.py`; only the relative offsets
+(TV = table tile + (1, -1)) are baked in here, for the HDMI cable.
+
+Without
+  G2.4   tv-frozen          the remote face, pixelated and frozen mid-sentence, a
+                            buffering spinner (2-frame `blink` on the spinner)
+         conf-huddle        the table with the chairs shoved back, one laptop on it
+                            pointed at the TV, a cable up to the TV with an adapter
+                            dangling from it, spare dongles on the table
+  G7.3a  whiteboard-requests  FEATURE / REQUESTS, full, OWNER:? — nobody's name
+
+Built
+  G2.4   tv-live            the same face, sharp, talking (2-frame `talk`)
+         camera-bar         a camera bar over the TV
+         conf-table         the table, four chairs pulled in, a touch panel
+  G7.3a  whiteboard-owned   the same list, ticked and numbered, OWNER: and a hat
+"""
+from __future__ import annotations
+
+from ..dsl import Canvas
+from ..vox import Iso, Sprite, make, make_anim
+from .. import glyphs
+from . import desk as desk_mod
+from .band80 import _thick, _rows
+
+# world units, relative to the TV's tile (6, 0)
+TV = dict(c0=1.0, c1=15.0, r0=0.0, r1=1.2, z0=14.0, z1=27.0)
+
+
+def _tv_body(iso: Iso):
+    t = TV
+    return iso.box(t["c0"], t["r0"], t["z0"], t["c1"], t["r1"], t["z1"],
+                   top="chair-dark", left="monitor-frame", right="outline")
+
+
+def _face_fn(u, z, frozen: bool, mouth_open: bool):
+    """The remote colleague, in the TV face's own coordinates: u = c - c0 across
+    (0..14), z up. `frozen` quantises everything to 2 x 2 blocks (the pixelated look of
+    a stalled video) and catches the eyes mid-blink and the mouth mid-word."""
+    t = TV
+    if not (0.8 <= u < 13.2 and t["z0"] + 0.8 <= z < t["z1"] - 0.8):
+        return None
+    if frozen:
+        u = (u // 2) * 2 + 1.0
+        z = (z // 2) * 2 + 1.0
+    zb = z - t["z0"]            # 0 at the bottom of the TV
+    du, dz = u - 7.0, zb - 7.2
+    # shoulders
+    if zb < 3.4 and abs(du) < 5.0 - max(0.0, zb - 1.0):
+        return "badge-green" if not frozen else "shirt-2-dark"
+    # head: an oval
+    if (du / 3.2) ** 2 + (dz / 3.9) ** 2 < 1.0:
+        if dz > 2.0 or abs(du) > 2.6:
+            return "hair-1"
+        if abs(dz - 0.6) < 0.5 and abs(abs(du) - 1.3) < 0.5:
+            return "outline" if not frozen else "skin-2"      # eyes; mid-blink
+        if frozen and abs(dz - 0.1) < 0.5 and abs(abs(du) - 1.3) < 0.9:
+            return "outline"                                    # half-shut lids
+        if abs(dz + 1.9) < (0.9 if mouth_open else 0.4) and abs(du) < 1.2:
+            return "badge-red" if mouth_open else "outline"
+        return "skin-3"
+    return "glass-dark" if not frozen else "shirt-1-dark"
+
+
+def _tv(iso: Iso, c: Canvas, frame: int, frozen: bool):
+    f = _tv_body(iso)
+    t = TV
+    mouth = True if frozen else (frame == 1)
+    iso.paint(f, "L", t["r1"], lambda cc, z: _face_fn(cc - t["c0"], z, frozen, mouth)
+              or ("monitor-frame" if True else None))
+    if frozen:
+        # buffering spinner, top right: a ring of dots, one bright dot going round
+        cx, cy = iso.left_px(t["r1"], t["c1"] - 2.4, t["z1"] - 2.6)
+        ring = [(0, -2), (2, -1), (2, 1), (0, 2), (-2, 1), (-2, -1)]
+        for i, (dx, dy) in enumerate(ring):
+            c.point(cx + dx, cy + dy + dx // 2, "paper" if i == (frame * 3) % 6 else "badge-body")
+
+
+def _tv_frozen(iso, c, frame):
+    _tv(iso, c, frame, frozen=True)
+    return {"screen": iso.left_px(TV["r1"], 8.0, 14.0)}
+
+
+def _tv_live(iso, c, frame):
+    _tv(iso, c, frame, frozen=False)
+    return {"screen": iso.left_px(TV["r1"], 8.0, 14.0)}
+
+
+def _camera_bar(iso: Iso, c: Canvas):
+    t = TV
+    f = iso.box(4.5, 0.0, t["z1"] + 0.6, 11.5, 1.8, t["z1"] + 2.6, top="chair-mid",
+                left="monitor-frame", right="outline")
+    iso.paint(f, "L", 1.8, lambda cc, z: "glass-highlight" if abs(cc - 8.0) < 0.5 and t["z1"] + 1.1 <= z < t["z1"] + 2.1
+              else ("badge-green" if abs(cc - 10.5) < 0.3 and t["z1"] + 1.1 <= z < t["z1"] + 2.1 else None))
+
+
+# -- the table (tile (12, 1) is its rear-most tile; four seats on row 1) -----------------
+
+# 3.5 tiles long; its front edge is a desk's front edge (r 4.0), so seated workers line
+# up exactly as at a desk; it runs back to within a unit of the wall
+TABLE = dict(c0=2.0, c1=30.0, r0=-5.0, r1=4.0)
+
+
+def _chair_at(iso: Iso, dc: float, dr: float = 0.0, back=True):
+    """The desk chair (desk.py geometry) shifted by dc/dr world units."""
+    ch = desk_mod.CHAIR
+    iso.box(ch["c0"] + 0.3 + dc, 4.9 + dr, 0, ch["c1"] - 0.3 + dc, 7.2 + dr, 0.8,
+            top="chair-dark", left="chair-dark", right="outline")
+    iso.box(2.2 + dc, 5.7 + dr, 0.8, 2.8 + dc, 6.3 + dr, ch["seat"], top="chair-mid",
+            left="chair-mid", right="chair-dark")
+    iso.box(ch["c0"] + dc, ch["r0"] + dr, ch["seat"], ch["c1"] + dc, ch["r1"] + dr,
+            ch["seat"] + 1.5, top="chair-mid", left="chair-dark", right="chair-dark")
+    if back:
+        b = desk_mod.BACKREST
+        iso.box(b["c0"] + dc, b["r0"] + dr, b["z0"], b["c1"] + dc, b["r1"] + dr, b["z1"],
+                top="chair-mid", left="chair-mid", right="chair-dark")
+
+
+def _table(iso: Iso):
+    t = TABLE
+    top = desk_mod.DESK["top"]
+    iso.floor_shadow(t["c0"], t["r0"], t["c1"], t["r1"], grow=1.0, grow_r=0.5)
+    for cc in (t["c0"] + 1.0, t["c1"] - 3.0):                        # two pedestals
+        iso.box(cc, t["r0"] + 1.0, 0, cc + 2.0, t["r1"] - 1.0, top,
+                top="desk-wood-dark", left="desk-wood-dark", right="hair-1")
+    return iso.box(t["c0"], t["r0"], top, t["c1"], t["r1"], top + 1.5, top="desk-wood",
+                   left="desk-wood-dark", right="desk-wood-dark")
+
+
+def _conf_table(iso: Iso, c: Canvas):
+    """Built: chairs pulled in at the four seats (seated workers paste over tiles
+    (12..15, 1) exactly as at a desk), a touch panel on the table."""
+    _table(iso)
+    top = desk_mod.DESK["top"] + 1.5
+    # touch panel: a small dark wedge, screen lit, facing the seats
+    f = iso.box(14.0, 2.0, top, 17.0, 3.4, top + 1.6, top="monitor-frame",
+                left="monitor-frame", right="outline")
+    iso.paint(f, "T", top + 1.6, lambda a, b: "monitor-screen" if 14.4 <= a < 16.6 and 2.3 <= b < 3.1 else None)
+    iso.paint(f, "L", 3.4, lambda a, z: "badge-green" if 16.0 <= a < 16.5 else None)
+    for k in range(4):
+        _chair_at(iso, 8.0 * k, back=False)   # backrests come with the seated workers
+
+
+def _conf_huddle(iso: Iso, c: Canvas):
+    """Without: chairs shoved back against the glass, one laptop on the table turned
+    to the TV, its cable climbing to the TV with an adapter dangling off it."""
+    for dc, dr in ((0.5, 6.5), (25.0, 7.5)):
+        _chair_at(iso, dc, dr)
+    tf = _table(iso)
+    top = desk_mod.DESK["top"] + 1.5
+    # spare dongles and adapters, spilled on the table
+    for (cc, rr, col) in ((8.5, 2.6, "paper"), (10.2, 3.2, "wall-shadow"),
+                          (20.5, 2.4, "paper"), (22.0, 3.0, "badge-body")):
+        iso.box(cc, rr, top, cc + 1.2, rr + 0.6, top + 0.6, top=col, left=col,
+                right="badge-body", outline="outline")
+    # the laptop, lid toward us (screen toward the TV)
+    lc = 14.0
+    iso.box(lc, 1.4, top, lc + 4.0, 3.6, top + 0.7, top="chair-mid", left="badge-body",
+            right="chair-dark")
+    lid = iso.box(lc, 3.4, top, lc + 4.0, 3.9, top + 5.0, top="chair-dark",
+                  left="chair-mid", right="chair-dark")
+    iso.paint(lid, "L", 3.9, lambda a, z: "paper" if abs(a - lc - 2.0) < 0.4 and abs(z - top - 3.0) < 0.6 else None)
+    # the HDMI cable: off the back of the laptop, up the wall to the TV (one tile +c, -r,
+    # i.e. c + 8, r - 8 from here), with an adapter hanging halfway
+    t = TV
+    tvx = 8.0 + 7.5
+    pts = [(lc + 2.0, 1.4, top + 0.4), (lc + 1.0, 0.2, top + 0.2), (tvx - 0.5, -6.0, 4.0),
+           (tvx, -6.8, t["z0"] - 1.0), (tvx, -7.0, t["z0"] + 0.2)]
+    _thick(iso, pts, "outline", width=1)
+    x, y = iso.pt(tvx - 0.4, -6.2, 8.0)
+    for dy in range(1, 4):                                            # the dangle
+        c.point(x - 2, y + dy, "outline")
+    c.rect(x - 4, y + 4, x - 1, y + 7, "outline")                     # the dongle
+    c.rect(x - 3, y + 5, x - 2, y + 6, "paper")
+
+
+# -- G7.3a: the whiteboard --------------------------------------------------------------
+
+def _whiteboard(owned: bool) -> Canvas:
+    """A whiteboard on a wheeled stand, billboarded. FEATURE / REQUESTS, a list that
+    runs to the bottom edge, and the line that makes the joke: OWNER:? (without) or
+    OWNER: and a little hat (built). Anchor: between the feet."""
+    w_in = glyphs.text_width("REQUESTS") + 4
+    w, h = w_in + 2, 34
+    c = Canvas(w, h + 9)
+    c.rect(0, 0, w - 1, h - 1, "badge-body")        # aluminium frame
+    c.rect(0, 0, w - 1, 0, "outline")
+    c.rect(0, h - 1, w - 1, h - 1, "outline")
+    c.rect(0, 0, 0, h - 1, "outline")
+    c.rect(w - 1, 0, w - 1, h - 1, "outline")
+    c.rect(2, 2, w - 3, h - 3, "paper")
+    glyphs.draw(c, "FEATURE", 1 + (w - glyphs.text_width("FEATURE")) // 2, 3, "outline")
+    glyphs.draw(c, "REQUESTS", 1 + (w - glyphs.text_width("REQUESTS")) // 2, 9, "outline")
+    # the list: scribbles in two marker colours, one per line
+    lens = [18, 23, 14, 21, 16]
+    for i, ln in enumerate(lens):
+        y = 16 + i * 2
+        col = ("shirt-1", "badge-red")[i % 2]
+        x0 = 4
+        if owned:
+            # ticked and numbered: a priority digit, then a green tick on the done ones
+            glyphs_digit = "12345"[i]
+            c.point(3, y, "shirt-2-dark")
+            x0 = 6
+            if i in (0, 2):
+                for (dx, dy) in ((-7, 0), (-6, 1), (-5, 0), (-4, -1)):
+                    c.point(w + dx, y + dy, "shirt-2-dark")
+        for x in range(x0, min(x0 + ln, w - 8)):
+            if (x * 7 + i * 3) % 5 != 0:
+                c.point(x, y, col)
+    glyphs.draw(c, "OWNER:", 4, h - 8, "outline")
+    ox = 4 + glyphs.text_width("OWNER:") + 2
+    if owned:
+        # the hat: a red crown on a brim
+        _rows(c, [".rrr.", ".rrr.", "rrrrr"], ox, h - 7, {"r": "badge-red"})
+        c.rect(ox, h - 4, ox + 4, h - 4, "outline")
+    else:
+        glyphs.draw(c, "?", ox, h - 8, "badge-red")
+    # stand: two legs to castors
+    for k in range(8):
+        c.point(4 - k // 3, h + k, "outline")
+        c.point(w - 5 + k // 3, h + k, "outline")
+    c.rect(1, h + 8, w - 2, h + 8, "shadow")
+    for x in (1, 2, w - 3, w - 2):
+        c.point(x, h + 7, "outline")
+    return c
+
+
+def build_all() -> dict:
+    wb0, wb1 = _whiteboard(False), _whiteboard(True)
+    return {
+        # without
+        "tv-frozen": make_anim(_tv_frozen, 2, ms=250),
+        "conf-huddle": make(_conf_huddle),
+        "whiteboard-requests": Sprite(wb0, (wb0.w // 2, wb0.h)),
+        # built
+        "tv-live": make_anim(_tv_live, 2, key="talk", ms=180),
+        "camera-bar": make(_camera_bar),
+        "conf-table": make(_conf_table),
+        "whiteboard-owned": Sprite(wb1, (wb1.w // 2, wb1.h)),
+    }
