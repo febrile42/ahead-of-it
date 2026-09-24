@@ -186,6 +186,14 @@ function checkSceneFileShape(scene: SceneFile, label: string, debt: Set<string>)
 
   for (const view of scene.views) {
     const vlabel = `${label} view "${view.id}"`;
+    // A missing/empty label is an export bug, not something the painter
+    // should paper over — src/main.ts's view switcher renders it
+    // verbatim (`${view.label} (${count})`) with no fallback, so a
+    // missing label here means "undefined (N)" on the actual tab row.
+    // Caught by reading the combined-tree screenshots; this is the
+    // contract test that should have caught it first.
+    expect(typeof view.label, `${vlabel}: label is a string`).toBe('string');
+    expect(view.label.trim().length, `${vlabel}: label is non-empty`).toBeGreaterThan(0);
     // D-036 rule 3: w <= 360, h <= 240 native px.
     expect(view.size.w, `${vlabel}: width <= 360`).toBeLessThanOrEqual(360);
     expect(view.size.h, `${vlabel}: height <= 240`).toBeLessThanOrEqual(240);

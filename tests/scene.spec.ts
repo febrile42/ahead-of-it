@@ -96,6 +96,19 @@ test.describe('every band x both states (PH1-09 acceptance)', () => {
         await setBand(page, band);
         await setState(page, state);
 
+        // A missing/undefined view label is an export bug (found by
+        // reading the combined-tree screenshots: the tab row rendered
+        // "undefined (5)"). src/main.ts's view switcher has no fallback
+        // for it on purpose — this is the Playwright-level backstop for
+        // src/scene/scene-contract.test.ts's label assertion.
+        const viewTabs = page.locator('.scene-views__button');
+        const tabCount = await viewTabs.count();
+        for (let i = 0; i < tabCount; i += 1) {
+          const tabText = (await viewTabs.nth(i).textContent()) ?? '';
+          expect(tabText.toLowerCase()).not.toContain('undefined');
+          expect(tabText.trim().length).toBeGreaterThan(0);
+        }
+
         const layerHandle = page.locator('#hotspots-layer');
         const hotspots = page.locator('.hotspot');
         await expect(hotspots).toHaveCount(expectedHotspotCount(band, state));
