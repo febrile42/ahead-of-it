@@ -1,4 +1,4 @@
-# Panels — DRAFT v3 (2026-09-24: forks resolved; G7.3a added)
+# Panels — DRAFT v4 (2026-09-24: every factual mark resolved; Beyond band added)
 
 Final copy for every hotspot, in the `TONE.md` voice: **Already** (dated, numbered, first
 person, past tense) → **What it prevented** (second person, honest confidence) → **Worth it
@@ -11,9 +11,8 @@ Panels are opened in arbitrary order, so every panel is somebody's first; the st
 each one self-identifying without spending words. Descriptors (D-014): current company =
 *a clean-energy company, now $3B+*; previous = *a $200M company, nine-building campus*.
 
-`[JOSH: …]` marks an inference or a question. Marked sentences ship only on a yes;
-otherwise they are cut, not softened. **Forks** (true either-way calls) are collected at
-the end under "Forks for Josh".
+No `[JOSH:]` marks remain: every one was answered 2026-09-24 and folded in. The answers
+are in `EVIDENCE.md` (E-01…E-30) and `TIMELINE.md`.
 
 **Review disposition** (`PANELS-REVIEW.md`, 2026-09-16): 10 blockers → 8 fixed, 2 pushed
 back (see end). Both doc-wide rules (descriptor in every panel; second-person prevention
@@ -34,20 +33,21 @@ have one.
 works until the Monday it doesn't. Every office you open afterwards inherits the same
 closet.
 
-**Worth it later:** six offices opened on that design. `[JOSH: confirm — did any of the
-six get an on-prem server, or was every one comms-room only?]` `E-01 E-05`
+**Worth it later:** six offices opened on that design. Five are comms racks only;
+Lawrence — the operations site — is the one that got servers, for the OT that needs
+them. `E-01 E-05`
 
 ### G1.2 · One identity, so leaving is one switch
 `2018 · ~80 · a clean-energy company, now $3B+`
-**Already:** From 2018, one identity for everyone, in Microsoft 365 and Azure — so a
-person's access was one record, not a dozen. `[JOSH: were SSO and MFA enforced org-wide
-in 2018, or did those land later? If 2018, say so here — it doubles the panel.]`
+**Already:** From 2018, at ~80 people, one identity for everyone in Microsoft 365 and
+Azure, with single sign-on and multi-factor authentication enforced org-wide from the
+start — so a person's access was one record, not a dozen.
 
 **What it prevented:** by now logins are on sticky notes and in a shared spreadsheet, and
 offboarding is "hope". You find out how good it was on the first departure on bad terms.
 
-**Worth it later:** the 2022 automation function built SSO and SCIM provisioning on top
-of that identity, so joining and leaving became a workflow. `E-01 E-03`
+**Worth it later:** SCIM provisioning was built on that identity in 2022, and the company
+went passwordless in 2025. `E-01 E-03 E-29`
 
 ### G2.1 · A helpdesk with an owner
 `2018 · ~80 · a clean-energy company, now $3B+`
@@ -64,8 +64,7 @@ headcount demanded. `E-22 E-02`
 `2018 · ~80 · a clean-energy company, now $3B+`
 **Already:** In 2018 I planned and ran the Boston build-out and move — roughly 9,000 to
 22,000 sq ft — with structured cabling, building access, intrusion detection and
-conferencing as part of the build. `[JOSH: confirm — in before move-in, not during?]`
-The same playbook then opened five more offices: Chicago 2019, Lawrence 2022, Austin,
+conferencing installed before move-in. The same playbook then opened five more offices: Chicago 2019, Lawrence 2022, Austin,
 New York and DC in 2023.
 
 **What it prevented:** the week after you sign a lease, the network is whatever reached —
@@ -75,8 +74,8 @@ unless someone plans for it. `E-05`
 ### G2.3 · A firewall five years before a network engineer
 `2018 · ~80 · a clean-energy company, now $3B+`
 **Already:** In 2018, at ~80 people, I put a Palo Alto next-generation firewall at the
-edge, so the network had a boundary and rules before it had a network engineer.
-`[JOSH: confirm — was guest traffic segmented from the start?]`
+edge, with guest Wi-Fi segmented from the corporate network from the start — so the
+network had a boundary and rules before it had a network engineer.
 
 **What it prevented:** at 80 there is usually one flat network: the visitor's laptop on
 your lobby sofa is a neighbour of the finance PC and the CEO's mailbox.
@@ -101,8 +100,9 @@ labelled "Dave? (left)" is a question nobody wants asked. `E-19 E-24`
 ### G4.2 · Everyone trained, every year
 `2019 · ~150 · a clean-energy company, now $3B+`
 **Already:** In 2019 I started annual security training for the whole company, at ~150
-people, with a way to report what looked wrong. `[JOSH: an email-security product to
-name here? A product is a receipt; "a way to report" is not.]`
+people, with a way to report what looked wrong — and put Exchange ATP (now Defender
+for Office 365) and Area 1, through a managed security provider, in front of the
+mailboxes.
 
 **What it prevented:** around now the first serious phishing attempt lands in your
 finance inbox with a plausible invoice attached, and there is nothing between it and a
@@ -124,26 +124,26 @@ function I was incubating. `E-08 E-14`
 ### G5.1 · The second office, on the network the same year
 `2019 · ~150 · a clean-energy company, now $3B+`
 **Already:** In 2019 Chicago opened and the offices were linked by VPN the same year, at
-~150 people. Years earlier, at a $200M company on a nine-building campus, I'd linked the
-buildings with private fiber. `[JOSH: what year did the campus fiber go in?]`
+~150 people. A few years earlier, at a $200M company on a nine-building campus, I'd
+linked the buildings with private fiber.
 
 **What it prevented:** with a second office, your network between cities is a courier
 account — a padded envelope with a hard drive in it, and someone at the far end checking
 their watch.
 
-**Worth it later:** four more offices followed. `[JOSH: confirm — each on the VPN from
-day one?]` `E-27 E-23 E-05`
+**Worth it later:** every office since — Lawrence, Austin, New York, DC — opened on the
+VPN from day one. `E-27 E-23 E-05`
 
 ---
 
 ## 220 · 2020
 
-### G2.4 · Twenty-nine rooms, one spec
+### G2.4 · Twenty-nine rooms, one standard
 `2020 · ~220 · a clean-energy company, now $3B+`
 **Already:** Twenty-nine conference rooms across Boston, Chicago, New York, DC and
-Lawrence run the same kit, so any room works like every other room. `[JOSH: confirm —
-genuinely one spec across all 29?]` The first two went in in 2018; most of the rest came
-through 2020, at ~220 people, when everyone went home.
+Lawrence work to one standard, so any room behaves like every other room — the function
+was fixed from the first two in 2018; the kit itself was unified by the time DC opened
+in 2023. Most of the rooms came through 2020, at ~220 people, when everyone went home.
 
 **What it prevented:** by now your meetings start with four people around one laptop
 pointed at a TV, and a colleague in another city frozen mid-sentence on the wall.
@@ -189,18 +189,18 @@ to a desk phone.
 **What it prevented:** with legacy telecom every seat is a line on a bill, every new one
 is a work order, and your call-centre team sits wherever the copper is.
 
-**Worth it later:** across network, telecom and hosting, costs came down ~40% while WAN
-capacity went up 33%. `[JOSH: year(s) for the 40% / 33% — E-11 is undated]` `E-10 E-11`
+**Worth it later:** by 2014, across network, telecom and hosting, costs were down ~40%
+while WAN capacity was up 33%. `E-10 E-11`
 
-### G5.3 · Virtualised, with a recovery plan
+### G5.3 · Virtualised, with a tested recovery plan
 `2013 · 300+ · a $200M company, nine-building campus`
 **Already:** At the campus I moved the physical servers to VMware in 2013 and added
-Commvault with a disaster-recovery plan in 2015, on NetApp storage. `[JOSH: were
-restores actually tested / DR exercised? If yes, it goes in the title.]`
+Commvault with a disaster-recovery plan in 2015, on NetApp storage — and tested the
+restore before calling it done.
 
 **What it prevented:** at 300 there is a tower PC in the closet hand-labelled "MAIN
 SERVER" with a sign that says do not turn off, two fans pointed at it, and a backup that
-is a schedule rather than a plan. `E-09`
+is a schedule rather than a tested restore. `E-09`
 
 ### G5.6 · One copy of the company's data
 `2012 · 300+ · a $200M company, nine-building campus`
@@ -226,20 +226,21 @@ provisioning, and the integrations between systems.
 
 **What it prevented:** at your size onboarding is a person, not a process. A new hire
 sits at a bare desk in their coat while accounts get created by hand and a laptop gets
-ordered when someone remembers. `E-03`
-`[JOSH: fork — by 2026 the company ran 250 contractors on top of ~500 employees. Did
-contractors go through the same JML flow? If yes, that is the Worth-it-later.]`
+ordered when someone remembers.
+
+**Worth it later:** by 2026 the same process was running for 250 contractors on top of
+~500 employees. `E-03 E-30`
 
 ### G6.4 · Access control as part of the opening
 `2022 · ~490 · a clean-energy company, now $3B+`
 **Already:** In 2022 Lawrence opened and Boston took a fourth floor, at ~490 people, with
 building access, intrusion detection, cabling and conferencing specified as part of the
-opening rather than added after it.
+opening rather than added after it. Badge removal was a step on the offboarding
+checklist — manual, but on the list.
 
 **What it prevented:** by now your physical access is a fob system nobody administers
-and a door propped open with a chair. `[JOSH: did badge deprovisioning run off the same
-JML process as accounts? If yes: "Offboarding reaches the accounts and stops at the
-building" goes back in, and this becomes a much bigger panel.]` `E-05`
+and a door propped open with a chair. Offboarding reaches the accounts and stops at the
+building. `E-05`
 
 ---
 
@@ -248,14 +249,13 @@ building" goes back in, and this becomes a much bigger panel.]` `E-05`
 ### G4.1 · A security function, before the auditor arrived
 `2023 · ~610 · a $3B+ clean-energy company`
 **Already:** In 2023, at ~610 people, I hired an Information Security Manager and stood
-up the policy framework, audit readiness and cross-department compliance workflows,
-targeting ISO 27001 and SOC 2 inside 18–24 months. A Security Analyst followed in 2025.
-`[JOSH: did either certification land, and when? That is the best Worth-it-later on the
-site if so.]`
+up the policy framework, audit readiness and cross-department compliance workflows. A
+Security Analyst followed in 2025.
 
-**What it prevented:** around this size an enterprise prospect's procurement team asks
-for a SOC 2 report before they'll sign, and the honest answer — with no program and no
-one whose job it is — is "no". The deal dies in procurement, not in the budget. `E-04`
+**What it prevented:** around this size an enterprise prospect's procurement team asks to
+see your security program before they'll sign, and the honest answer — with no program,
+no policies and no one whose job it is — is "we don't have one". The deal dies in
+procurement, not in the budget. `E-04`
 
 ### G5.2 · Five years of network before a network engineer
 `2023 · ~610 · a $3B+ clean-energy company`
@@ -271,9 +271,7 @@ air. `E-06`
 `2023 · ~610 · a $3B+ clean-energy company`
 **Already:** By 2023, at ~610 people, IT was nine people across Infrastructure,
 Cybersecurity, Network, Automation and Support, and I introduced leadership layers so
-the function no longer ran through one person. `[JOSH: confirm nine in 2023 (six
-support + automation + infosec + network); eleven is the 2026 number. Where did IT
-report before, and did the line move?]`
+the function no longer ran through one person.
 
 **What it prevented:** at your size IT is one box off to the side of the org chart with
 a dotted line to whoever signs the invoices — a single point of failure with no on-call
@@ -286,8 +284,8 @@ rotation and no succession.
 **Already:** In 2023 Austin, New York and Washington DC opened in the same year, at ~610
 people, each with structured cabling, building access, intrusion detection and
 conferencing specified before move-in. Six offices in total, over 100,000 sq ft. Years
-earlier, at a $200M company on a nine-building campus, two new facilities of 200,000+
-sq ft. `[JOSH: year(s) of the two campus facilities]`
+earlier — 2015 to 2017, at a $200M company on a nine-building campus — two new
+facilities of 200,000+ sq ft.
 
 **What it prevented:** by now a new office is a signed lease and a moving truck, and IT
 is one person in the doorway of an empty shell holding a single cable, three weeks
@@ -310,10 +308,8 @@ what the company pays for twice. `E-08`
 ### G6.2 · $500,000+ back, in one year
 `2024 · ~650 → 750 · a $3B+ clean-energy company`
 **Already:** I owned enterprise IT budgeting and vendor strategy. In 2024 that produced
-over $500,000 in savings through renegotiation, renewals and licensing audits — the
-same year as the portfolio consolidation in the previous panel.
-`[JOSH: fork — on what spend base, across roughly how many vendors, recurring or
-one-time? Any of those makes this the strongest panel on the site.]`
+over $500,000 in savings, most of it recurring, through renegotiation, renewals and
+licensing audits — the same year as the portfolio consolidation in the previous panel.
 
 **What it prevented:** by now contracts auto-renew because nobody owns them, and your
 finance corner is under a slope of paper with a hand sticking out. `E-07`
@@ -329,11 +325,10 @@ in 2026, and Claude mid-year.
 assistant on a personal account, and the company card is next. `E-12`
 
 ### G7.2 · A chair at the table
-`2018→ · ~80→750 · a clean-energy company, now $3B+`
-**Already:** I reported to the SVP of Product & Technology and contributed to strategic
-planning and cross-functional initiatives across the company — the technology voice in
-the room where the three-year plan gets drawn. `[JOSH: since when? The strip needs a
-start year.]`
+`2022→ · ~490→750 · a $3B+ clean-energy company`
+**Already:** Since the second half of 2022 I have reported to the SVP of Product &
+Technology and contributed to strategic planning and cross-functional initiatives across
+the company — the technology voice in the room where the three-year plan gets drawn.
 
 **What it prevented:** by now the plan gets drawn in a room with six chairs, and
 technology is a change request that arrives after the decision — usually with a date
@@ -344,14 +339,48 @@ functions handed over, so the floor runs without me in that meeting. `E-13 E-14 
 
 ### G7.4 · Someone whose job is the knowledge
 `2026 · ~750 · a $3B+ clean-energy company`
-**Already:** In 2026, at ~750 people, a Business Librarian moved into the function —
-knowledge management as a role, not a hope — the same year Glean gave the company one
-place to search.
+**Already:** In 2026, at ~750 people, the company's Business Librarian — a role it had
+had since 2020 — moved into the IT function: knowledge management next to the systems
+that hold the knowledge, the same year Glean gave the company one place to search.
 
 **What it prevented:** by now your real procedures live in people's heads and in seven
-versions of a document, and every departure takes some of them along.
-`[JOSH: fork — was KM driven by the contractor curve (250 by 2026)? If yes, say so;
-contractor churn is the sharpest version of this argument.]` `E-26 E-12`
+versions of a document, and every departure takes some of them along. `E-26 E-12`
+
+---
+
+## 1,000+ · Beyond · *The from-zero seat inside a big company* (D-029)
+
+Not a year band. Past 750 the slider has one more stop; the building stops growing and
+the copy turns to the reader's large organisation. One panel, opened by the band itself,
+plus a translation column in the checklist.
+
+### B · Nobody builds IT from zero at your size
+`1,000+ · your company · every receipt in this building, translated`
+**Already:** Everything in this building was decided ahead of need — at 80, at 150, at
+600 — by one person who stayed long enough to see the 2018 decisions carry 750 people
+across six cities.
+
+**What it prevented:** nobody builds IT from zero at your size. Except every time you
+acquire a company, open a region, stand up a business unit, or a new category of tool
+arrives before anyone owns it. Each of those is a from-zero build inside a big company,
+with the same failure modes as the closet and the sticky notes — and more at stake.
+
+**Worth it later:** the checklist below maps each receipt to what it looks like at
+yours. `E-01…E-30`
+
+**Checklist translation column (R-14, at this stop only):**
+
+| Receipt | At 1,000+ this is |
+|---|---|
+| Six site builds; three in one year on one playbook (G2.2, G6.3, G6.4) | the site-integration playbook for every acquisition and new region |
+| AI governance shipped *with* the tool, 2025 (G7.1) | the same problem at any size; policy with the rollout, not after it |
+| Dev and Product incubated, then handed off (G7.3, G7.3a) | the internal-startup pattern: stand it up, staff it, give it away |
+| Leadership layers at 610 (G3.3) | org design when a function outgrows its founder |
+| $500,000+ a year back from vendors (G6.2) | the licensing and renewal program every enterprise runs annually |
+| A security function and audit readiness before the ask (G4.1) | the readiness work that precedes any certification |
+| Cloud identity in 2018; passwordless in 2025 (G1.1, G1.2) | identity as the platform; everything else plugs in |
+| JML automation covering 250 contractors (G3.1) | joiner/mover/leaver at the scale of a workforce that churns |
+| Nine functions, one building, eight years (all) | the person you put on the thing that doesn't exist yet |
 
 ---
 
