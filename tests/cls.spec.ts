@@ -77,3 +77,44 @@ test.describe('no page-level horizontal scroll at 390px (PH1-04 review S2)', () 
     expect(scrollWidth).toBe(VIEWPORT.width);
   });
 });
+
+// Fix round item 7 / review fix 4: chooseScale now takes the *smaller* of
+// the width- and height-derived integer scales, so a view can't earn a
+// scale on width alone that makes it taller than .scene-wrap's own
+// 360:240-capped box — which would otherwise force an internal vertical
+// scrollbar inside the scene (as opposed to the page-level horizontal
+// scroll case above, which is allowed). Checked at three real device
+// profiles named in the fix-round brief.
+test.describe('no internal vertical scroll inside .scene-wrap (fix round item 7)', () => {
+  const profiles = [
+    { label: '360 CSS width, DPR 3', width: 360, deviceScaleFactor: 3 },
+    { label: '390 CSS width, DPR 3', width: 390, deviceScaleFactor: 3 },
+    { label: '412 CSS width, DPR 2.625', width: 412, deviceScaleFactor: 2.625 },
+  ];
+
+  for (const profile of profiles) {
+    test(`${profile.label}: .scene-wrap has no internal vertical overflow`, async ({ browser }) => {
+      const context = await browser.newContext({
+        viewport: { width: profile.width, height: 900 },
+        deviceScaleFactor: profile.deviceScaleFactor,
+      });
+      const page = await context.newPage();
+      try {
+        await interceptFixtureScenes(page);
+        await page.goto('/');
+        await page.waitForFunction(() => document.body.dataset.renderedToken !== undefined);
+
+        const overflow = await page.locator('#scene-wrap').evaluate((el) => ({
+          scrollHeight: el.scrollHeight,
+          clientHeight: el.clientHeight,
+        }));
+        expect(
+          overflow.scrollHeight,
+          `${profile.label}: scene-wrap scrollHeight (${overflow.scrollHeight}) should not exceed its clientHeight (${overflow.clientHeight})`
+        ).toBeLessThanOrEqual(overflow.clientHeight);
+      } finally {
+        await context.close();
+      }
+    });
+  }
+});

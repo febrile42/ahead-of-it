@@ -119,11 +119,12 @@ function realCases(): { cases: ParityCase[]; skips: string[] } {
 }
 
 async function gotoAtScale1(page: Page, c: ParityCase) {
-  // A viewport well within one native-width multiple keeps
-  // chooseScale's `s = max(1, floor(cssAvail*dpr/nativeW))` at exactly 1
-  // for this view's own native size (every D-036 view is <= 360 wide;
-  // giving the wrap up to 300 css px and dpr 1 can't reach scale 2 for
-  // anything up to 599px native).
+  // A viewport well within one native-size multiple on both axes keeps
+  // chooseScale's two-axis `s = max(1, min(floor(cssAvailW*dpr/nativeW),
+  // floor(cssAvailH*dpr/nativeH)))` at exactly 1 for this view's own
+  // native size (every D-036 view is <= 360x240; giving the wrap up to
+  // 300 css px wide / native height + 400 tall at dpr 1 can't reach
+  // scale 2 on either axis for anything up to 599px native).
   await page.setViewportSize({ width: 300, height: Math.max(700, c.viewSize.h + 400) });
   await page.route('**/sprites/scenes/index.json', (route) =>
     route.fulfill({ contentType: 'application/json', body: c.indexBody })

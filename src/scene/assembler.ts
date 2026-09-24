@@ -95,11 +95,26 @@ export async function renderScene(
 }
 
 /**
- * Integer device-pixel scale per SCENE-FORMAT: `s = max(1, floor(cssAvail
- * * dpr / nativeW))`; the caller then sizes the canvas's backing store to
- * `native * s` and its CSS size to `native * s / dpr` (R-25 — pixelated,
- * integer scaling only, DPR-aware unlike PH1-04's chooseScale, m7).
+ * Integer device-pixel scale, on both axes (fix round item 7 — review
+ * fix 4): `s = max(1, min(floor(cssAvailW*dpr/nativeW),
+ * floor(cssAvailH*dpr/nativeH)))`. Taking the *smaller* of the two axis
+ * scales is what stops a view from overflowing `.scene-wrap` vertically
+ * — `.scene-wrap`'s box is capped at the D-036 360:240 aspect ratio
+ * (style.css), so a view whose height would want scale 2 but whose
+ * width only earns scale 1 has to render at scale 1 on both axes, not
+ * grow past the box on one of them. The caller then sizes the canvas's
+ * backing store to `native * s` and its CSS size to `native * s / dpr`
+ * (R-25 — pixelated, integer scaling only, DPR-aware unlike PH1-04's
+ * chooseScale, m7).
  */
-export function chooseScale(cssAvailWidth: number, nativeWidth: number, dpr: number): number {
-  return Math.max(1, Math.floor((cssAvailWidth * dpr) / nativeWidth));
+export function chooseScale(
+  cssAvailWidth: number,
+  cssAvailHeight: number,
+  nativeWidth: number,
+  nativeHeight: number,
+  dpr: number
+): number {
+  const scaleW = Math.floor((cssAvailWidth * dpr) / nativeWidth);
+  const scaleH = Math.floor((cssAvailHeight * dpr) / nativeHeight);
+  return Math.max(1, Math.min(scaleW, scaleH));
 }

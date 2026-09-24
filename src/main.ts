@@ -128,13 +128,18 @@ if (sliderRoot && toggleRoot && sceneWrap && canvas && hotspotsLayer && panelRoo
   }
 
   /** Sizes the canvas + hotspots layer in device pixels per SCENE-FORMAT's
-   * `s = max(1, floor(cssAvail * dpr / nativeW))`, and scrolls to the
+   * two-axis `s = max(1, min(floor(cssAvailW*dpr/nativeW),
+   * floor(cssAvailH*dpr/nativeH)))` (fix round item 7 / review fix 4 —
+   * scaling on width alone could grow a view taller than `.scene-wrap`'s
+   * own box and force an internal vertical scroll), scrolls to the
    * view's `focus` rect (with the "scroll for more" hint) when the view
-   * is wider than what fits. */
+   * is wider than what fits, and centres the canvas horizontally when it
+   * isn't. */
   function sizeAndPositionCanvas(view: SceneView) {
     const dpr = window.devicePixelRatio || 1;
-    const cssAvail = sceneWrap!.clientWidth || window.innerWidth;
-    const scale = chooseScale(cssAvail, view.size.w, dpr);
+    const cssAvailW = sceneWrap!.clientWidth || window.innerWidth;
+    const cssAvailH = sceneWrap!.clientHeight || 240;
+    const scale = chooseScale(cssAvailW, cssAvailH, view.size.w, view.size.h, dpr);
     const backingW = view.size.w * scale;
     const backingH = view.size.h * scale;
     const cssW = backingW / dpr;
@@ -153,15 +158,24 @@ if (sliderRoot && toggleRoot && sceneWrap && canvas && hotspotsLayer && panelRoo
     // contribution to CLS at zero after the first paint (deliberately
     // over reserving over the alternative of a later shift).
 
-    const overflows = cssW > cssAvail + 0.5;
-    scrollHint.classList.toggle('scene-scroll-hint--visible', overflows);
-    if (overflows) {
+    const overflowsX = cssW > cssAvailW + 0.5;
+    scrollHint.classList.toggle('scene-scroll-hint--visible', overflowsX);
+    if (overflowsX) {
       const focusScale = cssW / view.size.w;
       sceneWrap!.scrollLeft = view.focus.x * focusScale;
       sceneWrap!.scrollTop = view.focus.y * focusScale;
+      canvas!.style.marginLeft = '0px';
+      hotspotsLayer!.style.left = '0px';
     } else {
       sceneWrap!.scrollLeft = 0;
       sceneWrap!.scrollTop = 0;
+      // Centre horizontally when the view is narrower than the wrap
+      // (review fix 4) — canvas and hotspotsLayer move together so
+      // hotspot buttons (positioned as % of the layer) stay aligned
+      // with the picture under them.
+      const offsetLeft = Math.max(0, (cssAvailW - cssW) / 2);
+      canvas!.style.marginLeft = `${offsetLeft}px`;
+      hotspotsLayer!.style.left = `${offsetLeft}px`;
     }
   }
 
