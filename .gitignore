@@ -15,3 +15,6 @@ test-results/
 playwright-report/
 blob-report/
 playwright/.cache/
+
+# Lighthouse CI (PH1-05, R-23) — generated reports, filesystem upload target
+.lighthouseci/

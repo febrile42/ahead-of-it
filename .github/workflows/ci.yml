@@ -1,0 +1,142 @@
+name: Checks and Deploy
+
+# PH1-05: the non-negotiables (R-16, R-21, R-23, R-26, R-33) as CI gates,
+# plus deploy. One workflow so deploy can `needs: check` — a separate
+# deploy.yml triggered on the same push would run independently and could
+# deploy a red build. `check` runs on every PR into develop and on every
+# push to develop/main; `preview` and `deploy-production` are gated on
+# `check` passing and keep their original push-only conditions (never on a
+# pull_request — there is nothing to deploy for a PR).
+on:
+  pull_request:
+    branches:
+      - develop
+  push:
+    branches:
+      - develop
+      - main
+
+jobs:
+  check:
+    name: build, test, serving, lighthouse
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5.0.1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Playwright's own Chromium is reused for both the e2e smoke tests
+      # and Lighthouse CI (via CHROME_PATH below), so there's exactly one
+      # browser download per run and one binary the whole check suite
+      # agrees on.
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Resolve CHROME_PATH from the Playwright cache
+        run: |
+          CHROME_DIR=$(find "$HOME/.cache/ms-playwright" -maxdepth 1 -type d -name 'chromium-*' | sort | tail -1)
+          echo "CHROME_PATH=$CHROME_DIR/chrome-linux64/chrome" >> "$GITHUB_ENV"
+
+      - name: Verify Chrome binary
+        run: test -x "$CHROME_PATH"
+
+      # R-33 / D-014: check:employer runs inside `npm run build` already.
+      - name: Build
+        run: npm run build
+
+      # R-21/R-16/R-26 smoke + unit tests (tests/**, src/**/*.test.ts).
+      - name: Test
+        run: npm run test
+
+      # R-26: dist/ must carry nothing but the served site.
+      - name: Serving hygiene
+        run: npm run check:serving
+
+      # R-23: performance >= 80, first-band transfer < 600 KB.
+      - name: Lighthouse
+        run: npm run check:lighthouse
+
+      - name: Upload Lighthouse report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-report
+          path: .lighthouseci
+          retention-days: 14
+
+  # ── develop → preview URL (staging-ahead-of-it.<subdomain>.workers.dev) ──
+  # Will not run until a remote exists and the Cloudflare secrets are set
+  # (docs/STATUS.md "Public actions still needing Josh's explicit yes"). That
+  # is expected — this job exists so the deploy shape is settled now.
+  preview:
+    name: Upload Preview
+    needs: check
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/develop'
+    steps:
+      - uses: actions/checkout@v5.0.1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Upload version with staging alias (does not touch production)
+        uses: cloudflare/wrangler-action@v4.0.0
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          wranglerVersion: "4.138.0"
+          command: versions upload --preview-alias staging
+
+  # ── main → production ────────────────────────────────────────────────────
+  deploy-production:
+    name: Deploy to Production
+    needs: check
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v5.0.1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Deploy Worker
+        uses: cloudflare/wrangler-action@v4.0.0
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          wranglerVersion: "4.138.0"
+          command: deploy
+
+      - name: Smoke test — pages serve, .git does not
+        run: |
+          check() {
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" --retry 5 --retry-delay 3 "$1")
+            if [ "$STATUS" != "$2" ]; then
+              echo "Smoke test failed: $1 returned HTTP $STATUS, expected $2"
+              exit 1
+            fi
+            echo "Smoke test passed: $1 → HTTP $STATUS"
+          }
+          # No custom domain yet (Phase 4, D-005/D-018) — workers.dev for now.
+          BASE_URL="https://ahead-of-it.joshua-gister.workers.dev"
+          check "$BASE_URL/"             200
+          check "$BASE_URL/.git/config"  404
