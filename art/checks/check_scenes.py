@@ -56,7 +56,7 @@ VIEW_ORDER = ["ground", "floor-2", "floor-3", "floor-4", "floor-5", "floor-6", "
 SPACING_MIN = 44
 # SCENE-FORMAT.md "Two-part gags": the states in which each is drawn in two places.
 TWO_PART = {"G3.2": ("without", "built"), "G4.1": ("without", "built"),
-            "G5.1": ("without",)}  # G2.4 joins with its inset part (PH1-10 item 3)
+            "G2.4": ("without", "built"), "G5.1": ("without",)}
 
 failures: list[str] = []
 warnings: list[str] = []

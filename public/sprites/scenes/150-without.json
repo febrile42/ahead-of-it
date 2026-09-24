@@ -2745,7 +2745,7 @@
           "depth": 6
         },
         {
-          "sprite": "wall-back-r-window",
+          "sprite": "wall-back-r",
           "frame": "default",
           "x": 69,
           "y": 113,
@@ -2777,9 +2777,9 @@
         {
           "sprite": "desk",
           "frame": "default",
-          "x": 37,
-          "y": 113,
-          "depth": 7
+          "x": 21,
+          "y": 121,
+          "depth": 8
         },
         {
           "sprite": "worker-give",

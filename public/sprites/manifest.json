@@ -131,6 +131,22 @@
       ]
     },
     "h": 41,
+    "w": 32
+  },
+  "camera-bar-small": {
+    "anchor": [
+      1,
+      41
+    ],
+    "frames": {
+      "default": [
+        {
+          "duration": 0,
+          "file": "camera-bar-small.png"
+        }
+      ]
+    },
+    "h": 41,
     "w": 24
   },
   "card-customers": {
@@ -1387,7 +1403,7 @@
   "tv-frozen": {
     "anchor": [
       1,
-      42
+      46
     ],
     "frames": {
       "blink": [
@@ -1407,6 +1423,38 @@
         }
       ]
     },
+    "h": 46,
+    "points": {
+      "screen": [
+        23,
+        30
+      ]
+    },
+    "w": 47
+  },
+  "tv-frozen-small": {
+    "anchor": [
+      1,
+      42
+    ],
+    "frames": {
+      "blink": [
+        {
+          "duration": 250,
+          "file": "tv-frozen-small-blink-0.png"
+        },
+        {
+          "duration": 250,
+          "file": "tv-frozen-small-blink-1.png"
+        }
+      ],
+      "default": [
+        {
+          "duration": 0,
+          "file": "tv-frozen-small.png"
+        }
+      ]
+    },
     "h": 42,
     "points": {
       "screen": [
@@ -1419,7 +1467,7 @@
   "tv-live": {
     "anchor": [
       1,
-      42
+      46
     ],
     "frames": {
       "default": [
@@ -1436,6 +1484,38 @@
         {
           "duration": 180,
           "file": "tv-live-talk-1.png"
+        }
+      ]
+    },
+    "h": 46,
+    "points": {
+      "screen": [
+        23,
+        30
+      ]
+    },
+    "w": 47
+  },
+  "tv-live-small": {
+    "anchor": [
+      1,
+      42
+    ],
+    "frames": {
+      "default": [
+        {
+          "duration": 0,
+          "file": "tv-live-small.png"
+        }
+      ],
+      "talk": [
+        {
+          "duration": 180,
+          "file": "tv-live-small-talk-0.png"
+        },
+        {
+          "duration": 180,
+          "file": "tv-live-small-talk-1.png"
         }
       ]
     },
@@ -2846,6 +2926,66 @@
         {
           "duration": 900,
           "file": "worker-watch-e-1.png"
+        }
+      ]
+    },
+    "h": 24,
+    "w": 16
+  },
+  "worker-wave": {
+    "anchor": [
+      8,
+      24
+    ],
+    "frames": {
+      "a": [
+        {
+          "duration": 280,
+          "file": "worker-wave-a-0.png"
+        },
+        {
+          "duration": 280,
+          "file": "worker-wave-a-1.png"
+        }
+      ],
+      "b": [
+        {
+          "duration": 280,
+          "file": "worker-wave-b-0.png"
+        },
+        {
+          "duration": 280,
+          "file": "worker-wave-b-1.png"
+        }
+      ],
+      "c": [
+        {
+          "duration": 280,
+          "file": "worker-wave-c-0.png"
+        },
+        {
+          "duration": 280,
+          "file": "worker-wave-c-1.png"
+        }
+      ],
+      "d": [
+        {
+          "duration": 280,
+          "file": "worker-wave-d-0.png"
+        },
+        {
+          "duration": 280,
+          "file": "worker-wave-d-1.png"
+        }
+      ],
+      "e": [
+        {
+          "duration": 280,
+          "file": "worker-wave-e-0.png"
+        },
+        {
+          "duration": 280,
+          "file": "worker-wave-e-1.png"
         }
       ]
     },

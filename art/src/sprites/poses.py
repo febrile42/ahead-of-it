@@ -15,6 +15,8 @@ every look is a palette swap. Each pose is one manifest entry keyed by look (lik
                    whiteboard. `point-right` / `point-left`, 2-frame jab each. 20 x 24.
   worker-huddle    G2.4: seen from behind, hunched over the table's one laptop;
                    `<look>` and `<look>-dongle` (an arm up, holding an adapter).
+  worker-wave      G2.4 (band 220, PH1-10): from behind, facing a screen on the wall,
+                   one arm up waving at it — "can you hear me?" (2 frames). 16 x 24.
   worker-hat       G7.3a built: front view, a marker raised to the board, wearing the
                    `PRODUCT` hat — a paper band far wider than the head. 32 x 34.
   worker-reach     G4.2 (band 150): seated at the finance desk, reaching up for the
@@ -312,8 +314,34 @@ def huddle_frames(look_name: str) -> dict:
         _head_back(f, look["style"], 2)
         if dongle:
             f.blob(R(13, 2, 14, 10), lambda p: "s" if p[1] <= 3 else "T", ring="outer")
-            f.blob(R(12, 0, 15, 1), "V", ring=True)    # the adapter, held up
+            f.blob(R(12, 0, 15, 2), "Y", ring=True)    # the adapter, held up (yellow)
         out[look_name + ("-dongle" if dongle else "")] = [f.to_canvas(look)]
+    return out
+
+
+WAVE_MS = 280
+
+
+def wave_frames(look_name: str) -> list[Canvas]:
+    """From behind, facing the frozen screen, the screen-right arm up and waving: the
+    hand over the head's corner (frame 0), then tipped out a pixel (frame 1)."""
+    from .worker import _head_back, _arm_front
+    look = LOOKS[look_name]
+    out = []
+    for i in range(2):
+        f = Fig()
+        _shadow(f)
+        _leg_front(f, "left", 0, 0)
+        _leg_front(f, "right", 0, 0)
+        _torso_front(f, 0)
+        _arm_front(f, "left", 6, 0)
+        _head_back(f, look["style"], 0)
+        if i == 0:
+            f.blob(R(13, 3, 14, 10), lambda p: "s" if p[1] <= 4 else "T", ring="outer")
+        else:
+            f.blob(R(13, 6, 14, 10), "T", ring="outer")
+            f.blob(R(14, 2, 15, 5), lambda p: "s" if p[1] <= 3 else "T", ring="outer")
+        out.append(f.to_canvas(look))
     return out
 
 

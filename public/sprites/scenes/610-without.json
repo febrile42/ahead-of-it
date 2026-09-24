@@ -2315,9 +2315,9 @@
           "gagId": "G2.4",
           "part": "room",
           "x": 202,
-          "y": 91,
-          "w": 98,
-          "h": 70,
+          "y": 87,
+          "w": 105,
+          "h": 74,
           "primary": true
         },
         {
@@ -3220,7 +3220,7 @@
           "depth": 6
         },
         {
-          "sprite": "wall-back-r-window",
+          "sprite": "wall-back-r",
           "frame": "default",
           "x": 69,
           "y": 133,
@@ -3250,11 +3250,38 @@
           "part": "handover"
         },
         {
+          "sprite": "tv-frozen-small",
+          "frame": "default",
+          "x": 69,
+          "y": 133,
+          "depth": 6.5,
+          "gagId": "G2.4",
+          "part": "inset"
+        },
+        {
+          "sprite": "worker-wave",
+          "frame": "c",
+          "x": 48,
+          "y": 123,
+          "depth": 6.7,
+          "gagId": "G2.4",
+          "part": "inset"
+        },
+        {
+          "sprite": "worker-wave",
+          "frame": "a",
+          "x": 73,
+          "y": 124,
+          "depth": 6.85,
+          "gagId": "G2.4",
+          "part": "inset"
+        },
+        {
           "sprite": "desk",
           "frame": "default",
-          "x": 37,
-          "y": 133,
-          "depth": 7
+          "x": 21,
+          "y": 141,
+          "depth": 8
         },
         {
           "sprite": "partition-c",
@@ -3318,6 +3345,15 @@
         }
       ],
       "hotspots": [
+        {
+          "gagId": "G2.4",
+          "part": "inset",
+          "x": 40,
+          "y": 91,
+          "w": 59,
+          "h": 33,
+          "primary": false
+        },
         {
           "gagId": "G5.1",
           "part": "handover",
