@@ -1,4 +1,6 @@
+import { readFileSync } from 'node:fs';
 import { expect, test } from '@playwright/test';
+import type { Page } from '@playwright/test';
 
 // PH1-04 review acceptance: keyboard behaviour at the slider's last stop
 // and the panel (B4), and a screenshot of the G2.1 panel showing the
@@ -6,6 +8,22 @@ import { expect, test } from '@playwright/test';
 // followed by a lowercase-led paragraph.
 
 const VIEWPORT = { width: 390, height: 900 };
+
+// PH1-09/D-035: G2.1's hotspot now comes from an art-exported scene file
+// (docs/product/SCENE-FORMAT.md), which doesn't exist in this worktree
+// yet (PH1-08b hasn't landed) — serve the hand-written band-80 fixture
+// at the URL the app fetches. See tests/scene.spec.ts for the fuller
+// version of this shim.
+async function interceptFixtureScenes(page: Page) {
+  const index = readFileSync(new URL('./fixtures/index.json', import.meta.url), 'utf-8');
+  const built = readFileSync(new URL('./fixtures/80-built.json', import.meta.url), 'utf-8');
+  await page.route('**/sprites/scenes/index.json', (route) =>
+    route.fulfill({ contentType: 'application/json', body: index })
+  );
+  await page.route('**/sprites/scenes/80-built.json', (route) =>
+    route.fulfill({ contentType: 'application/json', body: built })
+  );
+}
 
 test.describe('keyboard: slider End and panel Escape (B4)', () => {
   test('End keeps focus on the slider even though it auto-opens the Beyond panel', async ({ page }) => {
@@ -41,6 +59,7 @@ test.describe('keyboard: slider End and panel Escape (B4)', () => {
   });
 
   test('Escape closes a hotspot-opened panel and returns focus to that hotspot', async ({ page }) => {
+    await interceptFixtureScenes(page);
     await page.setViewportSize(VIEWPORT);
     await page.goto('/');
     await page.waitForFunction(() => document.body.dataset.renderedToken !== undefined);
@@ -61,6 +80,7 @@ test.describe('keyboard: slider End and panel Escape (B4)', () => {
 
 test.describe('panel copy (B5): inline beat labels', () => {
   test('screenshot band 80 / G2.1 panel', async ({ page }) => {
+    await interceptFixtureScenes(page);
     await page.setViewportSize(VIEWPORT);
     await page.goto('/');
     await page.waitForFunction(() => document.body.dataset.renderedToken !== undefined);

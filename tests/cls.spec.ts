@@ -1,4 +1,22 @@
+import { readFileSync } from 'node:fs';
 import { expect, test } from '@playwright/test';
+import type { Page } from '@playwright/test';
+
+// PH1-09/D-035: the default band (80) needs a real scene file to measure
+// CLS/scroll against something other than the "not drawn yet" placeholder
+// — public/sprites/scenes/ doesn't exist yet (PH1-08b hasn't landed), so
+// this serves the hand-written fixture at the URL the app actually
+// fetches. See tests/scene.spec.ts for the fuller version of this shim.
+async function interceptFixtureScenes(page: Page) {
+  const index = readFileSync(new URL('./fixtures/index.json', import.meta.url), 'utf-8');
+  const built = readFileSync(new URL('./fixtures/80-built.json', import.meta.url), 'utf-8');
+  await page.route('**/sprites/scenes/index.json', (route) =>
+    route.fulfill({ contentType: 'application/json', body: index })
+  );
+  await page.route('**/sprites/scenes/80-built.json', (route) =>
+    route.fulfill({ contentType: 'application/json', body: built })
+  );
+}
 
 // PH1-04 review S1/S2: everything above the canvas (slider, readout,
 // ticks, toggle, tagline) used to be built by JS into empty roots, and the
@@ -45,6 +63,7 @@ test.describe('CLS under throttling (PH1-04 review S1)', () => {
       observer.observe({ type: 'layout-shift', buffered: true });
     });
 
+    await interceptFixtureScenes(page);
     await page.setViewportSize(VIEWPORT);
     await page.goto('/', { timeout: 60_000 });
     await page.waitForFunction(() => document.body.dataset.renderedToken !== undefined, { timeout: 60_000 });
@@ -60,6 +79,7 @@ test.describe('CLS under throttling (PH1-04 review S1)', () => {
 
 test.describe('no page-level horizontal scroll at 390px (PH1-04 review S2)', () => {
   test('documentElement.scrollWidth equals the viewport width', async ({ page }) => {
+    await interceptFixtureScenes(page);
     await page.setViewportSize(VIEWPORT);
     await page.goto('/');
     await page.waitForFunction(() => document.body.dataset.renderedToken !== undefined);

@@ -20,29 +20,52 @@ const content = JSON.parse(readFileSync(new URL('../src/content/content.json', i
   copy: { contact: { email: { user: string; domain: string } } };
 };
 
-// Mirrors src/scene/slots.ts's GAG_PLACEMENTS: every gag gets one hotspot
-// except the two the brief calls out as spanning two slots. slots.ts is
-// slated for deletion (PH1-09 replaces the scene approach entirely — see
-// docs/briefs/PH1-04-REVIEW.md), so this small duplication is cheaper than
-// importing a module that's going away.
-const MULTI_PART_GAGS: ReadonlySet<string> = new Set(['G4.1', 'G5.1']);
+// PH1-09/D-035: hotspot geometry is no longer computed in the web (that
+// was src/scene/slots.ts, deleted) — it comes straight from the art
+// pipeline's exported scene file (docs/product/SCENE-FORMAT.md). PH1-08b
+// hasn't landed, so public/sprites/scenes/ doesn't exist in this
+// worktree: `interceptFixtureScenes` serves the hand-written band-80
+// fixture (tests/fixtures/) at the same URLs the app fetches in
+// production. Every other band has no scene file at all yet, which is
+// expected to render the "not drawn yet" placeholder (src/main.ts's
+// renderMissingScene) rather than crash — see the band-loop tests below.
+const FIXTURE_INDEX = JSON.parse(
+  readFileSync(new URL('./fixtures/index.json', import.meta.url), 'utf-8')
+) as { bands: Record<string, { built: string; without: string }> };
 
-function expectedHotspotCount(band: BandId): number {
-  const tier = band === 'beyond' ? 750 : band;
-  let count = 0;
-  for (const gag of content.gags) {
-    const gagTier = gag.band === 'beyond' ? 750 : gag.band;
-    if (gagTier > tier) continue;
-    count += MULTI_PART_GAGS.has(gag.id) ? 2 : 1;
+const FIXTURE_SCENES: Record<string, unknown> = {
+  '80-built.json': JSON.parse(readFileSync(new URL('./fixtures/80-built.json', import.meta.url), 'utf-8')),
+  '80-without.json': JSON.parse(readFileSync(new URL('./fixtures/80-without.json', import.meta.url), 'utf-8')),
+};
+
+async function interceptFixtureScenes(page: Page) {
+  await page.route('**/sprites/scenes/index.json', async (route) => {
+    await route.fulfill({ contentType: 'application/json', body: JSON.stringify(FIXTURE_INDEX) });
+  });
+  for (const [fileName, body] of Object.entries(FIXTURE_SCENES)) {
+    await page.route(`**/sprites/scenes/${fileName}`, async (route) => {
+      await route.fulfill({ contentType: 'application/json', body: JSON.stringify(body) });
+    });
   }
-  return count;
+  // Everything else under sprites/scenes/ (every band but 80) has no
+  // fixture and no real export yet — let the request fall through to the
+  // dev/preview server, where it 404s (same-origin) and src/main.ts's
+  // renderMissingScene takes over.
 }
 
-// PH1-04 acceptance (brief 3h): every band x both states renders at 390px
-// with all hotspots present, focusable and centred on their rect; toggling
-// changes the canvas; no request leaves origin. Also generates the four
-// required screenshots (band 80 and 750, both states) under
-// tests/screenshots/.
+function fixtureHotspotCount(band: BandId, state: 'built' | 'without'): number {
+  if (band !== 80) return 0; // no fixture for any other band yet — the placeholder draws zero hotspots
+  const scene = FIXTURE_SCENES[`80-${state}.json`] as { views: Array<{ hotspots: unknown[] }> };
+  return scene.views[0].hotspots.length;
+}
+
+// PH1-09 acceptance: every band x both states renders at 390px without
+// crashing; where a scene file exists (band 80, via the fixture), every
+// hotspot is present, focusable, >=44px and centred on its rect; bands
+// with no scene file yet render the placeholder with zero hotspots
+// (expected — see the fixture comment above). Toggling changes the
+// canvas; no request leaves origin. Also generates the three required
+// screenshots (80/150/750, both states) under tests/screenshots/.
 
 const VIEWPORT = { width: 390, height: 900 };
 
@@ -92,6 +115,7 @@ test.describe('no third-party requests (R-21)', () => {
         offOrigin.push(request.url());
       }
     });
+    await interceptFixtureScenes(page);
     await page.setViewportSize(VIEWPORT);
     await page.goto('/');
     await page.waitForFunction(() => document.body.dataset.renderedToken !== undefined);
@@ -99,10 +123,11 @@ test.describe('no third-party requests (R-21)', () => {
   });
 });
 
-test.describe('every band x both states (PH1-04 acceptance)', () => {
+test.describe('every band x both states (PH1-09 acceptance)', () => {
   for (const band of BAND_ORDER) {
     for (const state of ['built', 'without'] as const) {
       test(`band ${band} / ${state} renders with every hotspot focusable and centred`, async ({ page }) => {
+        await interceptFixtureScenes(page);
         await page.setViewportSize(VIEWPORT);
         await page.goto('/');
         await page.waitForFunction(() => document.body.dataset.renderedToken !== undefined);
@@ -110,14 +135,10 @@ test.describe('every band x both states (PH1-04 acceptance)', () => {
         await setState(page, state);
 
         const layerHandle = page.locator('#hotspots-layer');
-        const bufferW = Number(await layerHandle.getAttribute('data-buffer-w'));
-
         const hotspots = page.locator('.hotspot');
-        // S4: this used to only assert count > 0. The exact expected count
-        // (every active gag's parts, cumulative — R-03a) catches both
-        // missing and duplicated hotspots.
-        await expect(hotspots).toHaveCount(expectedHotspotCount(band));
+        await expect(hotspots).toHaveCount(fixtureHotspotCount(band, state));
 
+        const bufferW = Number(await layerHandle.getAttribute('data-buffer-w'));
         const count = await hotspots.count();
         for (let i = 0; i < count; i += 1) {
           const button = hotspots.nth(i);
@@ -125,8 +146,8 @@ test.describe('every band x both states (PH1-04 acceptance)', () => {
           await expect(button).toBeFocused();
 
           // Recomputed per hotspot: focusing an off-screen hotspot
-          // auto-scrolls .scene-wrap (it's the horizontally-scrolling
-          // container — see src/scene/layout.ts), which moves
+          // auto-scrolls .scene-wrap (the horizontally-scrolling
+          // container — see src/style.css), which moves
           // #hotspots-layer relative to the viewport along with it.
           const layerBox = await layerHandle.boundingBox();
           expect(layerBox).not.toBeNull();
@@ -153,10 +174,11 @@ test.describe('every band x both states (PH1-04 acceptance)', () => {
 
 test.describe('toggling changes the canvas', () => {
   test('built and without states render different pixels', async ({ page }) => {
+    await interceptFixtureScenes(page);
     await page.setViewportSize(VIEWPORT);
     await page.goto('/');
     await page.waitForFunction(() => document.body.dataset.renderedToken !== undefined);
-    await setBand(page, 750);
+    await setBand(page, 80);
     await setState(page, 'built');
     const builtHash = await page.locator('#scene-canvas').evaluate((c) => (c as HTMLCanvasElement).toDataURL());
 
@@ -174,6 +196,7 @@ test.describe('email is never a joined string in the page', () => {
     const { user, domain } = content.copy.contact.email;
     const assembled = `${user}@${domain}`;
 
+    await interceptFixtureScenes(page);
     await page.setViewportSize(VIEWPORT);
     await page.goto('/');
     await page.waitForFunction(() => document.body.dataset.renderedToken !== undefined);
@@ -188,10 +211,15 @@ test.describe('email is never a joined string in the page', () => {
   });
 });
 
-test.describe('screenshots (acceptance: band 80 and band 750, both states, 390px)', () => {
-  for (const band of [80, 750] as const) {
+test.describe('screenshots (acceptance: bands 80/150/750, both states)', () => {
+  // Only band 80 has a scene file (the fixture); 150 and 750 render the
+  // "not drawn yet" placeholder — expected until PH1-08b lands, and
+  // exactly what the opus reviewer should see when reading these against
+  // art/preview/.
+  for (const band of [80, 150, 750] as const) {
     for (const state of ['built', 'without'] as const) {
       test(`screenshot band ${band} / ${state}`, async ({ page }) => {
+        await interceptFixtureScenes(page);
         await page.setViewportSize(VIEWPORT);
         await page.goto('/');
         await page.waitForFunction(() => document.body.dataset.renderedToken !== undefined);
