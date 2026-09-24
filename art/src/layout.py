@@ -85,21 +85,23 @@ B80_DESKS = [(4, 3), (6, 3), (4, 5), (6, 5)]
 
 def _band80() -> list:
     P = []
-    # G1.1 the closet (and its cutaway partitions, both states)
+    # G1.1 the closet (and its cutaway partitions, both states). Only the closet's own
+    # contents are gag-tagged; the partitions and the cable spilling out past them are
+    # structural/scenery (tagging them stretched the hotspot toward G3.2's trolley).
     P += [
         _t("closet-shelf", 0, 0, depth=0.6, states=W, id="router", gag="G1.1", part="closet"),
         _t("mop-bucket", 0, 1, depth=1.5, states=W, gag="G1.1", part="closet"),
         _t("box-fan", 1, 1, dx=-10, dy=-3, depth=2.2, states=W, gag="G1.1", part="closet"),
-        _t("cable-spill", 2, 0, depth=2.6, states=W, gag="G1.1", part="closet"),
+        _t("cable-spill", 2, 0, depth=2.6, states=W),
         _t("rack", 0, 0, depth=0.8, states=B, gag="G1.1", part="closet"),
         _t("firewall", 0, 0, depth=0.81, states=B, id="firewall", gag="G1.1", part="closet"),
-        _t("partition-c", 0, 1, depth=2.05, gag="G1.1", part="closet"),
-        _t("partition-c", 1, 1, depth=3.05, gag="G1.1", part="closet"),
-        _t("partition-r-door-open", 1, 0, depth=2.5, states=W, gag="G1.1", part="closet"),
-        _t("partition-r-door-closed", 1, 0, depth=2.5, states=B, gag="G1.1", part="closet"),
-        _t("partition-r-end", 1, 1, depth=3.1, gag="G1.1", part="closet"),
+        _t("partition-c", 0, 1, depth=2.05),
+        _t("partition-c", 1, 1, depth=3.05),
+        _t("partition-r-door-open", 1, 0, depth=2.5, states=W),
+        _t("partition-r-door-closed", 1, 0, depth=2.5, states=B),
+        _t("partition-r-end", 1, 1, depth=3.1),
     ]
-    # G1.2 the sales pit: post-its / padlocks; the note-peeler at (6, 3)
+    # G1.2 the sales pit: post-its / padlocks; the note-peeler at (6, 3).
     seated = {"without": {(4, 3): "a", (6, 5): "d"},
               "built": {(4, 3): "a", (6, 3): "c", (4, 5): "e", (6, 5): "d"}}
     for (col, row) in B80_DESKS:
@@ -116,26 +118,30 @@ def _band80() -> list:
     # G2.1 the developer's desk and the queue
     P += [
         _t("desk-dev", 3, 0, states=W, id="desk-dev", gag="G2.1", part="queue"),
-        _t("desk-dev-built", 3, 0, states=B, gag="G2.1", part="queue"),
-        _t("worker-seated", 3, 0, frame="b", depth=4.01, gag="G2.1", part="queue"),
+        # desk-dev-built and its occupant carry no gag tag: G2.1's built-state story is
+        # the helpdesk group below, not this desk (avoids a second, near-duplicate
+        # "queue" hotspot sitting right on top of "helpdesk" once the desk is fixed).
+        _t("desk-dev-built", 3, 0, states=B),
+        _t("worker-seated", 3, 0, frame="b", depth=4.01),
     ]
     queue = [("worker-c", "idle-left"), ("worker-queue", "a-left"), ("worker-e", "idle-left"),
              ("worker-d", "idle-left"), ("worker-b", "idle-left"), ("worker-c", "idle-left")]
     for i, (spr, fr) in enumerate(queue):
         P.append(_f(spr, 4.95 + i * 0.62, 1.65, frame=fr, states=W,
                     quiet="drop" if i >= 3 else "keep", gag="G2.1", part="queue"))
-    # G2.2 the taped floor cable and the sign; someone stepping over it
+    # G2.2 the taped floor cable and the sign; someone stepping over it. The cable
+    # tiles themselves span almost the whole room (a hotspot union that wide would sit
+    # on top of G1.2's), so only the sign and the step-over — the gag's actual visual
+    # punchline — are gag-tagged; the cable stays plain scenery.
     P += [
-        _t("cable-floor-r", 1, 2, depth=3.0, states=W, gag="G2.2", part="cable"),
-        _t("cable-floor-r", 1, 3, depth=4.0, states=W, gag="G2.2", part="cable"),
-        _t("cable-floor-turn", 1, 4, depth=5.0, states=W, gag="G2.2", part="cable"),
+        _t("cable-floor-r", 1, 2, depth=3.0, states=W),
+        _t("cable-floor-r", 1, 3, depth=4.0, states=W),
+        _t("cable-floor-turn", 1, 4, depth=5.0, states=W),
     ]
-    P += [_t("cable-floor-c", col, 4, depth=col + 4.0, states=W, gag="G2.2", part="cable")
-          for col in range(2, 9)]
+    P += [_t("cable-floor-c", col, 4, depth=col + 4.0, states=W) for col in range(2, 9)]
     P += [
         _t("sign-caution", 7, 4, dx=-10, dy=-2, depth=11.6, states=W, gag="G2.2", part="cable"),
-        _f("worker-c", 8.05, 4.55, frame="step-right", states=W, quiet="drop",
-           gag="G2.2", part="cable"),
+        _f("worker-c", 8.05, 4.55, frame="step-right", states=W, quiet="drop"),
     ]
     # G2.1 built: the support desk, its board, someone being helped; the cleared floor
     P += [
