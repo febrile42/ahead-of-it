@@ -272,3 +272,18 @@ the detail.
    PH1-10 clears both.
 8. Views must be whole rooms, not crops of one plate (the gap PH1-08b reported). Until
    PH1-10 lands, staging shows cropped rooms.
+
+**D-038 · 2026-09-24 · Views are composed rooms; scene rules have no exceptions.**
+PH1-10 replaced one wide plate per band, sliced into views by hand-placed crops, with one
+composed room per D-036 view: `ground`, a separate room per upper storey, and `street` as
+HQ's exterior with the road and the inset office. Amends D-037 items 2, 7 and 8:
+1. The per-view parity reference is each room's own native render, not a crop of a plate.
+2. Band 80 has `ground` only: none of its gags lives in the street (D-036 rule 2).
+3. The spacing and two-part debt lists are cleared, and the mechanism goes with them: rule 7
+   and the two-part rule have no exemptions on either side. A future exception needs a
+   decision first.
+4. HQ's storey count in `street` follows the floors `BANDS-AND-GAGS.md` narrates (3 at 150,
+   4 at 220). That is scenery, not a receipt.
+5. G2.4's second part is staged as one call: the inset office's screen shows the HQ worker
+   frozen mid-wave, with an inset worker beside it waving back. That is the drawable reading
+   of "a worker on each side waving".
