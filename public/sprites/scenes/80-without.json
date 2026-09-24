@@ -1,0 +1,1058 @@
+{
+  "schema": 1,
+  "band": 80,
+  "state": "without",
+  "views": [
+    {
+      "id": "ground",
+      "label": "Ground floor",
+      "size": {
+        "w": 300,
+        "h": 214
+      },
+      "focus": {
+        "x": 0,
+        "y": 0,
+        "w": 300,
+        "h": 214
+      },
+      "entries": [
+        {
+          "sprite": "slab-l",
+          "frame": "default",
+          "x": 38,
+          "y": 132,
+          "depth": 7
+        },
+        {
+          "sprite": "slab-l",
+          "frame": "default",
+          "x": 54,
+          "y": 140,
+          "depth": 8
+        },
+        {
+          "sprite": "slab-l",
+          "frame": "default",
+          "x": 70,
+          "y": 148,
+          "depth": 9
+        },
+        {
+          "sprite": "slab-l",
+          "frame": "default",
+          "x": 86,
+          "y": 156,
+          "depth": 10
+        },
+        {
+          "sprite": "slab-l",
+          "frame": "default",
+          "x": 102,
+          "y": 164,
+          "depth": 11
+        },
+        {
+          "sprite": "slab-l",
+          "frame": "default",
+          "x": 118,
+          "y": 172,
+          "depth": 12
+        },
+        {
+          "sprite": "slab-l",
+          "frame": "default",
+          "x": 134,
+          "y": 180,
+          "depth": 13
+        },
+        {
+          "sprite": "slab-l",
+          "frame": "default",
+          "x": 150,
+          "y": 188,
+          "depth": 14
+        },
+        {
+          "sprite": "slab-l",
+          "frame": "default",
+          "x": 166,
+          "y": 196,
+          "depth": 15
+        },
+        {
+          "sprite": "slab-r",
+          "frame": "default",
+          "x": 262,
+          "y": 148,
+          "depth": 9
+        },
+        {
+          "sprite": "slab-r",
+          "frame": "default",
+          "x": 246,
+          "y": 156,
+          "depth": 10
+        },
+        {
+          "sprite": "slab-r",
+          "frame": "default",
+          "x": 230,
+          "y": 164,
+          "depth": 11
+        },
+        {
+          "sprite": "slab-r",
+          "frame": "default",
+          "x": 214,
+          "y": 172,
+          "depth": 12
+        },
+        {
+          "sprite": "slab-r",
+          "frame": "default",
+          "x": 198,
+          "y": 180,
+          "depth": 13
+        },
+        {
+          "sprite": "slab-r",
+          "frame": "default",
+          "x": 182,
+          "y": 188,
+          "depth": 14
+        },
+        {
+          "sprite": "slab-r",
+          "frame": "default",
+          "x": 166,
+          "y": 196,
+          "depth": 15
+        },
+        {
+          "sprite": "floor-closet",
+          "frame": "default",
+          "x": 134,
+          "y": 84,
+          "depth": 1
+        },
+        {
+          "sprite": "floor-closet",
+          "frame": "default",
+          "x": 150,
+          "y": 92,
+          "depth": 2
+        },
+        {
+          "sprite": "floor-office",
+          "frame": "default",
+          "x": 166,
+          "y": 100,
+          "depth": 3
+        },
+        {
+          "sprite": "floor-office",
+          "frame": "default",
+          "x": 182,
+          "y": 108,
+          "depth": 4
+        },
+        {
+          "sprite": "floor-office",
+          "frame": "default",
+          "x": 198,
+          "y": 116,
+          "depth": 5
+        },
+        {
+          "sprite": "floor-office",
+          "frame": "default",
+          "x": 214,
+          "y": 124,
+          "depth": 6
+        },
+        {
+          "sprite": "floor-office",
+          "frame": "default",
+          "x": 230,
+          "y": 132,
+          "depth": 7
+        },
+        {
+          "sprite": "floor-office",
+          "frame": "default",
+          "x": 246,
+          "y": 140,
+          "depth": 8
+        },
+        {
+          "sprite": "floor-office",
+          "frame": "default",
+          "x": 262,
+          "y": 148,
+          "depth": 9
+        },
+        {
+          "sprite": "floor-closet",
+          "frame": "default",
+          "x": 118,
+          "y": 92,
+          "depth": 2
+        },
+        {
+          "sprite": "floor-closet",
+          "frame": "default",
+          "x": 134,
+          "y": 100,
+          "depth": 3
+        },
+        {
+          "sprite": "floor-office",
+          "frame": "default",
+          "x": 150,
+          "y": 108,
+          "depth": 4
+        },
+        {
+          "sprite": "floor-office",
+          "frame": "default",
+          "x": 166,
+          "y": 116,
+          "depth": 5
+        },
+        {
+          "sprite": "floor-office",
+          "frame": "default",
+          "x": 182,
+          "y": 124,
+          "depth": 6
+        },
+        {
+          "sprite": "floor-office",
+          "frame": "default",
+          "x": 198,
+          "y": 132,
+          "depth": 7
+        },
+        {
+          "sprite": "floor-office",
+          "frame": "default",
+          "x": 214,
+          "y": 140,
+          "depth": 8
+        },
+        {
+          "sprite": "floor-office",
+          "frame": "default",
+          "x": 230,
+          "y": 148,
+          "depth": 9
+        },
+        {
+          "sprite": "floor-office",
+          "frame": "default",
+          "x": 246,
+          "y": 156,
+          "depth": 10
+        },
+        {
+          "sprite": "floor-office",
+          "frame": "default",
+          "x": 102,
+          "y": 100,
+          "depth": 3
+        },
+        {
+          "sprite": "floor-office",
+          "frame": "default",
+          "x": 118,
+          "y": 108,
+          "depth": 4
+        },
+        {
+          "sprite": "floor-office",
+          "frame": "default",
+          "x": 134,
+          "y": 116,
+          "depth": 5
+        },
+        {
+          "sprite": "floor-office",
+          "frame": "default",
+          "x": 150,
+          "y": 124,
+          "depth": 6
+        },
+        {
+          "sprite": "floor-office",
+          "frame": "default",
+          "x": 166,
+          "y": 132,
+          "depth": 7
+        },
+        {
+          "sprite": "floor-office",
+          "frame": "default",
+          "x": 182,
+          "y": 140,
+          "depth": 8
+        },
+        {
+          "sprite": "floor-office",
+          "frame": "default",
+          "x": 198,
+          "y": 148,
+          "depth": 9
+        },
+        {
+          "sprite": "floor-office",
+          "frame": "default",
+          "x": 214,
+          "y": 156,
+          "depth": 10
+        },
+        {
+          "sprite": "floor-office",
+          "frame": "default",
+          "x": 230,
+          "y": 164,
+          "depth": 11
+        },
+        {
+          "sprite": "floor-office",
+          "frame": "default",
+          "x": 86,
+          "y": 108,
+          "depth": 4
+        },
+        {
+          "sprite": "floor-office",
+          "frame": "default",
+          "x": 102,
+          "y": 116,
+          "depth": 5
+        },
+        {
+          "sprite": "floor-office",
+          "frame": "default",
+          "x": 118,
+          "y": 124,
+          "depth": 6
+        },
+        {
+          "sprite": "floor-office",
+          "frame": "default",
+          "x": 134,
+          "y": 132,
+          "depth": 7
+        },
+        {
+          "sprite": "floor-office",
+          "frame": "default",
+          "x": 150,
+          "y": 140,
+          "depth": 8
+        },
+        {
+          "sprite": "floor-office",
+          "frame": "default",
+          "x": 166,
+          "y": 148,
+          "depth": 9
+        },
+        {
+          "sprite": "floor-office",
+          "frame": "default",
+          "x": 182,
+          "y": 156,
+          "depth": 10
+        },
+        {
+          "sprite": "floor-office",
+          "frame": "default",
+          "x": 198,
+          "y": 164,
+          "depth": 11
+        },
+        {
+          "sprite": "floor-office",
+          "frame": "default",
+          "x": 214,
+          "y": 172,
+          "depth": 12
+        },
+        {
+          "sprite": "floor-office",
+          "frame": "default",
+          "x": 70,
+          "y": 116,
+          "depth": 5
+        },
+        {
+          "sprite": "floor-office",
+          "frame": "default",
+          "x": 86,
+          "y": 124,
+          "depth": 6
+        },
+        {
+          "sprite": "floor-office",
+          "frame": "default",
+          "x": 102,
+          "y": 132,
+          "depth": 7
+        },
+        {
+          "sprite": "floor-office",
+          "frame": "default",
+          "x": 118,
+          "y": 140,
+          "depth": 8
+        },
+        {
+          "sprite": "floor-office",
+          "frame": "default",
+          "x": 134,
+          "y": 148,
+          "depth": 9
+        },
+        {
+          "sprite": "floor-office",
+          "frame": "default",
+          "x": 150,
+          "y": 156,
+          "depth": 10
+        },
+        {
+          "sprite": "floor-office",
+          "frame": "default",
+          "x": 166,
+          "y": 164,
+          "depth": 11
+        },
+        {
+          "sprite": "floor-office",
+          "frame": "default",
+          "x": 182,
+          "y": 172,
+          "depth": 12
+        },
+        {
+          "sprite": "floor-office",
+          "frame": "default",
+          "x": 198,
+          "y": 180,
+          "depth": 13
+        },
+        {
+          "sprite": "floor-office",
+          "frame": "default",
+          "x": 54,
+          "y": 124,
+          "depth": 6
+        },
+        {
+          "sprite": "floor-office",
+          "frame": "default",
+          "x": 70,
+          "y": 132,
+          "depth": 7
+        },
+        {
+          "sprite": "floor-office",
+          "frame": "default",
+          "x": 86,
+          "y": 140,
+          "depth": 8
+        },
+        {
+          "sprite": "floor-office",
+          "frame": "default",
+          "x": 102,
+          "y": 148,
+          "depth": 9
+        },
+        {
+          "sprite": "floor-office",
+          "frame": "default",
+          "x": 118,
+          "y": 156,
+          "depth": 10
+        },
+        {
+          "sprite": "floor-office",
+          "frame": "default",
+          "x": 134,
+          "y": 164,
+          "depth": 11
+        },
+        {
+          "sprite": "floor-office",
+          "frame": "default",
+          "x": 150,
+          "y": 172,
+          "depth": 12
+        },
+        {
+          "sprite": "floor-office",
+          "frame": "default",
+          "x": 166,
+          "y": 180,
+          "depth": 13
+        },
+        {
+          "sprite": "floor-office",
+          "frame": "default",
+          "x": 182,
+          "y": 188,
+          "depth": 14
+        },
+        {
+          "sprite": "floor-office",
+          "frame": "default",
+          "x": 38,
+          "y": 132,
+          "depth": 7
+        },
+        {
+          "sprite": "floor-office",
+          "frame": "default",
+          "x": 54,
+          "y": 140,
+          "depth": 8
+        },
+        {
+          "sprite": "floor-office",
+          "frame": "default",
+          "x": 70,
+          "y": 148,
+          "depth": 9
+        },
+        {
+          "sprite": "floor-office",
+          "frame": "default",
+          "x": 86,
+          "y": 156,
+          "depth": 10
+        },
+        {
+          "sprite": "floor-office",
+          "frame": "default",
+          "x": 102,
+          "y": 164,
+          "depth": 11
+        },
+        {
+          "sprite": "floor-office",
+          "frame": "default",
+          "x": 118,
+          "y": 172,
+          "depth": 12
+        },
+        {
+          "sprite": "floor-office",
+          "frame": "default",
+          "x": 134,
+          "y": 180,
+          "depth": 13
+        },
+        {
+          "sprite": "floor-office",
+          "frame": "default",
+          "x": 150,
+          "y": 188,
+          "depth": 14
+        },
+        {
+          "sprite": "floor-office",
+          "frame": "default",
+          "x": 166,
+          "y": 196,
+          "depth": 15
+        },
+        {
+          "sprite": "wall-corner",
+          "frame": "default",
+          "x": 134,
+          "y": 84,
+          "depth": 1
+        },
+        {
+          "sprite": "wall-back-l",
+          "frame": "default",
+          "x": 134,
+          "y": 84,
+          "depth": 1
+        },
+        {
+          "sprite": "wall-back-l",
+          "frame": "default",
+          "x": 118,
+          "y": 92,
+          "depth": 2
+        },
+        {
+          "sprite": "wall-back-l",
+          "frame": "default",
+          "x": 102,
+          "y": 100,
+          "depth": 3
+        },
+        {
+          "sprite": "wall-back-l-window",
+          "frame": "default",
+          "x": 86,
+          "y": 108,
+          "depth": 4
+        },
+        {
+          "sprite": "wall-back-l",
+          "frame": "default",
+          "x": 70,
+          "y": 116,
+          "depth": 5
+        },
+        {
+          "sprite": "wall-back-l-door",
+          "frame": "default",
+          "x": 54,
+          "y": 124,
+          "depth": 6
+        },
+        {
+          "sprite": "wall-back-l-end",
+          "frame": "default",
+          "x": 38,
+          "y": 132,
+          "depth": 7
+        },
+        {
+          "sprite": "wall-back-r",
+          "frame": "default",
+          "x": 134,
+          "y": 84,
+          "depth": 1
+        },
+        {
+          "sprite": "wall-back-r",
+          "frame": "default",
+          "x": 150,
+          "y": 92,
+          "depth": 2
+        },
+        {
+          "sprite": "wall-back-r",
+          "frame": "default",
+          "x": 166,
+          "y": 100,
+          "depth": 3
+        },
+        {
+          "sprite": "wall-back-r-window",
+          "frame": "default",
+          "x": 182,
+          "y": 108,
+          "depth": 4
+        },
+        {
+          "sprite": "wall-back-r",
+          "frame": "default",
+          "x": 198,
+          "y": 116,
+          "depth": 5
+        },
+        {
+          "sprite": "wall-back-r-window",
+          "frame": "default",
+          "x": 214,
+          "y": 124,
+          "depth": 6
+        },
+        {
+          "sprite": "wall-back-r",
+          "frame": "default",
+          "x": 230,
+          "y": 132,
+          "depth": 7
+        },
+        {
+          "sprite": "wall-back-r-window",
+          "frame": "default",
+          "x": 246,
+          "y": 140,
+          "depth": 8
+        },
+        {
+          "sprite": "wall-back-r-end",
+          "frame": "default",
+          "x": 262,
+          "y": 148,
+          "depth": 9
+        },
+        {
+          "sprite": "closet-shelf",
+          "frame": "default",
+          "x": 134,
+          "y": 84,
+          "depth": 0.6,
+          "gagId": "G1.1",
+          "part": "closet"
+        },
+        {
+          "sprite": "mop-bucket",
+          "frame": "default",
+          "x": 118,
+          "y": 92,
+          "depth": 1.5,
+          "gagId": "G1.1",
+          "part": "closet"
+        },
+        {
+          "sprite": "partition-c",
+          "frame": "default",
+          "x": 118,
+          "y": 92,
+          "depth": 2.05
+        },
+        {
+          "sprite": "box-fan",
+          "frame": "default",
+          "x": 124,
+          "y": 97,
+          "depth": 2.2,
+          "gagId": "G1.1",
+          "part": "closet"
+        },
+        {
+          "sprite": "partition-r-door-open",
+          "frame": "default",
+          "x": 150,
+          "y": 92,
+          "depth": 2.5
+        },
+        {
+          "sprite": "cable-spill",
+          "frame": "default",
+          "x": 166,
+          "y": 100,
+          "depth": 2.6
+        },
+        {
+          "sprite": "cable-floor-r",
+          "frame": "default",
+          "x": 118,
+          "y": 108,
+          "depth": 3.0
+        },
+        {
+          "sprite": "partition-c",
+          "frame": "default",
+          "x": 134,
+          "y": 100,
+          "depth": 3.05
+        },
+        {
+          "sprite": "partition-r-end",
+          "frame": "default",
+          "x": 134,
+          "y": 100,
+          "depth": 3.1
+        },
+        {
+          "sprite": "sofa",
+          "frame": "default",
+          "x": 102,
+          "y": 100,
+          "depth": 3.5,
+          "gagId": "G2.3",
+          "part": "lobby"
+        },
+        {
+          "sprite": "visitor",
+          "frame": "default",
+          "x": 100,
+          "y": 100,
+          "depth": 3.9,
+          "gagId": "G2.3",
+          "part": "lobby"
+        },
+        {
+          "sprite": "desk-dev",
+          "frame": "default",
+          "x": 182,
+          "y": 108,
+          "depth": 4,
+          "gagId": "G2.1",
+          "part": "queue"
+        },
+        {
+          "sprite": "cable-floor-r",
+          "frame": "default",
+          "x": 102,
+          "y": 116,
+          "depth": 4.0
+        },
+        {
+          "sprite": "worker-seated",
+          "frame": "b",
+          "x": 182,
+          "y": 108,
+          "depth": 4.01
+        },
+        {
+          "sprite": "cable-floor-turn",
+          "frame": "default",
+          "x": 86,
+          "y": 124,
+          "depth": 5.0
+        },
+        {
+          "sprite": "cable-floor-c",
+          "frame": "default",
+          "x": 102,
+          "y": 132,
+          "depth": 6.0
+        },
+        {
+          "sprite": "plant",
+          "frame": "default",
+          "x": 38,
+          "y": 132,
+          "depth": 6.4
+        },
+        {
+          "sprite": "worker-c",
+          "frame": "idle-left",
+          "x": 187,
+          "y": 121,
+          "depth": 6.6,
+          "gagId": "G2.1",
+          "part": "queue"
+        },
+        {
+          "sprite": "cable-floor-c",
+          "frame": "default",
+          "x": 118,
+          "y": 140,
+          "depth": 7.0
+        },
+        {
+          "sprite": "worker-queue",
+          "frame": "a-left",
+          "x": 197,
+          "y": 126,
+          "depth": 7.22,
+          "gagId": "G2.1",
+          "part": "queue"
+        },
+        {
+          "sprite": "worker-e",
+          "frame": "idle-left",
+          "x": 207,
+          "y": 131,
+          "depth": 7.84,
+          "gagId": "G2.1",
+          "part": "queue"
+        },
+        {
+          "sprite": "desk-postit",
+          "frame": "default",
+          "x": 150,
+          "y": 140,
+          "depth": 8,
+          "gagId": "G1.2",
+          "part": "pit"
+        },
+        {
+          "sprite": "cable-floor-c",
+          "frame": "default",
+          "x": 134,
+          "y": 148,
+          "depth": 8.0
+        },
+        {
+          "sprite": "worker-seated",
+          "frame": "a",
+          "x": 150,
+          "y": 140,
+          "depth": 8.01,
+          "gagId": "G1.2",
+          "part": "pit"
+        },
+        {
+          "sprite": "worker-d",
+          "frame": "idle-left",
+          "x": 217,
+          "y": 136,
+          "depth": 8.46,
+          "gagId": "G2.1",
+          "part": "queue"
+        },
+        {
+          "sprite": "cable-floor-c",
+          "frame": "default",
+          "x": 150,
+          "y": 156,
+          "depth": 9.0
+        },
+        {
+          "sprite": "worker-b",
+          "frame": "idle-left",
+          "x": 226,
+          "y": 141,
+          "depth": 9.08,
+          "gagId": "G2.1",
+          "part": "queue"
+        },
+        {
+          "sprite": "worker-c",
+          "frame": "idle-left",
+          "x": 236,
+          "y": 146,
+          "depth": 9.7,
+          "gagId": "G2.1",
+          "part": "queue"
+        },
+        {
+          "sprite": "desk-postit",
+          "frame": "default",
+          "x": 182,
+          "y": 156,
+          "depth": 10,
+          "gagId": "G1.2",
+          "part": "pit"
+        },
+        {
+          "sprite": "desk-postit",
+          "frame": "default",
+          "x": 118,
+          "y": 156,
+          "depth": 10,
+          "gagId": "G1.2",
+          "part": "pit"
+        },
+        {
+          "sprite": "cable-floor-c",
+          "frame": "default",
+          "x": 166,
+          "y": 164,
+          "depth": 10.0
+        },
+        {
+          "sprite": "worker-peel",
+          "frame": "e",
+          "x": 182,
+          "y": 156,
+          "depth": 10.01,
+          "gagId": "G1.2",
+          "part": "pit"
+        },
+        {
+          "sprite": "cable-floor-c",
+          "frame": "default",
+          "x": 182,
+          "y": 172,
+          "depth": 11.0
+        },
+        {
+          "sprite": "sign-caution",
+          "frame": "default",
+          "x": 172,
+          "y": 170,
+          "depth": 11.6,
+          "gagId": "G2.2",
+          "part": "cable"
+        },
+        {
+          "sprite": "desk-postit",
+          "frame": "default",
+          "x": 150,
+          "y": 172,
+          "depth": 12,
+          "gagId": "G1.2",
+          "part": "pit"
+        },
+        {
+          "sprite": "cable-floor-c",
+          "frame": "default",
+          "x": 198,
+          "y": 180,
+          "depth": 12.0
+        },
+        {
+          "sprite": "worker-seated",
+          "frame": "d",
+          "x": 150,
+          "y": 172,
+          "depth": 12.01,
+          "gagId": "G1.2",
+          "part": "pit"
+        },
+        {
+          "sprite": "worker-c",
+          "frame": "step-right",
+          "x": 190,
+          "y": 169,
+          "depth": 12.6
+        },
+        {
+          "sprite": "fx-net-80-without-0-0-300-214",
+          "frame": "default",
+          "x": 0,
+          "y": 0,
+          "depth": 900,
+          "gagId": "G2.3",
+          "part": "lobby"
+        }
+      ],
+      "hotspots": [
+        {
+          "gagId": "G1.1",
+          "part": "closet",
+          "x": 111,
+          "y": 28,
+          "w": 51,
+          "h": 69,
+          "primary": true
+        },
+        {
+          "gagId": "G1.2",
+          "part": "pit",
+          "x": 102,
+          "y": 100,
+          "w": 96,
+          "h": 72,
+          "primary": true
+        },
+        {
+          "gagId": "G2.1",
+          "part": "queue",
+          "x": 166,
+          "y": 68,
+          "w": 78,
+          "h": 78,
+          "primary": true
+        },
+        {
+          "gagId": "G2.2",
+          "part": "cable",
+          "x": 164,
+          "y": 145,
+          "w": 17,
+          "h": 25,
+          "primary": true
+        },
+        {
+          "gagId": "G2.3",
+          "part": "lobby",
+          "x": 73,
+          "y": 74,
+          "w": 40,
+          "h": 32,
+          "primary": true
+        }
+      ],
+      "default": true
+    }
+  ]
+}

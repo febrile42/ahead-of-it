@@ -22,7 +22,7 @@ from art.src.dsl import Canvas, save_png, scale_nn
 from art.src import iso
 from art.src.sprites import floor, wall, desk, worker, badge_reader, room, band80, poses
 from art.src.sprites import band150, band220
-from art.src import compose, layout
+from art.src import compose, layout, export_scene
 from art.src.vox import Sprite
 
 SPRITES_DIR = os.path.join(_REPO_ROOT, "public", "sprites")
@@ -407,6 +407,7 @@ def main():
     build_room(static, badge_rendered, worker_rendered)
     for band in sorted(layout.ROOMS):
         build_band(band)
+    export_scene.export_all()
     print("Build complete.")
 
 

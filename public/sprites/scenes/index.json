@@ -1,0 +1,69 @@
+{
+  "schema": 1,
+  "bands": {
+    "80": {
+      "without": "80-without.json",
+      "built": "80-built.json"
+    },
+    "150": {
+      "without": "150-without.json",
+      "built": "150-built.json"
+    },
+    "220": {
+      "without": "220-without.json",
+      "built": "220-built.json"
+    },
+    "360": {
+      "without": "360-without.json",
+      "built": "360-built.json"
+    },
+    "490": {
+      "without": "490-without.json",
+      "built": "490-built.json"
+    },
+    "610": {
+      "without": "610-without.json",
+      "built": "610-built.json"
+    },
+    "750": {
+      "without": "750-without.json",
+      "built": "750-built.json"
+    }
+  },
+  "beyond": "750",
+  "thumbs": {
+    "G1.1": "thumbs/G1.1.png",
+    "G1.2": "thumbs/G1.2.png",
+    "G2.1": "thumbs/G2.1.png",
+    "G2.2": "thumbs/G2.2.png",
+    "G2.3": "thumbs/G2.3.png",
+    "G3.2": "thumbs/G3.2.png",
+    "G4.2": "thumbs/G4.2.png",
+    "G4.3": "thumbs/G4.3.png",
+    "G5.1": "thumbs/G5.1.png",
+    "G2.4": "thumbs/G2.4.png",
+    "G7.3a": "thumbs/G7.3a.png"
+  },
+  "knownSpacingDebt": [
+    [
+      "G1.1",
+      "G3.2"
+    ],
+    [
+      "G1.2",
+      "G2.1"
+    ],
+    [
+      "G1.2",
+      "G2.2"
+    ],
+    [
+      "G2.1",
+      "G2.3"
+    ],
+    [
+      "G2.1",
+      "G3.2"
+    ]
+  ]
+}

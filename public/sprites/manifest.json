@@ -607,6 +607,134 @@
     "h": 16,
     "w": 32
   },
+  "fx-net-150-built-140-10-355-240": {
+    "anchor": [
+      0,
+      0
+    ],
+    "frames": {
+      "default": [
+        {
+          "duration": 0,
+          "file": "fx-net-150-built-140-10-355-240.png"
+        }
+      ]
+    },
+    "h": 230,
+    "w": 215
+  },
+  "fx-net-150-without-140-10-355-240": {
+    "anchor": [
+      0,
+      0
+    ],
+    "frames": {
+      "default": [
+        {
+          "duration": 0,
+          "file": "fx-net-150-without-140-10-355-240.png"
+        }
+      ]
+    },
+    "h": 230,
+    "w": 215
+  },
+  "fx-net-150-without-300-60-465-300": {
+    "anchor": [
+      0,
+      0
+    ],
+    "frames": {
+      "default": [
+        {
+          "duration": 0,
+          "file": "fx-net-150-without-300-60-465-300.png"
+        }
+      ]
+    },
+    "h": 240,
+    "w": 165
+  },
+  "fx-net-220-built-140-10-470-220": {
+    "anchor": [
+      0,
+      0
+    ],
+    "frames": {
+      "default": [
+        {
+          "duration": 0,
+          "file": "fx-net-220-built-140-10-470-220.png"
+        }
+      ]
+    },
+    "h": 210,
+    "w": 330
+  },
+  "fx-net-220-without-140-10-470-220": {
+    "anchor": [
+      0,
+      0
+    ],
+    "frames": {
+      "default": [
+        {
+          "duration": 0,
+          "file": "fx-net-220-without-140-10-470-220.png"
+        }
+      ]
+    },
+    "h": 210,
+    "w": 330
+  },
+  "fx-net-220-without-300-60-525-260": {
+    "anchor": [
+      0,
+      0
+    ],
+    "frames": {
+      "default": [
+        {
+          "duration": 0,
+          "file": "fx-net-220-without-300-60-525-260.png"
+        }
+      ]
+    },
+    "h": 200,
+    "w": 225
+  },
+  "fx-net-80-built-0-0-300-214": {
+    "anchor": [
+      0,
+      0
+    ],
+    "frames": {
+      "default": [
+        {
+          "duration": 0,
+          "file": "fx-net-80-built-0-0-300-214.png"
+        }
+      ]
+    },
+    "h": 214,
+    "w": 300
+  },
+  "fx-net-80-without-0-0-300-214": {
+    "anchor": [
+      0,
+      0
+    ],
+    "frames": {
+      "default": [
+        {
+          "duration": 0,
+          "file": "fx-net-80-without-0-0-300-214.png"
+        }
+      ]
+    },
+    "h": 214,
+    "w": 300
+  },
   "glass-c": {
     "anchor": [
       16,
