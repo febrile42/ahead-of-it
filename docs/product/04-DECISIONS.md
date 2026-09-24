@@ -231,7 +231,20 @@ pixel-for-pixel (a test). Contract: `docs/product/SCENE-FORMAT.md`. Cumulative c
 PH1-07), PH1-09 painter (sonnet, after PH1-04 fixes). PH1-04's interaction plumbing merges
 with fixes; its `slots/layout/assembler` are replaced.
 
-**D-036 · (pending PH1-08a) · Floor / width convention for views.** Proposed: views ≤ 390
-native px wide; one view per gag-carrying floor plus an exterior stack sprite as switcher;
-inset in the ground view from 150; map as an exterior overlay from 490; ≥44 CSS px hotspot
-spacing enforced. Decided after the spike's mocks.
+**D-036 · 2026-09-24 · Views: option A, one view per gag-carrying floor, ≤ 360 px wide.**
+Decided on the PH1-08a mocks (`art/spike/A-750.png` vs `B-750.png`;
+`docs/research/FLOOR-CONVENTION-2026-09.md`). Rule, enforced by `check_scenes.py`:
+1. View ids ∈ {ground, floor-2 … floor-6, top, street}, unique, in that order.
+2. `ground` always exists; any other view only if it holds ≥ 1 primary hotspot.
+3. `w ≤ 360`, `h ≤ 240` native px (not 390: at 390 a worker shrinks to 8–12 CSS px on
+   360/375-wide phones); `focus` = the full view.
+4. Each gag has exactly one primary hotspot, in its home view: ground G1.1 G1.2 G2.1 G2.2
+   G2.3 G3.1 G3.2 G4.1 G5.3 G5.4 G6.1 G7.1 · floor-2 G2.4 G3.3 G4.2 G4.3 G6.2 G7.3 G7.3a
+   G7.4 · top G7.2 · street G5.1 G5.2 G5.6 G6.3 G6.4.
+5. Inset office and map live only in `street`; map pins are non-primary G6.3 entries.
+6. Default view = the one with the most primaries among the current band's own gags; ties
+   to the earlier view.
+7. Primary hotspot centres ≥ 44 native px apart within a view.
+The web switcher is a tab row with per-view gag counts (as mocked); B's exterior stacked
+building is optional Phase 2 polish for that switcher. Consequence: PH1-07's 430/494 px
+rooms for 150/220 must be re-cut into views by PH1-08b (street takes the inset).
