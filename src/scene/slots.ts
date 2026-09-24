@@ -43,6 +43,12 @@ export interface SlotInfo {
   subGrid: { cols: number; cellW: number; cellH: number };
 }
 
+// Cell sizes are chosen so that at the minimum integer scale (1x — see
+// src/scene/assembler.ts's chooseScale) every sub-cell is already >=44
+// logical px on its shorter side, satisfying R-20's tap-target minimum
+// without needing to zoom. The logical buffer is wider than a 390px
+// viewport as a result; .scene-wrap scrolls horizontally, which R-20
+// explicitly allows ("pan/zoom is allowed, tiny hotspots are not").
 export const SLOTS: Record<SlotId, SlotInfo> = {
   closet: {
     id: 'closet',
@@ -50,8 +56,8 @@ export const SLOTS: Record<SlotId, SlotInfo> = {
     introducedAt: 80,
     tower: 'hq',
     floorIndex: 0,
-    anchor: { x: 8, y: 4 },
-    subGrid: { cols: 1, cellW: 18, cellH: 14 },
+    anchor: { x: 20, y: 10 },
+    subGrid: { cols: 1, cellW: 45, cellH: 35 },
   },
   door: {
     id: 'door',
@@ -59,8 +65,8 @@ export const SLOTS: Record<SlotId, SlotInfo> = {
     introducedAt: 80,
     tower: 'hq',
     floorIndex: 0,
-    anchor: { x: 30, y: 4 },
-    subGrid: { cols: 2, cellW: 18, cellH: 14 },
+    anchor: { x: 75, y: 10 },
+    subGrid: { cols: 2, cellW: 45, cellH: 35 },
   },
   pit: {
     id: 'pit',
@@ -68,8 +74,8 @@ export const SLOTS: Record<SlotId, SlotInfo> = {
     introducedAt: 80,
     tower: 'hq',
     floorIndex: 0,
-    anchor: { x: 70, y: 4 },
-    subGrid: { cols: 4, cellW: 18, cellH: 14 },
+    anchor: { x: 175, y: 10 },
+    subGrid: { cols: 4, cellW: 45, cellH: 35 },
   },
   conf: {
     id: 'conf',
@@ -77,8 +83,8 @@ export const SLOTS: Record<SlotId, SlotInfo> = {
     introducedAt: 80,
     tower: 'hq',
     floorIndex: 1,
-    anchor: { x: 8, y: 4 },
-    subGrid: { cols: 2, cellW: 18, cellH: 14 },
+    anchor: { x: 20, y: 10 },
+    subGrid: { cols: 2, cellW: 45, cellH: 35 },
   },
   corridor: {
     id: 'corridor',
@@ -86,8 +92,8 @@ export const SLOTS: Record<SlotId, SlotInfo> = {
     introducedAt: 150,
     tower: 'hq',
     floorIndex: 1,
-    anchor: { x: 48, y: 4 },
-    subGrid: { cols: 3, cellW: 18, cellH: 14 },
+    anchor: { x: 120, y: 10 },
+    subGrid: { cols: 3, cellW: 45, cellH: 35 },
   },
   finance: {
     id: 'finance',
@@ -95,8 +101,8 @@ export const SLOTS: Record<SlotId, SlotInfo> = {
     introducedAt: 80,
     tower: 'hq',
     floorIndex: 1,
-    anchor: { x: 106, y: 4 },
-    subGrid: { cols: 3, cellW: 18, cellH: 14 },
+    anchor: { x: 265, y: 10 },
+    subGrid: { cols: 3, cellW: 45, cellH: 35 },
   },
   top: {
     id: 'top',
@@ -104,8 +110,8 @@ export const SLOTS: Record<SlotId, SlotInfo> = {
     introducedAt: 610,
     tower: 'hq',
     floorIndex: 6,
-    anchor: { x: 40, y: 4 },
-    subGrid: { cols: 1, cellW: 18, cellH: 14 },
+    anchor: { x: 150, y: 10 },
+    subGrid: { cols: 1, cellW: 45, cellH: 35 },
   },
   inset: {
     id: 'inset',
@@ -113,8 +119,8 @@ export const SLOTS: Record<SlotId, SlotInfo> = {
     introducedAt: 150,
     tower: 'inset',
     floorIndex: 0,
-    anchor: { x: 4, y: 4 },
-    subGrid: { cols: 3, cellW: 18, cellH: 14 },
+    anchor: { x: 10, y: 10 },
+    subGrid: { cols: 3, cellW: 45, cellH: 35 },
   },
   outside: {
     id: 'outside',
@@ -123,7 +129,7 @@ export const SLOTS: Record<SlotId, SlotInfo> = {
     tower: 'street',
     floorIndex: 0,
     anchor: { x: 0, y: 0 },
-    subGrid: { cols: 2, cellW: 20, cellH: 14 },
+    subGrid: { cols: 2, cellW: 45, cellH: 35 },
   },
   map: {
     id: 'map',
@@ -131,8 +137,8 @@ export const SLOTS: Record<SlotId, SlotInfo> = {
     introducedAt: 490,
     tower: 'overlay',
     floorIndex: 0,
-    anchor: { x: 4, y: 4 },
-    subGrid: { cols: 1, cellW: 18, cellH: 14 },
+    anchor: { x: 10, y: 10 },
+    subGrid: { cols: 1, cellW: 45, cellH: 35 },
   },
 };
 

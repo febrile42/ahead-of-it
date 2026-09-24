@@ -14,7 +14,7 @@
 // already boxed 20% smaller by computeLayout(); this module additionally
 // draws them at 55% opacity. Both rules apply identically in both states.
 import type { SceneLayout } from './layout';
-import { HQ_ORIGIN, INSET_ORIGIN, STREET_Y } from './layout';
+import { INSET_ORIGIN, STREET_ORIGIN } from './layout';
 import { loadManifest, loadSpriteFrame } from './sprites';
 import type { SpriteManifest } from './sprites';
 
@@ -22,8 +22,10 @@ const PLACEHOLDER_WITHOUT = '#FF3DAE';
 const PLACEHOLDER_BUILT = '#22C7B8';
 const PLACEHOLDER_TEXT = '#0B0B0B';
 
-const HQ_FLOOR_TILE_COLS = 5;
-const INSET_FLOOR_TILE_COLS = 3;
+// Column counts wide enough that the floor-tile backdrop spans roughly the
+// same width as the slot grid it sits under (slots.ts's cell spacing).
+const HQ_FLOOR_TILE_COLS = 26;
+const INSET_FLOOR_TILE_COLS = 9;
 
 function drawSprite(
   ctx: CanvasRenderingContext2D,
@@ -47,10 +49,16 @@ async function drawFloorAndWalls(
 
   for (const tile of layout.tiles) {
     const cols = tile.tower === 'hq' ? HQ_FLOOR_TILE_COLS : INSET_FLOOR_TILE_COLS;
+    // A flat strip of interlocking iso diamonds (each sprite keeps its own
+    // isometric diamond shape; the row itself stays level) rather than a
+    // true per-tile depth offset — this keeps the floor lined up with the
+    // slot grid above it (slots.ts positions gag hotspots on a flat row
+    // per floor, not a receding iso grid), which reads far more clearly
+    // at 390px than a "true" isometric floor plan would with only five
+    // generic sprites to build it from.
     for (let col = 0; col < cols; col += 1) {
       const x = tile.x + col * (floor.entry.w / 2);
-      const y = tile.y + col * (floor.entry.h / 2);
-      drawSprite(ctx, floor.image, floor.entry.anchor, x, y);
+      drawSprite(ctx, floor.image, floor.entry.anchor, x, tile.y);
     }
     // Back wall at the floor's left edge.
     drawSprite(ctx, wall.image, wall.entry.anchor, tile.x, tile.y);
@@ -58,10 +66,9 @@ async function drawFloorAndWalls(
     // not tied to any gag — real assets, decorative only (R-07/R-08's
     // animation is Phase 2; this is a single static frame).
     const deskCol = Math.floor(cols / 2);
-    const deskX = tile.x + deskCol * (floor.entry.w / 2) + 4;
-    const deskY = tile.y + deskCol * (floor.entry.h / 2) - 2;
-    drawSprite(ctx, desk.image, desk.entry.anchor, deskX, deskY);
-    drawSprite(ctx, worker.image, worker.entry.anchor, deskX + 10, deskY + 2);
+    const deskX = tile.x + deskCol * (floor.entry.w / 2);
+    drawSprite(ctx, desk.image, desk.entry.anchor, deskX, tile.y);
+    drawSprite(ctx, worker.image, worker.entry.anchor, deskX + 20, tile.y);
   }
 
   if (layout.hasStreet) {
@@ -69,11 +76,11 @@ async function drawFloorAndWalls(
     // simple dotted ground line using floor tiles at reduced opacity.
     ctx.save();
     ctx.globalAlpha = 0.5;
-    const startX = HQ_ORIGIN.x + 90;
+    const startX = STREET_ORIGIN.x;
     const endX = INSET_ORIGIN.x;
-    for (let x = startX; x < endX; x += 10) {
+    for (let x = startX; x < endX; x += 14) {
       ctx.fillStyle = '#8F5A34';
-      ctx.fillRect(x, STREET_Y + 6, 4, 2);
+      ctx.fillRect(x, STREET_ORIGIN.y + 12, 6, 3);
     }
     ctx.restore();
   }
@@ -82,12 +89,12 @@ async function drawFloorAndWalls(
     ctx.save();
     ctx.strokeStyle = '#1A1410';
     ctx.fillStyle = '#EAFBFF';
-    const box = { x: layout.bufferW - 60, y: 2, w: 56, h: 40 };
+    const box = { x: layout.bufferW - 130, y: 2, w: 120, h: 80 };
     ctx.fillRect(box.x, box.y, box.w, box.h);
     ctx.strokeRect(box.x, box.y, box.w, box.h);
     ctx.fillStyle = '#1A1410';
-    ctx.font = '6px monospace';
-    ctx.fillText('MAP', box.x + 4, box.y + 8);
+    ctx.font = '10px monospace';
+    ctx.fillText('MAP', box.x + 6, box.y + 14);
     ctx.fillStyle = '#D9432C';
     for (const pin of layout.mapPins) {
       ctx.beginPath();
@@ -126,17 +133,24 @@ async function drawHotspot(
   ctx.strokeRect(hotspot.x, hotspot.y, hotspot.w, hotspot.h);
   ctx.setLineDash([]);
   ctx.fillStyle = PLACEHOLDER_TEXT;
-  ctx.font = '6px monospace';
+  ctx.font = '9px monospace';
   ctx.textAlign = 'center';
   ctx.fillText(hotspot.gagId, hotspot.x + hotspot.w / 2, hotspot.y + hotspot.h / 2 + 2);
   ctx.restore();
 }
 
-/** Draws `layout` onto `canvas`'s 2D context at 1 logical px = 1 canvas-space unit (the caller applies the integer viewport scale via ctx transform or CSS). */
+/**
+ * Draws `layout` onto `canvas`. The caller is responsible for sizing the
+ * canvas's own width/height to `layout.bufferW/H * scale` (an integer —
+ * R-25) before calling this; the scale is recovered from that ratio so
+ * every draw call below can keep working in logical (unscaled) units.
+ */
 export async function renderScene(canvas: HTMLCanvasElement, layout: SceneLayout): Promise<void> {
   const ctx = canvas.getContext('2d');
   if (!ctx) return;
+  const scale = canvas.width / layout.bufferW || 1;
   ctx.imageSmoothingEnabled = false;
+  ctx.setTransform(scale, 0, 0, scale, 0, 0);
   ctx.clearRect(0, 0, layout.bufferW, layout.bufferH);
 
   // Sky/ground backdrop.

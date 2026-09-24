@@ -6,9 +6,28 @@
     <!-- R-16 / D-018: unlisted until the Phase 4 publicity gate opens. -->
     <meta name="robots" content="noindex, nofollow" />
     <title>Ahead of It — Josh Gister's résumé</title>
+    <!-- OG title/description mirror src/content/content.json's copy.ogTitle /
+         copy.ogDescription (TONE.md "Toggle and share copy", D-010/D-027).
+         Authored by hand here because index.html has no templating step —
+         keep these in sync with TONE.md if that copy ever changes. -->
+    <meta name="description" content="Build it, then make sure it doesn't need you." />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Ahead of It — Josh Gister's résumé" />
+    <meta property="og:description" content="Build it, then make sure it doesn't need you." />
+    <link rel="stylesheet" href="/src/style.css" />
   </head>
   <body>
-    <div id="app"></div>
+    <div id="app">
+      <h1>Ahead of It</h1>
+      <div id="slider-root"></div>
+      <div id="toggle-root"></div>
+      <div class="scene-wrap" id="scene-wrap">
+        <canvas id="scene-canvas"></canvas>
+        <div class="hotspots-layer" id="hotspots-layer"></div>
+      </div>
+      <div id="panel-root"></div>
+      <div id="checklist-root"></div>
+    </div>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

@@ -13,14 +13,20 @@ import { isAtLeast } from './bands';
 import { floorCountForBand, mapPinCount, GAG_PLACEMENTS, SLOTS } from './slots';
 import type { SlotId, Tower } from './slots';
 
-/** Logical pixel-art raster buffer, before any integer viewport scale (R-25). */
-export const BUFFER_W = 260;
-export const BUFFER_H = 190;
+/**
+ * Logical pixel-art raster buffer, before any integer viewport scale
+ * (R-25). Wider than a phone viewport on purpose — see the comment above
+ * SLOTS in slots.ts: cell spacing is sized for a real 44px tap target at
+ * 1x, which makes the whole scene wider than 390px. .scene-wrap scrolls
+ * horizontally at narrow widths (R-20 allows pan for this reason).
+ */
+export const BUFFER_W = 680;
+export const BUFFER_H = 520;
 
-export const FLOOR_HEIGHT = 20;
-export const HQ_ORIGIN = { x: 10, y: 150 };
-export const INSET_ORIGIN = { x: 195, y: 150 };
-export const STREET_Y = 158;
+export const FLOOR_HEIGHT = 50;
+export const HQ_ORIGIN = { x: 20, y: 380 };
+export const INSET_ORIGIN = { x: 500, y: 380 };
+export const STREET_ORIGIN = { x: 420, y: 400 };
 
 export type Emphasis = 'current' | 'quiet';
 export type SpriteKind = 'badge-reader' | 'placeholder';
@@ -68,8 +74,8 @@ export interface SceneLayout {
 
 function towerOrigin(tower: Tower): { x: number; y: number } {
   if (tower === 'inset') return INSET_ORIGIN;
-  if (tower === 'street') return { x: HQ_ORIGIN.x, y: STREET_Y };
-  if (tower === 'overlay') return { x: BUFFER_W - 60, y: 6 };
+  if (tower === 'street') return STREET_ORIGIN;
+  if (tower === 'overlay') return { x: BUFFER_W - 130, y: 10 };
   return HQ_ORIGIN;
 }
 
@@ -93,7 +99,7 @@ function computeMapPins(band: BandId): MapPin[] {
   const origin = towerOrigin('overlay');
   const pins: MapPin[] = [];
   for (let i = 0; i < count; i += 1) {
-    pins.push({ index: i, x: origin.x + 6 + (i % 3) * 14, y: origin.y + 8 + Math.floor(i / 3) * 12 });
+    pins.push({ index: i, x: origin.x + 14 + (i % 3) * 30, y: origin.y + 20 + Math.floor(i / 3) * 24 });
   }
   return pins;
 }
