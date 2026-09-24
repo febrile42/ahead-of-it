@@ -74,6 +74,6 @@ Two registers, kept strictly apart.
 - Share caption: *"By the time the company was your size, Josh had already fixed this."*
 - OG title: *Ahead of It — Josh Gister's résumé* (D-010, decided 2026-09-24). Slider label: *at your scale*.
 - **Contact (R-12, D-019; Josh 2026-09-24):** email `joshua.gister@gmail.com` — assembled
-  client-side, never a plain `mailto:` in the source. LinkedIn URL: **pending** (Q-24).
+  client-side, never a plain `mailto:` in the source. LinkedIn: `https://www.linkedin.com/in/joshgister/`.
 - **OG description / tagline (F-4, D-027):** *Build it, then make sure it doesn't need you.*
   Also the subtitle under the "What he'd already built" toggle state.
