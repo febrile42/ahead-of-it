@@ -6,7 +6,7 @@
 // hand-edit content.json and never read docs/content/*.md at runtime; this
 // module is the only supported way the rest of the app reads content.
 import contentJson from './content.json';
-import type { Band, BandId, Beyond, ContentJson, Copy, Gag } from '../../scripts/build-content';
+import type { Band, BandId, Beyond, ContentJson, Copy, Gag, PanelFields } from '../../scripts/build-content';
 
 // The `as unknown as ContentJson` cast (rather than a plain `as`) is
 // because this repo has no `resolveJsonModule` in tsconfig.json (out of
@@ -61,4 +61,4 @@ export function getContact(): Copy['contact'] {
   return content.copy.contact;
 }
 
-export type { Band, BandId, Beyond, ContentJson, Copy, Gag };
+export type { Band, BandId, Beyond, ContentJson, Copy, Gag, PanelFields };

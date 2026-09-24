@@ -1,0 +1,311 @@
+/* PH1-04: phone-first (R-20), designed at 390px before the >=768px side
+   panel kicks in. No UI framework (D-009) — plain CSS, one file. */
+
+:root {
+  color-scheme: light;
+  --ink: #1a1410;
+  --paper: #eafbff;
+  --accent: #4472c4;
+  font-family: system-ui, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0 0 2rem;
+  color: var(--ink);
+  background: #fff;
+}
+
+h1 {
+  font-size: 1.4rem;
+  padding: 1rem 1rem 0;
+  margin: 0;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* --- Slider (3c) --- */
+.slider {
+  padding: 1rem;
+}
+
+.slider__label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+  /* S1: reserves a line of height before content.json's copy fills the
+     text in, so the label doesn't collapse to 0 height on first paint
+     (an empty element has no line box to size from) and then grow once
+     JS runs. */
+  min-height: 1.2em;
+}
+
+.slider__readout {
+  font-variant-numeric: tabular-nums;
+  margin: 0 0 0.5rem;
+  min-height: 1.2em; /* S1, see .slider__label */
+}
+
+.slider input[type='range'] {
+  width: 100%;
+}
+
+.slider__ticks {
+  position: relative;
+  height: 1.5rem;
+  font-size: 0.65rem;
+}
+
+.slider__tick {
+  position: absolute;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+
+/* S2: the first labelled tick sits close to the left edge (band 80 isn't
+   quite at the slider's minimum) — left-align it instead of centring so
+   it can't bleed past the left edge. */
+.slider__tick--first {
+  transform: translateX(0);
+}
+
+/* S2: the 1,000+ stop is pinned to the right edge of the ticks row
+   (rather than left:100% + translateX(-50%), which put half the label
+   past the viewport and scrolled the whole page horizontally). */
+.slider__tick--beyond {
+  right: 0;
+  left: auto;
+  transform: none;
+}
+
+/* --- Toggle (3d) --- */
+.toggle {
+  padding: 0 1rem 1rem;
+}
+
+.toggle__button {
+  font-size: 1rem;
+  font-weight: 700;
+  padding: 0.75rem 1.25rem;
+  min-height: 44px;
+  border-radius: 999px;
+  border: 2px solid var(--ink);
+  background: #ffd23f;
+  cursor: pointer;
+}
+
+.toggle__button[aria-pressed='true'] {
+  background: #ff3dae;
+  color: #fff;
+}
+
+.toggle__subtitle {
+  margin: 0.5rem 0 0;
+  font-style: italic;
+  min-height: 1.2em; /* S1, see .slider__label */
+}
+
+.toggle__nudge {
+  margin: 0.5rem 0 0;
+  font-weight: 600;
+  min-height: 1.2em; /* S1, see .slider__label */
+  /* S1c/m2: visibility, not `hidden` — the nudge's line stays reserved in
+     the layout at all times so showing or hiding it (once, after the
+     first slider move; then again once the visitor toggles) never shifts
+     the scene below it. */
+  visibility: hidden;
+}
+
+.toggle__nudge--visible {
+  visibility: visible;
+}
+
+/* --- Scene (3a/3b) --- */
+.scene-wrap {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  /* R-20: "pan/zoom is allowed, tiny hotspots are not" — the logical
+     scene (slots.ts) is wider than a 390px viewport so every hotspot can
+     be a real 44px tap target; this scrolls horizontally to reach it.
+     canvas and .hotspots-layer are both given the same explicit pixel
+     width/height in src/main.ts, so the absolute-positioned hotspots
+     layer overlays the full scrollable canvas, not just the visible
+     viewport slice of it. */
+}
+
+.scene-wrap canvas {
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+  display: block;
+}
+
+.hotspots-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.hotspot {
+  background: transparent;
+  border: 2px dashed rgba(26, 20, 16, 0.6);
+  border-radius: 4px;
+  cursor: pointer;
+  padding: 0;
+}
+
+.hotspot--quiet {
+  opacity: 0.7;
+}
+
+.hotspot:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* --- Panel (3e): bottom sheet on phone, side panel from 768px --- */
+.panel {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  max-height: 70vh;
+  overflow-y: auto;
+  background: #fff;
+  border-top: 2px solid var(--ink);
+  border-radius: 12px 12px 0 0;
+  padding: 1rem;
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.panel__close {
+  min-width: 44px;
+  min-height: 44px;
+  border: 1px solid var(--ink);
+  background: #fff;
+  border-radius: 4px;
+  float: right;
+  cursor: pointer;
+}
+
+.panel__strip {
+  font-variant-numeric: tabular-nums;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  opacity: 0.75;
+  clear: both;
+}
+
+.panel__thumb {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 48px;
+  border: 2px dashed var(--ink);
+  font: 700 0.65rem monospace;
+  margin: 0.5rem 0;
+}
+
+.panel__thumb--without {
+  background: #ff3dae;
+}
+
+.panel__thumb--built {
+  background: #22c7b8;
+}
+
+.contact-line {
+  border-top: 1px solid #ccc;
+  margin-top: 1rem;
+  padding-top: 0.5rem;
+}
+
+.contact-line a {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+
+@media (min-width: 768px) {
+  .panel {
+    left: auto;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 360px;
+    max-height: none;
+    border-top: none;
+    border-left: 2px solid var(--ink);
+    border-radius: 0;
+  }
+}
+
+/* --- Checklist (3f) --- */
+.checklist {
+  padding: 1rem;
+}
+
+.checklist__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.checklist__item {
+  border-bottom: 1px solid #ddd;
+  padding: 0.75rem 0;
+}
+
+.checklist__without,
+.checklist__worth {
+  color: #555;
+  font-size: 0.9rem;
+}
+
+.checklist__download {
+  min-height: 44px;
+  margin-bottom: 1rem;
+}
+
+.checklist__translation {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+.checklist__translation th,
+.checklist__translation td {
+  border: 1px solid #ccc;
+  padding: 0.4rem;
+  text-align: left;
+  font-size: 0.85rem;
+}
+
+@media print {
+  .slider,
+  .toggle,
+  .scene-wrap,
+  .panel,
+  .checklist__download {
+    display: none !important;
+  }
+}
