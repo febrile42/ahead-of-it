@@ -24,26 +24,35 @@
 //   EVIDENCE.md         -> the set of valid E-xx ids, checked against every
 //                         receipt referenced above.
 //   TONE.md             -> copy{} (toggle/share/OG copy, §"Toggle and share
-//                         copy"). copy.contact is NOT sourced from anywhere:
-//                         no LinkedIn URL or email address appears in any
-//                         docs/content or docs/product file. Per CLAUDE.md
-//                         ("Nothing invented, ever") this script leaves both
-//                         fields absent rather than inventing them — see the
-//                         PH1-03 handback report for the question this
-//                         raises for the mastermind.
+//                         copy"), including copy.contact.linkedin and
+//                         copy.contact.email (the "Contact (R-12, D-019)"
+//                         bullet). The email is split into { user, domain }
+//                         here, not joined into one string — the joined
+//                         address must never appear in content.json; the
+//                         client assembles it (see src/content/index.ts).
 //   TIMELINE.md         -> the two employer names to ban (its own "## <name>,
 //                         <city>" headings), same convention as
 //                         scripts/check-employer.sh.
 //
-// Design note on the strip's descriptor text: PANELS.md uses two different
-// literal forms for the current employer's descriptor — "a clean-energy
-// company, now $3B+" for bands 80-360 (2018-2021) and "a $3B+ clean-energy
-// company" for bands 610/750 (2023+). Per the PH1-03 brief this is
-// intentional (the $3B+ figure becomes true partway through the timeline),
-// not the drift PANELS-CHECK-2026-09-24.md flagged it as. This script parses
+// Design note on the strip's descriptor text: the actual source of truth is
+// docs/content/TONE.md §"Employer descriptors" (D-014, amended), which
+// defines exactly ONE literal current-employer form — "a $3B+ clean-energy
+// company" -> "the company" after first mention — with no date-based
+// variant. PANELS.md's own header (lines 8-11), not TONE.md, is where "a
+// clean-energy company, now $3B+" comes from; PANELS-REVIEW.md's DW-1
+// (2026-09-16) already flagged that header line as inconsistent with the
+// body and it was never fully corrected, so 15 panels (bands 80-490) still
+// carry the header's "now $3B+" wording instead of TONE.md's canonical
+// form while the rest use the correct one. PANELS-CHECK-2026-09-24.md's
+// "wrong descriptor" finding checked the latter panels against that same
+// erroneous PANELS.md header instead of against TONE.md/D-014 — the
+// mastermind has ruled that finding a false positive. This script parses
 // the strip's descriptor field literally, whichever form it finds, and does
 // not validate its wording — only that it contains neither employer name
-// (checked globally, see checkNoEmployerNames below).
+// (checked globally, see checkNoEmployerNames below). The PANELS.md
+// header/body split itself is a real, still-open R-04a inconsistency; per
+// the brief's boundary rule, fixing the doc is the mastermind's job, not
+// this pipeline's.
 
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
@@ -104,9 +113,12 @@ export interface Copy {
   ogTitle: string;
   ogDescription: string;
   sliderLabel: string;
+  // Split, not joined: the client assembles the address (see
+  // src/content/index.ts). The joined string must never appear in
+  // content.json.
   contact: {
-    linkedin?: string;
-    emailObfuscated?: string;
+    linkedin: string;
+    email: { user: string; domain: string };
   };
 }
 
@@ -161,10 +173,19 @@ function splitOnHeadings(text: string, headingRe: RegExp): Section[] {
   });
 }
 
-function countWords(s: string | undefined): number {
+// A token made up entirely of punctuation — a free-standing em dash ("—"),
+// en dash ("–"), middle dot ("·"), hyphen ("-") or arrow ("→"), or any run
+// of those characters — is not a word. Matches PANELS-CHECK-2026-09-24.md's
+// manual counting method, which does not count these as words either.
+const PUNCTUATION_ONLY_TOKEN_RE = /^[—–·\-→]+$/;
+
+export function countWords(s: string | undefined): number {
   if (!s) return 0;
   const withoutBackticks = s.replace(/`[^`]*`/g, ' ');
-  return withoutBackticks.split(/\s+/).filter(Boolean).length;
+  return withoutBackticks
+    .split(/\s+/)
+    .filter(Boolean)
+    .filter((token) => !PUNCTUATION_ONLY_TOKEN_RE.test(token)).length;
 }
 
 // ---------------------------------------------------------------------------
@@ -535,6 +556,15 @@ export function parseCopy(toneMd: string): Copy {
     return m[1].trim();
   }
 
+  const linkedinMatch = section.match(/LinkedIn:\s*`([^`]+)`/);
+  if (!linkedinMatch) {
+    throw new ContentPipelineError(['docs/content/TONE.md: could not find "Contact" LinkedIn URL in §"Toggle and share copy"']);
+  }
+  const emailMatch = section.match(/\*\*Contact[^`]*email\s*`([^@`]+)@([^`]+)`/);
+  if (!emailMatch) {
+    throw new ContentPipelineError(['docs/content/TONE.md: could not find "Contact" email in §"Toggle and share copy"']);
+  }
+
   return {
     toggleToWithout: extract(/Toggle, built → without: \*\*"([^"]+)"\*\*/, 'toggleToWithout'),
     toggleToBuilt: extract(/Without → built: \*\*"([^"]+)"\*\*/, 'toggleToBuilt'),
@@ -543,10 +573,11 @@ export function parseCopy(toneMd: string): Copy {
     ogTitle: extract(/OG title: \*([^*]+)\*/, 'ogTitle'),
     sliderLabel: extract(/Slider label: \*([^*]+)\*/, 'sliderLabel'),
     ogDescription: extract(/OG description \/ tagline[^*]*\*\*\s*\*([^*]+)\*/, 'ogDescription'),
-    // No LinkedIn URL or email address appears anywhere in docs/content or
-    // docs/product — not invented here (CLAUDE.md). See the PH1-03 handback
-    // report.
-    contact: {},
+    // Split, never joined — see the Copy.contact doc comment above.
+    contact: {
+      linkedin: linkedinMatch[1].trim(),
+      email: { user: emailMatch[1].trim(), domain: emailMatch[2].trim() },
+    },
   };
 }
 

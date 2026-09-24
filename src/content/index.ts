@@ -50,4 +50,15 @@ export function getAmbientHover(): string {
 /** Toggle/share/OG copy from TONE.md §"Toggle and share copy". */
 export const copy: Copy = content.copy;
 
+/**
+ * Contact info for the "Talk to Josh" link (R-12): a LinkedIn URL plus an
+ * email split into { user, domain }. content.json never carries the joined
+ * address — assemble it here, client-side only, e.g.
+ * `${getContact().email.user}@${getContact().email.domain}`, so it never
+ * appears as a plain string in served source or a `mailto:` in markup.
+ */
+export function getContact(): Copy['contact'] {
+  return content.copy.contact;
+}
+
 export type { Band, BandId, Beyond, ContentJson, Copy, Gag };

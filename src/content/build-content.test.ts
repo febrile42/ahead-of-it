@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'vitest';
+import realContent from './content.json';
 import schema from './schema.json';
 import {
   buildContent,
   ContentPipelineError,
+  countWords,
   parseBandSectionsPublic,
   parseBandsTable,
   parseCopy,
@@ -97,6 +99,8 @@ const VALID_TONE_MD = `# Tone — fixture
 - Nudge (once, after the first slider move): *"Now see what this looks like without him."*
 - Share caption: *"Fixture share caption."*
 - OG title: *Fixture OG title*. Slider label: *at your scale*.
+- **Contact (fixture):** email \`fixture.user@fixture-domain.example\` — assembled
+  client-side, never a plain \`mailto:\` in the source. LinkedIn: \`https://www.linkedin.com/in/fixture/\`.
 - **OG description / tagline (fixture):** *Fixture tagline text.*
 `;
 
@@ -182,7 +186,10 @@ describe('parsing evidence ids, employer names and toggle/share copy', () => {
       ogTitle: 'Fixture OG title',
       sliderLabel: 'at your scale',
       ogDescription: 'Fixture tagline text.',
-      contact: {},
+      contact: {
+        linkedin: 'https://www.linkedin.com/in/fixture/',
+        email: { user: 'fixture.user', domain: 'fixture-domain.example' },
+      },
     });
   });
 });
@@ -308,5 +315,67 @@ describe('parsePanelBody', () => {
   it('rejects a panel that does not open with a backticked strip line', () => {
     const body = 'no strip line here\n**Already:** x.\n\n**What it prevented:** y.';
     expect(() => parsePanelBody('X.1', body, body, 0)).toThrow(/does not open with a backticked strip line/);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// countWords — standalone punctuation tokens are not words (PH1-03 review
+// should-fix #2): matches PANELS-CHECK-2026-09-24.md's manual counting
+// method, which does not count a free-standing em/en dash, middle dot,
+// hyphen or arrow as a word.
+// ---------------------------------------------------------------------------
+
+describe('countWords', () => {
+  it('counts ordinary space-separated words', () => {
+    expect(countWords('four little words')).toBe(3);
+  });
+
+  it('does not count standalone punctuation tokens as words', () => {
+    expect(countWords('three — words — here')).toBe(3);
+    expect(countWords('en dash – too')).toBe(3);
+    expect(countWords('middle · dot')).toBe(2);
+    expect(countWords('bare - hyphen')).toBe(2);
+    expect(countWords('an → arrow')).toBe(2);
+    expect(countWords('repeated —— dashes –– together')).toBe(3);
+  });
+
+  it('still counts a hyphenated compound as one word (hyphen is not standalone)', () => {
+    expect(countWords('a well-built room')).toBe(3);
+  });
+
+  it('ignores backticked receipt ids, as before', () => {
+    expect(countWords('already built `E-01 E-02`')).toBe(2);
+  });
+
+  it('returns 0 for undefined', () => {
+    expect(countWords(undefined)).toBe(0);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// copy.contact — split, never joined (PH1-03 review item #3)
+// ---------------------------------------------------------------------------
+
+describe('copy.contact', () => {
+  it('parses linkedin and email as separate fields, not a joined address', () => {
+    const copy = parseCopy(VALID_TONE_MD);
+    expect(copy.contact).toEqual({
+      linkedin: 'https://www.linkedin.com/in/fixture/',
+      email: { user: 'fixture.user', domain: 'fixture-domain.example' },
+    });
+  });
+
+  it('never emits the joined email address anywhere in the built content.json', () => {
+    const content = buildContent(validInputs());
+    const json = JSON.stringify(content);
+    const joined = `${content.copy.contact.email.user}@${content.copy.contact.email.domain}`;
+    expect(json).not.toContain(joined);
+    expect(json).not.toContain('fixture.user@fixture-domain.example');
+  });
+
+  it('never emits the real joined address in the committed content.json', () => {
+    // Guards the actual shipped artifact, not just the fixture build.
+    const json = JSON.stringify(realContent);
+    expect(json).not.toContain('joshua.gister@gmail.com');
   });
 });

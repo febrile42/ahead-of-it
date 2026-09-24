@@ -59,9 +59,18 @@
         "contact": {
           "type": "object",
           "additionalProperties": false,
+          "required": ["linkedin", "email"],
           "properties": {
             "linkedin": { "type": "string", "minLength": 1 },
-            "emailObfuscated": { "type": "string", "minLength": 1 }
+            "email": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["user", "domain"],
+              "properties": {
+                "user": { "type": "string", "minLength": 1 },
+                "domain": { "type": "string", "minLength": 1 }
+              }
+            }
           }
         }
       }

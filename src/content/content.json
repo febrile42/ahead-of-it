@@ -651,7 +651,13 @@
     "ogTitle": "Ahead of It — Josh Gister's résumé",
     "sliderLabel": "at your scale",
     "ogDescription": "Build it, then make sure it doesn't need you.",
-    "contact": {}
+    "contact": {
+      "linkedin": "https://www.linkedin.com/in/joshgister/",
+      "email": {
+        "user": "joshua.gister",
+        "domain": "gmail.com"
+      }
+    }
   },
   "ambient": {
     "hover": "Someone is always on call. In the built state, it's a rotation."
