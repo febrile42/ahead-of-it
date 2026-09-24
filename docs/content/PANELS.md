@@ -140,8 +140,8 @@ VPN from day one. `E-27 E-23 E-05`
 
 ### G2.4 · Twenty-nine rooms, one standard
 `2020 · ~220 · a clean-energy company, now $3B+`
-**Already:** Twenty-nine conference rooms across Boston, Chicago, New York, DC and
-Lawrence work to one standard, so any room behaves like every other room — the function
+**Already:** I built twenty-nine conference rooms across Boston, Chicago, New York, DC
+and Lawrence to one standard, so any room behaved like every other room — the function
 was fixed from the first two in 2018; the kit itself was unified by the time DC opened
 in 2023. Most of the rooms came through 2020, at ~220 people, when everyone went home.
 

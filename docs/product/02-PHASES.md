@@ -1,6 +1,6 @@
 # 02 — Phases
 
-Current phase: **0**. Phases exit on criteria, not dates. Owners: **J** = Josh,
+Current phase: **0 — exit criteria met 2026-09-24** (gag list v5 + Beyond stop approved through Josh's answers; every receipt confirmed; `PANELS.md` v4 passed the mechanical check). **Phase 1 starts on Josh's go.** Phases exit on criteria, not dates. Owners: **J** = Josh,
 **M** = mastermind (Opus session agent), **S** = sonnet subagents, **H** = haiku subagents,
 **A** = pixel artist (Phase 3+).
 
