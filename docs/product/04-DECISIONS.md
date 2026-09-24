@@ -248,3 +248,27 @@ Decided on the PH1-08a mocks (`art/spike/A-750.png` vs `B-750.png`;
 The web switcher is a tab row with per-view gag counts (as mocked); B's exterior stacked
 building is optional Phase 2 polish for that switcher. Consequence: PH1-07's 430/494 px
 rooms for 150/220 must be re-cut into views by PH1-08b (street takes the inset).
+
+**D-037 · 2026-09-24 · Scene contract rulings from the PH1-08b/09 integration.**
+Found by merging the export and the painter in a scratch tree and running both sides'
+checks against real data. They amend D-035/D-036 where noted; `SCENE-FORMAT.md` carries
+the detail.
+1. `frame` is the manifest frame-*name* string, never an index, with no fallback (the
+   contract's own example used integers; the manifest never did).
+2. Parity goldens are per view (`art/preview/views/<band>-<state>-<view>@1x.png`), painted
+   from the export and proven equal to the full-plate render's crop. Whole-plate previews
+   stay art-review images. Amends D-035's "match `art/preview/<band>-<state>@1x.png`".
+3. D-036 rule 3's "`focus` = the full view" is loosened to "`focus` inside the view", so
+   a view wider than a phone can scroll to its point of interest.
+4. D-036 rule 4 counts per file: one primary per gag in its home view, at most one per
+   view. Other parts may sit in other views (G3.2's box on `floor-2`).
+5. Two-part is per state, per `BANDS-AND-GAGS.md`: G5.1 is two-part only in `without`.
+   All-placeholder gags are exempt.
+6. Painter scale uses both axes (`min` of width and height scales), so no view overflows
+   the fixed 360:240 scene box. Amends D-035's width-only formula.
+7. Rule failures that need art are **listed debt**, not tolerated silently and not faked
+   by moving hotspots: `knownSpacingDebt` (5 band-80 pairs under rule 7) and
+   `TWO_PART_ART_DEBT` (G2.4's inset part). Each list fails the build once stale.
+   PH1-10 clears both.
+8. Views must be whole rooms, not crops of one plate (the gap PH1-08b reported). Until
+   PH1-10 lands, staging shows cropped rooms.

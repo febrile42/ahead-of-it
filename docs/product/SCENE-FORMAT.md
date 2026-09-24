@@ -3,8 +3,12 @@
 The art pipeline (`art/`, Python, Opus-drawn) is the single source of what each band looks
 like. It exports, per band × state, a **scene file**; the web (`src/scene/`, sonnet-built)
 is a dumb painter that draws it. The art side paints its own previews *from the exported
-file*, so the web canvas at scale 1 must match `art/preview/<band>-<state>@1x.png` pixel
-for pixel — a Playwright test, not a promise.
+file*, so the web canvas at scale 1 must match the art's per-view reference image
+`art/preview/views/<band>-<state>-<viewId>@1x.png` pixel for pixel — a Playwright test, not
+a promise. Those references are painted from the exported `entries`, and `check_scenes.py`
+proves each one equals the same rect cropped out of the native full-plate render, so the
+chain art → export → web has no unchecked link. (The whole-plate `art/preview/band<N>-*.png`
+are 4× art-review images, not parity goldens.)
 
 Files: `public/sprites/scenes/index.json` and `public/sprites/scenes/<band>-<state>.json`
 for band ∈ {80,150,220,360,490,610,750} and state ∈ {built,without}. `beyond` is an alias
@@ -25,10 +29,10 @@ the without scene around the gag's primary hotspot (R-04).
       "focus": { "x": 0, "y": 0, "w": 300, "h": 214 },   // what to scroll to if wider than viewport
       "default": true,                                     // holds the current band's gags
       "entries": [                                         // paint order = array order
-        { "sprite": "floor", "frame": 0, "x": 0, "y": 100, "depth": 0 },
-        { "sprite": "worker-queue", "frame": 2, "x": 180, "y": 120, "depth": 140,
+        { "sprite": "floor", "frame": "default", "x": 0, "y": 100, "depth": 0 },
+        { "sprite": "worker-queue", "frame": "b-left", "x": 180, "y": 120, "depth": 140,
           "gagId": "G2.1", "part": "queue-3", "alpha": 1.0 },
-        { "sprite": "fx-net-80-without", "frame": 0, "x": 0, "y": 0, "depth": 900,
+        { "sprite": "fx-net-80-without", "frame": "default", "x": 0, "y": 0, "depth": 900,
           "gagId": "G2.3" }                                // A3: procedural marks are baked overlays
       ],
       "hotspots": [                                        // A1: explicit rects, art-authored
@@ -39,25 +43,46 @@ the without scene around the gag's primary hotspot (R-04).
 ```
 
 Rules
-- `sprite`/`frame` reference **manifest keys**, never file names (A2). A check fails on any
-  reference not in `manifest.json`.
+- `sprite`/`frame` reference **manifest keys**, never file names (A2). `frame` is always the
+  frame-*name* string exactly as it appears in that sprite's `frames` object (`"default"`,
+  `"green"`, `"a-left"`), never an index. No fallback: an unknown frame fails
+  `check_scenes.py`, the contract test, and throws in the painter.
+- **Paint order = array order.** The exporter emits it exactly as `compose.render` paints:
+  `base` in list order, then `main` sorted by `(depth, order)`, then `over` in list order.
+- Entries may extend past a view's rect (a road tile at `x: -8`); the canvas clips them.
+  Hotspots and `focus` must lie inside the view.
 - `depth` is kept on every entry so Phase 2 can insert walkers between props (A2).
 - The painter draws **images only** (A3). Dotted lines, roads, links are overlay sprites
   (PNG-8, palette-checked), tagged with their gag.
 - **Cumulative (R-03a):** band N's scene contains every gag with band ≤ N in the matching
   state. Emphasis is the art's decision: `alpha` (applied blindly by the painter) or a
   palette-true quiet variant.
-- Two-part gags (G4.1 door+pit, G5.1 both doors, G3.2, G2.4) get one hotspot per part, one
-  `primary: true`. All hotspots of a gag open the same panel.
+- Two-part gags get one hotspot per part, one `primary: true`, and all of a gag's hotspots
+  open the same panel. Which states are two-part follows `BANDS-AND-GAGS.md`: G3.2, G4.1
+  and G2.4 in both states; G5.1 in `without` only (its built state is one picture — a solid
+  link). A gag whose hotspots are all `placeholder` is exempt. Parts may sit in different
+  views; only the primary must be in the gag's home view.
 - **Placeholders:** bands with no composer yet export the nearest drawn room plus
   `placeholder: true` hotspots; the web draws its labelled box for those. No off-palette
-  PNGs ever.
+  PNGs ever. If a scene *file* is missing altogether (it should never be, once exported),
+  the web shows a plain "not drawn yet" panel rather than failing.
 - **Views (D-036):** ids ∈ {ground, floor-2…floor-6, top, street} in that order; `ground`
-  always; others only if they hold a primary hotspot; `w ≤ 360`, `h ≤ 240`; each gag has one
-  primary in its home view (table in D-036); inset + map only in `street`; default view =
-  most primaries of the current band's gags; primary centres ≥ 44 native px apart.
-  `check_scenes.py` fails the build otherwise. Pan/zoom is the escape valve, not the default.
-- Painter scaling is chosen in **device** pixels: `s = max(1, floor(cssAvail·dpr / nativeW))`;
-  backing store `native·s`; CSS size `native·s/dpr`.
-- `art/checks/check_scenes.py`: determinism, manifest references, R-03a coverage both
-  states, hotspot bounds, 44 px spacing, `beyond` alias.
+  always; others only if they hold a primary hotspot; `w ≤ 360`, `h ≤ 240`; each gag has
+  exactly one primary **per file**, in its home view (table in D-036), and at most one per
+  view; inset + map only in `street`; default view = most primaries of the current band's
+  gags; primary centres ≥ 44 native px apart. `check_scenes.py` fails the build otherwise.
+  Pan/zoom is the escape valve, not the default.
+- `focus` is the region to scroll to when a view is wider than the viewport. It must lie
+  inside the view; it need not equal it (the exporter currently emits the full view).
+- **Known debt** is listed, never silently tolerated. `index.json` may carry
+  `"knownSpacingDebt": [["G1.2","G2.2"], …]` — unordered pairs exempt from the 44 px rule.
+  Both `check_scenes.py` and the web contract test read it, warn on each listed pair, fail
+  on any unlisted pair, and fail if a listed pair is no longer too close. Two-part art debt
+  (a part not drawn yet) is tracked the same way in the contract test. Each list names the
+  brief that clears it.
+- Painter scaling is chosen in **device** pixels on both axes, so a view never overflows the
+  fixed 360:240 scene box: `s = max(1, min(floor(cssW·dpr / nativeW), floor(cssH·dpr / nativeH)))`;
+  backing store `native·s`; CSS size `native·s/dpr`; the canvas is centred horizontally.
+- `art/checks/check_scenes.py`: determinism, manifest references and frame keys, R-03a
+  coverage both states, one primary per gag per file, hotspot bounds, 44 px spacing (with
+  known debt), `beyond` alias, and per-view pixel parity against the full-plate render.
