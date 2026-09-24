@@ -27,6 +27,10 @@ module.exports = {
       numberOfRuns: 3,
       settings: {
         chromePath: process.env.CHROME_PATH,
+        // GitHub's Ubuntu 24.04 runners disable unprivileged user namespaces, so
+        // Chromium's sandbox can't start there ("No usable sandbox!"). Playwright
+        // already passes --no-sandbox; do the same, but only on CI.
+        chromeFlags: process.env.CI ? '--no-sandbox' : '',
         formFactor: 'mobile',
         throttlingMethod: 'simulate',
         screenEmulation: {
