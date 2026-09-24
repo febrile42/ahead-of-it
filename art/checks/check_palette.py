@@ -3,6 +3,8 @@
 (or transparency). Independent of art/src/dsl.py:save_png's own enforcement — this
 reads the PNGs back off disk, the way a reviewer who didn't write the build would.
 
+Also enforces the palette itself: at most 32 named colours, no duplicate RGB values.
+
 Usage: python3 art/checks/check_palette.py
 Exit 0 and prints PASS per file if clean; exits 1 and prints the offending file/pixel
 otherwise.
@@ -20,12 +22,21 @@ _REPO_ROOT = os.path.dirname(os.path.dirname(_HERE))
 with open(os.path.join(_REPO_ROOT, "art", "palette.json")) as f:
     raw = json.load(f)
 
+# PH1-06: the palette may grow to at most 32 named colours, each a distinct RGB value.
+MAX_COLOURS = 32
+
 allowed = set()
-for name, hexcode in raw.items():
-    if name.startswith("_"):
-        continue
-    h = hexcode.lstrip("#")
+names = [k for k in raw if not k.startswith("_")]
+for name in names:
+    h = raw[name].lstrip("#")
     allowed.add((int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16)))
+
+if len(names) > MAX_COLOURS:
+    print(f"FAIL — palette.json has {len(names)} colours, cap is {MAX_COLOURS}", file=sys.stderr)
+    sys.exit(1)
+if len(allowed) != len(names):
+    print("FAIL — palette.json has two names for the same RGB value", file=sys.stderr)
+    sys.exit(1)
 
 
 def check_file(path: str) -> list[str]:
