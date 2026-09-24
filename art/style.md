@@ -148,3 +148,27 @@ still not authored: it is `right` mirrored horizontally (`Canvas.mirror_h`).
 The worker is built from outlined *blobs* (`art/src/sprites/worker.py`), with colours
 as roles (`t` shirt, `s` skin, `h` hair …) resolved per look, which is how outfits and
 hair/skin variants are palette swaps rather than redraws.
+
+## Animated props and preview-only sprites (PH1-07)
+
+A prop can carry an animation next to its still: the manifest entry keeps `default` (the
+still, for anything that doesn't animate) and gains a named key whose frames all share
+the still's canvas size and anchor, each with a `duration` in ms (`vox.make_anim`).
+`closet-shelf` has `blink` (the router's LEDs, 2 × 350 ms). An entry marked
+`"preview_only": true` (`tag-visitor`) exists for the 4× previews and is not drawn by the
+site renderer.
+
+## Legibility at 1× (PH1-07)
+
+A gag's key object must read at native size, not only in the 4× preview:
+
+- **The router** sits on *top* of the closet shelving, the darkest and widest thing there
+  (22 px), four antennas silhouetted against the wall, every cable in the closet
+  converging on its port row.
+- **The visitor** wears a dark jacket nobody on staff wears and an oversized name-tag
+  sticker: red band, `VIS` in the 3 × 5 glyphs on white, 11 × 7 px. The `VISITOR` callout
+  above the sofa is preview-only.
+- **`worker-peel`** (G1.2): a standing worker at a colleague's desk, arm stretched to the
+  monitor (frame 0), then holding the note up to read it (frame 1, which also paints the
+  clean screen back over the note). Same 32 × 40 canvas and anchor as the desk; paste over
+  `desk-postit`.

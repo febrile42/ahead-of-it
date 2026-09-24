@@ -27,6 +27,7 @@ ORIGIN = (134, 84)
 DESKS = [(4, 3), (6, 3), (4, 5), (6, 5)]
 DEV_DESK = (3, 0)
 SUPPORT_DESK = (1, 5)
+PEEL_DESK = (6, 3)
 
 
 def at(col, row):
@@ -131,6 +132,11 @@ def compose(sprites: dict, state: str) -> Canvas:
                             pt[1] - spr.anchor[1] + spr.points["net"][1]))
         if (col, row) in seated:
             sc.tile(f"worker-seated-{seated[(col, row)]}", col, row, depth=col + row + 1.01)
+        elif state == "without" and (col, row) == PEEL_DESK:
+            # G1.2: someone at a colleague's empty desk, peeling the password note off
+            pk = s["worker-peel"]
+            sc.items.append((col + row + 1.01, len(sc.items),
+                             lambda pt=pt, pk=pk: sc.paste(pk.frames["e"][0], pk.anchor, pt)))
 
     # the developer's desk, nearest the closet
     dev = "desk-dev" if state == "without" else "desk-dev-built"

@@ -185,10 +185,13 @@ class Sprite:
     point `iso.iso_to_screen(col, row)` returns for the tile it is placed on), and
     named points (e.g. "net": where a dotted network line attaches)."""
 
-    def __init__(self, canvas: Canvas, anchor, points=None):
+    def __init__(self, canvas: Canvas, anchor, points=None, anims=None):
         self.canvas = canvas
         self.anchor = tuple(anchor)
         self.points = dict(points or {})
+        # optional animations: {key: ([Canvas, ...], ms_per_frame)}, every frame the
+        # same size as `canvas` and sharing its anchor (PH1-07: router blink etc.)
+        self.anims = dict(anims or {})
 
     @property
     def w(self):
@@ -219,3 +222,35 @@ def make(draw, size: int = 192) -> Sprite:
     out.draw = ImageDraw.Draw(out.img)
     return Sprite(out, (anchor[0] - x0, anchor[1] - y0),
                   {k: (v[0] - x0, v[1] - y0) for k, v in points.items()})
+
+
+def make_anim(draw, n: int, size: int = 192, key: str = "blink", ms: int = 400,
+              default: int = 0) -> Sprite:
+    """Like `make`, for an animated prop: `draw(iso, canvas, frame)` is called once per
+    frame; every frame is cropped to the *union* of the drawn pixels so all frames share
+    one canvas size and one anchor. The returned Sprite's `canvas` is frame `default`
+    (the still, for renderers that don't animate) and `anims[key]` holds all n frames."""
+    from PIL import ImageDraw
+    scratch, pts = [], None
+    ox, oy = size // 2, size // 2
+    for i in range(n):
+        c = Canvas(size, size)
+        p = draw(Iso(c, (ox, oy)), c, i) or {}
+        if i == default:
+            pts = p
+        scratch.append(c)
+    anchor = (ox, oy + 16)
+    boxes = [c.img.getbbox() for c in scratch if c.img.getbbox()]
+    x0 = min([b[0] for b in boxes] + [anchor[0] - 1])
+    y0 = min([b[1] for b in boxes] + [anchor[1] - 1])
+    x1 = max([b[2] for b in boxes] + [anchor[0] + 1])
+    y1 = max([b[3] for b in boxes] + [anchor[1]])
+    frames = []
+    for c in scratch:
+        out = Canvas(x1 - x0, y1 - y0)
+        out.img = c.img.crop((x0, y0, x1, y1))
+        out.draw = ImageDraw.Draw(out.img)
+        frames.append(out)
+    return Sprite(frames[default], (anchor[0] - x0, anchor[1] - y0),
+                  {k: (v[0] - x0, v[1] - y0) for k, v in pts.items()},
+                  {key: (frames, ms)})

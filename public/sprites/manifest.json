@@ -24,7 +24,7 @@
   "box-fan": {
     "anchor": [
       11,
-      29
+      34
     ],
     "frames": {
       "default": [
@@ -34,7 +34,7 @@
         }
       ]
     },
-    "h": 29,
+    "h": 34,
     "w": 23
   },
   "cable-floor-c": {
@@ -119,10 +119,20 @@
   },
   "closet-shelf": {
     "anchor": [
-      6,
-      46
+      8,
+      56
     ],
     "frames": {
+      "blink": [
+        {
+          "duration": 350,
+          "file": "closet-shelf-blink-0.png"
+        },
+        {
+          "duration": 350,
+          "file": "closet-shelf-blink-1.png"
+        }
+      ],
       "default": [
         {
           "duration": 0,
@@ -130,14 +140,14 @@
         }
       ]
     },
-    "h": 48,
+    "h": 62,
     "points": {
       "net": [
-        20,
-        15
+        18,
+        12
       ]
     },
-    "w": 33
+    "w": 36
   },
   "desk": {
     "anchor": [
@@ -557,6 +567,7 @@
       ]
     },
     "h": 14,
+    "preview_only": true,
     "w": 27
   },
   "visitor": {
@@ -575,8 +586,8 @@
     "h": 24,
     "points": {
       "net": [
-        8,
-        13
+        13,
+        16
       ]
     },
     "w": 16
@@ -1330,6 +1341,66 @@
     },
     "h": 24,
     "w": 16
+  },
+  "worker-peel": {
+    "anchor": [
+      16,
+      40
+    ],
+    "frames": {
+      "a": [
+        {
+          "duration": 600,
+          "file": "worker-peel-a-0.png"
+        },
+        {
+          "duration": 600,
+          "file": "worker-peel-a-1.png"
+        }
+      ],
+      "b": [
+        {
+          "duration": 600,
+          "file": "worker-peel-b-0.png"
+        },
+        {
+          "duration": 600,
+          "file": "worker-peel-b-1.png"
+        }
+      ],
+      "c": [
+        {
+          "duration": 600,
+          "file": "worker-peel-c-0.png"
+        },
+        {
+          "duration": 600,
+          "file": "worker-peel-c-1.png"
+        }
+      ],
+      "d": [
+        {
+          "duration": 600,
+          "file": "worker-peel-d-0.png"
+        },
+        {
+          "duration": 600,
+          "file": "worker-peel-d-1.png"
+        }
+      ],
+      "e": [
+        {
+          "duration": 600,
+          "file": "worker-peel-e-0.png"
+        },
+        {
+          "duration": 600,
+          "file": "worker-peel-e-1.png"
+        }
+      ]
+    },
+    "h": 40,
+    "w": 32
   },
   "worker-queue": {
     "anchor": [

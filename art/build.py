@@ -20,7 +20,7 @@ sys.path.insert(0, _REPO_ROOT)
 
 from art.src.dsl import Canvas, save_png, scale_nn
 from art.src import iso
-from art.src.sprites import floor, wall, desk, worker, badge_reader, room, band80
+from art.src.sprites import floor, wall, desk, worker, badge_reader, room, band80, poses
 from art.src import scene80
 from art.src.vox import Sprite
 
@@ -75,7 +75,7 @@ def build_badge_reader():
 WALK_KEYS = ("down", "up", "left", "right")
 
 
-def save_entry(name, frames, w, h, anchor, points=None):
+def save_entry(name, frames, w, h, anchor, points=None, durations=None):
     """Save every frame of one manifest entry and return the entry. File naming keeps
     the spike's scheme: `<name>.png` for a single default frame, `<name>-<key>.png` for
     a single-frame state, `<name>-<key>-<i>.png` for an animation."""
@@ -91,7 +91,8 @@ def save_entry(name, frames, w, h, anchor, points=None):
                 fname = f"{name}-{key}-{i}.png"
             assert (cv.w, cv.h) == (w, h), (name, key, cv.w, cv.h, w, h)
             save_png(cv, os.path.join(SPRITES_DIR, fname))
-            files.append({"file": fname, "duration": WALK_FRAME_MS if key in WALK_KEYS else 0})
+            ms = (durations or {}).get(key, WALK_FRAME_MS if key in WALK_KEYS else 0)
+            files.append({"file": fname, "duration": ms})
         fm[key] = files
     entry = {"w": w, "h": h, "anchor": list(anchor), "frames": fm}
     if points:
@@ -131,7 +132,11 @@ def build_worker(manifest, registry):
     manifest["worker-seated"] = save_entry("worker-seated", seated, desk.W, desk.H, desk.ANCHOR)
     for look, cv in seated.items():
         registry[f"worker-seated-{look}"] = Sprite(cv[0], desk.ANCHOR)
-    vis = worker.visitor_frame("d")
+    peel = {look: poses.peel_frames(look) for look in worker.LOOK_NAMES}
+    manifest["worker-peel"] = save_entry("worker-peel", peel, desk.W, desk.H, desk.ANCHOR,
+                                         durations={k: poses.PEEL_MS for k in peel})
+    registry["worker-peel"] = Frames(peel, desk.ANCHOR)
+    vis = worker.visitor_frame()
     pts = {"net": worker.VISITOR_NET}
     manifest["visitor"] = save_entry("visitor", {"default": [vis]}, vis.w, vis.h,
                                      worker.VISITOR_ANCHOR, pts)
@@ -151,12 +156,23 @@ def build_desks(manifest, registry):
         registry[name] = Sprite(cv, desk.ANCHOR, pts)
 
 
+def save_sprite(manifest, registry, name, spr):
+    """One prop: the still as `default`, plus any animations (`Sprite.anims`) as extra
+    frame keys with their per-frame duration."""
+    frames = {"default": [spr.canvas]}
+    durations = {}
+    for key, (cvs, ms) in spr.anims.items():
+        frames[key] = list(cvs)
+        durations[key] = ms
+    manifest[name] = save_entry(name, frames, spr.w, spr.h, spr.anchor, spr.points,
+                                durations)
+    registry[name] = spr
+
+
 def build_props(manifest, registry):
     for group in (room.build_all(), band80.build_all()):
         for name, spr in group.items():
-            manifest[name] = save_entry(name, {"default": [spr.canvas]}, spr.w, spr.h,
-                                        spr.anchor, spr.points)
-            registry[name] = spr
+            save_sprite(manifest, registry, name, spr)
 
 
 def build_manifest():
@@ -167,6 +183,10 @@ def build_manifest():
     worker_rendered = build_worker(manifest, registry)
     build_desks(manifest, registry)
     build_props(manifest, registry)
+
+    # PH1-07: the VISITOR callout is for the 4x previews only; at 1x the chest sticker
+    # on `visitor` carries it. The flag tells the renderer to leave it out.
+    manifest["tag-visitor"]["preview_only"] = True
 
     manifest_path = os.path.join(SPRITES_DIR, "manifest.json")
     with open(manifest_path, "w") as f:
@@ -196,6 +216,13 @@ def build_sheet(static, badge_rendered, worker_rendered, registry):
         seat.paste(registry["desk"].canvas, 0, 0)
         seat.paste(registry[f"worker-seated-{look}"].canvas, 0, 0)
         items.append(seat)
+    for look in worker.LOOK_NAMES:
+        for fr in registry["worker-peel"].frames[look]:
+            seat = Canvas(desk.W, desk.H)
+            seat.paste(registry["desk-postit"].canvas, 0, 0)
+            seat.paste(fr, 0, 0)
+            items.append(seat)
+        break  # one look is enough to judge the pose; all five ship
     items.append(registry["visitor"].canvas)
     for name in ("desk-postit", "desk-padlock", "desk-dev", "desk-dev-built"):
         items.append(registry[name].canvas)
