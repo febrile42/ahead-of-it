@@ -291,8 +291,16 @@ if (sliderRoot && toggleRoot && sceneWrap && canvas && hotspotsLayer && panelRoo
     void render();
   });
 
+  // F2.2 (DIA-14): unthrottled, resize fired one full render per event — a
+  // phone scroll collapsing the address bar or a desktop window drag can
+  // produce dozens in a row (R-23). Debounce to one render per burst: each
+  // event resets the timer, so render() only runs once the resizing has
+  // actually stopped, and the eventual call still picks up whatever the
+  // final size is.
+  let resizeDebounce: ReturnType<typeof setTimeout> | undefined;
   window.addEventListener('resize', () => {
-    void render();
+    clearTimeout(resizeDebounce);
+    resizeDebounce = setTimeout(() => void render(), 150);
   });
 
   // Sanity: every band this build knows about must exist in content.json
