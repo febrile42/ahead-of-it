@@ -127,7 +127,17 @@ jobs:
           command: deploy
 
       - name: Smoke test — pages serve, .git does not
+        env:
+          # No custom domain yet (Phase 4, D-005/D-018) — workers.dev for now.
+          # Set in GitHub repo Settings > Secrets and variables > Actions > Variables.
+          # A wrong guess here breaks the first production deploy silently, so this
+          # fails loudly instead of hardcoding a hostname.
+          PROD_SMOKE_HOST: ${{ vars.PROD_SMOKE_HOST }}
         run: |
+          if [ -z "$PROD_SMOKE_HOST" ]; then
+            echo "::error::PROD_SMOKE_HOST repo variable is not set. Add it in GitHub repo Settings > Secrets and variables > Actions > Variables — the real workers.dev hostname, e.g. ahead-of-it.<account-subdomain>.workers.dev." >&2
+            exit 1
+          fi
           check() {
             STATUS=$(curl -s -o /dev/null -w "%{http_code}" --retry 5 --retry-delay 3 "$1")
             if [ "$STATUS" != "$2" ]; then
@@ -136,7 +146,6 @@ jobs:
             fi
             echo "Smoke test passed: $1 → HTTP $STATUS"
           }
-          # No custom domain yet (Phase 4, D-005/D-018) — workers.dev for now.
-          BASE_URL="https://ahead-of-it.joshua-gister.workers.dev"
+          BASE_URL="https://$PROD_SMOKE_HOST"
           check "$BASE_URL/"             200
           check "$BASE_URL/.git/config"  404
