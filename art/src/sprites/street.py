@@ -65,7 +65,10 @@ BLOCK_N = dict(c0=-24.0, c1=8.0, r0=-16.0, r1=8.0)
 
 def _hq(iso: Iso, c: Canvas, floors: int, b=BLOCK, vent=True):
     top = GROUND_H + STOREY_H * (floors - 1)
-    iso.floor_shadow(b["c0"], b["r0"], b["c1"], b["r1"], grow=2.0, grow_r=0.8)
+    # DIA-5 item 2: a cast shadow, not a contact line. With a 2-unit rim HQ read as
+    # floating over its plot; the light is top-left, so the block throws most of a tile
+    # of shadow down its shaded (+c) side, where its plot now has pavement to take it.
+    iso.floor_shadow(b["c0"], b["r0"], b["c1"], b["r1"], grow=7.0, grow_r=1.2)
     f = iso.box(b["c0"], b["r0"], 0, b["c1"], b["r1"], top + PARAPET, top="wall-trim",
                 left="wall", right="wall-shadow", outline=None)
     # the storey lines and a plinth, then windows on both faces, one per tile per storey

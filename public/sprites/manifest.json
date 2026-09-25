@@ -301,22 +301,6 @@
     "h": 41,
     "w": 32
   },
-  "camera-dome": {
-    "anchor": [
-      3,
-      0
-    ],
-    "frames": {
-      "default": [
-        {
-          "duration": 0,
-          "file": "camera-dome.png"
-        }
-      ]
-    },
-    "h": 5,
-    "w": 7
-  },
   "card-customers": {
     "anchor": [
       20,
@@ -1241,7 +1225,7 @@
   },
   "hq-3": {
     "anchor": [
-      113,
+      114,
       151
     ],
     "frames": {
@@ -1252,12 +1236,12 @@
         }
       ]
     },
-    "h": 154,
-    "w": 164
+    "h": 159,
+    "w": 175
   },
   "hq-4": {
     "anchor": [
-      113,
+      114,
       171
     ],
     "frames": {
@@ -1268,12 +1252,12 @@
         }
       ]
     },
-    "h": 174,
-    "w": 164
+    "h": 179,
+    "w": 175
   },
   "hq-5": {
     "anchor": [
-      65,
+      66,
       167
     ],
     "frames": {
@@ -1284,12 +1268,12 @@
         }
       ]
     },
-    "h": 170,
-    "w": 116
+    "h": 175,
+    "w": 127
   },
   "hq-6": {
     "anchor": [
-      65,
+      66,
       187
     ],
     "frames": {
@@ -1300,8 +1284,8 @@
         }
       ]
     },
-    "h": 190,
-    "w": 116
+    "h": 195,
+    "w": 127
   },
   "hq-door": {
     "anchor": [
@@ -1483,6 +1467,38 @@
     "h": 14,
     "w": 19
   },
+  "link-hop-c": {
+    "anchor": [
+      8,
+      13
+    ],
+    "frames": {
+      "default": [
+        {
+          "duration": 0,
+          "file": "link-hop-c.png"
+        }
+      ]
+    },
+    "h": 13,
+    "w": 16
+  },
+  "link-hop-r": {
+    "anchor": [
+      7,
+      13
+    ],
+    "frames": {
+      "default": [
+        {
+          "duration": 0,
+          "file": "link-hop-r.png"
+        }
+      ]
+    },
+    "h": 13,
+    "w": 16
+  },
   "link-r": {
     "anchor": [
       9,
@@ -1587,6 +1603,22 @@
         {
           "duration": 0,
           "file": "note-dave.png"
+        }
+      ]
+    },
+    "h": 13,
+    "w": 23
+  },
+  "note-dave-r": {
+    "anchor": [
+      3,
+      0
+    ],
+    "frames": {
+      "default": [
+        {
+          "duration": 0,
+          "file": "note-dave-r.png"
         }
       ]
     },
@@ -1997,6 +2029,22 @@
     "h": 13,
     "w": 17
   },
+  "slab-l-upper": {
+    "anchor": [
+      16,
+      8
+    ],
+    "frames": {
+      "default": [
+        {
+          "duration": 0,
+          "file": "slab-l-upper.png"
+        }
+      ]
+    },
+    "h": 28,
+    "w": 17
+  },
   "slab-r": {
     "anchor": [
       1,
@@ -2011,6 +2059,22 @@
       ]
     },
     "h": 13,
+    "w": 17
+  },
+  "slab-r-upper": {
+    "anchor": [
+      1,
+      8
+    ],
+    "frames": {
+      "default": [
+        {
+          "duration": 0,
+          "file": "slab-r-upper.png"
+        }
+      ]
+    },
+    "h": 28,
     "w": 17
   },
   "sofa": {
@@ -2064,6 +2128,10 @@
       "note": [
         43,
         14
+      ],
+      "note-tip": [
+        45,
+        13
       ]
     },
     "w": 47
@@ -2093,6 +2161,32 @@
     },
     "h": 22,
     "w": 24
+  },
+  "truck-c": {
+    "anchor": [
+      11,
+      21
+    ],
+    "frames": {
+      "default": [
+        {
+          "duration": 0,
+          "file": "truck-c.png"
+        }
+      ],
+      "drive": [
+        {
+          "duration": 160,
+          "file": "truck-c-drive-0.png"
+        },
+        {
+          "duration": 160,
+          "file": "truck-c-drive-1.png"
+        }
+      ]
+    },
+    "h": 25,
+    "w": 33
   },
   "tv-frozen": {
     "anchor": [
@@ -2435,6 +2529,22 @@
     },
     "h": 5,
     "w": 7
+  },
+  "wifi-card": {
+    "anchor": [
+      2,
+      12
+    ],
+    "frames": {
+      "default": [
+        {
+          "duration": 0,
+          "file": "wifi-card.png"
+        }
+      ]
+    },
+    "h": 13,
+    "w": 15
   },
   "worker": {
     "anchor": [
