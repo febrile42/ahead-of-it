@@ -3,7 +3,6 @@ import { defineConfig, devices } from '@playwright/test';
 // Smoke-tests the built dist/ via `vite preview`, not the dev server, so
 // this exercises exactly what would be deployed. R-21: no third-party
 // requests — enforced in tests/smoke.spec.ts by intercepting every request.
-//
 // The port is env-overridable (default unchanged at 4173, so CI behaves
 // exactly as before) because `--strictPort` plus `reuseExistingServer: false`
 // makes two checkouts of this repo — two git worktrees, or two concurrent CI
