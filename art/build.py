@@ -191,6 +191,13 @@ def build_worker(manifest, registry):
                                          worker.ANCHOR,
                                          durations={k: poses.WAVE_MS for k in wave})
     registry["worker-wave"] = Frames(wave, worker.ANCHOR)
+    flinch = {}
+    for look in looks:
+        flinch.update(poses.flinch_frames(look))
+    manifest["worker-flinch"] = save_entry("worker-flinch", flinch, worker.W, worker.H,
+                                           worker.ANCHOR,
+                                           durations={k: poses.FLINCH_MS for k in flinch})
+    registry["worker-flinch"] = Frames(flinch, worker.ANCHOR)
     hat = {}
     for look in looks:
         hat[look] = [poses.hat_frame(look)]

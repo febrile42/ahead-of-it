@@ -23,8 +23,8 @@
   },
   "balloon-welcome": {
     "anchor": [
-      8,
-      44
+      1,
+      12
     ],
     "frames": {
       "default": [
@@ -44,8 +44,8 @@
         }
       ]
     },
-    "h": 44,
-    "w": 56
+    "h": 13,
+    "w": 21
   },
   "box-fan": {
     "anchor": [
@@ -62,6 +62,22 @@
     },
     "h": 34,
     "w": 23
+  },
+  "box-fan-face": {
+    "anchor": [
+      19,
+      35
+    ],
+    "frames": {
+      "default": [
+        {
+          "duration": 0,
+          "file": "box-fan-face.png"
+        }
+      ]
+    },
+    "h": 35,
+    "w": 29
   },
   "box-fan-l": {
     "anchor": [
@@ -368,7 +384,7 @@
   "chair-back": {
     "anchor": [
       15,
-      19
+      22
     ],
     "frames": {
       "default": [
@@ -378,7 +394,7 @@
         }
       ]
     },
-    "h": 19,
+    "h": 22,
     "w": 16
   },
   "closet-shelf": {
@@ -1406,12 +1422,12 @@
         }
       ]
     },
-    "h": 37,
+    "h": 39,
     "w": 29
   },
   "label-main-server": {
     "anchor": [
-      13,
+      14,
       16
     ],
     "frames": {
@@ -1423,7 +1439,7 @@
       ]
     },
     "h": 16,
-    "w": 27
+    "w": 29
   },
   "laptop-shelf": {
     "anchor": [
@@ -1784,6 +1800,22 @@
     },
     "h": 26,
     "w": 20
+  },
+  "receipt-runaway": {
+    "anchor": [
+      7,
+      61
+    ],
+    "frames": {
+      "default": [
+        {
+          "duration": 0,
+          "file": "receipt-runaway.png"
+        }
+      ]
+    },
+    "h": 62,
+    "w": 46
   },
   "road-c": {
     "anchor": [
@@ -3224,6 +3256,116 @@
         {
           "duration": 120,
           "file": "worker-e-up-3.png"
+        }
+      ]
+    },
+    "h": 24,
+    "w": 16
+  },
+  "worker-flinch": {
+    "anchor": [
+      8,
+      24
+    ],
+    "frames": {
+      "a-left": [
+        {
+          "duration": 420,
+          "file": "worker-flinch-a-left-0.png"
+        },
+        {
+          "duration": 420,
+          "file": "worker-flinch-a-left-1.png"
+        }
+      ],
+      "a-right": [
+        {
+          "duration": 420,
+          "file": "worker-flinch-a-right-0.png"
+        },
+        {
+          "duration": 420,
+          "file": "worker-flinch-a-right-1.png"
+        }
+      ],
+      "b-left": [
+        {
+          "duration": 420,
+          "file": "worker-flinch-b-left-0.png"
+        },
+        {
+          "duration": 420,
+          "file": "worker-flinch-b-left-1.png"
+        }
+      ],
+      "b-right": [
+        {
+          "duration": 420,
+          "file": "worker-flinch-b-right-0.png"
+        },
+        {
+          "duration": 420,
+          "file": "worker-flinch-b-right-1.png"
+        }
+      ],
+      "c-left": [
+        {
+          "duration": 420,
+          "file": "worker-flinch-c-left-0.png"
+        },
+        {
+          "duration": 420,
+          "file": "worker-flinch-c-left-1.png"
+        }
+      ],
+      "c-right": [
+        {
+          "duration": 420,
+          "file": "worker-flinch-c-right-0.png"
+        },
+        {
+          "duration": 420,
+          "file": "worker-flinch-c-right-1.png"
+        }
+      ],
+      "d-left": [
+        {
+          "duration": 420,
+          "file": "worker-flinch-d-left-0.png"
+        },
+        {
+          "duration": 420,
+          "file": "worker-flinch-d-left-1.png"
+        }
+      ],
+      "d-right": [
+        {
+          "duration": 420,
+          "file": "worker-flinch-d-right-0.png"
+        },
+        {
+          "duration": 420,
+          "file": "worker-flinch-d-right-1.png"
+        }
+      ],
+      "e-left": [
+        {
+          "duration": 420,
+          "file": "worker-flinch-e-left-0.png"
+        },
+        {
+          "duration": 420,
+          "file": "worker-flinch-e-left-1.png"
+        }
+      ],
+      "e-right": [
+        {
+          "duration": 420,
+          "file": "worker-flinch-e-right-0.png"
+        },
+        {
+          "duration": 420,
+          "file": "worker-flinch-e-right-1.png"
         }
       ]
     },

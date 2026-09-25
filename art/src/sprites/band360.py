@@ -27,6 +27,8 @@ Built
 """
 from __future__ import annotations
 
+import math
+
 from ..dsl import Canvas
 from ..vox import Iso, SwapIso, Sprite, make, make_anim
 from .. import glyphs
@@ -66,15 +68,20 @@ def _server_tower(iso: Iso, c: Canvas):
 
 
 def main_server_label() -> Canvas:
-    """Hand-lettered, two lines, taped to the tower's top edge like the DEV card."""
+    """Hand-lettered, two lines, taped to the tower's top edge like the DEV card.
+
+    The plate is sized off the *longer* line plus a two-pixel margin on each side of
+    the paper, not one: at `+ 4` the final R of SERVER landed on the border column and
+    the letter lost its leg, so the sign read `SERVEI` at 1x. Both lines are centred,
+    so neither can drift into the frame again if the wording ever changes."""
     l1, l2 = "MAIN", "SERVER"
-    w = glyphs.text_width(l2) + 4
+    w = max(glyphs.text_width(l1), glyphs.text_width(l2)) + 6
     h = 15
     c = Canvas(w, h + 1)
     c.rect(0, 0, w - 1, h - 1, "outline")
     c.rect(1, 1, w - 2, h - 2, "paper")
-    glyphs.draw(c, l1, (w - glyphs.text_width(l1)) // 2, 2, "outline")
-    glyphs.draw(c, l2, 2, 8, "outline")
+    for line, y in ((l1, 2), (l2, 8)):
+        glyphs.draw(c, line, (w - glyphs.text_width(line)) // 2, y, "outline")
     c.point(2, h, "wall-shadow")
     c.point(w - 3, h, "wall-shadow")
     return c
@@ -121,6 +128,74 @@ def _box_fan_l(iso: Iso, c: Canvas):
             c.point(x - k * 2 - 1, y - 2 * k - 1, "glass-highlight")
 
 
+FAN_R = 8.0              # the guard: a 16px disc at 1x
+
+
+def _box_fan_face(iso: Iso, c: Canvas):
+    """The same household fan, turned face-on to camera and drawn half again the size
+    of `box-fan-l`, standing on open floor clear of the tower.
+
+    Everything else in that alcove — the tower, the crates, the cable shelf, the rack —
+    is a rectangle, so a **circle** is the one silhouette that cannot be read as another
+    box. Two 3/4-turned grey squares 13px wide is what the alcove had, and at 1x they
+    were more boxes.
+
+    Screen-space circle on an isometric stand: the guard genuinely faces the camera, so
+    it is not projected. The foot and column matter — a disc lying loose on a floor is a
+    ball, and that is exactly what the first attempt drew.
+
+    Two things about the guard were got wrong before they were got right, and both are
+    worth keeping written down. It has to be **pale** (`paper`), because a dark disc at
+    16 px is a football whatever is drawn on it. And the blades have to be filled
+    **wedges**, not radial lines: four black lines from the centre of a white circle cut
+    it into four white panels with black seams, which is a football again. A blade has
+    area. Four wedges of 38 degrees, all swept the same way, read as one thing caught
+    mid-rotation, and nothing else in the room is round."""
+    iso.floor_shadow(2.2, 2.4, 5.8, 4.6, grow=1.0)
+    iso.box(2.6, 2.6, 0, 5.4, 4.4, 1.6, top="chair-mid", left="chair-dark",
+            right="chair-dark", edge="chair-dark")                    # the foot
+    iso.box(3.6, 3.2, 1.6, 4.4, 3.8, 9.0, top="chair-mid", left="chair-mid",
+            right="chair-dark")                                       # the column
+    cx, cy = iso.pt(4.0, 3.5, 9.0)
+    cy -= int(FAN_R) - 1                     # the guard sits on top, the column showing
+    n = int(FAN_R) + 2
+    for y in range(-n, n + 1):
+        for x in range(-n, n + 1):
+            d = (x * x + y * y) ** 0.5
+            if d > FAN_R + 0.9:
+                continue
+            if d > FAN_R - 0.6:
+                col = "outline"                            # the rim, and its silhouette
+            elif x + y > FAN_R * 0.9:
+                col = "wall-shadow"                        # light from the top left
+            else:
+                col = "paper"
+            c.point(cx + x, cy + y, col)
+    # Four blades, as filled wedges rather than lines. Lines were the first attempt and
+    # they were wrong twice over: four black diagonals from the centre of a white disc
+    # cut it into four white panels with black seams, which at 1x is a football, and a
+    # blade has area — the thing that says "fan" is a dark shape sweeping round a hub,
+    # not a spoke. Each wedge covers 38 degrees of its quadrant, all four swept the same
+    # way, so the disc reads as caught mid-rotation.
+
+    for y in range(-n, n + 1):
+        for x in range(-n, n + 1):
+            d = (x * x + y * y) ** 0.5
+            if not 2.0 <= d <= FAN_R - 2.4:
+                continue
+            a = math.degrees(math.atan2(y, x)) % 90.0
+            if a <= 38.0:
+                c.point(cx + x, cy + y, "chair-dark" if a > 6.0 else "chair-mid")
+    for y in range(-2, 3):                                 # the hub
+        for x in range(-2, 3):
+            if x * x + y * y <= 5:
+                c.point(cx + x, cy + y, "outline")
+    for i, (dx, dy) in enumerate(((-2, -5), (-4, 1), (-3, -2))):   # the wind, up-left
+        for k in range(3 + (i == 2)):
+            c.point(cx + dx - n - k * 2, cy + dy - 2 * k, "glass-highlight")
+            c.point(cx + dx - n - k * 2 - 1, cy + dy - 2 * k - 1, "glass-highlight")
+
+
 # -- G5.3 built ----------------------------------------------------------------------
 
 def card_virtualised() -> Canvas:
@@ -159,19 +234,27 @@ CORD_FOOT = (5.2, 4.6)
 
 
 def _desk_phone_on(iso: Iso, c: Canvas):
-    """A chunky corded desk phone: a dark body, a light keypad, the handset in its
-    cradle, and a coiled cord looping off the front of the desk to the floor."""
+    """A chunky corded desk phone: a dark body with a light keypad, and — the part that
+    has to carry the read at 1x — the handset sitting *across* the body in its cradle,
+    raised clear of it, with a bulge at each end and a dip between them. That notched
+    top edge is the whole silhouette: a slab with a keypad on it reads as a laptop, a
+    slab with a handset on it reads as a telephone. A coiled cord loops off the desk's
+    front edge to the floor, where `phone-knot` picks it up."""
     top = desk_mod.DESK["top"] + desk_mod.DESK["slab"]
     p = PHONE
-    f = iso.box(p["c0"], p["r0"], top, p["c1"], p["r1"], top + 2.0, top="chair-dark",
+    f = iso.box(p["c0"], p["r0"], top, p["c1"], p["r1"], top + 1.4, top="chair-dark",
                 left="monitor-frame", right="outline")
-    iso.paint(f, "T", top + 2.0, lambda a, b: "paper"
-              if p["c0"] + 1.8 <= a < p["c1"] - 0.4 and 2.6 <= b < 3.4
+    iso.paint(f, "T", top + 1.4, lambda a, b: "paper"
+              if p["c0"] + 0.4 <= a < p["c1"] - 0.4 and 2.4 <= b < 3.4
               and int(a * 2) % 2 == 0 else None)                     # keypad
-    iso.box(p["c0"] + 0.2, p["r0"] + 0.2, top + 2.0, p["c0"] + 1.6, p["r1"] - 0.2,
-            top + 3.4, top="chair-mid", left="chair-dark", right="outline")   # handset
+    # The handset, across the back of the body in its cradle: earpiece, bar, mouthpiece,
+    # the ends taller than the middle. Light on the dark body — at 1x the notched pale
+    # bar is the only thing that separates a telephone from any other small dark box.
+    for c0, c1, h in ((0.0, 1.6, 3.4), (1.6, 2.8, 2.5), (2.8, 4.4, 3.4)):
+        iso.box(p["c0"] + c0, p["r0"] - 0.2, top + 1.4, p["c0"] + c1, p["r0"] + 1.4,
+                top + h, top="wall-trim", left="chair-mid", right="chair-dark")
     iso.paint(f, "L", p["r1"], lambda a, z: "badge-red"
-              if p["c1"] - 1.0 <= a < p["c1"] - 0.5 and z >= top + 1.0 else None)  # line lit
+              if p["c1"] - 1.0 <= a < p["c1"] - 0.5 and z >= top + 0.6 else None)  # line lit
     # the coiled cord: out of the handset's end, down the desk front, to the floor
     pts = [(p["c0"] + 0.9, p["r1"], top + 1.0), (p["c0"] + 1.2, 4.3, top + 0.4)]
     for k in range(7):
@@ -202,35 +285,48 @@ def desk_phone() -> Canvas:
     return c
 
 
-COINBOX = dict(c0=3.0, c1=7.3, r0=0.8, r1=3.8)
+COINBOX = dict(c0=4.6, c1=7.4, r0=1.0, r1=3.6)
 
 
 def desk_coinphone() -> Canvas:
-    """The phone takes coins: a chrome coin box on the desk, a slot at the top of its
-    front, the handset hung on its side, a stack of gold coins beside it, the cord to
-    the floor like the others. No chair: its user is standing at the end of the desk."""
+    """The phone takes coins. The previous pass drew this as a pale upright slab and it
+    read, unmistakably, as a monitor — a workstation, the opposite of the gag. What
+    makes a payphone a payphone at 1x is not the keypad or the slot, both of which are
+    sub-pixel here: it is the dark narrow body with a handset **hanging off its side on
+    a cord**, which no monitor has. So: a dark box, narrower than a screen and taller,
+    the handset hung vertically clear of the left edge so it breaks the silhouette, a
+    coiled cord between them, a gold coin slot, and a stack of coins on the desk. No
+    chair — its user is standing at the end of the desk, feeding it."""
     c = Canvas(desk_mod.W, desk_mod.H)
     iso = Iso(c)
     _desk_no_monitor(iso, chair=False)
     top = desk_mod.DESK["top"] + desk_mod.DESK["slab"]
     b = COINBOX
-    f = iso.box(b["c0"], b["r0"], top, b["c1"], b["r1"], top + 12.0, top="paper",
-                left="wall-shadow", right="badge-body")
+    f = iso.box(b["c0"], b["r0"], top, b["c1"], b["r1"], top + 14.0, top="chair-mid",
+                left="monitor-frame", right="chair-dark")
 
     def front(cc, z):
-        if top + 9.0 <= z < top + 10.2 and b["c0"] + 1.0 <= cc < b["c1"] - 1.0:
-            return "outline"                                  # the coin slot
-        if top + 10.2 <= z < top + 11.0 and b["c0"] + 1.0 <= cc < b["c1"] - 1.0:
-            return "sticky"                                   # a coin, going in
-        if top + 4.0 <= z < top + 7.5 and b["c0"] + 1.0 <= cc < b["c1"] - 1.4:
-            return "chair-dark" if int(cc * 2) % 2 or int(z) % 2 else "paper"   # keypad
-        if top + 0.8 <= z < top + 2.4 and b["c0"] + 1.2 <= cc < b["c1"] - 1.6:
-            return "chair-dark"                               # the coin return
+        if top + 11.0 <= z < top + 12.0 and b["c0"] + 0.6 <= cc < b["c1"] - 0.6:
+            return "sticky"                                   # the coin slot, lit gold
+        if top + 5.0 <= z < top + 9.0 and b["c0"] + 0.6 <= cc < b["c1"] - 0.6:
+            return "chair-dark" if int(cc * 2) % 2 or int(z) % 2 else "wall-trim"  # keypad
+        if top + 0.8 <= z < top + 2.6 and b["c0"] + 0.8 <= cc < b["c1"] - 0.8:
+            return "outline"                                  # the coin return
         return None
     iso.paint(f, "L", b["r1"], front)
-    # the handset hung on the box's left side
-    iso.box(b["c0"] - 1.0, b["r0"] + 0.6, top + 3.0, b["c0"], b["r1"] - 0.6, top + 11.0,
-            top="chair-mid", left="chair-dark", right="outline")
+    # the handset, hung vertically on a hook clear of the box's left edge
+    for z0, z1, out in ((4.2, 6.0, 0.6), (6.0, 9.6, 0.0), (9.6, 11.4, 0.6)):
+        iso.box(b["c0"] - 2.7 - out, b["r0"] + 0.5, top + z0, b["c0"] - 1.4,
+                b["r1"] - 0.5, top + z1, top="wall-trim", left="wall-trim",
+                right="chair-mid")
+    # its coiled cord, looping from the handset's foot back into the box
+    hx = b["c0"] - 2.0
+    coil = [(hx, b["r1"] - 0.8, top + 3.2)]
+    for k in range(5):
+        coil.append((hx + 0.3 + (0.8 if k % 2 else -0.2), b["r1"] - 0.8,
+                     top + 3.6 - 0.9 * k))
+    coil.append((b["c0"] + 0.2, b["r1"] - 0.8, top + 0.6))
+    _thick(iso, coil, "chair-dark", width=1)
     # a stack of coins at the front left of the desk
     for k in range(5):
         iso.box(0.6, 2.4, top + k * 0.8, 1.8, 3.6, top + k * 0.8 + 0.8, top="sticky",
@@ -239,7 +335,7 @@ def desk_coinphone() -> Canvas:
     for (x, y), ff in iso.box_faces(0.6, 2.4, top, 1.8, 3.6, top + 4.0).items():
         pts.add((x, y))
     iso.outline(pts, "outline")
-    pts = [(b["c0"] - 0.5, b["r1"] - 0.6, top + 2.0), (b["c0"] + 0.4, 4.3, top - 1.0)]
+    pts = [(b["c0"] - 0.5, b["r1"] - 0.6, top + 0.4), (b["c0"] + 0.4, 4.3, top - 1.0)]
     for k in range(6):
         pts.append((b["c0"] + 0.9 + (0.5 if k % 2 else -0.3), 4.3, max(top - 2.0 - 1.2 * k, 0.3)))
     pts.append((CORD_FOOT[0], CORD_FOOT[1], 0.3))
@@ -350,6 +446,71 @@ def receipt_33() -> Canvas:
             c.point(x, h - 1, "paper")
     c.point(1, 0, "wall-shadow")
     c.point(w - 2, 0, "wall-shadow")
+    return c
+
+
+RUNAWAY_W, RUNAWAY_H = 46, 62
+RUNAWAY_ANCHOR = (7, 61)
+
+
+def receipt_runaway() -> Canvas:
+    """G5.4 without, the *primary* read: the phone bill, unspooled.
+
+    The previous pass drew the phones. DIA-9 rated it **doesn't read** — "a black smear
+    speckled with white and pale blue on the floor next to a yellow `DAVE?` sign. No
+    phone, no bill, no coins" — and the fix is to stop drawing the phones and draw the
+    bill. The built state already owns the right object with a proven 1x silhouette:
+    `receipt-33`, the short till receipt with the torn perforated edge and `-33%` on it.
+    So the two states rhyme on one object instead of arguing about two: one receipt that
+    ends, and one that will not stop.
+
+    A long pale ribbon on a beige floor is the strongest silhouette this room has left —
+    nothing else here is a continuous curve, everything else is a box or a person. The
+    printed head stays the width of the built receipt so the digits can be read (four
+    glyphs need 15 px, which a 5 px till roll cannot carry); below the tear-off the roll
+    narrows to 5 px and falls, wavering, then loses its way on the floor in three loose
+    loops that double back over each other. Red digits, not the built state's green.
+
+    Drawn in screen space, not isometric: it is paper, it does not have a footprint, and
+    a projected ribbon at this size reads as a ramp."""
+    text = "-33%"
+    tw = glyphs.text_width(text)
+    hw, hh = tw + 6, 21                                   # the printed head
+    hx = RUNAWAY_W - hw - 2
+    c = Canvas(RUNAWAY_W, RUNAWAY_H)
+    c.rect(hx, 0, hx + hw - 1, hh - 1, "outline")
+    c.rect(hx + 1, 1, hx + hw - 2, hh - 1, "paper")
+    for y in (3, 5, 7):
+        c.rect(hx + 3, y, hx + hw - 4 - (y % 3), y, "wall-shadow")
+    glyphs.draw(c, text, hx + 3, 10, "badge-red")
+    c.rect(hx + 2, 17, hx + hw - 3, 17, "wall-shadow")
+    for x in range(hx + 1, hx + hw - 1):                  # the perforation it tore at
+        if x % 2 == 0:
+            c.point(x, hh - 1, "wall-shadow")
+    # the roll below the tear-off: a 5 px ribbon down the wall, then loose on the floor
+    spine = [(hx + hw // 2, hh), (hx + hw // 2 - 2, hh + 8), (hx + hw // 2, hh + 15),
+             (hx + hw // 2 - 5, hh + 20),
+             (26, hh + 23), (17, hh + 24), (11, hh + 26), (17, hh + 29), (26, hh + 30),
+             (30, hh + 32), (21, hh + 34), (12, hh + 36), (7, hh + 38)]
+    pts: set = set()
+    for (x0, y0), (x1, y1) in zip(spine, spine[1:]):
+        n = max(abs(x1 - x0), abs(y1 - y0), 1)
+        for k in range(n + 1):
+            x = x0 + round((x1 - x0) * k / n)
+            y = y0 + round((y1 - y0) * k / n)
+            for dx in range(-2, 3):
+                if 0 <= x + dx < RUNAWAY_W and 0 <= y < RUNAWAY_H:
+                    pts.add((x + dx, y))
+    for (x, y) in pts:
+        c.point(x, y, "paper")
+    for (x, y) in sorted(pts):
+        for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+            if (x + dx, y + dy) not in pts and 0 <= x + dx < RUNAWAY_W \
+                    and 0 <= y + dy < RUNAWAY_H and not (y + dy < hh and hx <= x + dx):
+                c.point(x + dx, y + dy, "outline")
+    for (x, y) in sorted(pts):                            # faint print on the roll
+        if y % 5 == 0 and (x + y) % 3 == 0:
+            c.point(x, y, "wall-shadow")
     return c
 
 
@@ -571,6 +732,7 @@ def build_all() -> dict:
     virt = card_virtualised()
     dr = icon_dr()
     rc = receipt_33()
+    run = receipt_runaway()
     dfin = drives_final()
     ist = icon_storage()
     return {
@@ -578,12 +740,14 @@ def build_all() -> dict:
         "label-main-server": Sprite(lab, (lab.w // 2, lab.h)),
         "sign-dnto": Sprite(dn, (dn.w // 2, dn.h)),
         "box-fan-l": make(_box_fan_l),
+        "box-fan-face": make(_box_fan_face),
         "card-virtualised": Sprite(virt, (virt.w // 2, virt.h)),
         "icon-dr": Sprite(dr, (dr.w // 2, dr.h)),
         "desk-phone": _desk_sprite(desk_phone()),
         "desk-coinphone": _desk_sprite(desk_coinphone()),
         "phone-knot": make(_phone_knot),
         "receipt-33": Sprite(rc, (rc.w // 2, rc.h)),
+        "receipt-runaway": Sprite(run, RUNAWAY_ANCHOR),
         "drives-final": Sprite(dfin, (dfin.w // 2, dfin.h)),
         "desk-drives": Sprite(desk_drives(), desk_mod.ANCHOR, {"drives": drives_point(),
                                                               "net": desk_mod.net_point()}),

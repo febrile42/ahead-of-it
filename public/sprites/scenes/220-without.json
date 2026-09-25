@@ -3179,6 +3179,15 @@
           "depth": 8
         },
         {
+          "sprite": "chair",
+          "frame": "default",
+          "x": 53,
+          "y": 141,
+          "depth": 8,
+          "gagId": "G2.4",
+          "part": "inset"
+        },
+        {
           "sprite": "partition-c",
           "frame": "default",
           "x": 21,
@@ -3246,7 +3255,7 @@
           "x": 37,
           "y": 79,
           "w": 62,
-          "h": 42,
+          "h": 57,
           "primary": false
         },
         {

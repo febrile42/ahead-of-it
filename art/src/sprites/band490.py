@@ -21,7 +21,7 @@ Built
 from __future__ import annotations
 
 from ..dsl import Canvas
-from ..vox import Iso, Sprite, make, make_anim
+from ..vox import Iso, Sprite, dotted, make, make_anim
 from .. import glyphs
 from . import desk as desk_mod
 from .band80 import _rows
@@ -46,6 +46,33 @@ def _panel(iso: Iso):
     return iso.left_px(p["r1"], (p["c0"] + p["c1"]) / 2 - 0.8, 17.0)
 
 
+# The laptop's footprint on the desk top, in world units. The built state fills it;
+# the without state draws its outline and nothing else.
+LAPTOP = dict(c0=3.4, c1=6.8, r0=1.6, r1=3.6)
+
+
+def _absent_laptop(iso: Iso, c: Canvas, z: float):
+    """A dashed rectangle on the desktop with exactly the built laptop's footprint.
+
+    A bare brown desk reads as "a desk" — it has no way of telling you that something
+    is missing, because nothing missing has a silhouette. A dashed outline does: it is
+    the one mark that says *the thing that should be here isn't*, and it turns the empty
+    desktop from scenery into the subject. Drawn as four dotted edges in `outline` on
+    `desk-wood`, not in `net` magenta, which this pipeline reserves for network lines.
+
+    Two pixels on, two off: a single-pixel dash disappears into the wood's dither at 1x,
+    and a solid rectangle would read as a mat or a sheet of paper lying there. Pale
+    dashes with a dark pixel under each one, not dark dashes: `outline` on `desk-wood`
+    is a four-value contrast step and vanishes at 1x, where `paper` is the brightest
+    mark on the desk and the halo keeps it from dissolving where it crosses the desk's
+    own edge."""
+    lp = LAPTOP
+    corners = [iso.pt(lp["c0"], lp["r0"], z), iso.pt(lp["c1"], lp["r0"], z),
+               iso.pt(lp["c1"], lp["r1"], z), iso.pt(lp["c0"], lp["r1"], z)]
+    for p0, p1 in zip(corners, corners[1:] + corners[:1]):
+        dotted(c, p0, p1, colour="paper", on=2, period=4, halo="outline")
+
+
 def _desk_bare(iso: Iso, c: Canvas, laptop=False):
     d = desk_mod.DESK
     cal = _panel(iso)
@@ -55,10 +82,14 @@ def _desk_bare(iso: Iso, c: Canvas, laptop=False):
                      grow=1.0, grow_r=0.3)
     desk_mod._desk(iso)
     top = d["top"] + d["slab"]
+    if not laptop:
+        _absent_laptop(iso, c, top)
     if laptop:
-        # the laptop, open, screen toward the chair; a badge on its lanyard; a coffee
-        iso.box(3.4, 1.6, top, 6.8, 3.6, top + 0.6, top="chair-mid", left="badge-body",
-                right="chair-dark")
+        # the laptop, open, screen toward the chair; a badge on its lanyard; a coffee.
+        # Its base is LAPTOP exactly — the same rectangle the without state dashes.
+        lp = LAPTOP
+        iso.box(lp["c0"], lp["r0"], top, lp["c1"], lp["r1"], top + 0.6, top="chair-mid",
+                left="badge-body", right="chair-dark")
         lid = iso.box(3.4, 1.2, top, 6.8, 1.7, top + 4.6, top="chair-dark",
                       left="monitor-frame", right="outline")
         iso.paint(lid, "L", 1.7, lambda cc, z: "monitor-screen"
@@ -145,84 +176,103 @@ def calendar_one() -> Canvas:
     return c
 
 
-COAT_LOOK = dict(t="shirt-3-dark", T="hair-1", p="pants-1", s="skin-2", h="hair-1",
-                 style="short")
+# The new hire is `LOOKS["e"]` in **both** states. The previous pass gave the without
+# state its own look — different shirt, different hair, a yellow bobble hat — so
+# flipping the toggle swapped one person for another and the A/B comparison stopped
+# being about onboarding at all. One person, one seat; only the desk changes.
+HIRE_LOOK = "e"
+
+
+# -- the coat, and why it is no longer in the picture -------------------------------------
+#
+# `BANDS-AND-GAGS.md` §490 G3.1 says "a new hire sitting at a bare desk **with their coat
+# on**", and the previous pass drew exactly that: a maroon torso under a yellow knitted
+# hat. The picture review (DIA-9) rated the whole gag *doesn't read — reads inverted* and
+# asked for the coat to come off the person, because at 1x the hat read as a crown and the
+# joke landed on the hire instead of on the desk (`TONE.md`: systemic, never personal).
+#
+# A worn coat also cannot survive the review's drift finding. The hire has to be the *same
+# person* in both states, and a coat that is on in one state and off in the other changes
+# their torso colour — which is precisely the swap the A/B comparison cannot take.
+#
+# Off the person, there is nowhere in this 40 px corner for it to read: the chair back sits
+# between the camera and the hire, so a coat on it lands on their shoulders and reads as
+# clothing again; the cubicle panel is 15 px wide and the calendar is 15 px wide; and a
+# fourth maroon mass on the desk top fights the dashed rectangle, which is the cue that
+# actually carries the gag. So the coat is out, the bag at their feet stays, and the corner
+# says it with three objects instead of four. This contradicts a locked content line and is
+# flagged on DIA-2 for the Product & Content Lead and CEO rather than changed quietly.
 
 
 def coat_frame() -> Canvas:
-    """Seated from behind at the bare desk with the coat still on: a maroon coat, the
-    collar turned up, a yellow knitted hat with a bobble (dressed for outside), a bag
-    on the floor by the chair."""
-    LOOKS["_coat"] = COAT_LOOK            # a look for this pose only (not in LOOK_NAMES)
+    """The hire in their own seat, with their bag still packed at their feet.
 
-    def hook(body):
-        # seated_frame shifts the body by (1, 10): the head spans rows 11..17
-        for x in range(5, 12):             # the turned-up collar, around the nape
-            body.put(x + 1, 8 + 10, "T")
-        body.put(5 + 1, 7 + 10, "T")
-        body.put(10 + 1, 7 + 10, "T")
-        # a knitted winter hat, pulled down, a bobble on top: dressed to go outside
-        body.blob(R(4 + 1, 1 + 10, 11 + 1, 3 + 10), lambda p: "Y" if p[1] != 12 else "b",
-                  ring=True)
-        body.blob(R(7 + 1, -1 + 10, 8 + 1, 0 + 10), "Y", ring=True)
-    LOOKS["_coat"] = dict(COAT_LOOK, b="desk-wood")
-    c = seated_frame("_coat", arm=hook)
-    del LOOKS["_coat"]
-    # the bag at the chair's foot
+    The figure is `seated_frame(HIRE_LOOK)` — pixel-for-pixel the sprite the built
+    state paints at this desk — so flipping the toggle cannot swap the person. Only the
+    bag is added, and the desk beneath them changes; that is the whole diff, which is
+    the only way the A/B comparison means anything."""
+    c = seated_frame(HIRE_LOOK)
     iso = Iso(c)
     iso.box(4.6, 6.2, 0, 6.6, 7.6, 3.0, top="hair-1", left="desk-wood-dark",
             right="hair-1")
     return c
 
 
-BALLOON_W, BALLOON_H = 56, 44
-BALLOON_ANCHOR = (8, 44)
+BALLOON_W, BALLOON_H = 21, 13
+BALLOON_ANCHOR = (1, 12)           # the desk corner the string is tied to, on its left
 
 
 def balloon_frames() -> list[Canvas]:
-    """A red balloon tied to the desk's corner (the anchor), the string rising to it, a
-    `WELCOME!` tag hung on the string. Frame 0 sagging (smaller, lower, a crease),
-    frame 1 sunk further, the tag nearly on the desk."""
-    text = "WELCOME!"
-    tw = glyphs.text_width(text)
+    """The balloon, down. Two frames of a slow settle (`deflate`); anchor: the desk
+    corner its string is tied to.
+
+    The previous pass drew a taut round balloon floating above a red `WELCOME!` plate,
+    and that is a party — the picture argued the opposite of the gag, which is that
+    nobody arranged anything. The plate is gone, and with it the only piece of copy in
+    this corner: the picture has to carry it alone, and a legible sign that says the
+    wrong thing beats no sign only in the sense that it is worse.
+
+    Deflated reads at 1x by **shape**, not by shade: taut is *taller than it is wide*
+    with a hard highlight, slack is *wider than it is tall* with a dented crown, three
+    dark crease lines and no highlight at all. It lies on the desk rather than floating,
+    so there is nothing above the desk line, and its string is a limp S that has already
+    given up instead of a taut diagonal."""
     out = []
     for i in range(2):
         c = Canvas(BALLOON_W, BALLOON_H)
-        drop = 6 if i == 0 else 13
-        bx, by = 21, 4 + drop                     # balloon centre
-        rw, rh = (5, 6) if i == 0 else (4, 4)
+        bx = 13
+        rw, rh = 6, 3 - i                         # wider than tall: the slack read
+        by = 10 - rh                              # it lies *on* the desk, not above it
         pts = set()
         for y in range(by - rh, by + rh + 1):
             for x in range(bx - rw, bx + rw + 1):
-                if ((x - bx) / (rw + 0.3)) ** 2 + ((y - by) / (rh + 0.3)) ** 2 <= 1.0:
+                if ((x - bx) / (rw + 0.3)) ** 2 + ((y - by) / (rh + 0.4)) ** 2 <= 1.0:
                     pts.add((x, y))
+        # the slump: one shallow dent, off-centre. A symmetrical dip in the middle
+        # reads as a heart, which is the one shape this corner must not produce.
+        pts -= {(bx + dx, by - rh) for dx in (1, 2, 3)}
+        pts -= {(bx + 2, by - rh + 1)}
         for (x, y) in pts:
             for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
                 if (x + dx, y + dy) not in pts:
                     c.point(x + dx, y + dy, "outline")
         for (x, y) in pts:
             c.point(x, y, "badge-red")
-        c.point(bx - rw + 2, by - rh + 2, "paper")                 # the shine
-        c.point(bx - rw + 2, by - rh + 3, "paper")
-        c.point(bx + 1, by + 1, "shirt-3-dark")                    # a crease: going soft
-        c.point(bx + 2, by, "shirt-3-dark")
-        if i == 1:
-            c.point(bx - 1, by + 2, "shirt-3-dark")
-        c.point(bx, by + rh + 1, "shirt-3-dark")                   # the knot
-        # the string, from the knot down to the desk corner at the anchor, slack
-        sx0, sy0 = bx, by + rh + 2
-        sx1, sy1 = BALLOON_ANCHOR[0], BALLOON_H - 1
-        n = max(1, sy1 - sy0)
+        for k, cx in enumerate((bx - 3, bx + 1, bx + 4)):          # the creases
+            for y in range(by - rh + 1 + (k == 1), by + rh):
+                if (cx, y) in pts:
+                    c.point(cx, y, "shirt-3-dark")
+        # the puckered neck and knot, at the balloon's lower left
+        c.point(bx - rw - 1, by + rh, "shirt-3-dark")
+        c.point(bx - rw - 2, by + rh, "outline")
+        # the string: a limp S down to the desk corner the balloon is still tied to
+        sx, sy = bx - rw - 2, by + rh
+        ax, ay = BALLOON_ANCHOR
+        n = max(1, sx - ax)
         for k in range(n + 1):
             t = k / n
-            x = round(sx0 + (sx1 - sx0) * t + (2 if 0.3 < t < 0.7 else 0))
-            c.point(x, sy0 + k, "outline")
-        # the tag, hung from the string just under the balloon
-        ty = sy0 + 3
-        tx = max(0, min(BALLOON_W - tw - 4, bx - 6))
-        c.rect(tx, ty, tx + tw + 3, ty + 8, "outline")
-        c.rect(tx + 1, ty + 1, tx + tw + 2, ty + 7, "paper")
-        glyphs.draw(c, text, tx + 2, ty + 2, "badge-red")
+            y = round(sy + (ay - sy) * t + (1.5 if t < 0.45 else -1.2 if t > 0.75 else 0))
+            c.point(sx - k, max(0, min(BALLOON_H - 1, y)), "outline")
         out.append(c)
     return out
 
@@ -267,6 +317,58 @@ def _door_badge(iso: Iso, c: Canvas, green: bool):
     return {"reader": (x + 1, y)}
 
 
+# The office chair, drawn so it reads as an *office* chair and not a dark lump: a
+# five-spoke star base with a castor on each tip (the jagged floor-level cross is the
+# cue that survives at 1x — a solid plinth reads as a box), a thin gas column with a
+# gap of pavement showing either side of it, then the seat pan and the backrest. The
+# same drawing serves both states of G6.4 — at the desk when the function is there, in
+# the doorway when it isn't — so the visitor diffs one chair that moved, not two props.
+CHAIR_CX, CHAIR_CR = 2.5, 6.0          # the column's axis, in desk.CHAIR's frame
+# Four spokes rather than five: at this size the two rear spokes of a real star base
+# fall behind the seat and cost silhouette without adding read. +c and -c project to
+# down-right / up-left, +r and -r to down-left / up-right, so these four give the
+# four-armed floor cross that says "castors".
+STAR = ((2.4, 0.0), (-2.4, 0.0), (0.0, 2.1), (0.0, -2.1))
+# Taller and narrower than desk.BACKREST, which is 5 units of back over 3.4 of width
+# and reads as a wing rather than a chair. Rising clear of the seat is what makes the
+# silhouette say "chair"; its top face stays dark so the lit seat pan below it is the
+# only bright horizontal in the prop.
+CHAIR_SEAT_Z = 5.0
+BACK_Z = (6.4, 14.0)
+
+
+def _office_chair(iso: Iso, dc: float, dr: float = 0.0, back=True, facing="away"):
+    """desk.CHAIR's footprint and seat height, shifted by dc/dr world units.
+
+    `facing="away"` is the chair pushed in at a desk: the back is the near edge, the
+    way you see a chair you are standing behind. `facing="near"` turns it a half-turn
+    so the back is the far edge and the seat pan is in front of it — the only
+    orientation in which a chair standing on its own, with nothing beside it to say
+    what it is, reads as a chair at 1x."""
+    ch = desk_mod.CHAIR
+    cx, cr = CHAIR_CX + dc, CHAIR_CR + dr
+    iso.floor_shadow(cx - 1.8, cr - 1.4, cx + 1.8, cr + 1.4, grow=0.8, grow_r=0.3)
+    base = {}
+    for sc, sr in STAR:                        # spokes, then a castor on each tip
+        base.update(iso.box(min(cx, cx + sc) - 0.25, min(cr, cr + sr) - 0.25, 1.1,
+                            max(cx, cx + sc) + 0.25, max(cr, cr + sr) + 0.25, 1.9,
+                            top="chair-mid", left="chair-dark", right="chair-dark",
+                            outline=None))
+        base.update(iso.box(cx + sc - 0.4, cr + sr - 0.4, 0, cx + sc + 0.4,
+                            cr + sr + 0.4, 1.4, top="chair-dark", left="chair-dark",
+                            right="chair-dark", outline=None))
+    iso.outline(set(base), "outline")          # one silhouette for the whole base
+    iso.box(cx - 0.5, cr - 0.5, 1.9, cx + 0.5, cr + 0.5, CHAIR_SEAT_Z,  # the gas column
+            top="chair-mid", left="chair-dark", right="chair-dark")
+    iso.box(ch["c0"] + dc, ch["r0"] + dr, CHAIR_SEAT_Z, ch["c1"] + dc, ch["r1"] + dr,
+            CHAIR_SEAT_Z + 1.4, top="chair-mid", left="chair-dark", right="chair-dark",
+            edge="outline")
+    if back:
+        br = (ch["r1"] + dr) if facing == "away" else (ch["r0"] - 0.6 + dr)
+        iso.box(ch["c0"] + dc, br, CHAIR_SEAT_Z + 1.4, ch["c1"] + dc, br + 0.8,
+                BACK_Z[1], top="chair-dark", left="chair-mid", right="chair-dark")
+
+
 def _door_propped(iso: Iso, c: Canvas, propped: bool):
     _jambs_and_frame(iso)
     if not propped:
@@ -274,10 +376,11 @@ def _door_propped(iso: Iso, c: Canvas, propped: bool):
         return
     # the leaf swung out into the street from its hinge on the back post, and an office
     # chair wedged against it on the pavement, holding it open: through the doorway
-    # you see the office floor
+    # you see the office floor. The chair sits forward of the leaf, so its star base is
+    # silhouetted against pale pavement rather than lost in the door's dark brown.
     iso.box(8.6, 1.1, 0, 15.0, 1.7, DOOR_H + 0.8, top="desk-wood", left="desk-wood",
             right="desk-wood-dark")
-    _chair_at(iso, 8.4, -2.4, back=True)
+    _office_chair(iso, 9.2, -2.6, back=True, facing="near")
 
 
 def camera_dome() -> Canvas:
@@ -349,5 +452,5 @@ def build_all() -> dict:
         "inset-door-badge": red,
         "inset-door-propped": prop,
         "camera-dome": Sprite(dome, (3, 0)),
-        "chair-back": make(lambda iso, c: _chair_at(iso, 0.0, back=True)),
+        "chair-back": make(lambda iso, c: _office_chair(iso, 0.0, back=True)),
     }

@@ -1209,15 +1209,6 @@
           "part": "phones"
         },
         {
-          "sprite": "box-fan-l",
-          "frame": "default",
-          "x": 115,
-          "y": 81,
-          "depth": 5.01,
-          "gagId": "G5.3",
-          "part": "server"
-        },
-        {
           "sprite": "worker-seated",
           "frame": "d",
           "x": 213,
@@ -1282,6 +1273,15 @@
           "part": "lobby"
         },
         {
+          "sprite": "receipt-runaway",
+          "frame": "default",
+          "x": 242,
+          "y": 108,
+          "depth": 7.6,
+          "gagId": "G5.4",
+          "part": "phones"
+        },
+        {
           "sprite": "visitor",
           "frame": "default",
           "x": 51,
@@ -1291,6 +1291,15 @@
           "part": "lobby"
         },
         {
+          "sprite": "box-fan-face",
+          "frame": "default",
+          "x": 92,
+          "y": 117,
+          "depth": 8.0,
+          "gagId": "G5.3",
+          "part": "server"
+        },
+        {
           "sprite": "trolley",
           "frame": "default",
           "x": 133,
@@ -1298,6 +1307,15 @@
           "depth": 8,
           "gagId": "G3.2",
           "part": "trolley"
+        },
+        {
+          "sprite": "worker-flinch",
+          "frame": "c-left",
+          "x": 116,
+          "y": 116,
+          "depth": 8.1,
+          "gagId": "G5.3",
+          "part": "server"
         },
         {
           "sprite": "plant",
@@ -1388,6 +1406,15 @@
         {
           "sprite": "worker-seated",
           "frame": "c",
+          "x": 213,
+          "y": 157,
+          "depth": 13.01,
+          "gagId": "G1.2",
+          "part": "pit"
+        },
+        {
+          "sprite": "worker-seated",
+          "frame": "e",
           "x": 149,
           "y": 157,
           "depth": 13.01,
@@ -1498,19 +1525,19 @@
         {
           "gagId": "G5.3",
           "part": "server",
-          "x": 83,
+          "x": 73,
           "y": 24,
-          "w": 51,
-          "h": 66,
+          "w": 61,
+          "h": 92,
           "primary": true
         },
         {
           "gagId": "G5.4",
           "part": "phones",
           "x": 131,
-          "y": 55,
-          "w": 120,
-          "h": 48,
+          "y": 47,
+          "w": 148,
+          "h": 61,
           "primary": true
         }
       ],
@@ -3922,6 +3949,15 @@
           "part": "data"
         },
         {
+          "sprite": "chair",
+          "frame": "default",
+          "x": 85,
+          "y": 113,
+          "depth": 6,
+          "gagId": "G2.4",
+          "part": "inset"
+        },
+        {
           "sprite": "desk",
           "frame": "default",
           "x": 133,
@@ -4049,7 +4085,7 @@
           "x": 69,
           "y": 51,
           "w": 62,
-          "h": 42,
+          "h": 57,
           "primary": false
         },
         {

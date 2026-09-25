@@ -439,7 +439,12 @@ def _band220() -> list:
         _t("camera-bar", *tv, depth=i["r0"] + 1.6, states=B, view=S, band=220,
            gag="G2.4", part="inset", primary=False),
         # built: someone on the call, facing the screen, the wave returned
-        _t("chair", i["c0"] + 1, i["r0"] + 1, states=B, view=S, band=220,
+        # the chair stays in both states. G2.4's diff is the screen and the pose — a
+        # frozen call and someone standing at it, or a live one and the wave returned
+        # from the chair — and the chair vanishing as well was read as the building
+        # changing between states (DIA-9 drift 2). Standing next to your own empty
+        # chair is what you do when the call has died, so nothing is lost.
+        _t("chair", i["c0"] + 1, i["r0"] + 1, view=S, band=220,
            gag="G2.4", part="inset", primary=False),
         _t("worker-seated-wave", i["c0"] + 1, i["r0"] + 1, frame="a",
            depth=i["c0"] + i["r0"] + 3.01, states=B, view=S, band=220,
@@ -506,8 +511,23 @@ def _ground360() -> list:
         dict(sprite="label-main-server", attach={"id": "tower", "point": "label"},
              states=W, gag="G5.3", part="server"),
         _t("box-fan-l", 1, 3, dx=-2, depth=5.0, states=W, gag="G5.3", part="server"),
-        _t("box-fan-l", 1, 3, dx=-2, dy=-12, depth=5.01, states=W, gag="G5.3",
-           part="server"),
+        # The second fan comes off its crate and out onto the open floor, face-on and
+        # half again the size (DIA-9: "weak — something is wrong in that closet reads,
+        # it is being kept alive by household fans does not"). Two 3/4-turned grey
+        # squares inside an alcove of crates, shelves and a tower were simply more
+        # boxes; a circle out in the open is the one silhouette nothing else in this
+        # corner can be mistaken for, and being outside the closet it has pale floor
+        # behind it instead of clutter.
+        _t("box-fan-face", 2, 5, dx=-9, depth=8.0, states=W, gag="G5.3", part="server"),
+        # ...and the beat that was written down but never drawn: the person who touched
+        # it. Mid-step backing away, both hands up, facing the tower. ~12 px, and it is
+        # the difference between "a corner with machines in it" and "nobody in this
+        # building may touch that".
+        # not `quiet="drop"`: the crowd extras around a gag can thin out at later bands,
+        # but this figure *is* the gag's read, and at 490 the fan was left standing on
+        # open floor with nobody recoiling from it
+        _f("worker-flinch", 2, 5, dx=15, dy=15, frame="c-left", depth=8.1, states=W,
+           gag="G5.3", part="server"),
         _t("rack", 0, 3, depth=3.8, states=B, id="rack2", gag="G5.3", part="server"),
         _f("card-virtualised", 0.12, 4.3, dy=-28, depth=3.2, states=B, gag="G5.3",
            part="server"),
@@ -534,6 +554,12 @@ def _ground360() -> list:
            part="phones"),
         _f("receipt-33", 4.55, 0.02, dy=-25, depth=0.5, states=B, gag="G5.4",
            part="phones"),
+        # the same receipt, unspooled: the primary read for G5.4 (DIA-9). It hangs on
+        # the clear stretch of back-right wall past the last phone desk — the phones
+        # themselves stay, but they are no longer being asked to carry the gag — and
+        # pools on the open floor in front of it, where nothing else is drawn.
+        _f("receipt-runaway", 6.85, 1.05, depth=7.6, states=W, gag="G5.4",
+           part="phones"),
     ]
     # G2.1, the developer and his queue further along the back-right wall
     dc, dr = G_DEV
@@ -556,17 +582,21 @@ def _ground360() -> list:
            gag="G2.1", part="helpdesk", band=80),
     ]
     # G1.2, the pit
-    seated = {"without": {G_PIT[0]: "a", G_PIT[3]: "d", G_PIT[2]: "c"},
-              "built": dict(zip(G_PIT, "aced"))}
+    # One look per seat, and the same four people in both states. The previous pass held
+    # two maps and they disagreed at G_PIT[2]: that chair was look "e" in built and look
+    # "c" in without, so flipping the toggle changed a bystander's hair and shirt, and a
+    # viewer who sees people swapped stops believing the two pictures are the same
+    # building (DIA-9 drift 1). It also left one chair empty in without only — which at
+    # band 80 is the colleague whose sticky note is being peeled, but the peeler goes
+    # quiet at 360, so at this band the empty chair explained nothing. Here G1.2 is
+    # carried entirely by the monitors: sticky notes, or padlocks. Nothing else moves.
+    PIT_LOOK = dict(zip(G_PIT, "aced"))
     for (col, row) in G_PIT:
         P.append(_t("desk-notes", col, row, states=W, id=f"pit-{col}-{row}",
                     gag="G1.2", part="pit", band=80))
         P.append(_t("desk-padlock", col, row, states=B, gag="G1.2", part="pit", band=80))
-        for st in BOTH:
-            if (col, row) in seated[st]:
-                P.append(_t("worker-seated", col, row, frame=seated[st][(col, row)],
-                            depth=col + row + 1.01, states=(st,), gag="G1.2", part="pit",
-                            band=80))
+        P.append(_t("worker-seated", col, row, frame=PIT_LOOK[(col, row)],
+                    depth=col + row + 1.01, gag="G1.2", part="pit", band=80))
     # G2.3, the lobby by the front door
     P += [
         _t("sofa", 0, LOBBY, depth=LOBBY + 1.5, gag="G2.3", part="lobby", band=80),
@@ -705,7 +735,8 @@ def _street360() -> list:
            part="inset", primary=False),
         _t("camera-bar", *tv, depth=i["r0"] + 1.6, states=B, band=220, gag="G2.4",
            part="inset", primary=False),
-        _t("chair", i["c0"] + 1, i["r0"] + 1, states=B, band=220, gag="G2.4",
+        # both states — see the note on the same placement in the band-220 street
+        _t("chair", i["c0"] + 1, i["r0"] + 1, band=220, gag="G2.4",
            part="inset", primary=False),
         _t("worker-seated-wave", i["c0"] + 1, i["r0"] + 1, frame="a",
            depth=i["c0"] + i["r0"] + 3.01, states=B, band=220, gag="G2.4", part="inset",
@@ -750,8 +781,12 @@ def _band490() -> list:
         dict(sprite="calendar-flip", frame="flip", attach={"id": "hire-desk", "point": "cal"},
              states=W, gag="G3.1", part="desk"),
         _t("worker-coat", c, r, depth=c + r + 1.01, states=W, gag="G3.1", part="desk"),
-        _f("balloon-welcome", c + 0.95, r + 0.3, dy=-9, frame="deflate", depth=c + r + 1.3,
-           states=W, gag="G3.1", part="desk"),
+        # the balloon lies on the desk top itself (dy = -9 is the slab's surface), at
+        # the desk's -c end and still tied to its front corner: nothing in this corner
+        # floats above the desk line any more, and the end that is clear of the absent
+        # laptop's dashed rectangle is the one it lies on
+        _f("balloon-welcome", c + 0.12, r + 0.47, dy=-9, frame="deflate",
+           depth=c + r + 1.3, states=W, gag="G3.1", part="desk"),
         _t("desk-laptop", c, r, states=B, id="hire-desk-b", gag="G3.1", part="desk"),
         dict(sprite="calendar-one", attach={"id": "hire-desk-b", "point": "cal"},
              states=B, gag="G3.1", part="desk"),
