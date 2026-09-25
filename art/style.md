@@ -260,3 +260,36 @@ A gag's key object must read at native size, not only in the 4× preview:
 - **The hat (G7.3a).** A rounded red crown, a white band with PRODUCT in the glyphs,
   a brim wider than both, set on the crown of the head so the face shows (38 x 36);
   the wearer stands clear of the board's OWNER: line.
+
+## Bands 360 and 490 (PH1-11)
+
+- **A band may re-compose a room.** Nine ground-floor primaries by 490 do not fit band
+  80's 10 x 7 room at 44 px, so from 360 `ground` is a new 12 x 9 picture
+  (`layout._ground360`). Placements carry `since` / `until` (the old room's items stop at
+  360, the new room's start there) and keep their own `band`, so every earlier gag is
+  re-placed in its quiet form and 80-220 stay pixel-identical. The street is re-composed
+  the same way (`_street360`): HQ is a narrower block (`hq-5`, `hq-6`: 4 x 3 tiles) at
+  the plate's back-right so six storeys fit 240 px and nothing on the left is behind it;
+  the inset office grows to 5 x 5.
+- **Ground floor from 360.** The closet runs down the back-left wall: router at the back
+  (G1.1), `MAIN / SERVER` tower with two stacked fans and `DO NOT / TURN OFF` at the front
+  (G5.3, the callback). The phone row stands beside it on the back-right wall; phones sit
+  where a monitor would, so a seated worker never hides one, and their cords run in front
+  of the chairs to one knot outside the closet door. The coin box's user stands at the
+  row's end in profile (the gesture is the joke). The pit is mid-floor, the lobby by the
+  front door, the trolley beside the closet, the taped cable in one run
+  (`cable-tape-360`) round the front-left, the new hire (490) in the front-right corner.
+- **Labels that are the joke are billboards,** in the 3 x 5 glyphs: `MAIN SERVER`,
+  `DO NOT TURN OFF`, `-33%`, `VIRTUALISED`, the five hats, `FINAL` / `FINAL2` /
+  `FINAL-real` (lowercase `r e a l` and `-`, `%` added to `glyphs.py`), `WELCOME!`.
+- **G7.3** walks the aisle along floor-2's back-left wall (the room gains a row): without,
+  one manager, arms out for balance, under five stacked hats; built, five people in the
+  same aisle, one hat each (the PRODUCT hat at the whiteboard drops at 360: it walked).
+- **G3.1** is a monitorless desk with a cubicle panel for the calendar; the new hire
+  wears a maroon coat and a yellow knitted hat, so "still dressed to leave" reads from
+  behind; the `WELCOME!` tag hangs to the right of the calendar, never over it.
+- **G6.4** uses two segments of the inset's +c partition, a plain one between them: the
+  badge door shut with its reader on the back post (the tapper stands beside it, not in
+  front of the door), and the next door swung out into the street with a chair holding it.
+- **Polish.** `note-dave` hangs on a string from the trolley's grip (anchor = string
+  top); the frozen screens' spinner sits on a dark disc, eight dots with a fading tail.

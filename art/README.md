@@ -61,6 +61,9 @@ here).
   returns `{view: placements}`, which `export_scene.py` exports. A view's canvas is
   fitted to what it draws in both states (`compose.fit`, 2 px margin), so no edge ever
   cuts a sprite; export fails if a room outgrows 360 x 240.
+- `art/src/sprites/band360.py`, `band490.py` (PH1-11) — bands 360 and 490, both
+  states; `layout.py`'s `since` / `until` let a band re-compose a room (the ground floor
+  and the street from 360) without moving anything in an earlier band's picture.
 - `art/src/sprites/street.py` (PH1-10) — the street exterior: `pavement`, HQ as a
   building (`hq-3`, `hq-4`: a storey per narrated floor) and `hq-door`. `art/src/compose.py` renders it from `manifest.json` and
   the shipped PNGs alone, the way the site's painter will.
