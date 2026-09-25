@@ -450,19 +450,22 @@ def _link_hop(iso: Iso, c: Canvas, along: str):
 
 
 TRUCK_MS = 160
+# DIA-37: the van was cardboard brown, the colour of the parcel and the crates, and at
+# 390 px it read as two boxes before it read as a van. A generic white courier van with
+# one red stripe; the cab glass stays blue and the tyres dark.
+VAN = dict(top="paper", left="wall", right="wall-shadow", outline="outline")
+VAN_STRIPE = "badge-red"
 
 
 def _truck(iso: Iso, c: Canvas, frame: int):
-    """A tiny courier van driving +r (toward the viewer's lower left): brown box, cab
+    """A tiny courier van driving +r (toward the viewer's lower left): white box, cab
     in front, windscreen, wheels on the visible side. Frame 1 bobs the body 1 unit."""
     C0, C1 = 2.0, 6.0
     iso.floor_shadow(C0, 0.5, C1, 8.0, grow=0.8, grow_r=0.3)
     z = 1.5 + (0.6 if frame else 0)
-    f = iso.box(C0, 0.5, z, C1, 5.5, z + 7.0, top="desk-wood", left="desk-wood-dark",
-                right="hair-1")
-    iso.paint(f, "R", C1, lambda rr, zz: "sticky" if z + 4.0 <= zz < z + 5.0 else None)
-    cab = iso.box(C0, 5.5, z, C1, 8.0, z + 4.8, top="desk-wood", left="desk-wood-dark",
-                  right="hair-1")
+    f = iso.box(C0, 0.5, z, C1, 5.5, z + 7.0, **VAN)
+    iso.paint(f, "R", C1, lambda rr, zz: VAN_STRIPE if z + 4.0 <= zz < z + 5.0 else None)
+    cab = iso.box(C0, 5.5, z, C1, 8.0, z + 4.8, **VAN)
     iso.paint(cab, "L", 8.0, lambda cc, zz: "glass" if z + 2.4 <= zz < z + 4.2 and C0 + 0.5 <= cc < C1 - 0.5
               else ("sticky" if zz < z + 1.0 and (cc < C0 + 1.0 or cc >= C1 - 1.0) else None))
     iso.paint(cab, "R", C1, lambda rr, zz: "glass-dark" if z + 2.4 <= zz < z + 4.2 and rr < 7.4 else None)
@@ -496,12 +499,10 @@ def _truck_c(iso: Iso, c: Canvas, frame: int):
     CAB, BOX0, BOX1 = 0.4, 5.0, 12.4
     iso.floor_shadow(CAB, R0, BOX1, R1, grow=0.8, grow_r=0.6)
     z = 2.4 + (0.6 if frame else 0)
-    cargo = iso.box(BOX0, R0, z, BOX1, R1, z + 8.0, top="desk-wood", left="desk-wood-dark",
-                    right="hair-1")
-    iso.paint(cargo, "L", R1, lambda cc, zz: "sticky" if z + 4.5 <= zz < z + 5.5 else None)
+    cargo = iso.box(BOX0, R0, z, BOX1, R1, z + 8.0, **VAN)
+    iso.paint(cargo, "L", R1, lambda cc, zz: VAN_STRIPE if z + 4.5 <= zz < z + 5.5 else None)
     iso.paint(cargo, "R", BOX1, lambda rr, zz: "outline" if abs(rr - 4.0) < 0.3 else None)
-    cab = iso.box(CAB, R0, z, BOX0, R1, z + 4.4, top="desk-wood", left="desk-wood-dark",
-                  right="hair-1")
+    cab = iso.box(CAB, R0, z, BOX0, R1, z + 4.4, **VAN)
     # the windscreen along the cab roof's front edge, the door window on its side
     iso.paint(cab, "T", z + 4.4, lambda cc, rr: "glass-dark" if cc < CAB + 1.6 else None)
     iso.paint(cab, "L", R1, lambda cc, zz: "glass" if z + 2.0 <= zz < z + 3.8

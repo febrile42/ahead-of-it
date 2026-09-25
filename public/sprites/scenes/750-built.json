@@ -4060,15 +4060,6 @@
           "part": "door"
         },
         {
-          "sprite": "camera-dome",
-          "frame": "default",
-          "x": 133,
-          "y": 132,
-          "depth": 10.96,
-          "gagId": "G6.4",
-          "part": "door"
-        },
-        {
           "sprite": "partition-c",
           "frame": "default",
           "x": 69,

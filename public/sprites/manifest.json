@@ -301,22 +301,6 @@
     "h": 41,
     "w": 32
   },
-  "camera-dome": {
-    "anchor": [
-      0,
-      2
-    ],
-    "frames": {
-      "default": [
-        {
-          "duration": 0,
-          "file": "camera-dome.png"
-        }
-      ]
-    },
-    "h": 6,
-    "w": 10
-  },
   "card-customers": {
     "anchor": [
       20,

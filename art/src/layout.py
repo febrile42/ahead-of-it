@@ -852,8 +852,9 @@ def _band490() -> list:
     i = INSET2
     S = []
     # G6.4: the inset office's door, shut, the reader red, someone tapping a badge at it;
-    # the next door propped open with an office chair / the reader green, a camera dome
-    # over the door, the door shut, the chair back at a desk
+    # the next door propped open with an office chair / the reader green, the door
+    # shut, the chair back at a desk. No camera dome: DIA-37 rated it "doesn't read"
+    # twice over, and the green reader and the returned chair already carry "built".
     S += [
         _t("inset-door-badge", i["c1"], BADGE_ROW, frame="red", depth=i["c1"] + BADGE_ROW + 1.95,
            states=W, gag="G6.4", part="door"),
@@ -865,8 +866,6 @@ def _band490() -> list:
            depth=i["c1"] + PROPPED_ROW + 1.95, states=B, gag="G6.4", part="door"),
         _f("worker-badge", i["c1"] + 1.55, BADGE_ROW + 0.08, frame="c-left",
            depth=i["c1"] + BADGE_ROW + 3.0, gag="G6.4", part="door"),
-        _t("camera-dome", i["c1"], BADGE_ROW, states=B, gag="G6.4", part="door",
-           depth=i["c1"] + BADGE_ROW + 1.96, dx=16, dy=-33),
         # the desk the chair came from (chairless: `desk-drives` is the plain desk
         # without its chair); built, the chair is back at it
         _t("desk-drives", 2, i["r1"] - 1, band=490),

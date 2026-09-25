@@ -16,7 +16,7 @@ Without
 
 Built
   G3.1  desk-laptop         laptop open, a badge on a lanyard, a coffee; calendar-one
-  G6.4  camera-dome         a small dome over the door; chair-back (a chair at a desk)
+  G6.4  chair-back          a chair at a desk (the camera dome was dropped, DIA-37)
 """
 from __future__ import annotations
 
@@ -453,26 +453,6 @@ def _door_propped(iso: Iso, c: Canvas, propped: bool):
                   back=True, facing="near")
 
 
-def camera_dome() -> Canvas:
-    """DIA-5 (D-041): the dome on a bracket off the door frame's right-hand post, a pale
-    housing over a dark lens. Flat on the lintel it sat against the dark door leaf and
-    read as a smudge, and anywhere above the lintel it lands on the person working
-    behind the door; out here it has the pale room behind it and its own outline.
-    Anchor: the bracket's tip, where it meets the post."""
-    rows = [
-        "..ooooooo.",
-        ".oPPPPPPPo",
-        "ooWWWWWWWo",
-        "..oKKKKKo.",
-        "...oKGKo..",
-        "....ooo...",
-    ]
-    c = Canvas(10, 6)
-    _rows(c, rows, 0, 0, {"o": "outline", "P": "paper", "W": "wall-shadow",
-                          "K": "chair-dark", "G": "glass-highlight"})
-    return c
-
-
 BADGE_W, BADGE_H = 24, 24
 BADGE_ANCHOR = (12, 24)
 
@@ -520,7 +500,6 @@ def build_all() -> dict:
     else:
         shut_cv = shut.canvas
     prop.anims = {"propped": ([prop.canvas], 0), "closed": ([shut_cv], 0)}
-    dome = camera_dome()
     return {
         "desk-bare": bare,
         "desk-laptop": lap,
@@ -528,6 +507,5 @@ def build_all() -> dict:
         "calendar-one": Sprite(one, (9, 30)),
         "inset-door-badge": red,
         "inset-door-propped": prop,
-        "camera-dome": Sprite(dome, (0, 2)),
         "chair-back": make(lambda iso, c: _office_chair(iso, 0.0, back=True)),
     }
