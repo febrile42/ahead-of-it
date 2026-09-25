@@ -381,3 +381,36 @@ not 195 × 130). Amends D-036 rules 2, 4, 6 and 7 and D-038 item 1:
    The painter, navigation and contract test belong to the Web Engineer. Both are merged
    together in a scratch worktree before either lands on `develop` (the CLAUDE.md
    integration rule).
+
+**D-042a · 2026-09-25 · Web sign-off on the close-up contract, and the navigation ruling
+(DIA-39; Web Engineer, within D-042 item 7).**
+Contract: `kind`, `parent`, `rect` and the `<room>.<n>` ids are accepted as proposed.
+Counters, all written into `SCENE-FORMAT.md`: (1) `schema` becomes 2, and the painter
+refuses any other value; (2) a close-up's entries, hotspots and `focus` are in the
+close-up's own coordinates and the painter applies no offset, so the painter stays dumb;
+(3) both states of a band share their view skeleton (ids, kinds, parents, labels, order)
+so the toggle keeps the visitor's place; (4) every view has a label of at most 24
+characters, reviewed once by the Product & Content Lead; (5) exactly one `default`, on a
+close-up. The contract test and `check_scenes.py` are split by who can see what: the test
+owns everything readable from the JSON, the script owns everything that needs a PNG;
+spacing and one-primary are checked by both, on purpose.
+Navigation, all three of D-042's options in layers, none of them hidden behind another:
+1. **Room tabs**, one line, horizontally scrollable, never wrapping (a wrapping row grew
+   with the band and would shift the page). Choosing a room lands on that room's default
+   close-up, not on the establishing shot, so a tap never leaves the visitor on a picture
+   with nothing to tap.
+2. **A stepper under the scene**: previous, "label · n of N", next, over all close-ups in
+   array order, crossing room boundaries. It alone reaches every gag; the tabs are
+   shortcuts. At either end it is `aria-disabled`, not `disabled`, so focus is not lost.
+3. **Whole floor**: a persistent control that shows the room's establishing shot. There
+   each of its close-ups is a "zoom in" button over the picture, drawn from the same array
+   (never a second list), so the picture and the buttons cannot disagree.
+Transition: a straight cut, no animation; a zoom from `rect` is possible later because a
+close-up is a crop of its room, but that belongs to the Phase 2 animation pass. No swipe
+gesture (it fights page scroll). The scene box does not shrink: it is 3:2 at every view,
+because a 180 × 120 close-up at 2 css px and a 360 × 240 room at 1 css px fill it exactly,
+which also holds CLS at zero. It is the full viewport width up to 430 px (this is what makes
+1.9 css px per art px true at 360 px: a padded 328 px box would give 1.5) and capped at
+720 px from 768 px. The R-14 checklist is by band and by gag, not by view, so it stays in
+sync by construction; the contract test's "every due gag has one primary in a close-up"
+is what keeps every gag on the list also reachable in the picture.
