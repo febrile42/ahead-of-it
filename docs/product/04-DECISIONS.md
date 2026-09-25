@@ -336,3 +336,48 @@ hallway-test kit, both still on open branches.) No receipt, date or figure chang
    their hands up.
 Deferred to the Phase 1 polish list, not rated weak: the G6.4 camera dome, the §5 closet
 density, `DAVE?` on the trolley body, and the G5.1 truck reading as a crate.
+
+**D-042 · 2026-09-25 · Phone-scale close-up views; rooms become establishing shots.**
+Josh flagged on DIA-36 that the art is too small on phones, and the Art Director measured
+it: inside the 360:240 box a 390 px phone paints current rooms at 1.0–1.33 css px per art
+px, so a 24 px person is about 4 mm tall. Reviews had been judging 4× plates. Gags per room
+grow with the band (750: 12 on ground), and at 1× a 12-gag room cannot "read cold at 390 in
+under 2 s". Proposal: DIA-36 document `proposal`. Accepted with one change (item 1: 180 × 120,
+not 195 × 130). Amends D-036 rules 2, 4, 6 and 7 and D-038 item 1:
+1. **Close-ups.** A close-up view is at most **180 × 120 native px** and holds **1–3
+   primary hotspots**. 195 × 130 lands on exactly 2 css px per art px only from 390 px up;
+   at 360/375 px it drops to 1.5. 180 × 120 lands on 1.9–2.33 on every phone 360–430 px
+   wide at dpr 2, 2.625 and 3. That is the size the art is judged at.
+2. **Rooms stay.** Each D-036 room (`ground`, `floor-2`…, `top`, `street`) is kept as the
+   establishing view for its close-ups. A room exists only if it has at least one
+   close-up. Rooms carry **no gag hotspots**, because at 1× they would be tap targets
+   millimetres apart. How a visitor gets from a room to its close-ups is the web's call
+   (item 7).
+3. **Sprites unchanged.** A close-up is a rectangle cut from its parent room's own
+   native render, not a new drawing. Its parity golden is that crop, and `check_scenes.py`
+   proves it equals the room render at `rect`. This is D-038's "each room's own render", not
+   the plate cropping D-038 retired.
+4. **Primaries.** Each gag has exactly one primary per file. It sits in a close-up whose
+   parent is the gag's home room (D-036 rule 4's table now names home *rooms*).
+   Non-primary parts may sit in other close-ups.
+5. **Spacing.** The rule is **44 css px** between primary centres on a 360–430 px phone.
+   In a close-up (≥ 1.9 css px per art px) that is **≥ 24 native px**, and `check_scenes.py`
+   and the contract test both enforce it with no exceptions (D-038 item 3 stands).
+6. **Default view.** The close-up holding the most of the current band's own primaries,
+   ties to the earlier one. First paint must be readable at true size. The room is one
+   step away.
+7. **Web's call, within limits.** Navigation (tabs grouped by room, tapping a room to
+   enter, or both), transitions and the scene box size belong to the Web Engineer. The
+   limits: a 180 × 120 close-up paints at ≥ 1.9 css px per art px at 360 and 390 px, dpr 2
+   and 3 (a Playwright assertion); about 10 close-ups at 750 stay reachable at 390 px by
+   touch and keyboard; the R-14 text list stays in sync. The contract fields
+   (`SCENE-FORMAT.md`: `kind`, `parent`, `rect`, id scheme) are proposed here, and the Web
+   Engineer can counter before the exporter merges.
+8. **Review at true size.** Every picture review (the "reads cold" test, legibility passes,
+   the hallway test) uses 390 px mocks at the real painted scale, never 4× plates.
+9. **Consequences.** The DIA-3 hold is lifted: 610/750 rooms are composed so that their
+   gags fall into clusters of ≤ 3 that each fit 180 × 120 at 24 px spacing. 80–490 are
+   re-exported, not redrawn. The exporter and `check_scenes.py` belong to the Art Director.
+   The painter, navigation and contract test belong to the Web Engineer. Both are merged
+   together in a scratch worktree before either lands on `develop` (the CLAUDE.md
+   integration rule).

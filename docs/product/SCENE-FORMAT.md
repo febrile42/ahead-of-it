@@ -74,21 +74,39 @@ Rules
   `placeholder: true` hotspots; the web draws its labelled box for those. No off-palette
   PNGs ever. If a scene *file* is missing altogether (it should never be, once exported),
   the web shows a plain "not drawn yet" panel rather than failing.
-- **Views (D-036):** ids ∈ {ground, floor-2…floor-6, top, street} in that order; `ground`
-  always; others only if they hold a primary hotspot; `w ≤ 360`, `h ≤ 240`; each gag has
-  exactly one primary **per file**, in its home view (table in D-036), and at most one per
-  view; inset + map only in `street`; default view = most primaries of the current band's
-  gags; primary centres ≥ 44 native px apart. `check_scenes.py` fails the build otherwise.
-  Pan/zoom is the escape valve, not the default.
+- **Views: rooms and close-ups (D-036, amended by D-042).** Every view carries
+  `"kind": "room"` or `"kind": "closeup"`.
+  - *Rooms* are the establishing shots: ids ∈ {ground, floor-2…floor-6, top, street} in
+    that order; `w ≤ 360`, `h ≤ 240`; `ground` always, others only if they have at least one
+    close-up; inset + map only in `street`. Rooms carry **no gag hotspots** (`hotspots: []`).
+  - *Close-ups* are where the gags are tapped: `w ≤ 180`, `h ≤ 120` (3:2 preferred);
+    id `<room>.<n>` from 1 (`ground.1`, `ground.2`, `floor-2.1`); `"parent": "<room id>"`;
+    `"rect": {x, y, w, h}`, their position inside the parent room in native px. A close-up
+    holds 1–3 primary hotspots. In array order a room's close-ups directly follow the room.
+  - Each gag has exactly one primary **per file**, in a close-up whose parent is its home
+    room (table in D-036). Non-primary parts may sit in other close-ups.
+  - Primary centres are ≥ **24 native px** apart within a close-up (= 44 css px at the
+    ≥ 1.9 css px per art px a close-up gets on a 360–430 px phone).
+  - Default view = the close-up holding the most primaries of the current band's own gags;
+    ties go to the earlier one.
+  - `check_scenes.py` and the contract test fail the build on any breach. Pan/zoom is the
+    escape valve, not the default.
+  - Field names and the id scheme are proposed by D-042; the Web Engineer may counter them
+    before the exporter merges.
 - `focus` is the region to scroll to when a view is wider than the viewport. It must lie
   inside the view; it need not equal it (the exporter currently emits the full view).
 - **No exceptions.** Since PH1-10 the 44 px rule and the two-part rule hold for every drawn
-  band, and both sides enforce them without an exemption list (D-038). If art ever needs to
+  band, and both sides enforce them without an exemption list (D-038). Under D-042 the
+  spacing rule is 24 native px within a close-up. If art ever needs to
   ship a known violation, write a decision first and add a list that `check_scenes.py` and
   the contract test both read, warn on, and fail once stale.
 - Painter scaling is chosen in **device** pixels on both axes, so a view never overflows the
-  fixed 360:240 scene box: `s = max(1, min(floor(cssW·dpr / nativeW), floor(cssH·dpr / nativeH)))`;
+  3:2 scene box (the Web Engineer may resize the box under D-042 item 7, provided a
+  180 × 120 close-up paints at ≥ 1.9 css px per art px at 360 and 390 px, dpr 2 and 3): `s = max(1, min(floor(cssW·dpr / nativeW), floor(cssH·dpr / nativeH)))`;
   backing store `native·s`; CSS size `native·s/dpr`; the canvas is centred horizontally.
 - `art/checks/check_scenes.py`: determinism, manifest references and frame keys, R-03a
-  coverage both states, one primary per gag per file, hotspot bounds, 44 px spacing (with
-  no exceptions), `beyond` alias, and per-view pixel parity against each room's own render.
+  coverage both states, one primary per gag per file, hotspot bounds, 24 px close-up spacing
+  (with no exceptions), `beyond` alias, per-view pixel parity against each room's own render,
+  and each close-up equal to its parent room's render cropped at `rect` (D-042).
+- **Review at true size (D-042).** Picture reviews use 390 px mocks at the painted scale,
+  never the 4× plates.
