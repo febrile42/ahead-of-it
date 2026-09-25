@@ -20,7 +20,10 @@ module.exports = {
     collect: {
       url: ['http://localhost:4173/'],
       startServerCommand: 'npm run preview',
-      startServerReadyPattern: 'Local:',
+      // Match the host, not "Local:": vite colours its banner, and the reset code
+      // lands between "Local" and ":", so /Local:/ never matched and every run
+      // burned the full ready timeout with a WARNING (DIA-4).
+      startServerReadyPattern: 'localhost',
       startServerReadyTimeout: 30000,
       // 3 runs, LHCI asserts on the median — shared CI runners are noisy
       // enough that a single run flakes on performance score/timing.

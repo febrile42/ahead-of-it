@@ -55,9 +55,16 @@ Rules
 - `depth` is kept on every entry so Phase 2 can insert walkers between props (A2).
 - The painter draws **images only** (A3). Dotted lines, roads, links are overlay sprites
   (PNG-8, palette-checked), tagged with their gag.
+- **Bands may re-compose a room (D-039).** In the art source a placement can carry
+  `since` / `until`, so the ground floor and the street are laid out afresh from 360 rather
+  than only added to. This never appears in a scene file: each `<band>-<state>.json` is
+  complete and self-contained, and the painter must not assume a gag keeps its position, or
+  a view its size, from one band to the next. Ground grows from 282 × 188 (220) to 346 × 220
+  (360); HQ's footprint shrinks from 7 × 3 tiles to 4 × 3 (`hq-5`, then `hq-6` from 490).
+  Every rule below applies to a re-composed room exactly as to any other, with no exemptions.
 - **Cumulative (R-03a):** band N's scene contains every gag with band ≤ N in the matching
-  state. Emphasis is the art's decision: `alpha` (applied blindly by the painter) or a
-  palette-true quiet variant.
+  state (re-placed, when the room was re-composed, never dropped). Emphasis is the art's
+  decision: `alpha` (applied blindly by the painter) or a palette-true quiet variant.
 - Two-part gags get one hotspot per part, one `primary: true`, and all of a gag's hotspots
   open the same panel. Which states are two-part follows `BANDS-AND-GAGS.md`: G3.2, G4.1
   and G2.4 in both states; G5.1 in `without` only (its built state is one picture — a solid
