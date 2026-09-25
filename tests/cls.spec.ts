@@ -23,7 +23,14 @@ test.use({
 const VIEWPORT = { width: 390, height: 844 };
 
 test.describe('CLS under throttling (PH1-04 review S1)', () => {
-  test('cumulative layout shift stays under 0.1 at 390px, 4x CPU / 1.6 Mbps', async ({ page }) => {
+  test('cumulative layout shift stays under 0.1 at 390px, 4x CPU / 1.6 Mbps', async ({ page, browserName }) => {
+    // DIA-18: newCDPSession is a Chromium-only API (line 16-18's own
+    // rationale for real CDP throttling already assumes Chromium) — on
+    // the webkit-iphone project this throws before the test can even
+    // start, which isn't a DPR/rendering bug, just the wrong engine for
+    // this technique. There's no WebKit equivalent to emulate CPU/network
+    // throttling from Playwright, so skip rather than fake a result.
+    test.skip(browserName !== 'chromium', 'CDP throttling is Chromium-only; not testable on WebKit');
     const client = await page.context().newCDPSession(page);
     await client.send('Network.enable');
     // ~1.6 Mbps down / 750 Kbps up, 150ms latency — the review's own
