@@ -7,7 +7,14 @@ name: Checks and Deploy
 # push to develop/main; `preview` and `deploy-production` are gated on
 # `check` passing and keep their original push-only conditions (never on a
 # pull_request — there is nothing to deploy for a PR).
+#
+# workflow_dispatch lets `preview` be re-run against `develop` on demand
+# (e.g. after adding secrets, with no new commit to push) — a manual
+# dispatch still sets `github.ref` to the chosen branch, so `preview`'s
+# `github.ref == 'refs/heads/develop'` condition needs no change to work
+# under it.
 on:
+  workflow_dispatch: {}
   pull_request:
     branches:
       - develop
