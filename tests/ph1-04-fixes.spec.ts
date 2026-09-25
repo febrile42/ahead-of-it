@@ -152,4 +152,64 @@ test.describe('panel thumbnail (fix round item 8 / review fix 5)', () => {
       .poll(() => img.evaluate((el) => (el as HTMLImageElement).naturalWidth))
       .toBeGreaterThan(0);
   });
+
+  // DIA-22 regression guard, and the suite's only slow-asset case.
+  //
+  // The test above only flakes under CPU load, which is why the race survived
+  // this long: on an idle machine the decode usually wins and a synchronous
+  // read of naturalWidth looks correct. What that test cannot show is that
+  // the losing state is reachable at all. This one does, deterministically —
+  // it holds the response open and asserts, in that window, the exact state
+  // the flake reported: frame laid out and visible, naturalWidth still 0.
+  // That is the proof the race is real and not a broken thumbnail.
+  //
+  // Do not read the final assertion as a trap for a reintroduced synchronous
+  // read. Once the response is released the decode is fast enough that a
+  // synchronous read there still passes about 4 times in 5 (measured), which
+  // is precisely the intermittency this issue is about. The poll is correct
+  // because the window above exists, not because a sleep makes it fail.
+  //
+  // It also pins real phone behaviour (R-20). panel.ts hides the frame only
+  // from `onerror`, so while the thumbnail is still in flight the frame must
+  // stay laid out: a visitor on a slow connection must not watch it collapse
+  // and reflow the copy underneath it.
+  test('a real thumb still appears when the PNG arrives slowly', async ({ page }) => {
+    test.skip(
+      !existsSync(G2_1_THUMB_PATH),
+      'public/sprites/thumbs/G2.1.png does not exist in this worktree yet (PH1-08b hasn\'t shipped it here)'
+    );
+
+    // Held until this test says so, rather than for a fixed number of
+    // milliseconds: a sleep would just be a second, slower race, and a
+    // de-flaking test that is itself timing-dependent is worth nothing.
+    let releaseThumb: () => void = () => {};
+    const thumbHeld = new Promise<void>((resolve) => {
+      releaseThumb = resolve;
+    });
+    await page.route('**/sprites/thumbs/G2.1.png', async (route) => {
+      await thumbHeld;
+      await route.continue();
+    });
+    await interceptFixtureScenes(page);
+    await page.setViewportSize(VIEWPORT);
+    await page.goto('/');
+    await page.waitForFunction(() => document.body.dataset.renderedToken !== undefined);
+
+    await page.locator('[data-gag-id="G2.1"]').click();
+    const thumb = page.locator('.panel__thumb');
+    const img = thumb.locator('img');
+
+    // Mid-flight: the bitmap has not arrived, so the frame is reserved but
+    // empty. Not hidden — `hidden` here would mean panel.ts had mistaken a
+    // slow load for a missing file.
+    await expect(thumb).toBeVisible();
+    expect(await img.evaluate((el) => (el as HTMLImageElement).naturalWidth)).toBe(0);
+
+    // After it lands, the same frame shows a real decoded bitmap.
+    releaseThumb();
+    await expect
+      .poll(() => img.evaluate((el) => (el as HTMLImageElement).naturalWidth))
+      .toBeGreaterThan(0);
+    await expect(thumb).toBeVisible();
+  });
 });
