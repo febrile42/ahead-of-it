@@ -363,6 +363,33 @@ def wifi() -> Canvas:
     return c
 
 
+def wifi_card() -> Canvas:
+    """A callout card with the Wi-Fi fan on it in the network colour, its tail on the
+    visitor's laptop (DIA-5 item 1). It names the dotted lines: without it the magenta
+    dots were only dots, but with the symbol they start at, they are this laptop's
+    Wi-Fi, and where they end is the gag. It is a paper card, as `DEV` and `VISITOR` are,
+    because a bare 11 px fan was a pink smudge at 390 px. Anchor: the tail tip."""
+    fan = [
+        "...nnnnn...",
+        ".nn.....nn.",
+        "n...nnn...n",
+        "..nn...nn..",
+        "...........",
+        ".....n.....",
+    ]
+    fw, fh = len(fan[0]), len(fan)
+    w, h = fw + 4, fh + 4
+    c = Canvas(w, h + 3)
+    c.rect(0, 0, w - 1, h - 1, "outline")
+    c.rect(1, 1, w - 2, h - 2, "paper")
+    _rows(c, fan, 2, 2, {"n": "net"})
+    # the tail, bottom-left, down toward the laptop
+    for k in range(3):
+        c.rect(2, h - 1 + k, 4 - k, h - 1 + k, "outline")
+    c.point(3, h - 1, "paper")
+    return c
+
+
 # -- built ------------------------------------------------------------------------------
 
 RACK = dict(c0=3.0, c1=8.0, r0=0.6, r1=4.6, top=22.0)
@@ -471,6 +498,7 @@ def build_all() -> dict:
     tag = tag_visitor()
     board = sla_board()
     w = wifi()
+    wc = wifi_card()
     return {
         # without
         "closet-shelf": make_anim(_closet_shelf, 2, ms=350),
@@ -489,6 +517,7 @@ def build_all() -> dict:
         "plant": make(_plant),
         "tag-visitor": Sprite(tag, (tag.w - 3, tag.h)),
         "wifi": Sprite(w, (3, w.h)),
+        "wifi-card": Sprite(wc, (2, wc.h - 1)),
         # built
         "rack": make(_rack),
         "firewall": make(_firewall),

@@ -1023,6 +1023,15 @@
           "depth": 900,
           "gagId": "G2.3",
           "part": "lobby"
+        },
+        {
+          "sprite": "wifi-card",
+          "frame": "default",
+          "x": 90,
+          "y": 65,
+          "depth": 3.91,
+          "gagId": "G2.3",
+          "part": "lobby"
         }
       ],
       "hotspots": [
@@ -1067,7 +1076,7 @@
           "part": "lobby",
           "x": 56,
           "y": 51,
-          "w": 40,
+          "w": 47,
           "h": 32,
           "primary": true
         }

@@ -109,11 +109,28 @@ axis, each with a 1 px `outline` pixel under it so it reads on floor and wall al
 everything except billboard labels. Without: the visitor's laptop to the router and to
 every monitor. Built: the visitor's laptop to the firewall, and it stops there.
 
+DIA-5: the lines start at `wifi-card`, a paper callout with the Wi-Fi fan on it in `net`,
+its tail on the laptop, in both states. It names the dots; where they end is the gag.
+The same dotted line is how the street's link crosses the open ground between HQ's plot
+and the inset office's (`link-hop-r`, `link-hop-c`): off the road, the link is the
+network.
+
 ## Cutaway rooms (PH1-06)
 
 Back walls are full height (40 units). Walls that would hide a room's contents — the
 closet's front partitions — are cut away at 7 units, with a dark (`chair-dark`) cut
 top: the dollhouse convention, and the architectural sign that the wall continues up.
+
+**Upper floors (DIA-5).** Every view but `ground` stands on the storey below it:
+`slab-l-upper` / `slab-r-upper` are the slab plus 15 units of exterior wall with one
+window per tile, HQ's window from `street.py`, cut off square. That is what says
+"upstairs"; a room with only a slab reads as a second ground floor.
+
+**The street is two plots (DIA-5).** HQ's plot and the inset office's plot each have
+their own slab, with open ground between them (`ROOMS["street"]["plates"]`). The road
+leaves one plot and arrives at the other; on one shared plate the inset read as HQ's
+annex. HQ's plot runs a column past the block on its shaded side, where the block
+throws most of a tile of shadow (`floor_shadow(grow=7)`): a 2-unit rim read as floating.
 
 ## Looks and poses (PH1-06)
 
