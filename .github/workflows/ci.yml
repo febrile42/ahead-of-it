@@ -125,6 +125,20 @@ jobs:
       - name: Build
         run: npm run build
 
+      # Checked before the deploy, not after: wrangler's own deployment-url
+      # output is the common-case source of truth for BASE_URL below and
+      # this variable is only a fallback for it — but an unset fallback must
+      # never be discovered *after* a real production deploy has already
+      # happened. Fail here instead.
+      - name: Require WORKERS_DEV_SUBDOMAIN
+        env:
+          WORKERS_DEV_SUBDOMAIN: ${{ vars.WORKERS_DEV_SUBDOMAIN }}
+        run: |
+          if [ -z "$WORKERS_DEV_SUBDOMAIN" ]; then
+            echo "::error::WORKERS_DEV_SUBDOMAIN repo variable is unset. Add it in GitHub repo Settings > Secrets and variables > Actions > Variables — the Cloudflare account's workers.dev subdomain (e.g. joshua-gister) — before deploying to production, so the smoke test has a host to fall back to if wrangler emits no deployment-url." >&2
+            exit 1
+          fi
+
       - name: Deploy Worker
         id: deploy
         uses: cloudflare/wrangler-action@v4.0.0
