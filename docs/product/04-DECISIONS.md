@@ -287,3 +287,20 @@ HQ's exterior with the road and the inset office. Amends D-037 items 2, 7 and 8:
 5. G2.4's second part is staged as one call: the inset office's screen shows the HQ worker
    frozen mid-wave, with an inset worker beside it waving back. That is the drawable reading
    of "a worker on each side waving".
+
+**D-041 · 2026-09-25 · Three 360/490 "without" lines follow the art that reads.**
+Three rounds of picture review at 390px (DIA-9, DIA-21, DIA-28) showed that three locked
+"without" lines could not be drawn legibly as written. `BANDS-AND-GAGS.md` now describes
+what is drawn. (D-039 is held for the room re-composition rule and D-040 for the
+hallway-test kit, both still on open branches.) No receipt, date or figure changes.
+1. **G3.1:** the coat and the `WELCOME!` balloon are removed. A worn coat changes the hire's
+   torso colour between states, which breaks the rule that a person must not change across
+   the toggle. With the coat off the hire, nowhere in that corner reads. The absence is
+   carried by an outline where the laptop should be.
+2. **G5.4:** the bill on the wall carries **no figure**. `−33%` is E-10, the saving VoIP
+   delivered. It belongs only to the "already" state, and E-10 never gives a base figure to
+   print instead. What carries the gag is the roll: a bill that will not stop.
+3. **G5.3:** "everyone freezes" is replaced by the drawn beat, one figure backing away with
+   their hands up.
+Deferred to the Phase 1 polish list, not rated weak: the G6.4 camera dome, the §5 closet
+density, `DAVE?` on the trolley body, and the G5.1 truck reading as a crate.

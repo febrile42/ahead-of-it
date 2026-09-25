@@ -178,8 +178,10 @@ campus company (300+, nine buildings), the 2011–2015 receipts land here: the p
 
 ### G5.4 · The phone bill
 - **Already:** headsets, no cords, a `−33%` receipt taped to the wall. VoIP, 2011, the campus.
-- **Without:** a worker feeding coins into a desk phone; a wall of desk phones with cords
-  tangled into one knot that runs into the closet.
+- **Without:** a worker has stood up at their desk to feed coins into a coin-op phone; the
+  row's phone cords tangle into one knot that runs into the closet; a bill with no figure
+  on it hangs on the wall, its roll spilling down and looping across the floor. The bill
+  won't stop (D-041).
 - **Where:** sales pit / call-centre row.
 - **Receipt:** E-10.
 
@@ -187,7 +189,7 @@ campus company (300+, nine buildings), the 2011–2015 receipts land here: the p
 - **Already:** a real rack with a small `VIRTUALISED` badge and a second small icon offsite
   (DR). No fans. VMware 2013; Commvault + DR 2015, the campus.
 - **Without:** the closet again — *two* box fans, a `DO NOT TURN OFF` sign, a tower PC
-  hand-labelled `MAIN SERVER`; a worker touches it and everyone freezes.
+  hand-labelled `MAIN SERVER`; the worker who touched it backs away, hands up (D-041).
 - **Where:** the closet (callback to G1.1).
 - **Receipt:** E-09.
 
@@ -209,8 +211,9 @@ Systems & Automation Engineer starts a function.
 ### G3.1 · The empty desk
 - **Already:** the new hire's desk has a laptop, a badge and a coffee; the calendar shows
   one page. Joiner/mover/leaver automation, SSO/SCIM, provisioning — 2022.
-- **Without:** a new hire sitting at a bare desk with their coat on; a wall calendar above
-  them flipping pages; a `WELCOME!` balloon slowly deflating.
+- **Without:** a new hire at a bare desk, with an outline where the laptop should be and a
+  bag at their feet; a wall calendar above them flipping pages; a balloon deflated on the
+  floor (D-041).
 - **Where:** the sales pit, front row.
 - **Receipt:** E-03. **Described, never quantified** (D-012).
 
