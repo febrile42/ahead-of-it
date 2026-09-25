@@ -269,6 +269,21 @@ def _sign_caution(iso: Iso, c: Canvas):
     glyphs.draw(c, "TION", x0 + (w - glyphs.text_width("TION")) // 2, y0 + 8, "outline")
 
 
+def _tape_360(iso, c):
+    """PH1-11: band 360's re-composed ground floor routes the cable in one run, anchored
+    on the tile in front of the closet's front wall (col 1, row 5): out under the wall,
+    down past the lobby, along the front of the room, and up into the pit."""
+    pts = [(4.0, 0.4), (4.0, 27.2), (43.2, 27.2), (43.2, 14.0)]
+    marks = []
+    for (a, b), (a2, b2) in zip(pts, pts[1:]):
+        along = "r" if a == a2 else "c"
+        n = int(max(abs(a2 - a), abs(b2 - b)) / TAPE_EVERY)
+        for k in range(n):
+            t = (k + 0.5) / n
+            marks.append((a + (a2 - a) * t, b + (b2 - b) * t, along))
+    _tape_run(iso, pts, marks)
+
+
 # -- G2.3 without: the lobby ------------------------------------------------------------
 
 SOFA = dict(c0=0.5, c1=5.5, r0=1.0, r1=15.0)
@@ -468,6 +483,7 @@ def build_all() -> dict:
         "cable-tape-c": make(_tape_c),
         "cable-tape-r": make(_tape_r),
         "cable-tape-turn": make(_tape_turn),
+        "cable-tape-360": make(_tape_360, size=256),
         "sign-caution": make(_sign_caution),
         "sofa": make(_sofa),
         "plant": make(_plant),

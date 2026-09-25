@@ -1022,8 +1022,8 @@
         {
           "sprite": "note-dave",
           "frame": "default",
-          "x": 142,
-          "y": 94,
+          "x": 163,
+          "y": 84,
           "depth": 6.01,
           "gagId": "G3.2",
           "part": "trolley"
@@ -1080,7 +1080,7 @@
           "part": "trolley",
           "x": 120,
           "y": 70,
-          "w": 47,
+          "w": 55,
           "h": 38,
           "primary": true
         }
@@ -3179,6 +3179,15 @@
           "depth": 8
         },
         {
+          "sprite": "chair",
+          "frame": "default",
+          "x": 53,
+          "y": 141,
+          "depth": 8,
+          "gagId": "G2.4",
+          "part": "inset"
+        },
+        {
           "sprite": "partition-c",
           "frame": "default",
           "x": 21,
@@ -3246,7 +3255,7 @@
           "x": 37,
           "y": 79,
           "w": 62,
-          "h": 42,
+          "h": 57,
           "primary": false
         },
         {

@@ -57,8 +57,13 @@ def _window(u0, u1, z0, z1, dark_from):
     return fn
 
 
-def _hq(iso: Iso, c: Canvas, floors: int):
-    b = BLOCK
+# PH1-11: from 360 HQ is a narrower, taller block (4 tiles along +c, 3 deep) at the
+# street plate's back-right, so five and six storeys still fit D-036's 240 px and the
+# inset office on the left is never behind it. Its door is on the same tile offset.
+BLOCK_N = dict(c0=-24.0, c1=8.0, r0=-16.0, r1=8.0)
+
+
+def _hq(iso: Iso, c: Canvas, floors: int, b=BLOCK, vent=True):
     top = GROUND_H + STOREY_H * (floors - 1)
     iso.floor_shadow(b["c0"], b["r0"], b["c1"], b["r1"], grow=2.0, grow_r=0.8)
     f = iso.box(b["c0"], b["r0"], 0, b["c1"], b["r1"], top + PARAPET, top="wall-trim",
@@ -115,8 +120,9 @@ def _hq(iso: Iso, c: Canvas, floors: int):
         if ff == "T" and ((x, y - 1) not in roof):
             c.point(x, y, "wall-shadow")
     # a plant box on the roof and a vent, so the roof reads as a roof
-    iso.box(b["c1"] - 14, b["r0"] + 4, top + PARAPET, b["c1"] - 9, b["r0"] + 8,
-            top + PARAPET + 4, top="chair-mid", left="badge-body", right="chair-dark")
+    if vent:
+        iso.box(b["c1"] - 14, b["r0"] + 4, top + PARAPET, b["c1"] - 9, b["r0"] + 8,
+                top + PARAPET + 4, top="chair-mid", left="badge-body", right="chair-dark")
 
 
 def _hq_door(iso: Iso, c: Canvas, open_: bool):
@@ -157,6 +163,8 @@ def build_all() -> dict:
         "pavement": Sprite(pv, (16, 16)),
         "hq-3": make(lambda iso, c: _hq(iso, c, 3), size=360),
         "hq-4": make(lambda iso, c: _hq(iso, c, 4), size=360),
+        "hq-5": make(lambda iso, c: _hq(iso, c, 5, BLOCK_N), size=360),
+        "hq-6": make(lambda iso, c: _hq(iso, c, 6, BLOCK_N, vent=False), size=360),
     }
     # the door: two frames under one key, sharing a canvas (the union of both)
     door_open = make(lambda iso, c: _hq_door(iso, c, True))

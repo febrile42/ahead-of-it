@@ -155,14 +155,23 @@ def _trolley(iso: Iso, c: Canvas):
     for rr in (R0 + 0.4, R1 - 0.4):
         _thick(iso, [(B1, rr, ZT - 1.0), (B1 + 2.0, rr, HZ)], "wall-trim", width=1)
     _thick(iso, [(B1 + 2.2, R0 - 0.2, HZ), (B1 + 2.2, R1 + 0.2, HZ)], "badge-red", width=2)
-    # the note hangs low on the basket's near side, over the wire
-    x, y = iso.pt(11.5, R1, ZB + 2.0)
-    return {"note": (x, y)}
+    # PH1-11: the note hangs from the handle's grip on a loop of string, out over open
+    # floor, so the whole wire basket shows
+    x, y = iso.pt(B1 + 2.2, R0 + 1.2, HZ)
+    return {"note": (x, y + 1)}
 
 
 def note_dave() -> Canvas:
-    """Yellow sticky note, `DAVE?` in the glyphs. Nobody knows whose laptop this was."""
-    return _card("DAVE?", fill="sticky", tape=False, pad=1)
+    """Yellow sticky note, `DAVE?` in the glyphs. Nobody knows whose laptop this was.
+    PH1-11: it hangs on a short string from the trolley's handle; the anchor is the top
+    of the string (the `note` point on the grip)."""
+    card = _card("DAVE?", fill="sticky", tape=False, pad=1)
+    s = 4
+    c = Canvas(card.w, card.h + s)
+    for k in range(s):
+        c.point(card.w // 2, k, "outline")
+    c.img.alpha_composite(card.img, (0, s))
+    return c
 
 
 # -- G3.2 built: the laptop shelf ------------------------------------------------------
@@ -459,7 +468,7 @@ def build_all() -> dict:
         # without
         # parked along +r, nose to the wall, right across the closet door
         "trolley": make(_trolley),
-        "note-dave": Sprite(note, (note.w // 2, note.h)),
+        "note-dave": Sprite(note, (note.w // 2, 0)),
         "desk-retail-box": _desk_sprite(desk_retail_box()),
         "fishing-line": make(_fishing_line),
         "desk-sheet": _desk_sprite(desk_sheet()),

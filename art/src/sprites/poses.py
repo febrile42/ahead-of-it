@@ -366,6 +366,49 @@ def wave_side_frames(look_name: str) -> dict:
     return {look_name + "-right": right, look_name + "-left": [c.mirror_h() for c in right]}
 
 
+FLINCH_MS = 420
+
+
+def flinch_frames(look_name: str) -> dict:
+    """G5.3 without: the one who touched it. Caught mid-step *backing away* from the
+    tower, both hands up and open, the trailing leg thrown out behind.
+
+    Both arms have to go up — one raised arm is a wave, two is recoil — and the leg is
+    what turns recoil into retreat; without it the figure reads as merely startled,
+    standing still. The far arm is drawn before the torso so the torso's outline ring
+    cuts in front of it and the two arms stay separable at 1x instead of fusing into a
+    single mass either side of the head.
+
+    Frame 1 drops the hands a pixel and swaps the near leg to `back`, so the loop is a
+    shuffle rather than a jump. `<look>-right` faces right; the closet uses `-left`,
+    where the figure faces the tower it is retreating from.
+
+    Systemic, not personal (`TONE.md`): the pose is alarm, never incompetence — nobody
+    in this building may touch that machine, and this is what that costs."""
+    look = LOOKS[look_name]
+    right = []
+    for i in range(2):
+        d = i                                        # frame 1 settles a pixel lower
+        f = Fig()
+        _shadow(f, cx=8)
+        far = {(6, 9), (5, 9), (5, 8), (4, 8), (4, 7), (3, 7), (3, 6), (2, 6),
+               (2, 5), (2, 4 + d), (2, 3 + d)}
+        far_hand = {(1, 1 + d), (2, 1 + d), (1, 2 + d), (2, 2 + d)}
+        f.blob(far | far_hand, lambda p: "s" if p in far_hand else "T", ring=True)
+        _leg_side(f, "back", 0)                      # the trailing leg, still behind
+        _torso_side(f, 0)
+        _leg_side(f, "fwd" if i == 0 else "stand", 0)
+        _head_side(f, look["style"], 0)
+        f.put(10, 6, "X")                            # the open mouth
+        f.put(10, 7, "e")
+        near = {(9, 9), (10, 9), (10, 8), (11, 8), (11, 7), (12, 7), (12, 6),
+                (13, 6), (13, 5), (13, 4 + d), (13, 3 + d)}
+        near_hand = {(13, 1 + d), (14, 1 + d), (13, 2 + d), (14, 2 + d)}
+        f.blob(near | near_hand, lambda p: "s" if p in near_hand else "T", ring="outer")
+        right.append(f.to_canvas(look))
+    return {look_name + "-right": right, look_name + "-left": [c.mirror_h() for c in right]}
+
+
 HAT_W, HAT_H = 38, 36
 HAT_ANCHOR = (19, 36)
 
