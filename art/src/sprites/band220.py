@@ -98,11 +98,21 @@ def _tv(iso: Iso, c: Canvas, frame: int, frozen: bool, t: dict, who=HQ_PERSON,
     iso.paint(f, "L", t["r1"], lambda cc, z: _face_fn(cc - t["c0"], z, frozen, mouth, t,
                                                      who, wave) or "monitor-frame")
     if frozen:
-        # buffering spinner, top right: a ring of dots, one bright dot going round
-        cx, cy = iso.left_px(t["r1"], t["c1"] - 2.4, t["z1"] - 2.6)
-        ring = [(0, -2), (2, -1), (2, 1), (0, 2), (-2, 1), (-2, -1)]
+        # buffering spinner, top right (PH1-11: bigger, on its own dark disc, so "frozen"
+        # reads at 1x): eight dots round a ring, the lit one and its fading tail going
+        # round frame by frame
+        cx, cy = iso.left_px(t["r1"], t["c1"] - 3.4, t["z1"] - 4.2)
+        disc = [(dx, dy) for dy in range(-5, 6) for dx in range(-5, 6)
+                if dx * dx + dy * dy <= 22]
+        for (dx, dy) in disc:
+            c.point(cx + dx, cy + dy + dx // 2, "outline")
+        ring = [(0, -3), (2, -2), (3, 0), (2, 2), (0, 3), (-2, 2), (-3, 0), (-2, -2)]
+        lead = (frame * 4) % 8
         for i, (dx, dy) in enumerate(ring):
-            c.point(cx + dx, cy + dy + dx // 2, "paper" if i == (frame * 3) % 6 else "badge-body")
+            k = (lead - i) % 8
+            col = "paper" if k == 0 else ("wall-shadow" if k == 1 else (
+                "badge-body" if k == 2 else "chair-mid"))
+            c.point(cx + dx, cy + dy + dx // 2, col)
 
 
 def _tv_frozen(t, who=HQ_PERSON, wave=False):
