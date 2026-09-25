@@ -1022,8 +1022,8 @@
         {
           "sprite": "note-dave",
           "frame": "default",
-          "x": 142,
-          "y": 94,
+          "x": 163,
+          "y": 84,
           "depth": 6.01,
           "gagId": "G3.2",
           "part": "trolley"
@@ -1080,7 +1080,7 @@
           "part": "trolley",
           "x": 120,
           "y": 70,
-          "w": 47,
+          "w": 55,
           "h": 38,
           "primary": true
         }

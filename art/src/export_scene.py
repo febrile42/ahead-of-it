@@ -12,8 +12,8 @@ it across *both* states (`compose.fit`), so the two states overlay pixel for pix
 view edge cuts anything. There are no crop rectangles any more: a view's entries are its
 room's placements, in paint order, in the room's own coordinates.
 
-**Placeholders (bands 360-750).** No composer exists yet, so every placeholder band
-re-exports band 220's views verbatim plus one `placeholder: true` box per undrawn gag in
+**Placeholders (bands 490-750, then 610-750 once 490 is drawn).** No composer exists
+yet, so every placeholder band re-exports the nearest drawn band's views verbatim plus one `placeholder: true` box per undrawn gag in
 its D-036 home view, placed where the room is emptiest and >= 48 px from every other
 primary (`_place_placeholders`). A view that band 220 doesn't have yet (`top`) is an
 empty canvas holding only its boxes.
@@ -37,10 +37,10 @@ THUMBS_DIR = os.path.join(SPRITES_DIR, "thumbs")
 PREVIEW_VIEWS_DIR = os.path.join(_REPO_ROOT, "art", "preview", "views")
 
 STATES = ("without", "built")
-DRAWN_BANDS = (80, 150, 220)
-UNDRAWN_BANDS = (360, 490, 610, 750)
+DRAWN_BANDS = (80, 150, 220, 360, 490)
+UNDRAWN_BANDS = (610, 750)
 ALL_BANDS = DRAWN_BANDS + UNDRAWN_BANDS
-NEAREST_DRAWN = 220
+NEAREST_DRAWN = 490
 MAX_W, MAX_H = 360, 240          # D-036 rule 3
 
 # The part of a gag that carries its D-036 primary hotspot. A dict means the primary
@@ -51,6 +51,9 @@ HOME_PART = {
     "G2.2": "cable", "G2.3": "lobby",
     "G3.2": "trolley", "G4.2": "desk", "G4.3": "desks",
     "G5.1": "handover", "G2.4": "room", "G7.3a": "board",
+    # PH1-11
+    "G5.3": "server", "G5.4": "phones", "G5.6": "data", "G7.3": "hats",
+    "G3.1": "desk", "G6.4": "door",
 }
 
 # D-036 rule 4: the view a gag's *primary* hotspot must be in. Not used to move
@@ -60,6 +63,8 @@ GAG_HOME_VIEW = {
     "G1.1": "ground", "G1.2": "ground", "G2.1": "ground", "G2.2": "ground",
     "G2.3": "ground", "G3.2": "ground", "G4.2": "floor-2", "G4.3": "floor-2",
     "G2.4": "floor-2", "G7.3a": "floor-2", "G5.1": "street",
+    "G5.3": "ground", "G5.4": "ground", "G7.3": "floor-2", "G5.6": "street",
+    "G3.1": "ground", "G6.4": "street",
 }
 
 # D-036 rule 4's view assignment for gags with no composer yet (no geometry to derive
@@ -73,8 +78,6 @@ PLACEHOLDER_VIEW = {
 }
 # Gags newly introduced at each undrawn band (cumulative — R-03a).
 NEW_GAGS_AT = {
-    360: ["G5.3", "G5.4", "G5.6", "G7.3"],
-    490: ["G3.1", "G6.4"],
     610: ["G4.1", "G5.2", "G3.3", "G6.3"],
     750: ["G6.1", "G6.2", "G7.1", "G7.2", "G7.4"],
 }
@@ -374,7 +377,7 @@ def export_band(lib: compose.Library, band: int, band_new_gags: set) -> dict:
 
 
 # ---------------------------------------------------------------------------
-# placeholder bands (360-750): band 220's views + placeholder:true boxes
+# placeholder bands: the nearest drawn band's views + placeholder:true boxes
 # ---------------------------------------------------------------------------
 
 def _place_placeholders(img: Image.Image | None, w: int, h: int, hotspots: list,
@@ -579,6 +582,8 @@ _GAG_BAND = {
     "G1.1": 80, "G1.2": 80, "G2.1": 80, "G2.2": 80, "G2.3": 80,
     "G3.2": 150, "G4.2": 150, "G4.3": 150, "G5.1": 150,
     "G2.4": 220, "G7.3a": 220,
+    "G5.3": 360, "G5.4": 360, "G5.6": 360, "G7.3": 360,
+    "G3.1": 490, "G6.4": 490,
 }
 
 

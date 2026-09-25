@@ -21,7 +21,7 @@ sys.path.insert(0, _REPO_ROOT)
 from art.src.dsl import Canvas, save_png, scale_nn
 from art.src import iso
 from art.src.sprites import floor, wall, desk, worker, badge_reader, room, band80, poses
-from art.src.sprites import band150, band220, street
+from art.src.sprites import band150, band220, street, band360, band490
 from art.src import compose, layout, export_scene
 from art.src.vox import Sprite
 
@@ -191,6 +191,13 @@ def build_worker(manifest, registry):
                                          worker.ANCHOR,
                                          durations={k: poses.WAVE_MS for k in wave})
     registry["worker-wave"] = Frames(wave, worker.ANCHOR)
+    flinch = {}
+    for look in looks:
+        flinch.update(poses.flinch_frames(look))
+    manifest["worker-flinch"] = save_entry("worker-flinch", flinch, worker.W, worker.H,
+                                           worker.ANCHOR,
+                                           durations={k: poses.FLINCH_MS for k in flinch})
+    registry["worker-flinch"] = Frames(flinch, worker.ANCHOR)
     hat = {}
     for look in looks:
         hat[look] = [poses.hat_frame(look)]
@@ -198,6 +205,51 @@ def build_worker(manifest, registry):
     manifest["worker-hat"] = save_entry("worker-hat", hat, poses.HAT_W, poses.HAT_H,
                                         poses.HAT_ANCHOR)
     registry["worker-hat"] = Frames(hat, poses.HAT_ANCHOR)
+    # PH1-11 (band 360)
+    coin = {}
+    for look in looks:
+        coin.update(band360.coin_frames(look))
+    manifest["worker-coin"] = save_entry("worker-coin", coin, band360.COIN_W, band360.COIN_H,
+                                         band360.COIN_ANCHOR,
+                                         durations={k: 500 for k in coin})
+    registry["worker-coin"] = Frames(coin, band360.COIN_ANCHOR)
+    hs = {look: band360.headset_frames(look) for look in looks}
+    manifest["worker-seated-headset"] = save_entry("worker-seated-headset", hs, desk.W,
+                                                   desk.H, desk.ANCHOR)
+    registry["worker-seated-headset"] = Frames(hs, desk.ANCHOR)
+    hats = {"default": band360.hats_frames()[:1], "wobble": band360.hats_frames()}
+    manifest["worker-hats"] = save_entry("worker-hats", hats, band360.HATS_W, band360.HATS_H,
+                                         band360.HATS_ANCHOR,
+                                         durations={"wobble": band360.HATS_MS})
+    registry["worker-hats"] = Frames(hats, band360.HATS_ANCHOR)
+    one = {}
+    for look in looks:
+        for label in band360.HAT_LABELS:
+            one[f"{look}-{label.lower()}"] = [band360.onehat_frame(look, label)]
+    manifest["worker-onehat"] = save_entry("worker-onehat", one, band360.ONEHAT_W,
+                                           band360.ONEHAT_H, band360.ONEHAT_ANCHOR)
+    registry["worker-onehat"] = Frames(one, band360.ONEHAT_ANCHOR)
+    under = {"default": band360.under_frames()[:1], "hunt": band360.under_frames()}
+    manifest["worker-under"] = save_entry("worker-under", under, desk.W, desk.H, desk.ANCHOR,
+                                          durations={"hunt": 400})
+    registry["worker-under"] = Frames(under, desk.ANCHOR)
+    # PH1-11 (band 490)
+    coat = {"default": [band490.coat_frame()]}
+    manifest["worker-coat"] = save_entry("worker-coat", coat, desk.W, desk.H, desk.ANCHOR)
+    registry["worker-coat"] = Frames(coat, desk.ANCHOR)
+    bal = band490.balloon_frames()
+    bf = {"default": bal[:1], "deflate": bal}
+    manifest["balloon-welcome"] = save_entry("balloon-welcome", bf, band490.BALLOON_W,
+                                             band490.BALLOON_H, band490.BALLOON_ANCHOR,
+                                             durations={"deflate": 900})
+    registry["balloon-welcome"] = Frames(bf, band490.BALLOON_ANCHOR)
+    bdg = {}
+    for look in looks:
+        bdg.update(band490.badge_frames(look))
+    manifest["worker-badge"] = save_entry("worker-badge", bdg, band490.BADGE_W,
+                                          band490.BADGE_H, band490.BADGE_ANCHOR,
+                                          durations={k: 450 for k in bdg})
+    registry["worker-badge"] = Frames(bdg, band490.BADGE_ANCHOR)
     vis = worker.visitor_frame()
     pts = {"net": worker.VISITOR_NET}
     manifest["visitor"] = save_entry("visitor", {"default": [vis]}, vis.w, vis.h,
@@ -234,7 +286,8 @@ def save_sprite(manifest, registry, name, spr):
 
 def build_props(manifest, registry):
     for group in (room.build_all(), band80.build_all(), band150.build_all(),
-                  band220.build_all(), street.build_all()):
+                  band220.build_all(), street.build_all(), band360.build_all(),
+                  band490.build_all()):
         for name, spr in group.items():
             save_sprite(manifest, registry, name, spr)
 
@@ -291,7 +344,8 @@ def build_sheet(static, badge_rendered, worker_rendered, registry):
     for name in ("desk-notes", "desk-padlock", "desk-dev", "desk-dev-built"):
         items.append(registry[name].canvas)
     for group in (room.build_all(), band80.build_all(), band150.build_all(),
-                  band220.build_all(), street.build_all()):
+                  band220.build_all(), street.build_all(), band360.build_all(),
+                  band490.build_all()):
         for name in group:
             items.append(registry[name].canvas)
     # PH1-07 poses, one look each (all five ship): every frame, so the animation is
@@ -306,7 +360,11 @@ def build_sheet(static, badge_rendered, worker_rendered, registry):
                        ("sales", "point-right"), ("engineer", "point-left"),
                        ("worker-huddle", "a"), ("worker-huddle", "c-dongle"),
                        ("worker-wave", "c-right"),
-                       ("worker-hat", "e"), ("worker-hat", "e-left")):
+                       ("worker-hat", "e"), ("worker-hat", "e-left"),
+                       ("worker-coin", "b-left"), ("worker-seated-headset", "c"),
+                       ("worker-hats", "wobble"), ("worker-onehat", "a-support"),
+                       ("worker-under", "hunt"), ("worker-coat", "default"),
+                       ("balloon-welcome", "deflate"), ("worker-badge", "a-left")):
         items.extend(registry[key].frames[frame])
 
     # trim to drawn pixels for the sheet only (wall-mounted props keep empty canvas
