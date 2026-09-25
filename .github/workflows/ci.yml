@@ -91,13 +91,16 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Upload version with staging alias (does not touch production)
+      # DIA-24 ONE-SHOT BOOTSTRAP (Josh approved 2026-09-25): `versions upload`
+      # needs the Worker to exist, and it never has. This push runs `deploy`
+      # once to create it; the very next commit reverts this step.
+      - name: Bootstrap — first deploy creates the Worker (DIA-24, revert next)
         uses: cloudflare/wrangler-action@v4.0.0
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           wranglerVersion: "4.138.0"
-          command: versions upload --preview-alias staging
+          command: deploy
 
   # ── main → production ────────────────────────────────────────────────────
   deploy-production:
