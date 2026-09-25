@@ -659,6 +659,19 @@
       }
     }
   },
+  "ui": {
+    "wholeFloor": "Whole floor",
+    "previous": "Previous close-up",
+    "next": "Next close-up",
+    "position": "{label} · {n} of {total}",
+    "zoomIn": "Zoom in: {label}",
+    "atStart": "No earlier close-ups",
+    "atEnd": "No more close-ups",
+    "roomTab": "{room} ({count})",
+    "roomTabName": "{room}: {count} to tap",
+    "announce": "{room}: {label}, {n} of {total}",
+    "announceRoom": "{room}: whole floor"
+  },
   "ambient": {
     "hover": "Someone is always on call. In the built state, it's a rotation."
   }

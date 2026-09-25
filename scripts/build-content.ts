@@ -30,6 +30,8 @@
 //                         here, not joined into one string — the joined
 //                         address must never appear in content.json; the
 //                         client assembles it (see src/content/index.ts).
+//                         Also -> ui{} (close-up navigation strings, §
+//                         "Navigation copy (D-042a)", R-14/R-20).
 //   TIMELINE.md         -> the two employer names to ban (its own "## <name>,
 //                         <city>" headings), same convention as
 //                         scripts/check-employer.sh.
@@ -126,11 +128,29 @@ export interface Ambient {
   hover: string;
 }
 
+// D-042a close-up navigation strings (docs/content/TONE.md §"Navigation
+// copy"). Signposts only, filled with {placeholders} by the web at
+// render time — see parseUi below for which placeholders each key takes.
+export interface Ui {
+  wholeFloor: string;
+  previous: string;
+  next: string;
+  position: string;
+  zoomIn: string;
+  atStart: string;
+  atEnd: string;
+  roomTab: string;
+  roomTabName: string;
+  announce: string;
+  announceRoom: string;
+}
+
 export interface ContentJson {
   bands: Band[];
   gags: Gag[];
   beyond: Beyond;
   copy: Copy;
+  ui: Ui;
   ambient: Ambient;
 }
 
@@ -582,6 +602,82 @@ export function parseCopy(toneMd: string): Copy {
 }
 
 // ---------------------------------------------------------------------------
+// TONE.md -> ui{} (D-042a close-up navigation strings)
+// ---------------------------------------------------------------------------
+
+// Each key's expected {placeholder} set, alphabetised to match
+// placeholdersOf's output below — the web fills these in at render time
+// (docs/content/TONE.md §"Navigation copy").
+const UI_PLACEHOLDERS: Record<keyof Ui, string[]> = {
+  wholeFloor: [],
+  previous: [],
+  next: [],
+  position: ['label', 'n', 'total'],
+  zoomIn: ['label'],
+  atStart: [],
+  atEnd: [],
+  roomTab: ['count', 'room'],
+  roomTabName: ['count', 'room'],
+  announce: ['label', 'n', 'room', 'total'],
+  announceRoom: ['room'],
+};
+const UI_KEYS = Object.keys(UI_PLACEHOLDERS) as (keyof Ui)[];
+
+function placeholdersOf(copy: string): string[] {
+  return [...new Set([...copy.matchAll(/\{(\w+)\}/g)].map((m) => m[1]))].sort();
+}
+
+/** The `| \`key\` | \`copy\` | where |` table rows of §"Navigation copy (D-042a)". */
+export function parseUi(toneMd: string): Ui {
+  const startIdx = toneMd.indexOf('## Navigation copy (D-042a)');
+  if (startIdx === -1) {
+    throw new ContentPipelineError(['docs/content/TONE.md: no "## Navigation copy (D-042a)" section found']);
+  }
+  const nextHeadingIdx = toneMd.indexOf('\n## ', startIdx + 1);
+  const section = toneMd.slice(startIdx, nextHeadingIdx === -1 ? undefined : nextHeadingIdx);
+
+  const errors: string[] = [];
+  const found = new Map<string, string>();
+  const rowRe = /^\|\s*`([^`]+)`\s*\|\s*`([^`]+)`\s*\|/gm;
+  for (const m of section.matchAll(rowRe)) {
+    const [, key, value] = m;
+    if (found.has(key)) {
+      errors.push(`docs/content/TONE.md: ui.${key} is duplicated in §"Navigation copy (D-042a)"`);
+      continue;
+    }
+    found.set(key, value);
+    if (!UI_KEYS.includes(key as keyof Ui)) {
+      errors.push(`docs/content/TONE.md: unknown ui key "${key}" in §"Navigation copy (D-042a)"`);
+      continue;
+    }
+    if (value.trim() === '') {
+      errors.push(`docs/content/TONE.md: ui.${key} has empty copy in §"Navigation copy (D-042a)"`);
+      continue;
+    }
+    const expected = UI_PLACEHOLDERS[key as keyof Ui];
+    const actual = placeholdersOf(value);
+    if (JSON.stringify(actual) !== JSON.stringify(expected)) {
+      errors.push(
+        `docs/content/TONE.md: ui.${key} has placeholders {${actual.join(',')}}, expected {${expected.join(',')}}`,
+      );
+    }
+  }
+  for (const key of UI_KEYS) {
+    if (!found.has(key)) {
+      errors.push(`docs/content/TONE.md: ui.${key} is missing from §"Navigation copy (D-042a)"`);
+    }
+  }
+
+  if (errors.length > 0) {
+    throw new ContentPipelineError(errors);
+  }
+
+  const ui = {} as Ui;
+  for (const key of UI_KEYS) ui[key] = found.get(key)!;
+  return ui;
+}
+
+// ---------------------------------------------------------------------------
 // Cross-file validation
 // ---------------------------------------------------------------------------
 
@@ -717,6 +813,7 @@ export function buildContent(inputs: BuildInputs): ContentJson {
   const scenes = parseBandsGagScenes(bandsMd);
   const { gagPanels, beyond, ambientHover } = parsePanelsMd(panelsMd);
   const copy = parseCopy(toneMd);
+  const ui = parseUi(toneMd);
 
   const errors: string[] = [];
 
@@ -769,6 +866,7 @@ export function buildContent(inputs: BuildInputs): ContentJson {
     gags,
     beyond,
     copy,
+    ui,
     ambient: { hover: ambientHover },
   };
 

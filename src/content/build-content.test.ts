@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import realContent from './content.json';
 import schema from './schema.json';
@@ -12,8 +13,13 @@ import {
   parseEvidenceIds,
   parsePanelBody,
   parsePanelsMd,
+  parseUi,
   type BuildInputs,
 } from '../../scripts/build-content';
+
+// The real docs/content/TONE.md, for the "reads the real file" test below —
+// not a fixture, since D-042a's exact wording matters (R-14/R-20).
+const REAL_TONE_MD = readFileSync(new URL('../../docs/content/TONE.md', import.meta.url), 'utf-8');
 
 // ---------------------------------------------------------------------------
 // Fixtures. Small, self-contained markdown — not the real docs/content/*.md
@@ -102,7 +108,37 @@ const VALID_TONE_MD = `# Tone — fixture
 - **Contact (fixture):** email \`fixture.user@fixture-domain.example\` — assembled
   client-side, never a plain \`mailto:\` in the source. LinkedIn: \`https://www.linkedin.com/in/fixture/\`.
 - **OG description / tagline (fixture):** *Fixture tagline text.*
+
+## Navigation copy (D-042a) (fixture)
+
+| key | copy | where |
+|---|---|---|
+| \`wholeFloor\` | \`Whole floor\` | fixture. |
+| \`previous\` | \`Previous close-up\` | fixture. |
+| \`next\` | \`Next close-up\` | fixture. |
+| \`position\` | \`{label} · {n} of {total}\` | fixture. |
+| \`zoomIn\` | \`Zoom in: {label}\` | fixture. |
+| \`atStart\` | \`No earlier close-ups\` | fixture. |
+| \`atEnd\` | \`No more close-ups\` | fixture. |
+| \`roomTab\` | \`{room} ({count})\` | fixture. |
+| \`roomTabName\` | \`{room}: {count} to tap\` | fixture. |
+| \`announce\` | \`{room}: {label}, {n} of {total}\` | fixture. |
+| \`announceRoom\` | \`{room}: whole floor\` | fixture. |
 `;
+
+const VALID_UI = {
+  wholeFloor: 'Whole floor',
+  previous: 'Previous close-up',
+  next: 'Next close-up',
+  position: '{label} · {n} of {total}',
+  zoomIn: 'Zoom in: {label}',
+  atStart: 'No earlier close-ups',
+  atEnd: 'No more close-ups',
+  roomTab: '{room} ({count})',
+  roomTabName: '{room}: {count} to tap',
+  announce: '{room}: {label}, {n} of {total}',
+  announceRoom: '{room}: whole floor',
+};
 
 function validInputs(overrides: Partial<BuildInputs> = {}): BuildInputs {
   return {
@@ -195,6 +231,53 @@ describe('parsing evidence ids, employer names and toggle/share copy', () => {
 });
 
 // ---------------------------------------------------------------------------
+// TONE.md §"Navigation copy (D-042a)" -> ui{}
+// ---------------------------------------------------------------------------
+
+describe('parsing ui (D-042a)', () => {
+  it('reads the real docs/content/TONE.md navigation strings', () => {
+    expect(parseUi(REAL_TONE_MD)).toEqual({
+      wholeFloor: 'Whole floor',
+      previous: 'Previous close-up',
+      next: 'Next close-up',
+      position: '{label} · {n} of {total}',
+      zoomIn: 'Zoom in: {label}',
+      atStart: 'No earlier close-ups',
+      atEnd: 'No more close-ups',
+      roomTab: '{room} ({count})',
+      roomTabName: '{room}: {count} to tap',
+      announce: '{room}: {label}, {n} of {total}',
+      announceRoom: '{room}: whole floor',
+    });
+  });
+
+  it('reads the fixture table', () => {
+    expect(parseUi(VALID_TONE_MD)).toEqual(VALID_UI);
+  });
+
+  it('fails when a key is missing from the table', () => {
+    const missingKey = VALID_TONE_MD.replace('| `atEnd` | `No more close-ups` | fixture. |\n', '');
+    expect(() => parseUi(missingKey)).toThrow(/ui\.atEnd is missing/);
+  });
+
+  it('fails on an unknown key in the table', () => {
+    const unknownKey = VALID_TONE_MD.replace(
+      '| `announceRoom` | `{room}: whole floor` | fixture. |',
+      '| `announceRoom` | `{room}: whole floor` | fixture. |\n| `bogusKey` | `Bogus` | fixture. |',
+    );
+    expect(() => parseUi(unknownKey)).toThrow(/unknown ui key "bogusKey"/);
+  });
+
+  it('fails when a copy value has the wrong placeholder set', () => {
+    const wrongPlaceholders = VALID_TONE_MD.replace(
+      '| `position` | `{label} · {n} of {total}` | fixture. |',
+      '| `position` | `{label} · {n}` | fixture. |',
+    );
+    expect(() => parseUi(wrongPlaceholders)).toThrow(/ui\.position has placeholders \{label,n\}, expected \{label,n,total\}/);
+  });
+});
+
+// ---------------------------------------------------------------------------
 // Full pipeline, happy path
 // ---------------------------------------------------------------------------
 
@@ -205,6 +288,7 @@ describe('buildContent — happy path', () => {
     expect(content.gags).toHaveLength(1);
     expect(content.gags[0].id).toBe('G1.1');
     expect(content.beyond.panel.id).toBe('B');
+    expect(content.ui).toEqual(VALID_UI);
     expect(content.ambient.hover).toBe('Fixture hover text.');
     expect(content.copy.shareCaption).toBe('Fixture share caption.');
   });
