@@ -29,7 +29,7 @@ Each gag has: **Already** (the built-state object and the receipt — this leads
 
 **Naming (D-014):** these notes name both companies; panel copy never does (`TONE.md`).
 Fixed geography: the closet · front door · sales pit · finance corner · conference room ·
-first-floor corridor · top floor (from 610) · outside (street; inset office from 150; map
+floor 2's back-left aisle · top floor (from 610) · outside (street; inset office from 150; map
 from 490).
 
 Total: **26 gags + 1 ambient** (G7.3a added 2026-09-24, D-028). Cap 28 (G-02). ≤ 5 per band (80 and 750 are at cap).
@@ -172,7 +172,7 @@ campus company (300+, nine buildings), the 2011–2015 receipts land here: the p
 - **Without:** one IT manager wearing a stack of hats labelled `INFRA` `SEC` `SUPPORT`
   `DEV` `PRODUCT`, walking carefully. The person who built the functions is the
   bottleneck on all of them.
-- **Where:** first-floor corridor.
+- **Where:** floor 2, the aisle along the back-left wall.
 - **Receipt:** E-14 (Dev incubated 2018 → handed off 2019; Product incubated 2020 → handed
   off 2021). The two hats can literally leave two bands apart.
 
@@ -212,8 +212,8 @@ Systems & Automation Engineer starts a function.
 - **Already:** the new hire's desk has a laptop, a badge and a coffee; the calendar shows
   one page. Joiner/mover/leaver automation, SSO/SCIM, provisioning — 2022.
 - **Without:** a new hire at a bare desk, with an outline where the laptop should be and a
-  bag at their feet; a wall calendar above them flipping pages; a balloon deflated on the
-  floor (D-041).
+  bag at their feet; a calendar on the cubicle panel above the desk flipping pages; a
+  balloon deflated on the floor (D-041).
 - **Where:** the sales pit, front row.
 - **Receipt:** E-03. **Described, never quantified** (D-012).
 
@@ -253,7 +253,7 @@ Austin, NYC and DC open in the same year on one playbook.
   Support — and its line goes to Technology, not Finance.
 - **Without:** every department is a tree; IT is one box off to the side, dotted line to
   Finance, one very tired sprite in it.
-- **Where:** first-floor corridor wall.
+- **Where:** floor 2, the back-left wall by the aisle.
 - **Receipt:** E-02 (leadership layers introduced 2023; 11 staff), E-13.
 
 ### G6.3 · The moving truck
@@ -313,7 +313,7 @@ argument ends.
   in the first worker's hand says `v1 · current`. A Business Librarian, 2026.
 - **Without:** a worker holding `HOW TO DO THE THING (v3?)`, asking a colleague, who points
   at a third, who points at a padlocked filing cabinet; a wiki icon with cobwebs.
-- **Where:** first-floor corridor, near the org chart.
+- **Where:** floor 2's back-left aisle, near the org chart.
 - **Receipt:** E-26. Note: Glean (enterprise search) rolled out 2026 alongside the
   librarian — the built state's `LIBRARY` desk can plausibly have a search box on it;
   confirm before drawing (E-12).
