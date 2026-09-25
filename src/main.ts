@@ -263,6 +263,7 @@ if (sliderRoot && toggleRoot && sceneWrap && canvas && hotspotsLayer && panelRoo
   }
 
   slider.onChange((newBand) => {
+    const wasBeyond = band === 'beyond';
     band = newBand;
     currentViewId = null; // a new band picks its own default view
     if (!hasMovedSlider) {
@@ -274,6 +275,12 @@ if (sliderRoot && toggleRoot && sceneWrap && canvas && hotspotsLayer && panelRoo
       // not steal focus off the slider at its last stop, and Escape
       // should return focus there too.
       panel.open(beyondPanelFields(), 'without', { focus: false, returnFocusTo: slider.input });
+    } else if (wasBeyond) {
+      // F5 (DIA-12): the auto-opened Beyond panel is only ever true for
+      // the 'beyond' band — leaving it must close the panel rather than
+      // let it keep announcing '1,000+' over whatever band is now
+      // rendered (R-04a self-identifying panels, R-14 text/visual sync).
+      panel.close();
     }
     void render();
   });
@@ -284,8 +291,16 @@ if (sliderRoot && toggleRoot && sceneWrap && canvas && hotspotsLayer && panelRoo
     void render();
   });
 
+  // F2.2 (DIA-14): unthrottled, resize fired one full render per event — a
+  // phone scroll collapsing the address bar or a desktop window drag can
+  // produce dozens in a row (R-23). Debounce to one render per burst: each
+  // event resets the timer, so render() only runs once the resizing has
+  // actually stopped, and the eventual call still picks up whatever the
+  // final size is.
+  let resizeDebounce: ReturnType<typeof setTimeout> | undefined;
   window.addEventListener('resize', () => {
-    void render();
+    clearTimeout(resizeDebounce);
+    resizeDebounce = setTimeout(() => void render(), 150);
   });
 
   // Sanity: every band this build knows about must exist in content.json
