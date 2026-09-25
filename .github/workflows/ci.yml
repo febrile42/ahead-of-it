@@ -119,6 +119,7 @@ jobs:
         run: npm run build
 
       - name: Deploy Worker
+        id: deploy
         uses: cloudflare/wrangler-action@v4.0.0
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -126,18 +127,36 @@ jobs:
           wranglerVersion: "4.138.0"
           command: deploy
 
-      - name: Smoke test — pages serve, .git does not
+      # No custom domain yet (Phase 4, D-005/D-018) — workers.dev for now.
+      # The host is never hardcoded: wrangler's own `deployment-url` output is
+      # the truth, so renaming the Worker in wrangler.jsonc can't leave this
+      # pointed at a stale host. The composed fallback exists only for a
+      # wrangler-action version that stops emitting that output; it reads the
+      # Worker name from wrangler.jsonc rather than repeating it here, so
+      # there is exactly one place (wrangler.jsonc + this one subdomain
+      # variable) that can go stale, not two.
+      - name: Resolve deployed URL
         env:
-          # No custom domain yet (Phase 4, D-005/D-018) — workers.dev for now.
-          # Set in GitHub repo Settings > Secrets and variables > Actions > Variables.
-          # A wrong guess here breaks the first production deploy silently, so this
-          # fails loudly instead of hardcoding a hostname.
-          PROD_SMOKE_HOST: ${{ vars.PROD_SMOKE_HOST }}
+          DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
+          WORKERS_DEV_SUBDOMAIN: ${{ vars.WORKERS_DEV_SUBDOMAIN }}
         run: |
-          if [ -z "$PROD_SMOKE_HOST" ]; then
-            echo "::error::PROD_SMOKE_HOST repo variable is not set. Add it in GitHub repo Settings > Secrets and variables > Actions > Variables — the real workers.dev hostname, e.g. ahead-of-it.<account-subdomain>.workers.dev." >&2
+          if [ -n "$DEPLOYMENT_URL" ]; then
+            echo "BASE_URL=$DEPLOYMENT_URL" >> "$GITHUB_ENV"
+            echo "Resolved BASE_URL from the wrangler deploy step: $DEPLOYMENT_URL"
+            exit 0
+          fi
+          echo "::warning::wrangler deploy emitted no deployment-url output; falling back to wrangler.jsonc name + WORKERS_DEV_SUBDOMAIN."
+          if [ -z "$WORKERS_DEV_SUBDOMAIN" ]; then
+            echo "::error::No deployment-url from wrangler, and the WORKERS_DEV_SUBDOMAIN repo variable is unset. Add it in GitHub repo Settings > Secrets and variables > Actions > Variables — the Cloudflare account's workers.dev subdomain (e.g. joshua-gister), so the smoke test host can be composed." >&2
             exit 1
           fi
+          WORKER_NAME=$(node scripts/print-worker-name.mjs)
+          BASE_URL="https://${WORKER_NAME}.${WORKERS_DEV_SUBDOMAIN}.workers.dev"
+          echo "BASE_URL=$BASE_URL" >> "$GITHUB_ENV"
+          echo "Composed BASE_URL from wrangler.jsonc name '$WORKER_NAME' + WORKERS_DEV_SUBDOMAIN: $BASE_URL"
+
+      - name: Smoke test — pages serve, .git does not
+        run: |
           check() {
             STATUS=$(curl -s -o /dev/null -w "%{http_code}" --retry 5 --retry-delay 3 "$1")
             if [ "$STATUS" != "$2" ]; then
@@ -146,6 +165,5 @@ jobs:
             fi
             echo "Smoke test passed: $1 → HTTP $STATUS"
           }
-          BASE_URL="https://$PROD_SMOKE_HOST"
           check "$BASE_URL/"             200
           check "$BASE_URL/.git/config"  404
