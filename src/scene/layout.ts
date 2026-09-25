@@ -31,3 +31,20 @@ export interface SceneLayout {
   bufferH: number;
   hotspots: Hotspot[];
 }
+
+/** D-042a: a room's "zoom in" target — the close-up's `rect` in the room's coordinates. Derived from the same array the close-ups come from, so the picture and the buttons cannot disagree. */
+export interface ZoomTarget {
+  viewId: string;
+  label: string;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
+
+/** What `renderZoomTargets` reads: the room's native size and its close-ups' rects. */
+export interface ZoomLayout {
+  bufferW: number;
+  bufferH: number;
+  targets: ZoomTarget[];
+}

@@ -8,8 +8,9 @@
 // scale (R-20).
 import type { Gag, PanelFields } from '../content';
 import { getBeyond, getGags } from '../content';
-import type { SceneLayout } from '../scene/layout';
+import type { SceneLayout, ZoomLayout } from '../scene/layout';
 import { createContactLine } from './contact';
+import { ui } from './strings';
 
 const MIN_TAP_PX = 44;
 
@@ -184,6 +185,26 @@ export function beyondPanelFields(): PanelFields {
   return getBeyond().panel;
 }
 
+/** Positions `button` over the canvas from a rect in the layout's native units: centred on the rect's centre (B2), never smaller than 44 css px (R-20). Returns the centre. */
+function placeButton(
+  button: HTMLButtonElement,
+  rect: { x: number; y: number; w: number; h: number },
+  layout: { bufferW: number; bufferH: number }
+): { cx: number; cy: number } {
+  button.style.position = 'absolute';
+  // B2: position from the rect's centre, not its top-left corner —
+  // `rect.x/y` is the top-left, so the point translate(-50%,-50%)
+  // centres on has to be (x + w/2, y + h/2).
+  const cx = rect.x + rect.w / 2;
+  const cy = rect.y + rect.h / 2;
+  button.style.left = `${(cx / layout.bufferW) * 100}%`;
+  button.style.top = `${(cy / layout.bufferH) * 100}%`;
+  button.style.minWidth = `${MIN_TAP_PX}px`;
+  button.style.minHeight = `${MIN_TAP_PX}px`;
+  button.style.transform = 'translate(-50%, -50%)';
+  return { cx, cy };
+}
+
 /**
  * Renders one real <button> per hotspot in `layout`, absolutely positioned
  * over the canvas from the same coordinates the assembler drew from, each
@@ -215,23 +236,49 @@ export function renderHotspots(
     // gag, checked by layout.test.ts's coverage test).
     const title = panelFieldsFor(hotspot.gagId)?.title ?? hotspot.gagId;
     button.setAttribute('aria-label', title);
-    button.style.position = 'absolute';
-    // B2: position from the rect's centre, not its top-left corner —
-    // `hotspot.x/y` is the top-left, so the point translate(-50%,-50%)
-    // centres on has to be (x + w/2, y + h/2).
-    const cx = hotspot.x + hotspot.w / 2;
-    const cy = hotspot.y + hotspot.h / 2;
-    button.style.left = `${(cx / layout.bufferW) * 100}%`;
-    button.style.top = `${(cy / layout.bufferH) * 100}%`;
-    button.style.minWidth = `${MIN_TAP_PX}px`;
-    button.style.minHeight = `${MIN_TAP_PX}px`;
-    button.style.transform = 'translate(-50%, -50%)';
+    const { cx, cy } = placeButton(button, hotspot, layout);
     // Test-only (S4): the exact centre point in buffer units, so
     // tests/scene.spec.ts can assert the rendered button centre matches
     // within 1px without duplicating the layout math.
     button.dataset.cx = String(cx);
     button.dataset.cy = String(cy);
     button.addEventListener('click', () => onOpen(hotspot.gagId, button));
+    container.append(button);
+  }
+}
+
+/**
+ * D-042a: a room has no gag hotspots; instead one "zoom in" <button> per
+ * close-up, covering that close-up's `rect` over the room picture (never
+ * smaller than 44 css px). Same seam as `renderHotspots` — positioned from
+ * the layout's native units, so the buttons cannot disagree with the
+ * picture — and the visible caption is the close-up's own scene-file label.
+ */
+export function renderZoomTargets(
+  container: HTMLElement,
+  layout: ZoomLayout,
+  onZoom: (viewId: string, button: HTMLButtonElement) => void
+): void {
+  container.replaceChildren();
+  container.dataset.bufferW = String(layout.bufferW);
+  container.dataset.bufferH = String(layout.bufferH);
+  for (const target of layout.targets) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'hotspot hotspot--zoom';
+    button.dataset.viewId = target.viewId;
+    button.setAttribute('aria-label', ui('zoomIn', { label: target.label }));
+    const { cx, cy } = placeButton(button, target, layout);
+    button.style.width = `${(target.w / layout.bufferW) * 100}%`;
+    button.style.height = `${(target.h / layout.bufferH) * 100}%`;
+    button.dataset.cx = String(cx);
+    button.dataset.cy = String(cy);
+    const caption = document.createElement('span');
+    caption.className = 'hotspot__caption';
+    caption.setAttribute('aria-hidden', 'true');
+    caption.textContent = target.label;
+    button.append(caption);
+    button.addEventListener('click', () => onZoom(target.viewId, button));
     container.append(button);
   }
 }

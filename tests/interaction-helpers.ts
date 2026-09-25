@@ -12,6 +12,7 @@
 // what lets the same driver be used by a test that expects the current
 // (buggy) behaviour and by the regression test that expects the fixed one.
 import type { Locator, Page } from '@playwright/test';
+import { interceptFixtureScenes } from './scene-source';
 
 /** Duplicated from src/scene/bands.ts for the same reason tests/scene.spec.ts
  * duplicates it: this file runs under Playwright's own Node ESM loader, which
@@ -81,6 +82,9 @@ export async function openApp(page: Page, options: OpenOptions = {}): Promise<vo
   const viewport = options.viewport ?? PHONE;
   if (options.reducedMotion) await page.emulateMedia({ reducedMotion: options.reducedMotion });
   await page.setViewportSize(viewport);
+  // D-042: serves the schema-2 fixtures until the exporter's schema-2 scenes
+  // are in public/ (a no-op after that).
+  await interceptFixtureScenes(page);
   await page.goto('/');
   await waitForFirstRender(page);
 }
