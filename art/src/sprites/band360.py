@@ -434,8 +434,8 @@ def headset_frames(look_name: str) -> list[Canvas]:
 
 def receipt_33() -> Canvas:
     """A till receipt taped to the wall: a long paper strip, a few grey lines, and the
-    number in green, -33%. Zigzag torn bottom."""
-    text = "-33%"
+    number in green, −33% (a true minus, DIA-31). Zigzag torn bottom."""
+    text = "\u221233%"
     tw = glyphs.text_width(text)
     w = tw + 6
     h = 24
@@ -489,7 +489,7 @@ def receipt_runaway() -> Canvas:
 
     Drawn in screen space, not isometric: it is paper, it does not have a footprint, and
     a projected ribbon at this size reads as a ramp."""
-    hw, hh = glyphs.text_width("-33%") + 6, 21            # the built receipt's width
+    hw, hh = 20, 21        # the built receipt's width before DIA-31's minus added 1 px
     hx = RUNAWAY_W - hw - 2
     c = Canvas(RUNAWAY_W, RUNAWAY_H)
     c.rect(hx, 0, hx + hw - 1, hh - 1, "outline")
