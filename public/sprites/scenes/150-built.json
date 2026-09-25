@@ -1023,6 +1023,15 @@
           "depth": 900,
           "gagId": "G2.3",
           "part": "lobby"
+        },
+        {
+          "sprite": "wifi-card",
+          "frame": "default",
+          "x": 90,
+          "y": 65,
+          "depth": 3.91,
+          "gagId": "G2.3",
+          "part": "lobby"
         }
       ],
       "hotspots": [
@@ -1067,7 +1076,7 @@
           "part": "lobby",
           "x": 56,
           "y": 51,
-          "w": 40,
+          "w": 47,
           "h": 32,
           "primary": true
         },
@@ -1088,115 +1097,115 @@
       "label": "Floor 2",
       "size": {
         "w": 250,
-        "h": 172
+        "h": 187
       },
       "focus": {
         "x": 0,
         "y": 0,
         "w": 250,
-        "h": 172
+        "h": 187
       },
       "entries": [
         {
-          "sprite": "slab-l",
+          "sprite": "slab-l-upper",
           "frame": "default",
           "x": 21,
           "y": 109,
           "depth": 7
         },
         {
-          "sprite": "slab-l",
+          "sprite": "slab-l-upper",
           "frame": "default",
           "x": 37,
           "y": 117,
           "depth": 8
         },
         {
-          "sprite": "slab-l",
+          "sprite": "slab-l-upper",
           "frame": "default",
           "x": 53,
           "y": 125,
           "depth": 9
         },
         {
-          "sprite": "slab-l",
+          "sprite": "slab-l-upper",
           "frame": "default",
           "x": 69,
           "y": 133,
           "depth": 10
         },
         {
-          "sprite": "slab-l",
+          "sprite": "slab-l-upper",
           "frame": "default",
           "x": 85,
           "y": 141,
           "depth": 11
         },
         {
-          "sprite": "slab-l",
+          "sprite": "slab-l-upper",
           "frame": "default",
           "x": 101,
           "y": 149,
           "depth": 12
         },
         {
-          "sprite": "slab-l",
+          "sprite": "slab-l-upper",
           "frame": "default",
           "x": 117,
           "y": 157,
           "depth": 13
         },
         {
-          "sprite": "slab-l",
+          "sprite": "slab-l-upper",
           "frame": "default",
           "x": 133,
           "y": 165,
           "depth": 14
         },
         {
-          "sprite": "slab-r",
+          "sprite": "slab-r-upper",
           "frame": "default",
           "x": 229,
           "y": 117,
           "depth": 8
         },
         {
-          "sprite": "slab-r",
+          "sprite": "slab-r-upper",
           "frame": "default",
           "x": 213,
           "y": 125,
           "depth": 9
         },
         {
-          "sprite": "slab-r",
+          "sprite": "slab-r-upper",
           "frame": "default",
           "x": 197,
           "y": 133,
           "depth": 10
         },
         {
-          "sprite": "slab-r",
+          "sprite": "slab-r-upper",
           "frame": "default",
           "x": 181,
           "y": 141,
           "depth": 11
         },
         {
-          "sprite": "slab-r",
+          "sprite": "slab-r-upper",
           "frame": "default",
           "x": 165,
           "y": 149,
           "depth": 12
         },
         {
-          "sprite": "slab-r",
+          "sprite": "slab-r-upper",
           "frame": "default",
           "x": 149,
           "y": 157,
           "depth": 13
         },
         {
-          "sprite": "slab-r",
+          "sprite": "slab-r-upper",
           "frame": "default",
           "x": 133,
           "y": 165,
@@ -1860,489 +1869,447 @@
       "id": "street",
       "label": "Street",
       "size": {
-        "w": 298,
-        "h": 200
+        "w": 327,
+        "h": 184
       },
       "focus": {
         "x": 0,
         "y": 0,
-        "w": 298,
-        "h": 200
+        "w": 327,
+        "h": 184
       },
       "entries": [
         {
           "sprite": "slab-l",
           "frame": "default",
-          "x": 21,
+          "x": 133,
           "y": 121,
           "depth": 8
         },
         {
           "sprite": "slab-l",
           "frame": "default",
-          "x": 37,
+          "x": 149,
           "y": 129,
           "depth": 9
         },
         {
           "sprite": "slab-l",
           "frame": "default",
-          "x": 53,
+          "x": 165,
           "y": 137,
           "depth": 10
         },
         {
           "sprite": "slab-l",
           "frame": "default",
-          "x": 69,
+          "x": 181,
           "y": 145,
           "depth": 11
         },
         {
           "sprite": "slab-l",
           "frame": "default",
-          "x": 85,
+          "x": 197,
           "y": 153,
           "depth": 12
         },
         {
           "sprite": "slab-l",
           "frame": "default",
-          "x": 101,
+          "x": 213,
           "y": 161,
           "depth": 13
         },
         {
           "sprite": "slab-l",
           "frame": "default",
-          "x": 117,
+          "x": 229,
           "y": 169,
           "depth": 14
         },
         {
           "sprite": "slab-l",
           "frame": "default",
-          "x": 133,
+          "x": 245,
           "y": 177,
           "depth": 15
         },
         {
-          "sprite": "slab-l",
+          "sprite": "slab-r",
           "frame": "default",
-          "x": 149,
-          "y": 185,
-          "depth": 16
+          "x": 309,
+          "y": 145,
+          "depth": 11
         },
         {
-          "sprite": "slab-l",
+          "sprite": "slab-r",
           "frame": "default",
-          "x": 165,
-          "y": 193,
-          "depth": 17
+          "x": 293,
+          "y": 153,
+          "depth": 12
         },
         {
           "sprite": "slab-r",
           "frame": "default",
           "x": 277,
-          "y": 137,
-          "depth": 10
-        },
-        {
-          "sprite": "slab-r",
-          "frame": "default",
-          "x": 261,
-          "y": 145,
-          "depth": 11
-        },
-        {
-          "sprite": "slab-r",
-          "frame": "default",
-          "x": 245,
-          "y": 153,
-          "depth": 12
-        },
-        {
-          "sprite": "slab-r",
-          "frame": "default",
-          "x": 229,
           "y": 161,
           "depth": 13
         },
         {
           "sprite": "slab-r",
           "frame": "default",
-          "x": 213,
+          "x": 261,
           "y": 169,
           "depth": 14
         },
         {
           "sprite": "slab-r",
           "frame": "default",
-          "x": 197,
+          "x": 245,
           "y": 177,
           "depth": 15
         },
         {
-          "sprite": "slab-r",
-          "frame": "default",
-          "x": 181,
-          "y": 185,
-          "depth": 16
-        },
-        {
-          "sprite": "slab-r",
-          "frame": "default",
-          "x": 165,
-          "y": 193,
-          "depth": 17
-        },
-        {
           "sprite": "pavement",
           "frame": "default",
-          "x": 133,
-          "y": 65,
-          "depth": 1
-        },
-        {
-          "sprite": "pavement",
-          "frame": "default",
-          "x": 149,
-          "y": 73,
-          "depth": 2
-        },
-        {
-          "sprite": "pavement",
-          "frame": "default",
-          "x": 165,
-          "y": 81,
-          "depth": 3
-        },
-        {
-          "sprite": "pavement",
-          "frame": "default",
-          "x": 181,
+          "x": 197,
           "y": 89,
           "depth": 4
         },
         {
           "sprite": "pavement",
           "frame": "default",
-          "x": 197,
+          "x": 213,
           "y": 97,
           "depth": 5
         },
         {
           "sprite": "pavement",
           "frame": "default",
-          "x": 213,
+          "x": 229,
           "y": 105,
           "depth": 6
         },
         {
           "sprite": "pavement",
           "frame": "default",
-          "x": 229,
+          "x": 245,
           "y": 113,
           "depth": 7
         },
         {
           "sprite": "pavement",
           "frame": "default",
-          "x": 245,
+          "x": 261,
           "y": 121,
           "depth": 8
-        },
-        {
-          "sprite": "pavement",
-          "frame": "default",
-          "x": 261,
-          "y": 129,
-          "depth": 9
         },
         {
           "sprite": "pavement",
           "frame": "default",
           "x": 277,
-          "y": 137,
-          "depth": 10
-        },
-        {
-          "sprite": "pavement",
-          "frame": "default",
-          "x": 117,
-          "y": 73,
-          "depth": 2
-        },
-        {
-          "sprite": "pavement",
-          "frame": "default",
-          "x": 133,
-          "y": 81,
-          "depth": 3
-        },
-        {
-          "sprite": "pavement",
-          "frame": "default",
-          "x": 149,
-          "y": 89,
-          "depth": 4
-        },
-        {
-          "sprite": "pavement",
-          "frame": "default",
-          "x": 165,
-          "y": 97,
-          "depth": 5
-        },
-        {
-          "sprite": "pavement",
-          "frame": "default",
-          "x": 181,
-          "y": 105,
-          "depth": 6
-        },
-        {
-          "sprite": "pavement",
-          "frame": "default",
-          "x": 197,
-          "y": 113,
-          "depth": 7
-        },
-        {
-          "sprite": "pavement",
-          "frame": "default",
-          "x": 213,
-          "y": 121,
-          "depth": 8
-        },
-        {
-          "sprite": "pavement",
-          "frame": "default",
-          "x": 229,
           "y": 129,
           "depth": 9
         },
         {
           "sprite": "pavement",
           "frame": "default",
-          "x": 245,
+          "x": 293,
           "y": 137,
           "depth": 10
+        },
+        {
+          "sprite": "pavement",
+          "frame": "default",
+          "x": 309,
+          "y": 145,
+          "depth": 11
+        },
+        {
+          "sprite": "pavement",
+          "frame": "default",
+          "x": 181,
+          "y": 97,
+          "depth": 5
+        },
+        {
+          "sprite": "pavement",
+          "frame": "default",
+          "x": 197,
+          "y": 105,
+          "depth": 6
+        },
+        {
+          "sprite": "pavement",
+          "frame": "default",
+          "x": 213,
+          "y": 113,
+          "depth": 7
+        },
+        {
+          "sprite": "pavement",
+          "frame": "default",
+          "x": 229,
+          "y": 121,
+          "depth": 8
+        },
+        {
+          "sprite": "pavement",
+          "frame": "default",
+          "x": 245,
+          "y": 129,
+          "depth": 9
         },
         {
           "sprite": "pavement",
           "frame": "default",
           "x": 261,
-          "y": 145,
-          "depth": 11
-        },
-        {
-          "sprite": "pavement",
-          "frame": "default",
-          "x": 101,
-          "y": 81,
-          "depth": 3
-        },
-        {
-          "sprite": "pavement",
-          "frame": "default",
-          "x": 117,
-          "y": 89,
-          "depth": 4
-        },
-        {
-          "sprite": "pavement",
-          "frame": "default",
-          "x": 133,
-          "y": 97,
-          "depth": 5
-        },
-        {
-          "sprite": "pavement",
-          "frame": "default",
-          "x": 149,
-          "y": 105,
-          "depth": 6
-        },
-        {
-          "sprite": "pavement",
-          "frame": "default",
-          "x": 165,
-          "y": 113,
-          "depth": 7
-        },
-        {
-          "sprite": "pavement",
-          "frame": "default",
-          "x": 181,
-          "y": 121,
-          "depth": 8
-        },
-        {
-          "sprite": "pavement",
-          "frame": "default",
-          "x": 197,
-          "y": 129,
-          "depth": 9
-        },
-        {
-          "sprite": "pavement",
-          "frame": "default",
-          "x": 213,
           "y": 137,
           "depth": 10
         },
         {
           "sprite": "pavement",
           "frame": "default",
-          "x": 229,
+          "x": 277,
           "y": 145,
           "depth": 11
+        },
+        {
+          "sprite": "pavement",
+          "frame": "default",
+          "x": 293,
+          "y": 153,
+          "depth": 12
+        },
+        {
+          "sprite": "pavement",
+          "frame": "default",
+          "x": 165,
+          "y": 105,
+          "depth": 6
+        },
+        {
+          "sprite": "pavement",
+          "frame": "default",
+          "x": 181,
+          "y": 113,
+          "depth": 7
+        },
+        {
+          "sprite": "pavement",
+          "frame": "default",
+          "x": 197,
+          "y": 121,
+          "depth": 8
+        },
+        {
+          "sprite": "pavement",
+          "frame": "default",
+          "x": 213,
+          "y": 129,
+          "depth": 9
+        },
+        {
+          "sprite": "pavement",
+          "frame": "default",
+          "x": 229,
+          "y": 137,
+          "depth": 10
         },
         {
           "sprite": "pavement",
           "frame": "default",
           "x": 245,
-          "y": 153,
-          "depth": 12
-        },
-        {
-          "sprite": "pavement",
-          "frame": "default",
-          "x": 85,
-          "y": 89,
-          "depth": 4
-        },
-        {
-          "sprite": "pavement",
-          "frame": "default",
-          "x": 101,
-          "y": 97,
-          "depth": 5
-        },
-        {
-          "sprite": "pavement",
-          "frame": "default",
-          "x": 117,
-          "y": 105,
-          "depth": 6
-        },
-        {
-          "sprite": "pavement",
-          "frame": "default",
-          "x": 133,
-          "y": 113,
-          "depth": 7
-        },
-        {
-          "sprite": "pavement",
-          "frame": "default",
-          "x": 149,
-          "y": 121,
-          "depth": 8
-        },
-        {
-          "sprite": "pavement",
-          "frame": "default",
-          "x": 165,
-          "y": 129,
-          "depth": 9
-        },
-        {
-          "sprite": "pavement",
-          "frame": "default",
-          "x": 181,
-          "y": 137,
-          "depth": 10
-        },
-        {
-          "sprite": "pavement",
-          "frame": "default",
-          "x": 197,
           "y": 145,
           "depth": 11
         },
         {
           "sprite": "pavement",
           "frame": "default",
-          "x": 213,
+          "x": 261,
           "y": 153,
           "depth": 12
+        },
+        {
+          "sprite": "pavement",
+          "frame": "default",
+          "x": 277,
+          "y": 161,
+          "depth": 13
+        },
+        {
+          "sprite": "pavement",
+          "frame": "default",
+          "x": 149,
+          "y": 113,
+          "depth": 7
+        },
+        {
+          "sprite": "pavement",
+          "frame": "default",
+          "x": 165,
+          "y": 121,
+          "depth": 8
+        },
+        {
+          "sprite": "pavement",
+          "frame": "default",
+          "x": 181,
+          "y": 129,
+          "depth": 9
+        },
+        {
+          "sprite": "pavement",
+          "frame": "default",
+          "x": 197,
+          "y": 137,
+          "depth": 10
+        },
+        {
+          "sprite": "pavement",
+          "frame": "default",
+          "x": 213,
+          "y": 145,
+          "depth": 11
         },
         {
           "sprite": "pavement",
           "frame": "default",
           "x": 229,
-          "y": 161,
-          "depth": 13
-        },
-        {
-          "sprite": "pavement",
-          "frame": "default",
-          "x": 69,
-          "y": 97,
-          "depth": 5
-        },
-        {
-          "sprite": "pavement",
-          "frame": "default",
-          "x": 85,
-          "y": 105,
-          "depth": 6
-        },
-        {
-          "sprite": "pavement",
-          "frame": "default",
-          "x": 101,
-          "y": 113,
-          "depth": 7
-        },
-        {
-          "sprite": "pavement",
-          "frame": "default",
-          "x": 117,
-          "y": 121,
-          "depth": 8
-        },
-        {
-          "sprite": "pavement",
-          "frame": "default",
-          "x": 133,
-          "y": 129,
-          "depth": 9
-        },
-        {
-          "sprite": "pavement",
-          "frame": "default",
-          "x": 149,
-          "y": 137,
-          "depth": 10
-        },
-        {
-          "sprite": "pavement",
-          "frame": "default",
-          "x": 165,
-          "y": 145,
-          "depth": 11
-        },
-        {
-          "sprite": "pavement",
-          "frame": "default",
-          "x": 181,
           "y": 153,
           "depth": 12
         },
         {
           "sprite": "pavement",
           "frame": "default",
-          "x": 197,
+          "x": 245,
           "y": 161,
           "depth": 13
+        },
+        {
+          "sprite": "pavement",
+          "frame": "default",
+          "x": 261,
+          "y": 169,
+          "depth": 14
+        },
+        {
+          "sprite": "pavement",
+          "frame": "default",
+          "x": 133,
+          "y": 121,
+          "depth": 8
+        },
+        {
+          "sprite": "pavement",
+          "frame": "default",
+          "x": 149,
+          "y": 129,
+          "depth": 9
+        },
+        {
+          "sprite": "pavement",
+          "frame": "default",
+          "x": 165,
+          "y": 137,
+          "depth": 10
+        },
+        {
+          "sprite": "pavement",
+          "frame": "default",
+          "x": 181,
+          "y": 145,
+          "depth": 11
+        },
+        {
+          "sprite": "pavement",
+          "frame": "default",
+          "x": 197,
+          "y": 153,
+          "depth": 12
         },
         {
           "sprite": "pavement",
           "frame": "default",
           "x": 213,
+          "y": 161,
+          "depth": 13
+        },
+        {
+          "sprite": "pavement",
+          "frame": "default",
+          "x": 229,
+          "y": 169,
+          "depth": 14
+        },
+        {
+          "sprite": "pavement",
+          "frame": "default",
+          "x": 245,
+          "y": 177,
+          "depth": 15
+        },
+        {
+          "sprite": "slab-l",
+          "frame": "default",
+          "x": 21,
+          "y": 129,
+          "depth": 9
+        },
+        {
+          "sprite": "slab-l",
+          "frame": "default",
+          "x": 37,
+          "y": 137,
+          "depth": 10
+        },
+        {
+          "sprite": "slab-l",
+          "frame": "default",
+          "x": 53,
+          "y": 145,
+          "depth": 11
+        },
+        {
+          "sprite": "slab-l",
+          "frame": "default",
+          "x": 69,
+          "y": 153,
+          "depth": 12
+        },
+        {
+          "sprite": "slab-l",
+          "frame": "default",
+          "x": 85,
+          "y": 161,
+          "depth": 13
+        },
+        {
+          "sprite": "slab-l",
+          "frame": "default",
+          "x": 101,
+          "y": 169,
+          "depth": 14
+        },
+        {
+          "sprite": "slab-r",
+          "frame": "default",
+          "x": 133,
+          "y": 153,
+          "depth": 12
+        },
+        {
+          "sprite": "slab-r",
+          "frame": "default",
+          "x": 117,
+          "y": 161,
+          "depth": 13
+        },
+        {
+          "sprite": "slab-r",
+          "frame": "default",
+          "x": 101,
           "y": 169,
           "depth": 14
         },
@@ -2350,223 +2317,139 @@
           "sprite": "pavement",
           "frame": "default",
           "x": 53,
-          "y": 105,
-          "depth": 6
-        },
-        {
-          "sprite": "pavement",
-          "frame": "default",
-          "x": 69,
           "y": 113,
           "depth": 7
         },
         {
           "sprite": "pavement",
           "frame": "default",
-          "x": 85,
+          "x": 69,
           "y": 121,
           "depth": 8
         },
         {
           "sprite": "pavement",
           "frame": "default",
-          "x": 101,
+          "x": 85,
           "y": 129,
           "depth": 9
         },
         {
           "sprite": "pavement",
           "frame": "default",
-          "x": 117,
+          "x": 101,
           "y": 137,
           "depth": 10
         },
         {
           "sprite": "pavement",
           "frame": "default",
-          "x": 133,
+          "x": 117,
           "y": 145,
           "depth": 11
         },
         {
           "sprite": "pavement",
           "frame": "default",
-          "x": 149,
+          "x": 133,
           "y": 153,
           "depth": 12
-        },
-        {
-          "sprite": "pavement",
-          "frame": "default",
-          "x": 165,
-          "y": 161,
-          "depth": 13
-        },
-        {
-          "sprite": "pavement",
-          "frame": "default",
-          "x": 181,
-          "y": 169,
-          "depth": 14
-        },
-        {
-          "sprite": "pavement",
-          "frame": "default",
-          "x": 197,
-          "y": 177,
-          "depth": 15
         },
         {
           "sprite": "pavement",
           "frame": "default",
           "x": 37,
-          "y": 113,
-          "depth": 7
-        },
-        {
-          "sprite": "pavement",
-          "frame": "default",
-          "x": 53,
           "y": 121,
           "depth": 8
         },
         {
           "sprite": "pavement",
           "frame": "default",
-          "x": 69,
+          "x": 53,
           "y": 129,
           "depth": 9
         },
         {
           "sprite": "pavement",
           "frame": "default",
-          "x": 85,
+          "x": 69,
           "y": 137,
           "depth": 10
         },
         {
           "sprite": "pavement",
           "frame": "default",
-          "x": 101,
+          "x": 85,
           "y": 145,
           "depth": 11
         },
         {
           "sprite": "pavement",
           "frame": "default",
-          "x": 117,
+          "x": 101,
           "y": 153,
           "depth": 12
         },
         {
           "sprite": "pavement",
           "frame": "default",
-          "x": 133,
+          "x": 117,
           "y": 161,
           "depth": 13
-        },
-        {
-          "sprite": "pavement",
-          "frame": "default",
-          "x": 149,
-          "y": 169,
-          "depth": 14
-        },
-        {
-          "sprite": "pavement",
-          "frame": "default",
-          "x": 165,
-          "y": 177,
-          "depth": 15
-        },
-        {
-          "sprite": "pavement",
-          "frame": "default",
-          "x": 181,
-          "y": 185,
-          "depth": 16
         },
         {
           "sprite": "pavement",
           "frame": "default",
           "x": 21,
-          "y": 121,
-          "depth": 8
-        },
-        {
-          "sprite": "pavement",
-          "frame": "default",
-          "x": 37,
           "y": 129,
           "depth": 9
         },
         {
           "sprite": "pavement",
           "frame": "default",
-          "x": 53,
+          "x": 37,
           "y": 137,
           "depth": 10
         },
         {
           "sprite": "pavement",
           "frame": "default",
-          "x": 69,
+          "x": 53,
           "y": 145,
           "depth": 11
         },
         {
           "sprite": "pavement",
           "frame": "default",
-          "x": 85,
+          "x": 69,
           "y": 153,
           "depth": 12
         },
         {
           "sprite": "pavement",
           "frame": "default",
-          "x": 101,
+          "x": 85,
           "y": 161,
           "depth": 13
         },
         {
           "sprite": "pavement",
           "frame": "default",
-          "x": 117,
+          "x": 101,
           "y": 169,
           "depth": 14
         },
         {
-          "sprite": "pavement",
-          "frame": "default",
-          "x": 133,
-          "y": 177,
-          "depth": 15
-        },
-        {
-          "sprite": "pavement",
-          "frame": "default",
-          "x": 149,
-          "y": 185,
-          "depth": 16
-        },
-        {
-          "sprite": "pavement",
-          "frame": "default",
-          "x": 165,
-          "y": 193,
-          "depth": 17
-        },
-        {
           "sprite": "road-r",
           "frame": "default",
-          "x": 165,
+          "x": 181,
           "y": 129,
           "depth": 9
         },
         {
           "sprite": "road-r",
           "frame": "default",
-          "x": 149,
+          "x": 165,
           "y": 137,
           "depth": 10
         },
@@ -2574,41 +2457,41 @@
           "sprite": "road-r",
           "frame": "default",
           "x": 133,
-          "y": 145,
-          "depth": 11
+          "y": 153,
+          "depth": 12
         },
         {
           "sprite": "road-turn",
           "frame": "default",
           "x": 117,
+          "y": 161,
+          "depth": 13
+        },
+        {
+          "sprite": "road-c",
+          "frame": "default",
+          "x": 101,
           "y": 153,
           "depth": 12
         },
         {
           "sprite": "road-c",
           "frame": "default",
-          "x": 101,
+          "x": 85,
           "y": 145,
           "depth": 11
         },
         {
-          "sprite": "road-c",
-          "frame": "default",
-          "x": 85,
-          "y": 137,
-          "depth": 10
-        },
-        {
           "sprite": "link-r",
           "frame": "default",
-          "x": 165,
+          "x": 181,
           "y": 129,
           "depth": 9
         },
         {
           "sprite": "link-r",
           "frame": "default",
-          "x": 149,
+          "x": 165,
           "y": 137,
           "depth": 10
         },
@@ -2616,153 +2499,160 @@
           "sprite": "link-r",
           "frame": "default",
           "x": 133,
-          "y": 145,
-          "depth": 11
+          "y": 153,
+          "depth": 12
         },
         {
           "sprite": "link-turn",
           "frame": "default",
           "x": 117,
+          "y": 161,
+          "depth": 13
+        },
+        {
+          "sprite": "link-c",
+          "frame": "default",
+          "x": 101,
           "y": 153,
           "depth": 12
         },
         {
           "sprite": "link-c",
           "frame": "default",
-          "x": 101,
+          "x": 85,
           "y": 145,
           "depth": 11
         },
         {
-          "sprite": "link-c",
+          "sprite": "link-hop-r",
           "frame": "default",
-          "x": 85,
-          "y": 137,
-          "depth": 10
+          "x": 149,
+          "y": 145,
+          "depth": 11
         },
         {
           "sprite": "floor-office",
           "frame": "default",
           "x": 53,
-          "y": 105,
-          "depth": 6
-        },
-        {
-          "sprite": "floor-office",
-          "frame": "default",
-          "x": 69,
           "y": 113,
           "depth": 7
         },
         {
           "sprite": "floor-office",
           "frame": "default",
-          "x": 85,
+          "x": 69,
           "y": 121,
           "depth": 8
+        },
+        {
+          "sprite": "floor-office",
+          "frame": "default",
+          "x": 85,
+          "y": 129,
+          "depth": 9
         },
         {
           "sprite": "floor-office",
           "frame": "default",
           "x": 37,
-          "y": 113,
-          "depth": 7
-        },
-        {
-          "sprite": "floor-office",
-          "frame": "default",
-          "x": 53,
           "y": 121,
           "depth": 8
         },
         {
           "sprite": "floor-office",
           "frame": "default",
-          "x": 69,
+          "x": 53,
           "y": 129,
           "depth": 9
+        },
+        {
+          "sprite": "floor-office",
+          "frame": "default",
+          "x": 69,
+          "y": 137,
+          "depth": 10
         },
         {
           "sprite": "floor-office",
           "frame": "default",
           "x": 21,
-          "y": 121,
-          "depth": 8
-        },
-        {
-          "sprite": "floor-office",
-          "frame": "default",
-          "x": 37,
           "y": 129,
           "depth": 9
         },
         {
           "sprite": "floor-office",
           "frame": "default",
-          "x": 53,
+          "x": 37,
           "y": 137,
           "depth": 10
+        },
+        {
+          "sprite": "floor-office",
+          "frame": "default",
+          "x": 53,
+          "y": 145,
+          "depth": 11
         },
         {
           "sprite": "wall-corner",
           "frame": "default",
           "x": 53,
-          "y": 105,
-          "depth": 6
+          "y": 113,
+          "depth": 7
         },
         {
           "sprite": "wall-back-l",
           "frame": "default",
           "x": 53,
-          "y": 105,
-          "depth": 6
+          "y": 113,
+          "depth": 7
         },
         {
           "sprite": "wall-back-l-window",
           "frame": "default",
           "x": 37,
-          "y": 113,
-          "depth": 7
+          "y": 121,
+          "depth": 8
         },
         {
           "sprite": "wall-back-l-end",
           "frame": "default",
           "x": 21,
-          "y": 121,
-          "depth": 8
+          "y": 129,
+          "depth": 9
         },
         {
           "sprite": "wall-back-r",
           "frame": "default",
           "x": 53,
-          "y": 105,
-          "depth": 6
+          "y": 113,
+          "depth": 7
         },
         {
           "sprite": "wall-back-r",
           "frame": "default",
           "x": 69,
-          "y": 113,
-          "depth": 7
+          "y": 121,
+          "depth": 8
         },
         {
           "sprite": "wall-back-r-end",
           "frame": "default",
           "x": 85,
-          "y": 121,
-          "depth": 8
+          "y": 129,
+          "depth": 9
         },
         {
           "sprite": "hq-3",
           "frame": "default",
-          "x": 245,
+          "x": 261,
           "y": 153,
           "depth": 1.0
         },
         {
           "sprite": "hq-door",
           "frame": "closed",
-          "x": 181,
+          "x": 197,
           "y": 121,
           "depth": 1.1,
           "gagId": "G5.1",
@@ -2772,64 +2662,64 @@
           "sprite": "desk",
           "frame": "default",
           "x": 21,
-          "y": 121,
-          "depth": 8
+          "y": 129,
+          "depth": 9
         },
         {
           "sprite": "worker-seated",
           "frame": "b",
           "x": 21,
-          "y": 121,
-          "depth": 8.01
+          "y": 129,
+          "depth": 9.01
         },
         {
           "sprite": "partition-c",
           "frame": "default",
           "x": 21,
-          "y": 121,
-          "depth": 8.95
+          "y": 129,
+          "depth": 9.95
         },
         {
           "sprite": "partition-r",
           "frame": "default",
           "x": 85,
-          "y": 121,
-          "depth": 8.95
+          "y": 129,
+          "depth": 9.95
         },
         {
           "sprite": "partition-c",
           "frame": "default",
           "x": 37,
-          "y": 129,
-          "depth": 9.95
+          "y": 137,
+          "depth": 10.95
         },
         {
           "sprite": "partition-r-doorway",
           "frame": "default",
           "x": 69,
-          "y": 129,
-          "depth": 9.95
+          "y": 137,
+          "depth": 10.95
         },
         {
           "sprite": "partition-c-end",
           "frame": "default",
           "x": 53,
-          "y": 137,
-          "depth": 10.95
+          "y": 145,
+          "depth": 11.95
         },
         {
           "sprite": "partition-r-end",
           "frame": "default",
           "x": 53,
-          "y": 137,
-          "depth": 10.95
+          "y": 145,
+          "depth": 11.95
         }
       ],
       "hotspots": [
         {
           "gagId": "G5.1",
           "part": "handover",
-          "x": 160,
+          "x": 176,
           "y": 85,
           "w": 21,
           "h": 37,

@@ -387,7 +387,7 @@
       "band": 490,
       "where": "front door of the inset office.",
       "without": "a worker tapping a badge at a door that stays shut; the next door propped open with an office chair.",
-      "built": "the reader goes green; the chair is a chair again; a small camera dome over the door. Offboarding reaches the doors."
+      "built": "the reader goes green; the chair is a chair again. Offboarding reaches the doors."
     },
     {
       "id": "G3.3",
@@ -658,6 +658,19 @@
         "domain": "gmail.com"
       }
     }
+  },
+  "ui": {
+    "wholeFloor": "Whole floor",
+    "previous": "Previous close-up",
+    "next": "Next close-up",
+    "position": "{label} · {n} of {total}",
+    "zoomIn": "Zoom in: {label}",
+    "atStart": "No earlier close-ups",
+    "atEnd": "No more close-ups",
+    "roomTab": "{room} ({count})",
+    "roomTabName": "{room}: {count} to tap",
+    "announce": "{room}: {label}, {n} of {total}",
+    "announceRoom": "{room}: whole floor"
   },
   "ambient": {
     "hover": "Someone is always on call. In the built state, it's a rotation."

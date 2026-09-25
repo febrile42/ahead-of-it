@@ -16,7 +16,7 @@ Without
 
 Built
   G3.1  desk-laptop         laptop open, a badge on a lanyard, a coffee; calendar-one
-  G6.4  camera-dome         a small dome over the door; chair-back (a chair at a desk)
+  G6.4  chair-back          a chair at a desk (the camera dome was dropped, DIA-37)
 """
 from __future__ import annotations
 
@@ -453,19 +453,6 @@ def _door_propped(iso: Iso, c: Canvas, propped: bool):
                   back=True, facing="near")
 
 
-def camera_dome() -> Canvas:
-    rows = [
-        ".ooooo.",
-        "oBBBBBo",
-        "oBoooBo",
-        ".oKKKo.",
-        "..ooo..",
-    ]
-    c = Canvas(7, 5)
-    _rows(c, rows, 0, 0, {"o": "outline", "B": "badge-body", "K": "chair-dark"})
-    return c
-
-
 BADGE_W, BADGE_H = 24, 24
 BADGE_ANCHOR = (12, 24)
 
@@ -513,7 +500,6 @@ def build_all() -> dict:
     else:
         shut_cv = shut.canvas
     prop.anims = {"propped": ([prop.canvas], 0), "closed": ([shut_cv], 0)}
-    dome = camera_dome()
     return {
         "desk-bare": bare,
         "desk-laptop": lap,
@@ -521,6 +507,5 @@ def build_all() -> dict:
         "calendar-one": Sprite(one, (9, 30)),
         "inset-door-badge": red,
         "inset-door-propped": prop,
-        "camera-dome": Sprite(dome, (3, 0)),
         "chair-back": make(lambda iso, c: _office_chair(iso, 0.0, back=True)),
     }

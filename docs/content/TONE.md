@@ -80,3 +80,26 @@ Two registers, kept strictly apart.
   client-side, never a plain `mailto:` in the source. LinkedIn: `https://www.linkedin.com/in/joshgister/`.
 - **OG description / tagline (F-4, D-027):** *Build it, then make sure it doesn't need you.*
   Also the subtitle under the "What he'd already built" toggle state.
+
+## Navigation copy (D-042a)
+
+The close-up navigation's strings (brief D042-W item 8). Plain, short, functional: these
+are signposts, not jokes, and they never mention Josh or an employer. `{placeholders}` are
+filled by the web: `{room}` a room's label, `{label}` a close-up's label (both from the
+scene file, ≤ 24 chars, reviewed separately), `{n}` a close-up's position and `{total}` the
+band's close-up count in array order, `{count}` the gags whose one primary is in that room.
+Wording avoids plurals that break at 1. Served as `content.json` `ui.<key>`.
+
+| key | copy | where |
+|---|---|---|
+| `wholeFloor` | `Whole floor` | Stepper-row control that toggles the room view; one label, state via `aria-pressed`. |
+| `previous` | `Previous close-up` | Accessible name of `‹`. |
+| `next` | `Next close-up` | Accessible name of `›`. |
+| `position` | `{label} · {n} of {total}` | Visible stepper text. |
+| `zoomIn` | `Zoom in: {label}` | Accessible name of each room-view "zoom in" button. |
+| `atStart` | `No earlier close-ups` | Live region, when `‹` is pressed at the first close-up. |
+| `atEnd` | `No more close-ups` | Live region, when `›` is pressed at the last close-up. |
+| `roomTab` | `{room} ({count})` | Visible room tab text. |
+| `roomTabName` | `{room}: {count} to tap` | Accessible name of a room tab. |
+| `announce` | `{room}: {label}, {n} of {total}` | Live region, on every close-up change. |
+| `announceRoom` | `{room}: whole floor` | Live region, on entering the room view. |
