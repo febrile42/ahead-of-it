@@ -183,7 +183,6 @@ test.describe('F2 — every resize re-renders, unthrottled', () => {
   });
 
   test('F2.2 a burst of resize events must be coalesced, not rendered one-for-one (R-23)', async ({ page }) => {
-    test.fail(); // live defect — delete this line with the fix
     await H.openApp(page);
     const EVENTS = 40;
     const renders = await H.resizeStorm(page, EVENTS);
