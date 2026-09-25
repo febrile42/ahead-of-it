@@ -88,13 +88,20 @@ def main_server_label() -> Canvas:
 
 
 def sign_dnto() -> Canvas:
-    """DO NOT / TURN OFF: a paper sign, red capitals, taped up by its corners."""
+    """DO NOT / TURN OFF: a sign in red capitals, taped up by its corners.
+
+    On **yellow** paper, not white. This sign and `label-main-server` hang about 9 px
+    apart on the same pale wall, and two white plates with black borders at that spacing
+    fuse into one bright smear at 1x (DIA-9). Nothing else in this alcove can be moved
+    far enough to open the gap, so the two plates are separated by field colour instead:
+    a red-on-yellow warning next to a black-on-white label reads as two signs at a
+    glance, and red on yellow is what a hand-made warning is actually written on."""
     l1, l2 = "DO NOT", "TURN OFF"
     w = glyphs.text_width(l2) + 4
     h = 15
     c = Canvas(w, h)
     c.rect(0, 0, w - 1, h - 1, "outline")
-    c.rect(1, 1, w - 2, h - 2, "paper")
+    c.rect(1, 1, w - 2, h - 2, "sticky")
     glyphs.draw(c, l1, (w - glyphs.text_width(l1)) // 2, 2, "badge-red")
     glyphs.draw(c, l2, 2, 8, "badge-red")
     for x, y in ((1, 1), (w - 2, 1)):
