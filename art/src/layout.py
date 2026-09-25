@@ -509,7 +509,7 @@ def _ground360() -> list:
         _t("box-fan-l", 1, 3, dx=-2, dy=-12, depth=5.01, states=W, gag="G5.3",
            part="server"),
         _t("rack", 0, 3, depth=3.8, states=B, id="rack2", gag="G5.3", part="server"),
-        _f("card-virtualised", 0.12, 4.75, dy=-30, depth=3.2, states=B, gag="G5.3",
+        _f("card-virtualised", 0.12, 4.3, dy=-28, depth=3.2, states=B, gag="G5.3",
            part="server"),
         _f("icon-dr", 0.12, 2.35, dy=-24, depth=3.1, states=B, gag="G5.3",
            part="server"),
@@ -634,7 +634,7 @@ def _band360() -> list:
 HQ2 = dict(anchor=(10, 2), door=(8, 2))     # hq-5 / hq-6: c 7..10, r 0..2
 INSET2 = dict(c0=0, c1=4, r0=3, r1=7)       # 5 x 5, doorway on the +c side at row 4
 INSET2_DOOR = 4
-BADGE_ROW, PROPPED_ROW = 6, 7               # G6.4's two doors, same +c side (490)
+BADGE_ROW, PROPPED_ROW = 5, 7               # G6.4's two doors, same +c side (490)
 G56 = (0, 6)                                # G5.6's desk: back-left wall, under a window
 
 
@@ -687,6 +687,7 @@ def _street360() -> list:
         P.append(_t(name, i["c1"], row, depth=i["c1"] + row + 1.95, band=150))
     for row in (BADGE_ROW, PROPPED_ROW):
         name = "partition-r-end" if row == i["r1"] else "partition-r"
+        # (from 490 G6.4's doors take these two segments)
         P.append(_t(name, i["c1"], row, depth=i["c1"] + row + 1.95, band=150, until=490))
     # a desk under the back-right window, someone at it (both states)
     P.append(_t("desk", i["c1"] - 1, i["r0"], band=150))
@@ -735,8 +736,64 @@ def _street360() -> list:
     return P
 
 
+# -- band 490: the new hire (ground), the badge that doesn't (street) ---------------------
+
+NEW_HIRE = (11, 6)          # the front row's end, clear of the pit and the queue
+
+
+def _band490() -> list:
+    c, r = NEW_HIRE
+    P = [
+        # G3.1 without: a bare desk, the coat still on, the calendar shedding pages, the
+        # balloon going soft / a laptop, a badge, a coffee, one calendar page
+        _t("desk-bare", c, r, states=W, id="hire-desk", gag="G3.1", part="desk"),
+        dict(sprite="calendar-flip", frame="flip", attach={"id": "hire-desk", "point": "cal"},
+             states=W, gag="G3.1", part="desk"),
+        _t("worker-coat", c, r, depth=c + r + 1.01, states=W, gag="G3.1", part="desk"),
+        _f("balloon-welcome", c + 0.95, r + 0.3, dy=-9, frame="deflate", depth=c + r + 1.3,
+           states=W, gag="G3.1", part="desk"),
+        _t("desk-laptop", c, r, states=B, id="hire-desk-b", gag="G3.1", part="desk"),
+        dict(sprite="calendar-one", attach={"id": "hire-desk-b", "point": "cal"},
+             states=B, gag="G3.1", part="desk"),
+        _t("worker-seated", c, r, frame="e", depth=c + r + 1.01, states=B, gag="G3.1",
+           part="desk"),
+    ]
+    for p in P:
+        p.setdefault("band", 490)
+        p["since"] = 490
+        p["view"] = "ground"
+    i = INSET2
+    S = []
+    # G6.4: the inset office's door, shut, the reader red, someone tapping a badge at it;
+    # the next door propped open with an office chair / the reader green, a camera dome
+    # over the door, the door shut, the chair back at a desk
+    S += [
+        _t("inset-door-badge", i["c1"], BADGE_ROW, frame="red", depth=i["c1"] + BADGE_ROW + 1.95,
+           states=W, gag="G6.4", part="door"),
+        _t("inset-door-badge", i["c1"], BADGE_ROW, frame="green",
+           depth=i["c1"] + BADGE_ROW + 1.95, states=B, gag="G6.4", part="door"),
+        _t("inset-door-propped", i["c1"], PROPPED_ROW, frame="propped",
+           depth=i["c1"] + PROPPED_ROW + 1.95, states=W, gag="G6.4", part="door"),
+        _t("inset-door-propped", i["c1"], PROPPED_ROW, frame="closed",
+           depth=i["c1"] + PROPPED_ROW + 1.95, states=B, gag="G6.4", part="door"),
+        _f("worker-badge", i["c1"] + 1.55, BADGE_ROW + 0.08, frame="c-left",
+           depth=i["c1"] + BADGE_ROW + 3.0, gag="G6.4", part="door"),
+        _t("camera-dome", i["c1"], BADGE_ROW, states=B, gag="G6.4", part="door",
+           depth=i["c1"] + BADGE_ROW + 1.96, dx=8, dy=-30),
+        # the desk the chair came from (chairless: `desk-drives` is the plain desk
+        # without its chair); built, the chair is back at it
+        _t("desk-drives", 2, i["r1"] - 1, band=490),
+        _t("chair-back", 2, i["r1"] - 1, states=B, gag="G6.4", part="chair", primary=False),
+    ]
+    for p in S:
+        p.setdefault("band", 490)
+        p["since"] = 490
+        p["view"] = "street"
+    return P + S
+
+
 PLACEMENTS = {80: _band80(), 150: _band150(), 220: _band220(),
-              360: _ground360() + _band360() + _street360()}
+              360: _ground360() + _band360() + _street360(), 490: _band490()}
 
 # A later band's building replaces an earlier one's (HQ gains a storey): the earlier
 # sprite is superseded rather than drawn twice.

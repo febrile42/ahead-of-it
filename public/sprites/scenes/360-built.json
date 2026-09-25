@@ -1204,8 +1204,8 @@
         {
           "sprite": "card-virtualised",
           "frame": "default",
-          "x": 75,
-          "y": 54,
+          "x": 82,
+          "y": 52,
           "depth": 3.2,
           "gagId": "G5.3",
           "part": "server"
@@ -1530,9 +1530,9 @@
         {
           "gagId": "G5.3",
           "part": "server",
-          "x": 54,
+          "x": 61,
           "y": 30,
-          "w": 67,
+          "w": 60,
           "h": 53,
           "primary": true
         },

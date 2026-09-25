@@ -37,10 +37,10 @@ THUMBS_DIR = os.path.join(SPRITES_DIR, "thumbs")
 PREVIEW_VIEWS_DIR = os.path.join(_REPO_ROOT, "art", "preview", "views")
 
 STATES = ("without", "built")
-DRAWN_BANDS = (80, 150, 220, 360)
-UNDRAWN_BANDS = (490, 610, 750)
+DRAWN_BANDS = (80, 150, 220, 360, 490)
+UNDRAWN_BANDS = (610, 750)
 ALL_BANDS = DRAWN_BANDS + UNDRAWN_BANDS
-NEAREST_DRAWN = 360
+NEAREST_DRAWN = 490
 MAX_W, MAX_H = 360, 240          # D-036 rule 3
 
 # The part of a gag that carries its D-036 primary hotspot. A dict means the primary
@@ -78,7 +78,6 @@ PLACEHOLDER_VIEW = {
 }
 # Gags newly introduced at each undrawn band (cumulative — R-03a).
 NEW_GAGS_AT = {
-    490: ["G3.1", "G6.4"],
     610: ["G4.1", "G5.2", "G3.3", "G6.3"],
     750: ["G6.1", "G6.2", "G7.1", "G7.2", "G7.4"],
 }

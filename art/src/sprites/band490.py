@@ -145,23 +145,27 @@ def calendar_one() -> Canvas:
     return c
 
 
-COAT_LOOK = dict(t="desk-wood", T="desk-wood-dark", p="pants-1", s="skin-2", h="hair-1",
+COAT_LOOK = dict(t="shirt-3-dark", T="hair-1", p="pants-1", s="skin-2", h="hair-1",
                  style="short")
 
 
 def coat_frame() -> Canvas:
-    """Seated from behind at the bare desk with the coat still on: a tan coat, the
-    collar turned up round the neck, a red scarf end, a bag on the floor by the chair."""
+    """Seated from behind at the bare desk with the coat still on: a maroon coat, the
+    collar turned up, a yellow knitted hat with a bobble (dressed for outside), a bag
+    on the floor by the chair."""
     LOOKS["_coat"] = COAT_LOOK            # a look for this pose only (not in LOOK_NAMES)
 
     def hook(body):
+        # seated_frame shifts the body by (1, 10): the head spans rows 11..17
         for x in range(5, 12):             # the turned-up collar, around the nape
             body.put(x + 1, 8 + 10, "T")
         body.put(5 + 1, 7 + 10, "T")
         body.put(10 + 1, 7 + 10, "T")
-        for y in range(9, 14):             # the scarf end, down the back
-            body.put(7 + 1, y + 10, "X")
-        body.put(8 + 1, 13 + 10, "X")
+        # a knitted winter hat, pulled down, a bobble on top: dressed to go outside
+        body.blob(R(4 + 1, 1 + 10, 11 + 1, 3 + 10), lambda p: "Y" if p[1] != 12 else "b",
+                  ring=True)
+        body.blob(R(7 + 1, -1 + 10, 8 + 1, 0 + 10), "Y", ring=True)
+    LOOKS["_coat"] = dict(COAT_LOOK, b="desk-wood")
     c = seated_frame("_coat", arm=hook)
     del LOOKS["_coat"]
     # the bag at the chair's foot
@@ -171,7 +175,7 @@ def coat_frame() -> Canvas:
     return c
 
 
-BALLOON_W, BALLOON_H = 40, 44
+BALLOON_W, BALLOON_H = 56, 44
 BALLOON_ANCHOR = (8, 44)
 
 
@@ -215,7 +219,7 @@ def balloon_frames() -> list[Canvas]:
             c.point(x, sy0 + k, "outline")
         # the tag, hung from the string just under the balloon
         ty = sy0 + 3
-        tx = max(0, min(BALLOON_W - tw - 4, bx - (tw + 4) // 2 - 4))
+        tx = max(0, min(BALLOON_W - tw - 4, bx - 6))
         c.rect(tx, ty, tx + tw + 3, ty + 8, "outline")
         c.rect(tx + 1, ty + 1, tx + tw + 2, ty + 7, "paper")
         glyphs.draw(c, text, tx + 2, ty + 2, "badge-red")
@@ -251,9 +255,10 @@ def _door_leaf_closed(iso: Iso):
 def _door_badge(iso: Iso, c: Canvas, green: bool):
     _jambs_and_frame(iso)
     _door_leaf_closed(iso)
-    # the reader on the outside of the frame's front post, big enough to read: a dark
-    # box, a lit panel (red: no; green: yes)
-    x, y = iso.right_px(8 + PART_T, 7.2, 15.0)
+    # the reader on the outside of the frame's back post, big enough to read: a dark
+    # box, a lit panel (red: no; green: yes). The tapper stands beside it, not in
+    # front of the door, so the shut door stays in view.
+    x, y = iso.right_px(8 + PART_T, 1.2, 15.0)
     c.rect(x - 1, y - 3, x + 3, y + 4, "outline")
     c.rect(x, y - 2, x + 2, y + 3, "chair-dark")
     col = "badge-green" if green else "badge-red"
@@ -267,12 +272,12 @@ def _door_propped(iso: Iso, c: Canvas, propped: bool):
     if not propped:
         _door_leaf_closed(iso)
         return
-    # the leaf swung out and back against the chair: standing out from the hinge (at the
-    # frame's back post, r 1.6) into the street (+c)
-    iso.box(8.6, 1.2, 0, 14.0, 1.8, DOOR_H + 0.8, top="desk-wood", left="desk-wood",
+    # the leaf swung out into the street from its hinge on the back post, and an office
+    # chair wedged against it on the pavement, holding it open: through the doorway
+    # you see the office floor
+    iso.box(8.6, 1.1, 0, 15.0, 1.7, DOOR_H + 0.8, top="desk-wood", left="desk-wood",
             right="desk-wood-dark")
-    # the office chair jammed in the doorway, holding it
-    _chair_at(iso, 6.2, -2.6, back=True)
+    _chair_at(iso, 8.4, -2.4, back=True)
 
 
 def camera_dome() -> Canvas:

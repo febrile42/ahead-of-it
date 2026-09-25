@@ -45,7 +45,7 @@
       ]
     },
     "h": 44,
-    "w": 40
+    "w": 56
   },
   "box-fan": {
     "anchor": [
@@ -1079,6 +1079,38 @@
     "h": 220,
     "w": 346
   },
+  "fx-net-490-built-ground": {
+    "anchor": [
+      0,
+      0
+    ],
+    "frames": {
+      "default": [
+        {
+          "duration": 0,
+          "file": "fx-net-490-built-ground.png"
+        }
+      ]
+    },
+    "h": 220,
+    "w": 346
+  },
+  "fx-net-490-without-ground": {
+    "anchor": [
+      0,
+      0
+    ],
+    "frames": {
+      "default": [
+        {
+          "duration": 0,
+          "file": "fx-net-490-without-ground.png"
+        }
+      ]
+    },
+    "h": 220,
+    "w": 346
+  },
   "fx-net-80-built-ground": {
     "anchor": [
       0,
@@ -1343,8 +1375,8 @@
     "h": 37,
     "points": {
       "reader": [
-        4,
-        20
+        16,
+        14
       ]
     },
     "w": 19
@@ -1375,7 +1407,7 @@
       ]
     },
     "h": 37,
-    "w": 27
+    "w": 29
   },
   "label-main-server": {
     "anchor": [
