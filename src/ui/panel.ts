@@ -25,6 +25,12 @@ export interface PanelHandles {
   open: (fields: PanelFields, thumbnailState: 'built' | 'without', options?: PanelOpenOptions) => void;
   close: () => void;
   isOpen: () => boolean;
+  /** DIA-13: repoints B4's return-focus target without touching content or
+   * live focus — for a re-render that rebuilds the hotspot layer out from
+   * under an open panel's invoking button (F3.2). The invoker reference
+   * `open()` was given is now a detached node; this swaps in its
+   * replacement so a later Escape/close still lands somewhere real. */
+  setReturnFocusTo: (el: HTMLElement | null) => void;
 }
 
 const PANEL_TITLE_ID = 'panel-title';
@@ -162,6 +168,9 @@ export function createPanel(): PanelHandles {
     },
     close,
     isOpen: () => !root.hidden,
+    setReturnFocusTo(el) {
+      returnFocusTo = el;
+    },
   };
 }
 

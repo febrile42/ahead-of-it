@@ -58,7 +58,6 @@ async function expectPanelAgreesWithScene(page: Page, openedGagId: string) {
 
 test.describe('F1 — an open panel survives a re-render that removes its subject', () => {
   test('F1.1 slider: a band-80 gag panel must not sit over the band-220 building', async ({ page }) => {
-    test.fail(); // live defect — delete this line with the fix (see file header)
     await H.openApp(page); // 390px, mouse
     await H.setBand(page, 80);
     const gagId = await H.openFirstHotspot(page, 'mouse');
@@ -78,7 +77,6 @@ test.describe('F1 — an open panel survives a re-render that removes its subjec
   });
 
   test('F1.2 slider: Escape after a band change must not dump focus on <body> (B4/R-24)', async ({ page }) => {
-    test.fail(); // live defect — delete this line with the fix
     await H.openApp(page);
     await H.setBand(page, 80);
     await H.openFirstHotspot(page, 'keyboard');
@@ -94,7 +92,6 @@ test.describe('F1 — an open panel survives a re-render that removes its subjec
   });
 
   test('F1.3 view tab: switching view must not strand focus on <body> (R-24)', async ({ page }) => {
-    test.fail(); // live defect — delete this line with the fix
     await H.openApp(page);
     await H.setBand(page, 220);
     const views = await H.viewIds(page);
@@ -110,7 +107,6 @@ test.describe('F1 — an open panel survives a re-render that removes its subjec
   });
 
   test('F1.3b view tab: an open panel must not survive a view it has no hotspot in', async ({ page }) => {
-    test.fail(); // live defect — delete this line with the fix
     await H.openApp(page);
     await H.setBand(page, 220);
     const gagId = await H.openFirstHotspot(page, 'mouse');
@@ -122,7 +118,6 @@ test.describe('F1 — an open panel survives a re-render that removes its subjec
   });
 
   test('F1.4 keyboard: Enter on a view tab must keep focus in the tab row (R-24)', async ({ page }) => {
-    test.fail(); // live defect — delete this line with the fix
     // No panel involved. A keyboard visitor tabs to the view switcher and
     // presses Enter; Enter fires the tab's *click* handler, not the roving
     // arrow-key handler, and only the arrow-key handler restores focus.
@@ -140,7 +135,6 @@ test.describe('F1 — an open panel survives a re-render that removes its subjec
   });
 
   test('F1.5 resize: Escape after a resize must not dump focus on <body> (B4/R-24)', async ({ page }) => {
-    test.fail(); // live defect — delete this line with the fix
     await H.openApp(page);
     await H.openFirstHotspot(page, 'keyboard');
 
@@ -161,7 +155,6 @@ test.describe('F1 — an open panel survives a re-render that removes its subjec
 
 test.describe('F2 — every resize re-renders, unthrottled', () => {
   test('F2.1 SEVERE: one resize must not blur a focused hotspot (R-24)', async ({ page }) => {
-    test.fail(); // live defect — delete this line with the fix
     // This is F2's real cost. No panel, no slider, no toggle: a keyboard
     // visitor has tabbed onto a hotspot and the page merely scrolled. On iOS
     // that collapses the address bar, which fires `resize`, which
@@ -272,7 +265,6 @@ test.describe('F3 — the toggle and an open panel', () => {
   });
 
   test('F3.2 but the toggle DOES invalidate the panel\'s return-focus target (B4/R-24)', async ({ page }) => {
-    test.fail(); // live defect — same root cause as F1; delete with the fix
     // The part of the candidate that is real: the toggle re-renders the
     // hotspot layer too, so the invoking hotspot the panel promised to
     // return focus to (B4) no longer exists. Escape then lands wherever

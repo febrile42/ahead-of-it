@@ -34,6 +34,11 @@ if (sliderRoot && toggleRoot && sceneWrap && canvas && hotspotsLayer && panelRoo
   let state: SceneState = 'built';
   let hasMovedSlider = false;
   let currentViewId: string | null = null;
+  // DIA-13: the gagId of the hotspot whose panel is currently open, or null
+  // when the open panel isn't hotspot-sourced (the auto-opened Beyond panel)
+  // or no panel is open. render() uses this to tell whether an open panel
+  // still describes something the just-rebuilt hotspot layer is showing.
+  let openPanelGagId: string | null = null;
 
   // S1: slider and toggle markup already lives in index.html's static
   // shell (CLS) — these fill it in rather than creating/appending it.
@@ -121,9 +126,9 @@ if (sliderRoot && toggleRoot && sceneWrap && canvas && hotspotsLayer && panelRoo
       const delta = event.key === 'ArrowRight' ? 1 : -1;
       const to = (from + delta + buttons.length) % buttons.length;
       currentViewId = buttons[to].dataset.viewId ?? null;
-      void render().then(() => {
-        viewsRow.querySelector<HTMLButtonElement>(`[data-view-id="${CSS.escape(String(currentViewId))}"]`)?.focus();
-      });
+      // DIA-13: render()'s own captureFocus/restoreFocus now does this
+      // (the pre-render active element is this row, same as a tab click).
+      void render();
     };
   }
 
@@ -182,6 +187,7 @@ if (sliderRoot && toggleRoot && sceneWrap && canvas && hotspotsLayer && panelRoo
   function openPanel(gagId: string, source: HTMLElement) {
     const fields = panelFieldsFor(gagId);
     if (!fields) return;
+    openPanelGagId = gagId;
     // R-04: the prevented-beat thumbnail is always the without-state
     // scene. B4: closing returns focus to the hotspot that opened it.
     panel.open(fields, 'without', { returnFocusTo: source });
@@ -203,6 +209,60 @@ if (sliderRoot && toggleRoot && sceneWrap && canvas && hotspotsLayer && panelRoo
    * all — so it draws a plain "not drawn yet" box instead of throwing
    * and leaving the page broken. */
   const MISSING_SCENE_SIZE = { w: 270, h: 184 };
+
+  // DIA-13: renderHotspots and renderViewSwitcher both rebuild their layer
+  // with replaceChildren() on every render() — the slider, the toggle, a
+  // view-tab click/Enter and resize all call render(). That silently
+  // detaches whatever was focused (a hotspot button, a view tab) and
+  // orphans any open panel's B4 return-focus target. captureFocus() reads
+  // the pre-render identity of a focused hotspot/tab (not the node itself
+  // — the node is about to die); restoreFocus() finds its replacement in
+  // the freshly rebuilt layer and focuses that instead.
+  type FocusCapture = { kind: 'hotspot'; hotspotId: string } | { kind: 'view' } | null;
+
+  function captureFocus(): FocusCapture {
+    const active = document.activeElement;
+    if (!(active instanceof HTMLElement)) return null;
+    if (hotspotsLayer!.contains(active)) {
+      const hotspotId = active.dataset.hotspotId;
+      return hotspotId ? { kind: 'hotspot', hotspotId } : null;
+    }
+    if (viewsRow.contains(active)) return { kind: 'view' };
+    return null;
+  }
+
+  function restoreFocus(captured: FocusCapture) {
+    if (!captured) return;
+    if (captured.kind === 'hotspot') {
+      hotspotsLayer!
+        .querySelector<HTMLButtonElement>(`[data-hotspot-id="${CSS.escape(captured.hotspotId)}"]`)
+        ?.focus();
+    } else {
+      viewsRow
+        .querySelector<HTMLButtonElement>(`[data-view-id="${CSS.escape(String(currentViewId))}"]`)
+        ?.focus();
+    }
+  }
+
+  /** F1.1/F1.3b/F3.2: an open panel is only valid while its gag still has a
+   * hotspot in the just-rebuilt view. If it does, repoint B4's return-focus
+   * target at the new button (the old one was just detached). If it
+   * doesn't, the panel is describing something no longer on screen (R-04a)
+   * — close it, first repointing return-focus at the slider so a visitor
+   * who had the panel focused doesn't land on <body> (R-24). */
+  function syncOpenPanel() {
+    if (!panel.isOpen() || !openPanelGagId) return;
+    const button = hotspotsLayer!.querySelector<HTMLButtonElement>(
+      `[data-gag-id="${CSS.escape(openPanelGagId)}"]`
+    );
+    if (button) {
+      panel.setReturnFocusTo(button);
+    } else {
+      panel.setReturnFocusTo(slider.input);
+      panel.close();
+      openPanelGagId = null;
+    }
+  }
 
   function renderMissingScene() {
     sizeAndPositionCanvas({
@@ -227,6 +287,9 @@ if (sliderRoot && toggleRoot && sceneWrap && canvas && hotspotsLayer && panelRoo
 
   async function render() {
     const token = (renderToken += 1);
+    // DIA-13: captured before anything below touches the DOM — the layers
+    // that are about to be rebuilt are exactly the ones that can hold focus.
+    const focusCapture = captureFocus();
     let scene: SceneFile | null = null;
     try {
       scene = await loadScene(band, state);
@@ -252,6 +315,8 @@ if (sliderRoot && toggleRoot && sceneWrap && canvas && hotspotsLayer && panelRoo
     await renderScene(canvas!, view, state);
     if (token !== renderToken) return; // superseded by a newer render — drop this stale paint
     renderHotspots(hotspotsLayer!, toSceneLayout(view), openPanel);
+    restoreFocus(focusCapture);
+    syncOpenPanel();
     checklist.render(band);
     // Test hooks: tests/scene.spec.ts and the pixel-parity spec await
     // renderedToken changing instead of sleeping a fixed timeout, and
@@ -273,13 +338,16 @@ if (sliderRoot && toggleRoot && sceneWrap && canvas && hotspotsLayer && panelRoo
     if (band === 'beyond') {
       // R-01b: the Beyond band opens its panel automatically. B4: it must
       // not steal focus off the slider at its last stop, and Escape
-      // should return focus there too.
+      // should return focus there too. Not hotspot-sourced, so it is never
+      // syncOpenPanel()'s concern (DIA-13).
+      openPanelGagId = null;
       panel.open(beyondPanelFields(), 'without', { focus: false, returnFocusTo: slider.input });
     } else if (wasBeyond) {
       // F5 (DIA-12): the auto-opened Beyond panel is only ever true for
       // the 'beyond' band — leaving it must close the panel rather than
       // let it keep announcing '1,000+' over whatever band is now
       // rendered (R-04a self-identifying panels, R-14 text/visual sync).
+      openPanelGagId = null;
       panel.close();
     }
     void render();
