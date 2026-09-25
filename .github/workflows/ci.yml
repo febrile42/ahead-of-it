@@ -66,14 +66,22 @@ jobs:
 
       # R-23: performance >= 80, first-band transfer < 600 KB.
       - name: Lighthouse
+        id: lighthouse
         run: npm run check:lighthouse
 
+      # Skipped (not warned) when an earlier step failed and Lighthouse never ran;
+      # if it ran, the reports must exist, so an empty upload is an error.
       - name: Upload Lighthouse report
-        if: always()
+        if: ${{ always() && steps.lighthouse.conclusion != 'skipped' }}
         uses: actions/upload-artifact@v4
         with:
           name: lighthouse-report
           path: .lighthouseci
+          # upload-artifact@v4.4+ skips dot-directories by default, which made
+          # this step warn "No files were found" on every run while LHCI had
+          # in fact written its reports (DIA-4).
+          include-hidden-files: true
+          if-no-files-found: error
           retention-days: 14
 
   # ── develop → preview URL (staging-ahead-of-it.<subdomain>.workers.dev) ──
