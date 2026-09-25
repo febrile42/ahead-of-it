@@ -1263,7 +1263,7 @@
         },
         {
           "sprite": "worker-seated-headset",
-          "frame": "b",
+          "frame": "d",
           "x": 213,
           "y": 93,
           "depth": 5.01,
@@ -1295,7 +1295,7 @@
         },
         {
           "sprite": "worker-seated-headset",
-          "frame": "d",
+          "frame": "b",
           "x": 229,
           "y": 101,
           "depth": 6.01,

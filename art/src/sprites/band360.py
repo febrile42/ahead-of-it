@@ -473,24 +473,35 @@ def receipt_runaway() -> Canvas:
 
     A long pale ribbon on a beige floor is the strongest silhouette this room has left —
     nothing else here is a continuous curve, everything else is a box or a person. The
-    printed head stays the width of the built receipt so the digits can be read (four
-    glyphs need 15 px, which a 5 px till roll cannot carry); below the tear-off the roll
-    narrows to 5 px and falls, wavering, then loses its way on the floor in three loose
-    loops that double back over each other. Red digits, not the built state's green.
+    printed head stays the width of the built receipt so it reads as the same object;
+    below the tear-off the roll narrows to 5 px and falls, wavering, then loses its way
+    on the floor in three loose loops that double back over each other.
+
+    **No digits, and that is deliberate** (DIA-21, ruled blocking). The previous pass put
+    `-33%` on this head in red — the built receipt's figure, recoloured. That is E-10,
+    the saving VoIP *delivered*, so on the wall of the room where VoIP was never built it
+    states the opposite of the gag; and reusing one number across both states spends the
+    pair's only figure on a hue change. The honest replacement is not a different number:
+    E-10 gives the saving and never the base, so there is no sourced "before" to print
+    and this project does not invent one. The head carries ruled line items and a total
+    rule instead — enough to say *itemised bill*, with the length of the roll doing the
+    joke, which is what it was always doing.
 
     Drawn in screen space, not isometric: it is paper, it does not have a footprint, and
     a projected ribbon at this size reads as a ramp."""
-    text = "-33%"
-    tw = glyphs.text_width(text)
-    hw, hh = tw + 6, 21                                   # the printed head
+    hw, hh = glyphs.text_width("-33%") + 6, 21            # the built receipt's width
     hx = RUNAWAY_W - hw - 2
     c = Canvas(RUNAWAY_W, RUNAWAY_H)
     c.rect(hx, 0, hx + hw - 1, hh - 1, "outline")
     c.rect(hx + 1, 1, hx + hw - 2, hh - 1, "paper")
-    for y in (3, 5, 7):
-        c.rect(hx + 3, y, hx + hw - 4 - (y % 3), y, "wall-shadow")
-    glyphs.draw(c, text, hx + 3, 10, "badge-red")
-    c.rect(hx + 2, 17, hx + hw - 3, 17, "wall-shadow")
+    # line items: a description rule on the left, its amount flush right, ragged lengths
+    for k, y in enumerate((3, 5, 7, 9, 11, 13)):
+        c.rect(hx + 2, y, hx + 2 + 4 + (k * 5) % 6, y, "wall-shadow")
+        c.rect(hx + hw - 4 - (2 + (k * 3) % 4), y, hx + hw - 3, y, "wall-shadow")
+    # the total: the one heavy horizontal on the head, so it reads as a bill and not as
+    # a blank strip of paper. The rule is drawn; the figure under it is not.
+    c.rect(hx + 2, 16, hx + hw - 3, 16, "outline")
+    c.rect(hx + hw - 9, 18, hx + hw - 3, 18, "outline")
     for x in range(hx + 1, hx + hw - 1):                  # the perforation it tore at
         if x % 2 == 0:
             c.point(x, hh - 1, "wall-shadow")

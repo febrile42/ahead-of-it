@@ -551,7 +551,12 @@ def _ground360() -> list:
             P.append(_f("worker-coin", col + 1.55, 0.5, frame="b-left", depth=col + 1.8,
                         states=W, gag="G5.4", part="phones"))
         P.append(_t("desk", col, 0, states=B, gag="G5.4", part="phones"))
-        P.append(_t("worker-seated-headset", col, 0, frame="cbd"[col - PHONES[0]],
+        # `c`, `d`, `b` — not `c`, `b`, `d`. The without row seats `c` and `d` at the
+        # first two desks and sends the third person to the coin phone, so the built row
+        # has to seat `c` and `d` at those same two desks or the toggle changes a
+        # bystander's shirt at desk two for no reason the picture gives (DIA-21 §3).
+        # With this order only `b` moves, which is the story: one person got up.
+        P.append(_t("worker-seated-headset", col, 0, frame="cdb"[col - PHONES[0]],
                     depth=col + 1.01, states=B, gag="G5.4", part="phones"))
     P += [
         _t("phone-knot", CL["c1"] + 1, 1, depth=3.4, layer="main", states=W, gag="G5.4",
@@ -785,12 +790,14 @@ def _band490() -> list:
         dict(sprite="calendar-flip", frame="flip", attach={"id": "hire-desk", "point": "cal"},
              states=W, gag="G3.1", part="desk"),
         _t("worker-coat", c, r, depth=c + r + 1.01, states=W, gag="G3.1", part="desk"),
-        # the balloon lies on the desk top itself (dy = -9 is the slab's surface), at
-        # the desk's -c end and still tied to its front corner: nothing in this corner
-        # floats above the desk line any more, and the end that is clear of the absent
-        # laptop's dashed rectangle is the one it lies on
-        _f("balloon-welcome", c + 0.12, r + 0.47, dy=-9, frame="deflate",
-           depth=c + r + 1.3, states=W, gag="G3.1", part="desk"),
+        # the balloon lies on the *floor*, in front of the desk beside the hire's bag —
+        # not on the desktop. On the slab it landed inside the grey cubicle column's
+        # silhouette at 1x and read as a red drawer belonging to the calendar unit, and
+        # a desk with a red mass on it is not a bare desk (DIA-21). Down here it is a
+        # thing on the floor that nobody picked up, the desktop is left genuinely empty
+        # so the ghost rectangle is the only mark on it, and the two cues stop competing.
+        _f("balloon-welcome", c - 0.45, r + 1.45, frame="deflate",
+           depth=c + r + 2.4, states=W, gag="G3.1", part="desk"),
         _t("desk-laptop", c, r, states=B, id="hire-desk-b", gag="G3.1", part="desk"),
         dict(sprite="calendar-one", attach={"id": "hire-desk-b", "point": "cal"},
              states=B, gag="G3.1", part="desk"),

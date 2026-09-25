@@ -52,25 +52,27 @@ LAPTOP = dict(c0=3.4, c1=6.8, r0=1.6, r1=3.6)
 
 
 def _absent_laptop(iso: Iso, c: Canvas, z: float):
-    """A dashed rectangle on the desktop with exactly the built laptop's footprint.
+    """A ghost rectangle on the desktop with exactly the built laptop's footprint.
 
     A bare brown desk reads as "a desk" — it has no way of telling you that something
-    is missing, because nothing missing has a silhouette. A dashed outline does: it is
-    the one mark that says *the thing that should be here isn't*, and it turns the empty
-    desktop from scenery into the subject. Drawn as four dotted edges in `outline` on
-    `desk-wood`, not in `net` magenta, which this pipeline reserves for network lines.
+    is missing, because nothing missing has a silhouette. An outline does: it is the one
+    mark that says *the thing that should be here isn't*, and it turns the empty desktop
+    from scenery into the subject. Drawn in `paper` with an `outline` halo under it, not
+    in `net` magenta, which this pipeline reserves for network lines: `paper` is the
+    brightest mark on the desk and the halo keeps it from dissolving where it crosses
+    the desk's own edge.
 
-    Two pixels on, two off: a single-pixel dash disappears into the wood's dither at 1x,
-    and a solid rectangle would read as a mat or a sheet of paper lying there. Pale
-    dashes with a dark pixel under each one, not dark dashes: `outline` on `desk-wood`
-    is a four-value contrast step and vanishes at 1x, where `paper` is the brightest
-    mark on the desk and the halo keeps it from dissolving where it crosses the desk's
-    own edge."""
+    **Continuous, not dashed** (DIA-21). The previous pass dashed it two on, two off, on
+    the theory that a solid rectangle would read as a mat. At 1x the drawn rectangle is
+    only about 10 x 6 px, so dashing broke it into 2 px runs and it arrived as four or
+    five stray pale pixels on brown — noise, not a shape. A 1 px continuous outline at
+    the same footprint is still far too thin to read as a sheet of paper, and it is the
+    only treatment at this size that resolves into a rectangle at all."""
     lp = LAPTOP
     corners = [iso.pt(lp["c0"], lp["r0"], z), iso.pt(lp["c1"], lp["r0"], z),
                iso.pt(lp["c1"], lp["r1"], z), iso.pt(lp["c0"], lp["r1"], z)]
     for p0, p1 in zip(corners, corners[1:] + corners[:1]):
-        dotted(c, p0, p1, colour="paper", on=2, period=4, halo="outline")
+        dotted(c, p0, p1, colour="paper", on=1, period=1, halo="outline")
 
 
 def _desk_bare(iso: Iso, c: Canvas, laptop=False):
@@ -302,19 +304,36 @@ def _door_leaf_closed(iso: Iso):
     iso.paint(f, "R", 8.7, lambda r, z: "sticky" if 2.2 <= r < 2.9 and 12 <= z < 13.2 else None)
 
 
+# The reader's verdict, 7 x 7, as a shape rather than a hue. DIA-21 measured the old
+# reader at 3 px and ruled that "built→without changes three pixels from green to red"
+# is not a signal at 1x, calibrating against `DAVE?` — which reads — as roughly an order
+# of magnitude more area. A colour swap also says nothing to a red-green colour-blind
+# visitor, and the one thing this picture cannot afford is a diff they cannot see.
+READER_CROSS = ("XX...XX", "XXX.XXX", ".XXXXX.", "..XXX..",
+                ".XXXXX.", "XXX.XXX", "XX...XX")
+READER_TICK = ("......X", ".....XX", "X...XX.", "XX.XX..",
+               "XXXXX..", ".XXX...", "..X....")
+
+
 def _door_badge(iso: Iso, c: Canvas, green: bool):
     _jambs_and_frame(iso)
     _door_leaf_closed(iso)
-    # the reader on the outside of the frame's back post, big enough to read: a dark
-    # box, a lit panel (red: no; green: yes). The tapper stands beside it, not in
-    # front of the door, so the shut door stays in view.
+    # the reader on the outside of the frame's back post: a dark chassis, a lit panel
+    # carrying a cross or a tick, and a keypad bar under it. The tapper stands beside
+    # it, not in front of the door, so the shut door stays in view.
     x, y = iso.right_px(8 + PART_T, 1.2, 15.0)
-    c.rect(x - 1, y - 3, x + 3, y + 4, "outline")
-    c.rect(x, y - 2, x + 2, y + 3, "chair-dark")
+    c.rect(x - 2, y - 8, x + 6, y + 5, "outline")
+    c.rect(x - 1, y - 7, x + 5, y + 4, "chair-dark")
     col = "badge-green" if green else "badge-red"
-    c.rect(x, y - 2, x + 2, y - 1, col)
-    c.point(x + 1, y + 1, "badge-body")
-    return {"reader": (x + 1, y)}
+    c.rect(x - 1, y - 7, x + 5, y - 1, "outline")           # the panel's bezel
+    for dy, row in enumerate(READER_TICK if green else READER_CROSS):
+        for dx, ch in enumerate(row):
+            if ch == "X":
+                c.point(x - 1 + dx, y - 7 + dy, col)
+    for ky in (y + 1, y + 3):                               # the keypad below it
+        for kx in (x, x + 2, x + 4):
+            c.point(kx, ky, "badge-body")
+    return {"reader": (x + 2, y - 4)}
 
 
 # The office chair, drawn so it reads as an *office* chair and not a dark lump: a
@@ -369,18 +388,69 @@ def _office_chair(iso: Iso, dc: float, dr: float = 0.0, back=True, facing="away"
                 BACK_Z[1], top="chair-dark", left="chair-mid", right="chair-dark")
 
 
+# The leaf is hinged on the **near** post and swings out into +c, away from the camera
+# along -r. That is the opposite hand to the badge door, and it is chosen for the
+# projection, not for the architecture: see `_door_propped`.
+HINGE = (8.4, 6.4)
+LEAF_LEN, LEAF_T = 4.9, 0.6
+AJAR_DEG = 28.0
+
+
+def _ajar_leaf(iso: Iso, deg: float, steps: int = 6):
+    """The door leaf part-open, and the world position of its free edge.
+
+    There is no rotation in this projection, so the swung leaf is stepped: `steps`
+    axis-aligned boxes walking out in +c as they run along -r from the hinge, each one
+    overlapping the next so their union is a solid slanted plane. They are outlined once
+    as a single silhouette — outline each box and the leaf reads as a stack of slats.
+
+    One number governs how open the door is, and it is tightly constrained. +c projects
+    down-right and -r projects up-right by the same amount, so a leaf at 45 degrees
+    projects to a *vertical line* — edge-on, no plane at all. Legibility therefore falls
+    off either side of 45 and is best near 0 (shut) and 90 (flat open). 28 is as far
+    open as this leaf can go while still reading as a door rather than a plank.
+    """
+    import math
+    th = math.radians(deg)
+    pts = [(HINGE[0] + LEAF_LEN * t / steps * math.sin(th),
+            HINGE[1] - LEAF_LEN * t / steps * math.cos(th)) for t in range(steps + 1)]
+    leaf: dict = {}
+    for (c0, r0), (c1, r1) in zip(pts, pts[1:]):
+        leaf.update(iso.box(c0, r0, 0, c1 + LEAF_T, r1, DOOR_H + 0.8, top="desk-wood",
+                            left="desk-wood", right="desk-wood-dark", outline=None))
+    iso.outline(set(leaf), "outline")
+    return pts[-1]
+
+
 def _door_propped(iso: Iso, c: Canvas, propped: bool):
     _jambs_and_frame(iso)
     if not propped:
         _door_leaf_closed(iso)
         return
-    # the leaf swung out into the street from its hinge on the back post, and an office
-    # chair wedged against it on the pavement, holding it open: through the doorway
-    # you see the office floor. The chair sits forward of the leaf, so its star base is
-    # silhouetted against pale pavement rather than lost in the door's dark brown.
-    iso.box(8.6, 1.1, 0, 15.0, 1.7, DOOR_H + 0.8, top="desk-wood", left="desk-wood",
-            right="desk-wood-dark")
-    _office_chair(iso, 9.2, -2.6, back=True, facing="near")
+    # The leaf barely ajar, and the chair jammed against its free edge.
+    #
+    # The previous pass swung the leaf a full quarter-turn, flat out into the street,
+    # with the chair standing on the pavement beside the opening. DIA-21 held the gag at
+    # *weak* for exactly that and was right: the causal read — this chair is what is
+    # holding this door open — needs the two objects touching. A door already wide open
+    # does not need holding, and a chair parked next to it is not a gag.
+    #
+    # Getting both at once is a projection problem, and the hand of the hinge is what
+    # solves it. Hinged on the *far* post, a barely-open leaf puts its free edge at high
+    # r — which projects down-left, straight into the near jamb post. The chair then
+    # lands in the one part of this prop that is already dark and already occluded, and
+    # `chair-mid` on the post's `badge-body` face is a one-value step: the chair stops
+    # being a chair, which is the note DIA-21 had just passed. Hinged on the **near**
+    # post the leaf swings the other way, its free edge sits at low r and high c, and
+    # that projects down-*right* onto open pale pavement. Same door, same angle, and the
+    # chair's star base gets the light ground it needs to silhouette against.
+    #
+    # So: the leaf covers most of the doorway, the office floor shows through the wedge
+    # left at the far post, and the chair stands at the leaf's free edge with its back
+    # against it, out on the pavement where all of it reads.
+    free = _ajar_leaf(iso, AJAR_DEG)
+    _office_chair(iso, free[0] + 1.25 - CHAIR_CX, free[1] - 0.15 - CHAIR_CR,
+                  back=True, facing="near")
 
 
 def camera_dome() -> Canvas:

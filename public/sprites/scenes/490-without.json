@@ -1478,9 +1478,9 @@
         {
           "sprite": "balloon-welcome",
           "frame": "deflate",
-          "x": 223,
-          "y": 177,
-          "depth": 18.3,
+          "x": 199,
+          "y": 189,
+          "depth": 19.4,
           "gagId": "G3.1",
           "part": "desk"
         },
@@ -1552,9 +1552,9 @@
         {
           "gagId": "G3.1",
           "part": "desk",
-          "x": 214,
+          "x": 199,
           "y": 136,
-          "w": 41,
+          "w": 56,
           "h": 59,
           "primary": true
         },
@@ -4186,7 +4186,7 @@
           "x": 85,
           "y": 129,
           "w": 62,
-          "h": 55,
+          "h": 54,
           "primary": true
         }
       ],
