@@ -218,8 +218,8 @@ Systems & Automation Engineer starts a function.
 - **Receipt:** E-03. **Described, never quantified** (D-012).
 
 ### G6.4 · The badge that doesn't
-- **Already:** the reader goes green; the chair is a chair again; a small camera dome over
-  the door. Offboarding reaches the doors.
+- **Already:** the reader goes green; the chair is a chair again. Offboarding reaches the
+  doors.
 - **Without:** a worker tapping a badge at a door that stays shut; the next door propped
   open with an office chair.
 - **Where:** front door of the inset office.
