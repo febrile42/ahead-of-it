@@ -429,7 +429,6 @@ test.describe('F5 — the auto-opened Beyond panel outlives the Beyond band', ()
   test('F5.1 sliding back down from 1,000+ must not leave the Beyond panel over a numeric band', async ({
     page,
   }) => {
-    test.fail(); // live defect — delete this line with the fix
     // Worse than F1 because it needs no hotspot and no precision: R-01b
     // opens this panel *automatically* at the last stop, and "drag to the
     // end, then drag back" is one of the first things anyone does with a
