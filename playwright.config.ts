@@ -30,7 +30,14 @@ export default defineConfig({
   projects: [
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      use: {
+        ...devices['Desktop Chrome'],
+        // CI sets CHROME_PATH so tests/cls.spec.ts's CDP throttling test
+        // and Lighthouse share one downloaded Chromium binary. Project-
+        // scoped, not a file-level test.use in cls.spec.ts, so it can
+        // never leak into the webkit-iphone project below.
+        launchOptions: process.env.CHROME_PATH ? { executablePath: process.env.CHROME_PATH } : {},
+      },
     },
     {
       name: 'webkit-iphone',

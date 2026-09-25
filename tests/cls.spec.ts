@@ -14,11 +14,12 @@ import { interceptFixtureScenes } from './scene-source';
 // though the Lighthouse lab run (simulated throttling, Lantern) passed
 // with CLS 0 because the bundle ran before first paint under simulation.
 // Real throttling — CDP CPU + network emulation on a real Chromium — is
-// the only way to catch this, hence its own file and its own (optionally
-// pinned) browser executable.
-test.use({
-  launchOptions: process.env.CHROME_PATH ? { executablePath: process.env.CHROME_PATH } : {},
-});
+// the only way to catch this, hence its own file. The pinned CHROME_PATH
+// binary (so this shares one Chromium with Lighthouse in CI) lives on the
+// `chromium` project in playwright.config.ts, not a file-level test.use
+// here — a file-level override applied to every test in this file
+// regardless of project, so under `webkit-iphone` it launched the Chrome
+// binary through WebKit's launch protocol and crashed (DIA-15 follow-up).
 
 const VIEWPORT = { width: 390, height: 844 };
 
