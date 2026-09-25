@@ -1116,15 +1116,6 @@
           "depth": 2.95
         },
         {
-          "sprite": "sign-dnto",
-          "frame": "default",
-          "x": 116,
-          "y": 39,
-          "depth": 3.2,
-          "gagId": "G5.3",
-          "part": "server"
-        },
-        {
           "sprite": "phone-knot",
           "frame": "default",
           "x": 165,
@@ -1239,6 +1230,15 @@
           "depth": 6,
           "gagId": "G5.4",
           "part": "phones"
+        },
+        {
+          "sprite": "sign-dnto",
+          "frame": "default",
+          "x": 116,
+          "y": 39,
+          "depth": 6.3,
+          "gagId": "G5.3",
+          "part": "server"
         },
         {
           "sprite": "worker-coin",

@@ -505,7 +505,11 @@ def _ground360() -> list:
     ]
     # G5.3, at the front of the same closet: the main server, two fans on it, the sign
     P += [
-        _f("sign-dnto", 0.12, 2.2, dy=-25, depth=3.2, states=W, gag="G5.3",
+        # depth 6.3, not 3.2: at 3.2 a closet upright sorted in front of the sign and
+        # took a column out of the final F, the same way the fan's wind streaks were
+        # eating MAIN SERVER's R. A sign taped to a cutaway wall should never be behind
+        # anything in the room it labels.
+        _f("sign-dnto", 0.12, 2.2, dy=-25, depth=6.3, states=W, gag="G5.3",
            part="server"),
         _t("server-tower", 0, 3, states=W, id="tower", gag="G5.3", part="server"),
         dict(sprite="label-main-server", attach={"id": "tower", "point": "label"},
