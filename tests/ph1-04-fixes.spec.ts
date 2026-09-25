@@ -144,6 +144,12 @@ test.describe('panel thumbnail (fix round item 8 / review fix 5)', () => {
 
     await expect(thumb).toBeVisible();
     await expect(img).toBeVisible();
-    expect(await img.evaluate((el) => (el as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
+    // `toBeVisible()` only proves the <img> box is laid out; the bitmap can
+    // still be decoding, so a single read of naturalWidth races the decode and
+    // returns 0 under load. Poll — same assertion, no race. A thumb that
+    // genuinely never loads still fails, once the poll times out.
+    await expect
+      .poll(() => img.evaluate((el) => (el as HTMLImageElement).naturalWidth))
+      .toBeGreaterThan(0);
   });
 });
