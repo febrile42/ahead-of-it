@@ -24,6 +24,11 @@ Exit criteria
 
 *Prove the mechanic with stock art. Already shareable if it works.*
 
+> **Progress (2026-09-24):** every deliverable below is merged on `develop` (the "building
+> assembler" became the scene seam, D-035). The art pipeline went in-house (D-024, D-034),
+> and bands 80/150/220 are final. Remaining: art for 360–750, then the exit criteria. Live
+> state is in `docs/STATUS.md`.
+
 Deliverables
 - Repo scaffold: build tooling, `wrangler.jsonc` (assets-only Worker), CI for staging preview on `develop`. (S, brief from M)
 - Content pipeline: `docs/content/*.md` → `content/gags.json` with schema validation. (S build, H validate)
