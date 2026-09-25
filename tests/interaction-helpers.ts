@@ -1,0 +1,420 @@
+// Shared drivers for the cross-interaction specs (T7 / DIA-8).
+//
+// The pre-existing specs each re-declare their own `setBand`/`setState`
+// against a single interaction at a time. This module is the combination
+// layer: the same state transitions, but reachable by each *input method*
+// a visitor actually has (touch, mouse, keyboard), plus the two oracles
+// the one-at-a-time specs never assert — **where focus went** after a
+// re-render, and **what the open panel is currently claiming** while the
+// picture underneath it changes.
+//
+// Nothing here asserts. Specs do. Keeping the drivers assertion-free is
+// what lets the same driver be used by a test that expects the current
+// (buggy) behaviour and by the regression test that expects the fixed one.
+import type { Locator, Page } from '@playwright/test';
+
+/** Duplicated from src/scene/bands.ts for the same reason tests/scene.spec.ts
+ * duplicates it: this file runs under Playwright's own Node ESM loader, which
+ * cannot `import` src/content/content.json without an import attribute Vite
+ * supplies for the app bundle and Playwright does not. D-023/D-029. */
+export type BandId = 80 | 150 | 220 | 360 | 490 | 610 | 750 | 'beyond';
+export const BAND_ORDER: readonly BandId[] = [80, 150, 220, 360, 490, 610, 750, 'beyond'];
+export const NUMERIC_BANDS = [80, 150, 220, 360, 490, 610, 750] as const;
+export type SceneState = 'built' | 'without';
+
+/** CLAUDE.md's phone-first design width. Every spec in this pass starts here. */
+export const PHONE = { width: 390, height: 844 };
+export const TABLET = { width: 768, height: 1024 };
+export const DESKTOP = { width: 1280, height: 900 };
+
+/** How a visitor reached a state. The distinction matters because the
+ * keyboard path is the only one with a focus contract to break (R-24). */
+export type InputMethod = 'mouse' | 'touch' | 'keyboard';
+
+// ---------------------------------------------------------------------------
+// render-token plumbing
+// ---------------------------------------------------------------------------
+
+/** src/main.ts stamps `body[data-rendered-token]` only for renders that
+ * actually committed (S5) — awaiting it changing is the only non-flaky way
+ * to know a re-render finished, and it never observes a dropped stale paint. */
+export async function currentRenderToken(page: Page): Promise<string | undefined> {
+  return page.evaluate(() => document.body.dataset.renderedToken);
+}
+
+export async function waitForFirstRender(page: Page): Promise<void> {
+  await page.waitForFunction(() => document.body.dataset.renderedToken !== undefined);
+}
+
+export async function waitForNextRender(page: Page, prevToken: string | undefined): Promise<void> {
+  await page.waitForFunction((prev) => {
+    const token = document.body.dataset.renderedToken;
+    return token !== undefined && token !== prev;
+  }, prevToken);
+}
+
+/** Runs `action`, then waits for the re-render it is expected to cause.
+ * Reads the token *before* acting so a fast render cannot be missed. */
+export async function actAndWaitForRender(page: Page, action: () => Promise<void>): Promise<void> {
+  const prev = await currentRenderToken(page);
+  await action();
+  await waitForNextRender(page, prev);
+}
+
+/** The panel opening is a DOM show, not a scene render — it has no token of
+ * its own, so specs wait on the panel's own visibility instead of sleeping. */
+export async function waitForPanelOpen(page: Page): Promise<void> {
+  await page.locator('.panel').waitFor({ state: 'visible' });
+}
+
+// ---------------------------------------------------------------------------
+// opening the page
+// ---------------------------------------------------------------------------
+
+export interface OpenOptions {
+  viewport?: { width: number; height: number };
+  /** Passed straight to page.emulateMedia — for the prefers-reduced-motion pass. */
+  reducedMotion?: 'reduce' | 'no-preference';
+}
+
+export async function openApp(page: Page, options: OpenOptions = {}): Promise<void> {
+  const viewport = options.viewport ?? PHONE;
+  if (options.reducedMotion) await page.emulateMedia({ reducedMotion: options.reducedMotion });
+  await page.setViewportSize(viewport);
+  await page.goto('/');
+  await waitForFirstRender(page);
+}
+
+// ---------------------------------------------------------------------------
+// band
+// ---------------------------------------------------------------------------
+
+function rawFor(band: BandId): number {
+  // 1000 is SLIDER_MAX (src/scene/bands.ts) — the 1,000+ stop, R-01b.
+  return band === 'beyond' ? 1000 : band;
+}
+
+export async function currentBand(page: Page): Promise<string | undefined> {
+  return page.evaluate(() => document.body.dataset.band);
+}
+
+/**
+ * Settles the slider on `band`.
+ *
+ * `mouse`/`touch` set the input's value and dispatch `input`, which is what
+ * a real drag settles on (a synthetic drag over a 390px-wide range input
+ * cannot land on an exact band reliably). `keyboard` uses real key presses,
+ * so it also exercises the arrow/Home/End path R-24 requires — and, unlike
+ * the value-set path, it fires `input` once *per key*, which is the event
+ * storm a real drag produces.
+ *
+ * Returns false when the band was already current, because no render fires
+ * then and there is nothing to wait for (src/ui/slider.ts only notifies
+ * listeners when the snapped band actually changes).
+ */
+export async function setBand(page: Page, band: BandId, via: InputMethod = 'mouse'): Promise<boolean> {
+  if ((await currentBand(page)) === String(band)) return false;
+  const prev = await currentRenderToken(page);
+  if (via === 'keyboard') {
+    await setBandByKeyboard(page, band);
+  } else {
+    await page.locator('#headcount-slider').evaluate((el, value) => {
+      const input = el as HTMLInputElement;
+      input.value = String(value);
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+    }, rawFor(band));
+  }
+  await waitForNextRender(page, prev);
+  return true;
+}
+
+/** Walks the slider to `band` with Home/End + arrow keys only — no value
+ * assignment. This is the path a keyboard visitor actually takes, and it
+ * fires `input` once per key press. */
+export async function setBandByKeyboard(page: Page, band: BandId): Promise<void> {
+  const slider = page.locator('#headcount-slider');
+  await slider.focus();
+  if (band === 'beyond') {
+    await page.keyboard.press('End');
+    return;
+  }
+  // Home lands on SLIDER_MIN (25), which snaps to band 80, then step up to
+  // the target's exact raw value. `step` is 1 (src/ui/slider.ts), so this is
+  // a deliberate storm of `input` events rather than one jump.
+  await page.keyboard.press('Home');
+  const from = Number(await slider.inputValue());
+  const to = rawFor(band);
+  const key = to >= from ? 'ArrowRight' : 'ArrowLeft';
+  for (let i = 0; i < Math.abs(to - from); i += 1) {
+    await page.keyboard.press(key);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// state (the built <-> without toggle)
+// ---------------------------------------------------------------------------
+
+export async function currentState(page: Page): Promise<SceneState> {
+  const pressed = await page.locator('.toggle__button').getAttribute('aria-pressed');
+  return pressed === 'true' ? 'without' : 'built';
+}
+
+/** Flips the toggle to `state`. Returns false when already there (no render). */
+export async function setState(page: Page, state: SceneState, via: InputMethod = 'mouse'): Promise<boolean> {
+  if ((await currentState(page)) === state) return false;
+  const button = page.locator('.toggle__button');
+  const prev = await currentRenderToken(page);
+  if (via === 'keyboard') {
+    await button.focus();
+    await page.keyboard.press('Enter');
+  } else if (via === 'touch') {
+    await button.tap();
+  } else {
+    await button.click();
+  }
+  await waitForNextRender(page, prev);
+  return true;
+}
+
+// ---------------------------------------------------------------------------
+// views (D-036's tab row)
+// ---------------------------------------------------------------------------
+
+export async function currentView(page: Page): Promise<string | undefined> {
+  return page.evaluate(() => document.body.dataset.view);
+}
+
+export async function viewIds(page: Page): Promise<string[]> {
+  return page.locator('.scene-views__button').evaluateAll((els) =>
+    els.map((el) => (el as HTMLElement).dataset.viewId ?? '')
+  );
+}
+
+/** Switches to `viewId` through the tab row. `keyboard` presses Enter on the
+ * focused tab (which routes through the tab's *click* handler, not the
+ * roving-tabindex keydown handler) — the two are different code paths in
+ * src/main.ts and only one of them restores focus. */
+export async function setView(page: Page, viewId: string, via: InputMethod = 'mouse'): Promise<boolean> {
+  if ((await currentView(page)) === viewId) return false;
+  const tab = page.locator(`.scene-views__button[data-view-id="${viewId}"]`);
+  if ((await tab.count()) === 0) return false;
+  const prev = await currentRenderToken(page);
+  if (via === 'keyboard') {
+    await tab.focus();
+    await page.keyboard.press('Enter');
+  } else if (via === 'touch') {
+    await tab.tap();
+  } else {
+    await tab.click();
+  }
+  await waitForNextRender(page, prev);
+  return true;
+}
+
+/** Moves one tab along the row with the arrow keys — src/main.ts's
+ * roving-tabindex handler, which is a separate path from a tab click. */
+export async function pressViewArrow(page: Page, key: 'ArrowLeft' | 'ArrowRight'): Promise<void> {
+  const prev = await currentRenderToken(page);
+  await page.keyboard.press(key);
+  await waitForNextRender(page, prev);
+}
+
+// ---------------------------------------------------------------------------
+// hotspots and the panel
+// ---------------------------------------------------------------------------
+
+export function hotspots(page: Page): Locator {
+  return page.locator('.hotspot');
+}
+
+/** Opens the panel from the first hotspot of the current view via `via`, and
+ * returns the gag id it opened (so a spec can assert the panel's own strip
+ * still belongs to it after the picture changes underneath). */
+export async function openFirstHotspot(page: Page, via: InputMethod = 'mouse'): Promise<string> {
+  const first = hotspots(page).first();
+  const gagId = (await first.getAttribute('data-gag-id')) ?? '';
+  if (via === 'keyboard') {
+    await first.focus();
+    await page.keyboard.press('Enter');
+  } else if (via === 'touch') {
+    await first.tap();
+  } else {
+    await first.click();
+  }
+  await waitForPanelOpen(page);
+  return gagId;
+}
+
+export async function openHotspot(page: Page, gagId: string, via: InputMethod = 'mouse'): Promise<void> {
+  const hotspot = page.locator(`.hotspot[data-gag-id="${gagId}"]`).first();
+  if (via === 'keyboard') {
+    await hotspot.focus();
+    await page.keyboard.press('Enter');
+  } else if (via === 'touch') {
+    await hotspot.tap();
+  } else {
+    await hotspot.click();
+  }
+  await waitForPanelOpen(page);
+}
+
+export async function panelIsOpen(page: Page): Promise<boolean> {
+  return page.locator('.panel').evaluate((el) => !(el as HTMLElement).hidden);
+}
+
+/** R-04a: every panel opens with a self-identifying `YEAR · ~HEADCOUNT ·
+ * DESCRIPTOR` strip. That makes the strip the oracle for "which band's gag
+ * is this panel actually showing" — it is the only band-identifying text in
+ * the panel, and it is exactly what goes stale if the picture re-renders
+ * underneath an open panel. */
+export async function panelStrip(page: Page): Promise<string> {
+  return (await page.locator('.panel__strip').textContent()) ?? '';
+}
+
+export async function panelTitle(page: Page): Promise<string> {
+  return (await page.locator('.panel__title').textContent()) ?? '';
+}
+
+// ---------------------------------------------------------------------------
+// focus: the oracle nothing in the existing suite checks after a re-render
+// ---------------------------------------------------------------------------
+
+export interface FocusInfo {
+  /** Lowercased tag name. 'body' means focus was lost — a keyboard visitor
+   * is silently dumped to the top of the document. */
+  tag: string;
+  className: string;
+  gagId: string | null;
+  viewId: string | null;
+  id: string | null;
+  /** False when activeElement is no longer in the document — the symptom of
+   * .focus() having been called on a node a replaceChildren() detached. */
+  connected: boolean;
+  /** False when activeElement exists but is not rendered (it or an ancestor
+   * is `hidden`/`display:none`). Chromium blurs such an element
+   * asynchronously, so for one frame after the panel is hidden focus is
+   * still *on* the hidden close button — an invisible focus holder is
+   * already lost focus, it just has not landed on <body> yet. */
+  visible: boolean;
+}
+
+export async function focusInfo(page: Page): Promise<FocusInfo> {
+  return page.evaluate(() => {
+    const el = document.activeElement as HTMLElement | null;
+    return {
+      tag: (el?.tagName ?? 'none').toLowerCase(),
+      className: el?.className ?? '',
+      gagId: el?.dataset?.gagId ?? null,
+      viewId: el?.dataset?.viewId ?? null,
+      id: el?.id ? el.id : null,
+      connected: el ? el.isConnected : false,
+      visible: el ? el.getClientRects().length > 0 : false,
+    };
+  });
+}
+
+/**
+ * Focus moves asynchronously after a DOM change (hiding an ancestor of the
+ * focused node blurs it on a later tick), so a single read right after an
+ * action can catch focus mid-flight. This polls until two consecutive reads
+ * agree, which is the state a visitor actually ends up in.
+ */
+export async function settledFocusInfo(page: Page): Promise<FocusInfo> {
+  let previous = JSON.stringify(await focusInfo(page));
+  for (let i = 0; i < 20; i += 1) {
+    await page.waitForTimeout(50);
+    const next = await focusInfo(page);
+    const serialised = JSON.stringify(next);
+    if (serialised === previous) return next;
+    previous = serialised;
+  }
+  return focusInfo(page);
+}
+
+/** True when focus is on nothing a visitor can see or act on — `<body>`,
+ * `<html>`, nowhere, or an element that is detached or not rendered. This is
+ * the shape "focus was lost" takes in a browser: `.focus()` on a detached
+ * node is a silent no-op, so nothing throws and nothing logs. */
+export function focusIsLost(info: FocusInfo): boolean {
+  if (info.tag === 'body' || info.tag === 'html' || info.tag === 'none') return true;
+  return !info.connected || !info.visible;
+}
+
+export async function pressEscape(page: Page): Promise<void> {
+  await page.keyboard.press('Escape');
+  await page.locator('.panel').waitFor({ state: 'hidden' });
+}
+
+// ---------------------------------------------------------------------------
+// resize
+// ---------------------------------------------------------------------------
+
+/**
+ * One resize, awaited through to the re-render it causes. src/main.ts's
+ * resize listener calls render() unconditionally, so a render always follows.
+ */
+export async function resizeTo(page: Page, width: number, height: number): Promise<void> {
+  const prev = await currentRenderToken(page);
+  await page.setViewportSize({ width, height });
+  await waitForNextRender(page, prev);
+}
+
+/**
+ * The iOS address-bar storm: scrolling collapses the browser chrome, which
+ * fires `resize` with the *width unchanged* and the height stepping by a few
+ * px at a time. Dispatched as real `resize` events on window rather than
+ * viewport changes, because that is the shape of the event a visitor's scroll
+ * produces and it is the only way to fire a burst faster than a render can
+ * finish. Returns how many renders actually committed.
+ */
+export async function resizeStorm(page: Page, count: number): Promise<number> {
+  const before = Number((await currentRenderToken(page)) ?? '0');
+  await page.evaluate((n) => {
+    for (let i = 0; i < n; i += 1) window.dispatchEvent(new Event('resize'));
+  }, count);
+  // Let every queued render settle; the token only advances for committed
+  // paints, so this measures work that landed, not events fired.
+  await page.waitForFunction(
+    (prev) => {
+      const token = Number(document.body.dataset.renderedToken ?? '0');
+      return token > prev;
+    },
+    before,
+    { timeout: 10_000 }
+  );
+  await page.waitForTimeout(250); // let any trailing renders of the burst land
+  const after = Number((await currentRenderToken(page)) ?? '0');
+  return after - before;
+}
+
+// ---------------------------------------------------------------------------
+// degenerate states
+// ---------------------------------------------------------------------------
+
+/**
+ * Forces src/main.ts's `renderMissingScene` "not drawn yet" fallback for one
+ * band by failing its scene fetch, and clears the module-level scene cache
+ * so the block is not masked by an already-resolved promise.
+ *
+ * Must be called before `openApp`. Every band now has a real scene file
+ * (public/sprites/scenes/), so an offline/404 fetch is the only way this
+ * path is still reachable — which is precisely the degenerate state worth a
+ * test: a visitor on a flaky connection.
+ */
+export async function failSceneFetch(page: Page, band: number | 'all'): Promise<void> {
+  const pattern = band === 'all' ? '**/sprites/scenes/*.json' : `**/sprites/scenes/${band}-*.json`;
+  await page.route(pattern, (route) => route.abort('failed'));
+}
+
+/** The "not drawn yet" box src/main.ts paints when no scene file loads. */
+export async function canvasShowsMissingScene(page: Page): Promise<boolean> {
+  // renderMissingScene() empties both the tab row and the hotspot layer and
+  // stamps an empty view id — that triple is its signature, and it is
+  // distinguishable from every real scene (all of which have >=1 tab).
+  const [view, tabs, spots] = await Promise.all([
+    currentView(page),
+    page.locator('.scene-views__button').count(),
+    hotspots(page).count(),
+  ]);
+  return view === '' && tabs === 0 && spots === 0;
+}
