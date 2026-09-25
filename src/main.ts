@@ -450,6 +450,7 @@ if (sliderRoot && toggleRoot && viewsRow && sceneWrap && stepper && canvas && ho
       document.body.dataset.renderedToken = String(token);
       document.body.dataset.band = String(band);
       document.body.dataset.view = '';
+      document.body.dataset.room = '';
       return;
     }
 
@@ -498,6 +499,7 @@ if (sliderRoot && toggleRoot && viewsRow && sceneWrap && stepper && canvas && ho
     document.body.dataset.renderedToken = String(token);
     document.body.dataset.band = String(band);
     document.body.dataset.view = view.id;
+    document.body.dataset.room = roomOf(scene, view)?.id ?? '';
   }
 
   slider.onChange((newBand) => {

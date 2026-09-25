@@ -12,7 +12,7 @@
 // what lets the same driver be used by a test that expects the current
 // (buggy) behaviour and by the regression test that expects the fixed one.
 import type { Locator, Page } from '@playwright/test';
-import { interceptFixtureScenes } from './scene-source';
+import { drawnBands as drawnNumericBands, interceptFixtureScenes } from './scene-source';
 
 /** Duplicated from src/scene/bands.ts for the same reason tests/scene.spec.ts
  * duplicates it: this file runs under Playwright's own Node ESM loader, which
@@ -22,6 +22,30 @@ export type BandId = 80 | 150 | 220 | 360 | 490 | 610 | 750 | 'beyond';
 export const BAND_ORDER: readonly BandId[] = [80, 150, 220, 360, 490, 610, 750, 'beyond'];
 export const NUMERIC_BANDS = [80, 150, 220, 360, 490, 610, 750] as const;
 export type SceneState = 'built' | 'without';
+
+/**
+ * Bands that actually have a scene file to paint right now — the fixtures
+ * (80, 750) until the D-042 exporter lands real schema-2 files for the rest,
+ * the real export after (scene-source.ts's `drawnBands`, same source
+ * pixel-parity.spec.ts reads). A spec that needs an actual rendered picture
+ * (hotspots, a tab row, a stepper) should iterate this instead of
+ * BAND_ORDER/NUMERIC_BANDS, so it starts covering every band the moment the
+ * real export does, with no change here — a band with no scene file at all
+ * renders the "not drawn yet" placeholder, which has nothing to interact with.
+ */
+export function testableBands(): BandId[] {
+  const nums = drawnNumericBands();
+  const bands: BandId[] = [...nums] as BandId[];
+  if (nums.includes(750)) bands.push('beyond'); // fixtures/index.json points "beyond" at the 750 file
+  return bands;
+}
+
+/** `testableBands()` without 'beyond' — for specs that need a plain numeric
+ * band to switch views/rooms/close-ups within (750 already covers what
+ * 'beyond' would, since both serve the same file). */
+export function numericTestableBands(): Exclude<BandId, 'beyond'>[] {
+  return drawnNumericBands() as Exclude<BandId, 'beyond'>[];
+}
 
 /** CLAUDE.md's phone-first design width. Every spec in this pass starts here. */
 export const PHONE = { width: 390, height: 844 };
@@ -76,6 +100,14 @@ export interface OpenOptions {
   viewport?: { width: number; height: number };
   /** Passed straight to page.emulateMedia — for the prefers-reduced-motion pass. */
   reducedMotion?: 'reduce' | 'no-preference';
+  /**
+   * Extra `page.route` setup to run after `interceptFixtureScenes` but
+   * before navigation — Playwright resolves the *most recently registered*
+   * matching route first, so a route meant to override the fixture (e.g.
+   * `failSceneFetch` on a fixture-covered band) must be added here, not
+   * before calling `openApp`, or the fixture route wins instead.
+   */
+  beforeGoto?: (page: Page) => Promise<void>;
 }
 
 export async function openApp(page: Page, options: OpenOptions = {}): Promise<void> {
@@ -85,6 +117,7 @@ export async function openApp(page: Page, options: OpenOptions = {}): Promise<vo
   // D-042: serves the schema-2 fixtures until the exporter's schema-2 scenes
   // are in public/ (a no-op after that).
   await interceptFixtureScenes(page);
+  await options.beforeGoto?.(page);
   await page.goto('/');
   await waitForFirstRender(page);
 }
@@ -181,26 +214,35 @@ export async function setState(page: Page, state: SceneState, via: InputMethod =
 }
 
 // ---------------------------------------------------------------------------
-// views (D-036's tab row)
+// views (D-042a): a room (the tab row's establishing shot, no gag hotspots)
+// or a close-up (where gags are tapped, reached by the stepper or a room's
+// "zoom in" buttons). `currentView` is whichever of the two is on screen;
+// `currentRoomId` is always the room it belongs to (itself, for a room).
 // ---------------------------------------------------------------------------
 
 export async function currentView(page: Page): Promise<string | undefined> {
   return page.evaluate(() => document.body.dataset.view);
 }
 
-export async function viewIds(page: Page): Promise<string[]> {
+export async function currentRoomId(page: Page): Promise<string | undefined> {
+  return page.evaluate(() => document.body.dataset.room);
+}
+
+/** The room tab row's ids, in array order — one per room, never a close-up. */
+export async function roomIds(page: Page): Promise<string[]> {
   return page.locator('.scene-views__button').evaluateAll((els) =>
     els.map((el) => (el as HTMLElement).dataset.viewId ?? '')
   );
 }
 
-/** Switches to `viewId` through the tab row. `keyboard` presses Enter on the
- * focused tab (which routes through the tab's *click* handler, not the
+/** Switches to `roomId` through the tab row — lands on that room's default
+ * close-up (D-042 item 6), not the room's own establishing shot. `keyboard`
+ * presses Enter on the focused tab (the tab's *click* handler, not the
  * roving-tabindex keydown handler) — the two are different code paths in
  * src/main.ts and only one of them restores focus. */
-export async function setView(page: Page, viewId: string, via: InputMethod = 'mouse'): Promise<boolean> {
-  if ((await currentView(page)) === viewId) return false;
-  const tab = page.locator(`.scene-views__button[data-view-id="${viewId}"]`);
+export async function setRoom(page: Page, roomId: string, via: InputMethod = 'mouse'): Promise<boolean> {
+  if ((await currentRoomId(page)) === roomId) return false;
+  const tab = page.locator(`.scene-views__button[data-view-id="${roomId}"]`);
   if ((await tab.count()) === 0) return false;
   const prev = await currentRenderToken(page);
   if (via === 'keyboard') {
@@ -215,12 +257,123 @@ export async function setView(page: Page, viewId: string, via: InputMethod = 'mo
   return true;
 }
 
-/** Moves one tab along the row with the arrow keys — src/main.ts's
+/** Moves one tab along the room row with the arrow keys — src/main.ts's
  * roving-tabindex handler, which is a separate path from a tab click. */
-export async function pressViewArrow(page: Page, key: 'ArrowLeft' | 'ArrowRight'): Promise<void> {
+export async function pressRoomArrow(page: Page, key: 'ArrowLeft' | 'ArrowRight'): Promise<void> {
   const prev = await currentRenderToken(page);
   await page.keyboard.press(key);
   await waitForNextRender(page, prev);
+}
+
+/** `force` bypasses Playwright's actionability check, which treats
+ * `aria-disabled="true"` as not-enabled and otherwise retries a click for
+ * the full test timeout — main.ts deliberately never sets the native
+ * `disabled` attribute on the stepper's ends (so focus is never lost
+ * there), and a real click or Enter on one of them does reach the handler
+ * (it just no-ops but for the live-region announcement), so the force is
+ * standing in for a real visitor's tap, not cheating past a broken state. */
+async function activate(locator: Locator, via: InputMethod, force = false): Promise<void> {
+  if (via === 'keyboard') {
+    await locator.focus();
+    await locator.press('Enter');
+  } else if (via === 'touch') {
+    await locator.tap({ force });
+  } else {
+    await locator.click({ force });
+  }
+}
+
+export interface StepperInfo {
+  prevDisabled: boolean;
+  nextDisabled: boolean;
+  label: string;
+  wholeFloor: boolean;
+}
+
+/** The stepper's current state: "label · n of N" plus which ends are
+ * reachable. Both ends are `aria-disabled`, never `disabled` (main.ts never
+ * drops focus at the boundary), so this reads that attribute, not `:disabled`. */
+export async function stepperInfo(page: Page): Promise<StepperInfo> {
+  const stepper = page.locator('#scene-stepper');
+  return {
+    prevDisabled: (await stepper.locator('.scene-stepper__prev').getAttribute('aria-disabled')) === 'true',
+    nextDisabled: (await stepper.locator('.scene-stepper__next').getAttribute('aria-disabled')) === 'true',
+    label: (await stepper.locator('.scene-stepper__label').textContent()) ?? '',
+    wholeFloor: (await stepper.locator('.scene-stepper__floor').getAttribute('aria-pressed')) === 'true',
+  };
+}
+
+/** Presses the stepper's previous (`delta -1`) or next (`delta 1`). Returns
+ * whether a render actually fired — false at an end (aria-disabled, a no-op
+ * that only updates the live region) or while a room view is showing (D-042a:
+ * there is no "next" close-up from an establishing shot). */
+export async function step(page: Page, delta: -1 | 1, via: InputMethod = 'mouse'): Promise<boolean> {
+  const button = page.locator(delta === 1 ? '.scene-stepper__next' : '.scene-stepper__prev');
+  if ((await button.getAttribute('aria-disabled')) === 'true') {
+    await activate(button, via, true);
+    return false;
+  }
+  const prev = await currentRenderToken(page);
+  await activate(button, via);
+  await waitForNextRender(page, prev);
+  return true;
+}
+
+/** Toggles the "whole floor" control: from a close-up to its room, or from a
+ * room back to wherever "whole floor" was entered from (main.ts's
+ * `roomFromId`, falling back to the room's default close-up). Always causes
+ * a render — from either kind of view there is always somewhere to go once
+ * a scene has loaded. */
+export async function toggleWholeFloor(page: Page, via: InputMethod = 'mouse'): Promise<void> {
+  const button = page.locator('.scene-stepper__floor');
+  const prev = await currentRenderToken(page);
+  await activate(button, via);
+  await waitForNextRender(page, prev);
+}
+
+/** Clicks a room's "zoom in" button for `closeupId` — present only while
+ * that close-up's room view is on screen (renderZoomTargets). */
+export async function zoomInto(page: Page, closeupId: string, via: InputMethod = 'mouse'): Promise<void> {
+  const button = page.locator(`.hotspot--zoom[data-view-id="${closeupId}"]`);
+  const prev = await currentRenderToken(page);
+  await activate(button, via);
+  await waitForNextRender(page, prev);
+}
+
+/**
+ * Walks every close-up of the current band in array order via the stepper —
+ * across every room, not just the current one (D-042a: the stepper's order
+ * is `closeups(scene)`, never room-scoped) — calling `atEachCloseup` while
+ * stopped on each one. Rewinds to the start first, so it is safe to call
+ * from wherever the visitor currently is, including a room view. Leaves the
+ * visitor on the last close-up.
+ */
+export async function forEachCloseup(
+  page: Page,
+  atEachCloseup: (closeupId: string) => Promise<void>
+): Promise<void> {
+  // A room view has no "previous"/"next" (main.ts's step() no-ops there) —
+  // land on one of its close-ups first via "whole floor".
+  if ((await currentView(page)) === (await currentRoomId(page))) {
+    await toggleWholeFloor(page);
+  }
+  while (!(await stepperInfo(page)).prevDisabled) {
+    await step(page, -1);
+  }
+  for (;;) {
+    await atEachCloseup((await currentView(page)) ?? '');
+    const moved = await step(page, 1);
+    if (!moved) break;
+  }
+}
+
+/** `forEachCloseup`, collecting the ids visited instead of acting on each. */
+export async function walkCloseupIds(page: Page): Promise<string[]> {
+  const ids: string[] = [];
+  await forEachCloseup(page, async (id) => {
+    ids.push(id);
+  });
+  return ids;
 }
 
 // ---------------------------------------------------------------------------

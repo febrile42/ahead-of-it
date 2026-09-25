@@ -268,6 +268,11 @@ h1 {
   margin: 0.5rem auto 0;
   max-width: 720px;
   padding: 0 1rem;
+  /* Below ~220px (200% zoom on a 390px phone) the four controls no longer
+     fit; contain the overflow here rather than widening the document, same
+     as .scene-views. */
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .scene-stepper__button,
