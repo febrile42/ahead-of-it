@@ -21,6 +21,32 @@
     "h": 20,
     "w": 12
   },
+  "balloon-welcome": {
+    "anchor": [
+      8,
+      44
+    ],
+    "frames": {
+      "default": [
+        {
+          "duration": 0,
+          "file": "balloon-welcome.png"
+        }
+      ],
+      "deflate": [
+        {
+          "duration": 900,
+          "file": "balloon-welcome-deflate-0.png"
+        },
+        {
+          "duration": 900,
+          "file": "balloon-welcome-deflate-1.png"
+        }
+      ]
+    },
+    "h": 44,
+    "w": 40
+  },
   "box-fan": {
     "anchor": [
       11,
@@ -31,6 +57,22 @@
         {
           "duration": 0,
           "file": "box-fan.png"
+        }
+      ]
+    },
+    "h": 34,
+    "w": 23
+  },
+  "box-fan-l": {
+    "anchor": [
+      12,
+      34
+    ],
+    "frames": {
+      "default": [
+        {
+          "duration": 0,
+          "file": "box-fan-l.png"
         }
       ]
     },
@@ -101,6 +143,22 @@
     "h": 16,
     "w": 18
   },
+  "cable-tape-360": {
+    "anchor": [
+      48,
+      13
+    ],
+    "frames": {
+      "default": [
+        {
+          "duration": 0,
+          "file": "cable-tape-360.png"
+        }
+      ]
+    },
+    "h": 70,
+    "w": 108
+  },
   "cable-tape-c": {
     "anchor": [
       9,
@@ -165,6 +223,52 @@
     "h": 51,
     "w": 20
   },
+  "calendar-flip": {
+    "anchor": [
+      9,
+      30
+    ],
+    "frames": {
+      "default": [
+        {
+          "duration": 0,
+          "file": "calendar-flip.png"
+        }
+      ],
+      "flip": [
+        {
+          "duration": 260,
+          "file": "calendar-flip-flip-0.png"
+        },
+        {
+          "duration": 260,
+          "file": "calendar-flip-flip-1.png"
+        },
+        {
+          "duration": 260,
+          "file": "calendar-flip-flip-2.png"
+        }
+      ]
+    },
+    "h": 30,
+    "w": 30
+  },
+  "calendar-one": {
+    "anchor": [
+      9,
+      30
+    ],
+    "frames": {
+      "default": [
+        {
+          "duration": 0,
+          "file": "calendar-one.png"
+        }
+      ]
+    },
+    "h": 30,
+    "w": 30
+  },
   "camera-bar": {
     "anchor": [
       1,
@@ -180,6 +284,22 @@
     },
     "h": 41,
     "w": 32
+  },
+  "camera-dome": {
+    "anchor": [
+      3,
+      0
+    ],
+    "frames": {
+      "default": [
+        {
+          "duration": 0,
+          "file": "camera-dome.png"
+        }
+      ]
+    },
+    "h": 5,
+    "w": 7
   },
   "card-customers": {
     "anchor": [
@@ -213,6 +333,22 @@
     "h": 9,
     "w": 27
   },
+  "card-virtualised": {
+    "anchor": [
+      21,
+      9
+    ],
+    "frames": {
+      "default": [
+        {
+          "duration": 0,
+          "file": "card-virtualised.png"
+        }
+      ]
+    },
+    "h": 9,
+    "w": 43
+  },
   "chair": {
     "anchor": [
       13,
@@ -228,6 +364,22 @@
     },
     "h": 17,
     "w": 14
+  },
+  "chair-back": {
+    "anchor": [
+      15,
+      19
+    ],
+    "frames": {
+      "default": [
+        {
+          "duration": 0,
+          "file": "chair-back.png"
+        }
+      ]
+    },
+    "h": 19,
+    "w": 16
   },
   "closet-shelf": {
     "anchor": [
@@ -341,6 +493,54 @@
     },
     "w": 32
   },
+  "desk-bare": {
+    "anchor": [
+      15,
+      46
+    ],
+    "frames": {
+      "default": [
+        {
+          "duration": 0,
+          "file": "desk-bare.png"
+        }
+      ]
+    },
+    "h": 46,
+    "points": {
+      "cal": [
+        21,
+        15
+      ]
+    },
+    "w": 30
+  },
+  "desk-coinphone": {
+    "anchor": [
+      16,
+      40
+    ],
+    "frames": {
+      "default": [
+        {
+          "duration": 0,
+          "file": "desk-coinphone.png"
+        }
+      ]
+    },
+    "h": 40,
+    "points": {
+      "card": [
+        23,
+        11
+      ],
+      "net": [
+        23,
+        16
+      ]
+    },
+    "w": 32
+  },
   "desk-dev": {
     "anchor": [
       16,
@@ -385,6 +585,54 @@
     },
     "w": 32
   },
+  "desk-drives": {
+    "anchor": [
+      16,
+      40
+    ],
+    "frames": {
+      "default": [
+        {
+          "duration": 0,
+          "file": "desk-drives.png"
+        }
+      ]
+    },
+    "h": 40,
+    "points": {
+      "drives": [
+        13,
+        19
+      ],
+      "net": [
+        23,
+        16
+      ]
+    },
+    "w": 32
+  },
+  "desk-laptop": {
+    "anchor": [
+      15,
+      46
+    ],
+    "frames": {
+      "default": [
+        {
+          "duration": 0,
+          "file": "desk-laptop.png"
+        }
+      ]
+    },
+    "h": 46,
+    "points": {
+      "cal": [
+        21,
+        15
+      ]
+    },
+    "w": 30
+  },
   "desk-notes": {
     "anchor": [
       16,
@@ -422,6 +670,32 @@
     },
     "h": 40,
     "points": {
+      "net": [
+        23,
+        16
+      ]
+    },
+    "w": 32
+  },
+  "desk-phone": {
+    "anchor": [
+      16,
+      40
+    ],
+    "frames": {
+      "default": [
+        {
+          "duration": 0,
+          "file": "desk-phone.png"
+        }
+      ]
+    },
+    "h": 40,
+    "points": {
+      "card": [
+        23,
+        11
+      ],
       "net": [
         23,
         16
@@ -554,6 +828,22 @@
       ]
     },
     "w": 32
+  },
+  "drives-final": {
+    "anchor": [
+      22,
+      34
+    ],
+    "frames": {
+      "default": [
+        {
+          "duration": 0,
+          "file": "drives-final.png"
+        }
+      ]
+    },
+    "h": 34,
+    "w": 45
   },
   "engineer": {
     "anchor": [
@@ -757,6 +1047,38 @@
     "h": 188,
     "w": 282
   },
+  "fx-net-360-built-ground": {
+    "anchor": [
+      0,
+      0
+    ],
+    "frames": {
+      "default": [
+        {
+          "duration": 0,
+          "file": "fx-net-360-built-ground.png"
+        }
+      ]
+    },
+    "h": 220,
+    "w": 346
+  },
+  "fx-net-360-without-ground": {
+    "anchor": [
+      0,
+      0
+    ],
+    "frames": {
+      "default": [
+        {
+          "duration": 0,
+          "file": "fx-net-360-without-ground.png"
+        }
+      ]
+    },
+    "h": 220,
+    "w": 346
+  },
   "fx-net-80-built-ground": {
     "anchor": [
       0,
@@ -901,6 +1223,38 @@
     "h": 174,
     "w": 164
   },
+  "hq-5": {
+    "anchor": [
+      65,
+      167
+    ],
+    "frames": {
+      "default": [
+        {
+          "duration": 0,
+          "file": "hq-5.png"
+        }
+      ]
+    },
+    "h": 170,
+    "w": 116
+  },
+  "hq-6": {
+    "anchor": [
+      65,
+      187
+    ],
+    "frames": {
+      "default": [
+        {
+          "duration": 0,
+          "file": "hq-6.png"
+        }
+      ]
+    },
+    "h": 190,
+    "w": 116
+  },
   "hq-door": {
     "anchor": [
       21,
@@ -928,6 +1282,116 @@
     },
     "h": 37,
     "w": 22
+  },
+  "icon-dr": {
+    "anchor": [
+      7,
+      11
+    ],
+    "frames": {
+      "default": [
+        {
+          "duration": 0,
+          "file": "icon-dr.png"
+        }
+      ]
+    },
+    "h": 11,
+    "w": 15
+  },
+  "icon-storage": {
+    "anchor": [
+      4,
+      5
+    ],
+    "frames": {
+      "default": [
+        {
+          "duration": 0,
+          "file": "icon-storage.png"
+        }
+      ]
+    },
+    "h": 10,
+    "w": 9
+  },
+  "inset-door-badge": {
+    "anchor": [
+      1,
+      36
+    ],
+    "frames": {
+      "default": [
+        {
+          "duration": 0,
+          "file": "inset-door-badge.png"
+        }
+      ],
+      "green": [
+        {
+          "duration": 0,
+          "file": "inset-door-badge-green.png"
+        }
+      ],
+      "red": [
+        {
+          "duration": 0,
+          "file": "inset-door-badge-red.png"
+        }
+      ]
+    },
+    "h": 37,
+    "points": {
+      "reader": [
+        4,
+        20
+      ]
+    },
+    "w": 19
+  },
+  "inset-door-propped": {
+    "anchor": [
+      1,
+      36
+    ],
+    "frames": {
+      "closed": [
+        {
+          "duration": 0,
+          "file": "inset-door-propped-closed.png"
+        }
+      ],
+      "default": [
+        {
+          "duration": 0,
+          "file": "inset-door-propped.png"
+        }
+      ],
+      "propped": [
+        {
+          "duration": 0,
+          "file": "inset-door-propped-propped.png"
+        }
+      ]
+    },
+    "h": 37,
+    "w": 27
+  },
+  "label-main-server": {
+    "anchor": [
+      13,
+      16
+    ],
+    "frames": {
+      "default": [
+        {
+          "duration": 0,
+          "file": "label-main-server.png"
+        }
+      ]
+    },
+    "h": 16,
+    "w": 27
   },
   "laptop-shelf": {
     "anchor": [
@@ -1038,6 +1502,32 @@
     },
     "h": 31,
     "w": 15
+  },
+  "nas": {
+    "anchor": [
+      11,
+      19
+    ],
+    "frames": {
+      "blink": [
+        {
+          "duration": 300,
+          "file": "nas-blink-0.png"
+        },
+        {
+          "duration": 300,
+          "file": "nas-blink-1.png"
+        }
+      ],
+      "default": [
+        {
+          "duration": 0,
+          "file": "nas.png"
+        }
+      ]
+    },
+    "h": 19,
+    "w": 12
   },
   "note-dave": {
     "anchor": [
@@ -1199,6 +1689,22 @@
     "h": 16,
     "w": 32
   },
+  "phone-knot": {
+    "anchor": [
+      34,
+      15
+    ],
+    "frames": {
+      "default": [
+        {
+          "duration": 0,
+          "file": "phone-knot.png"
+        }
+      ]
+    },
+    "h": 33,
+    "w": 99
+  },
   "plant": {
     "anchor": [
       7,
@@ -1229,6 +1735,22 @@
       ]
     },
     "h": 46,
+    "w": 20
+  },
+  "receipt-33": {
+    "anchor": [
+      10,
+      26
+    ],
+    "frames": {
+      "default": [
+        {
+          "duration": 0,
+          "file": "receipt-33.png"
+        }
+      ]
+    },
+    "h": 26,
     "w": 20
   },
   "road-c": {
@@ -1309,6 +1831,28 @@
     "h": 24,
     "w": 20
   },
+  "server-tower": {
+    "anchor": [
+      13,
+      34
+    ],
+    "frames": {
+      "default": [
+        {
+          "duration": 0,
+          "file": "server-tower.png"
+        }
+      ]
+    },
+    "h": 34,
+    "points": {
+      "label": [
+        8,
+        9
+      ]
+    },
+    "w": 26
+  },
   "sign-caution": {
     "anchor": [
       8,
@@ -1324,6 +1868,22 @@
     },
     "h": 25,
     "w": 17
+  },
+  "sign-dnto": {
+    "anchor": [
+      17,
+      15
+    ],
+    "frames": {
+      "default": [
+        {
+          "duration": 0,
+          "file": "sign-dnto.png"
+        }
+      ]
+    },
+    "h": 15,
+    "w": 35
   },
   "sign-pipeline": {
     "anchor": [
@@ -2048,6 +2608,116 @@
     "h": 24,
     "w": 16
   },
+  "worker-badge": {
+    "anchor": [
+      12,
+      24
+    ],
+    "frames": {
+      "a-left": [
+        {
+          "duration": 450,
+          "file": "worker-badge-a-left-0.png"
+        },
+        {
+          "duration": 450,
+          "file": "worker-badge-a-left-1.png"
+        }
+      ],
+      "a-right": [
+        {
+          "duration": 450,
+          "file": "worker-badge-a-right-0.png"
+        },
+        {
+          "duration": 450,
+          "file": "worker-badge-a-right-1.png"
+        }
+      ],
+      "b-left": [
+        {
+          "duration": 450,
+          "file": "worker-badge-b-left-0.png"
+        },
+        {
+          "duration": 450,
+          "file": "worker-badge-b-left-1.png"
+        }
+      ],
+      "b-right": [
+        {
+          "duration": 450,
+          "file": "worker-badge-b-right-0.png"
+        },
+        {
+          "duration": 450,
+          "file": "worker-badge-b-right-1.png"
+        }
+      ],
+      "c-left": [
+        {
+          "duration": 450,
+          "file": "worker-badge-c-left-0.png"
+        },
+        {
+          "duration": 450,
+          "file": "worker-badge-c-left-1.png"
+        }
+      ],
+      "c-right": [
+        {
+          "duration": 450,
+          "file": "worker-badge-c-right-0.png"
+        },
+        {
+          "duration": 450,
+          "file": "worker-badge-c-right-1.png"
+        }
+      ],
+      "d-left": [
+        {
+          "duration": 450,
+          "file": "worker-badge-d-left-0.png"
+        },
+        {
+          "duration": 450,
+          "file": "worker-badge-d-left-1.png"
+        }
+      ],
+      "d-right": [
+        {
+          "duration": 450,
+          "file": "worker-badge-d-right-0.png"
+        },
+        {
+          "duration": 450,
+          "file": "worker-badge-d-right-1.png"
+        }
+      ],
+      "e-left": [
+        {
+          "duration": 450,
+          "file": "worker-badge-e-left-0.png"
+        },
+        {
+          "duration": 450,
+          "file": "worker-badge-e-left-1.png"
+        }
+      ],
+      "e-right": [
+        {
+          "duration": 450,
+          "file": "worker-badge-e-right-0.png"
+        },
+        {
+          "duration": 450,
+          "file": "worker-badge-e-right-1.png"
+        }
+      ]
+    },
+    "h": 24,
+    "w": 24
+  },
   "worker-c": {
     "anchor": [
       8,
@@ -2165,6 +2835,132 @@
     },
     "h": 24,
     "w": 16
+  },
+  "worker-coat": {
+    "anchor": [
+      16,
+      40
+    ],
+    "frames": {
+      "default": [
+        {
+          "duration": 0,
+          "file": "worker-coat.png"
+        }
+      ]
+    },
+    "h": 40,
+    "w": 32
+  },
+  "worker-coin": {
+    "anchor": [
+      13,
+      26
+    ],
+    "frames": {
+      "a-left": [
+        {
+          "duration": 500,
+          "file": "worker-coin-a-left-0.png"
+        },
+        {
+          "duration": 500,
+          "file": "worker-coin-a-left-1.png"
+        }
+      ],
+      "a-right": [
+        {
+          "duration": 500,
+          "file": "worker-coin-a-right-0.png"
+        },
+        {
+          "duration": 500,
+          "file": "worker-coin-a-right-1.png"
+        }
+      ],
+      "b-left": [
+        {
+          "duration": 500,
+          "file": "worker-coin-b-left-0.png"
+        },
+        {
+          "duration": 500,
+          "file": "worker-coin-b-left-1.png"
+        }
+      ],
+      "b-right": [
+        {
+          "duration": 500,
+          "file": "worker-coin-b-right-0.png"
+        },
+        {
+          "duration": 500,
+          "file": "worker-coin-b-right-1.png"
+        }
+      ],
+      "c-left": [
+        {
+          "duration": 500,
+          "file": "worker-coin-c-left-0.png"
+        },
+        {
+          "duration": 500,
+          "file": "worker-coin-c-left-1.png"
+        }
+      ],
+      "c-right": [
+        {
+          "duration": 500,
+          "file": "worker-coin-c-right-0.png"
+        },
+        {
+          "duration": 500,
+          "file": "worker-coin-c-right-1.png"
+        }
+      ],
+      "d-left": [
+        {
+          "duration": 500,
+          "file": "worker-coin-d-left-0.png"
+        },
+        {
+          "duration": 500,
+          "file": "worker-coin-d-left-1.png"
+        }
+      ],
+      "d-right": [
+        {
+          "duration": 500,
+          "file": "worker-coin-d-right-0.png"
+        },
+        {
+          "duration": 500,
+          "file": "worker-coin-d-right-1.png"
+        }
+      ],
+      "e-left": [
+        {
+          "duration": 500,
+          "file": "worker-coin-e-left-0.png"
+        },
+        {
+          "duration": 500,
+          "file": "worker-coin-e-left-1.png"
+        }
+      ],
+      "e-right": [
+        {
+          "duration": 500,
+          "file": "worker-coin-e-right-0.png"
+        },
+        {
+          "duration": 500,
+          "file": "worker-coin-e-right-1.png"
+        }
+      ]
+    },
+    "h": 26,
+    "w": 26
   },
   "worker-d": {
     "anchor": [
@@ -2542,6 +3338,32 @@
     "h": 36,
     "w": 38
   },
+  "worker-hats": {
+    "anchor": [
+      20,
+      72
+    ],
+    "frames": {
+      "default": [
+        {
+          "duration": 0,
+          "file": "worker-hats.png"
+        }
+      ],
+      "wobble": [
+        {
+          "duration": 380,
+          "file": "worker-hats-wobble-0.png"
+        },
+        {
+          "duration": 380,
+          "file": "worker-hats-wobble-1.png"
+        }
+      ]
+    },
+    "h": 72,
+    "w": 40
+  },
   "worker-huddle": {
     "anchor": [
       8,
@@ -2611,6 +3433,166 @@
     },
     "h": 24,
     "w": 16
+  },
+  "worker-onehat": {
+    "anchor": [
+      18,
+      36
+    ],
+    "frames": {
+      "a-dev": [
+        {
+          "duration": 0,
+          "file": "worker-onehat-a-dev.png"
+        }
+      ],
+      "a-infra": [
+        {
+          "duration": 0,
+          "file": "worker-onehat-a-infra.png"
+        }
+      ],
+      "a-product": [
+        {
+          "duration": 0,
+          "file": "worker-onehat-a-product.png"
+        }
+      ],
+      "a-sec": [
+        {
+          "duration": 0,
+          "file": "worker-onehat-a-sec.png"
+        }
+      ],
+      "a-support": [
+        {
+          "duration": 0,
+          "file": "worker-onehat-a-support.png"
+        }
+      ],
+      "b-dev": [
+        {
+          "duration": 0,
+          "file": "worker-onehat-b-dev.png"
+        }
+      ],
+      "b-infra": [
+        {
+          "duration": 0,
+          "file": "worker-onehat-b-infra.png"
+        }
+      ],
+      "b-product": [
+        {
+          "duration": 0,
+          "file": "worker-onehat-b-product.png"
+        }
+      ],
+      "b-sec": [
+        {
+          "duration": 0,
+          "file": "worker-onehat-b-sec.png"
+        }
+      ],
+      "b-support": [
+        {
+          "duration": 0,
+          "file": "worker-onehat-b-support.png"
+        }
+      ],
+      "c-dev": [
+        {
+          "duration": 0,
+          "file": "worker-onehat-c-dev.png"
+        }
+      ],
+      "c-infra": [
+        {
+          "duration": 0,
+          "file": "worker-onehat-c-infra.png"
+        }
+      ],
+      "c-product": [
+        {
+          "duration": 0,
+          "file": "worker-onehat-c-product.png"
+        }
+      ],
+      "c-sec": [
+        {
+          "duration": 0,
+          "file": "worker-onehat-c-sec.png"
+        }
+      ],
+      "c-support": [
+        {
+          "duration": 0,
+          "file": "worker-onehat-c-support.png"
+        }
+      ],
+      "d-dev": [
+        {
+          "duration": 0,
+          "file": "worker-onehat-d-dev.png"
+        }
+      ],
+      "d-infra": [
+        {
+          "duration": 0,
+          "file": "worker-onehat-d-infra.png"
+        }
+      ],
+      "d-product": [
+        {
+          "duration": 0,
+          "file": "worker-onehat-d-product.png"
+        }
+      ],
+      "d-sec": [
+        {
+          "duration": 0,
+          "file": "worker-onehat-d-sec.png"
+        }
+      ],
+      "d-support": [
+        {
+          "duration": 0,
+          "file": "worker-onehat-d-support.png"
+        }
+      ],
+      "e-dev": [
+        {
+          "duration": 0,
+          "file": "worker-onehat-e-dev.png"
+        }
+      ],
+      "e-infra": [
+        {
+          "duration": 0,
+          "file": "worker-onehat-e-infra.png"
+        }
+      ],
+      "e-product": [
+        {
+          "duration": 0,
+          "file": "worker-onehat-e-product.png"
+        }
+      ],
+      "e-sec": [
+        {
+          "duration": 0,
+          "file": "worker-onehat-e-sec.png"
+        }
+      ],
+      "e-support": [
+        {
+          "duration": 0,
+          "file": "worker-onehat-e-support.png"
+        }
+      ]
+    },
+    "h": 36,
+    "w": 36
   },
   "worker-peel": {
     "anchor": [
@@ -2902,6 +3884,46 @@
     "h": 40,
     "w": 32
   },
+  "worker-seated-headset": {
+    "anchor": [
+      16,
+      40
+    ],
+    "frames": {
+      "a": [
+        {
+          "duration": 0,
+          "file": "worker-seated-headset-a.png"
+        }
+      ],
+      "b": [
+        {
+          "duration": 0,
+          "file": "worker-seated-headset-b.png"
+        }
+      ],
+      "c": [
+        {
+          "duration": 0,
+          "file": "worker-seated-headset-c.png"
+        }
+      ],
+      "d": [
+        {
+          "duration": 0,
+          "file": "worker-seated-headset-d.png"
+        }
+      ],
+      "e": [
+        {
+          "duration": 0,
+          "file": "worker-seated-headset-e.png"
+        }
+      ]
+    },
+    "h": 40,
+    "w": 32
+  },
   "worker-seated-turned": {
     "anchor": [
       16,
@@ -2996,6 +4018,32 @@
         {
           "duration": 280,
           "file": "worker-seated-wave-e-1.png"
+        }
+      ]
+    },
+    "h": 40,
+    "w": 32
+  },
+  "worker-under": {
+    "anchor": [
+      16,
+      40
+    ],
+    "frames": {
+      "default": [
+        {
+          "duration": 0,
+          "file": "worker-under.png"
+        }
+      ],
+      "hunt": [
+        {
+          "duration": 400,
+          "file": "worker-under-hunt-0.png"
+        },
+        {
+          "duration": 400,
+          "file": "worker-under-hunt-1.png"
         }
       ]
     },
