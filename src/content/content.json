@@ -347,7 +347,7 @@
         "E-18"
       ],
       "band": 360,
-      "where": "first-floor corridor.",
+      "where": "floor 2, the aisle along the back-left wall.",
       "without": "one IT manager wearing a stack of hats labelled `INFRA` `SEC` `SUPPORT` `DEV` `PRODUCT`, walking carefully. The person who built the functions is the bottleneck on all of them.",
       "built": "five hats on five heads. `DEV` walked off to its own floor in 2019; `PRODUCT` walks off now, 2021. The original manager has one hat."
     },
@@ -368,7 +368,7 @@
       ],
       "band": 490,
       "where": "the sales pit, front row.",
-      "without": "a new hire at a bare desk, with an outline where the laptop should be and a bag at their feet; a wall calendar above them flipping pages; a balloon deflated on the floor (D-041).",
+      "without": "a new hire at a bare desk, with an outline where the laptop should be and a bag at their feet; a calendar on the cubicle panel above the desk flipping pages; a balloon deflated on the floor (D-041).",
       "built": "the new hire's desk has a laptop, a badge and a coffee; the calendar shows one page. Joiner/mover/leaver automation, SSO/SCIM, provisioning — 2022."
     },
     {
@@ -405,7 +405,7 @@
         "E-13"
       ],
       "band": 610,
-      "where": "first-floor corridor wall.",
+      "where": "floor 2, the back-left wall by the aisle.",
       "without": "every department is a tree; IT is one box off to the side, dotted line to Finance, one very tired sprite in it.",
       "built": "the wall poster's IT box is a small tree — Infrastructure, Security, Support — and its line goes to Technology, not Finance."
     },
@@ -554,7 +554,7 @@
         "E-12"
       ],
       "band": 750,
-      "where": "first-floor corridor, near the org chart.",
+      "where": "floor 2's back-left aisle, near the org chart.",
       "without": "a worker holding `HOW TO DO THE THING (v3?)`, asking a colleague, who points at a third, who points at a padlocked filing cabinet; a wiki icon with cobwebs.",
       "built": "one worker at a desk with a `LIBRARY` sign; the wiki icon is clean; the page in the first worker's hand says `v1 · current`. A Business Librarian, 2026."
     }

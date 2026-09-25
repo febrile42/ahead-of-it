@@ -288,6 +288,38 @@ HQ's exterior with the road and the inset office. Amends D-037 items 2, 7 and 8:
    frozen mid-wave, with an inset worker beside it waving back. That is the drawable reading
    of "a worker on each side waving".
 
+**D-039 · 2026-09-25 · A band may re-compose a room, not only add to it.**
+Recorded after the fact: PH1-11 (`5be5870`, merged as DIA-29) introduced the mechanism, and
+the D-038 rule that a view is a *composed room* had no answer for a room that stops fitting.
+At 360 the ground floor could not seat nine primary hotspots 44 px apart (D-036 rule 7, no
+exceptions per D-038) by adding to the 220 room, so the room itself was re-laid.
+1. **Mechanism (`art/src/layout.py`).** A placement may carry `since` and `until`, in
+   headcount-band units: it is on screen only when `since <= band < until`. `scene()` applies
+   the window before the quiet rules, so it is a filter on *which room*, not on how loud.
+   Band 80's ground floor and 150/220's ground and street placements end at `until=360`; the
+   360 ground and street are placed with `since=360`; HQ is `hq-5` for `360 <= band < 490`
+   and `hq-6` from 490.
+2. **What stays true.** R-03a: band N still holds every gag with band <= N in the matching
+   state; a re-composed gag is re-placed, never dropped. Quiet rules still key on the
+   placement's own `band`, so a band-80 gag re-placed in the 360 room is quieted like any
+   earlier-band gag. D-038's "no exceptions" is untouched: every re-composed room passes the
+   44 px and two-part rules on its own (closest ground pair at 360: G1.1/G5.3, 47 px).
+3. **Consequence for content and evidence.** The same gag can sit somewhere else in a later
+   band, and a view's size can change (ground 282 x 188 at 220, 346 x 220 at 360; HQ's
+   footprint goes from 7 x 3 tiles at 150/220, `hq-3`/`hq-4`, to 4 x 3, `hq-5`/`hq-6`, from
+   360). That is scenery, not a receipt (D-038 item 4). `BANDS-AND-GAGS.md` "Where" is the
+   *home view* (D-036), not a coordinate; where the two differ, the home view wins.
+4. **Consequence for the exporter.** `since`/`until` are art-side only. They are resolved
+   when the scene is built and are **not written to the scene files**. The exporter emits a
+   plain, complete `entries` list per band x state x view.
+5. **Consequence for the painter: none, deliberately.** The web reads scene files and never
+   sees a window (D-035). It must not learn to compare bands, cache a room across bands, or
+   assume a gag's hotspot is where it was at the previous band. Each band's file is
+   self-contained. Hotspots are derived from the file being painted, so buttons follow the
+   re-composed room automatically.
+6. **Guardrail.** Any use of `since`/`until` to hide an art-rule failure rather than to fit a
+   larger room is an exception under D-038 item 3 and needs its own decision.
+
 **D-041 · 2026-09-25 · Three 360/490 "without" lines follow the art that reads.**
 Three rounds of picture review at 390px (DIA-9, DIA-21, DIA-28) showed that three locked
 "without" lines could not be drawn legibly as written. `BANDS-AND-GAGS.md` now describes
