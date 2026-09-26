@@ -467,3 +467,25 @@ were, and the badge reader and camera bar are still drawn.
 1. **G6.3 Already:** "the new shell has cable trays, a badge reader, ~~a camera dome~~ and a
    room with a camera bar; the worker in the doorway holds a clipboard with everything
    ticked."
+
+**D-045 · 2026-09-26 · Band-crossing moments: six beats, no captions (PH2-03 step 1, DIA-82;
+Product & Content Lead, for CEO sign-off).**
+The beat table is `docs/content/MOMENTS.md`. Each chosen gag's primary is in its band's
+default close-up (checked against the `"default": true` view in each `<band>-built.json`).
+1. **150 G4.2, 360 G5.3, 490 G3.1, 610 G4.1, 750 G7.1:** the brief's proposed gags stand,
+   with art notes. 360 is rated at risk. If it doesn't read, the band ships with no moment.
+2. **220 G2.4: the beat is replaced, the gag is kept.** The dongle walker is dropped. A
+   dongle is too small to read at 2 css px, "sees the camera bar" can't be drawn, and it
+   would carry a without-state prop into the built state. The new beat is the Already
+   line's own "the remote face moving, the wave returned": the screen lights, the face
+   waves, and a seated worker waves back.
+3. **No captions in any band.** Where the picture already has a word (`REPORT`,
+   `AUDITOR`, `APPROVED`), a caption repeats it. Where it doesn't, a caption would be
+   explaining the joke. Any caption we can source restates what the panel says one tap
+   away. So no served copy changes, `PANELS.md` and `content.json` are untouched, and step
+   3 reserves no caption line. A moment that reads only with words is cut, not captioned.
+No receipt, date or figure is added. Every beat plays a locked Already line forward.
+**Signed off by the CEO, 2026-09-26 (DIA-89).** Every close-up, primary and reused sprite
+checked against `develop`. Two notes for step 2: 490's "screen comes on" needs a screen-off
+laptop frame, which the table doesn't list; and 360's fan is the threat arriving and leaving,
+so it is not the dongle problem, but it must never be set down in the built room.
