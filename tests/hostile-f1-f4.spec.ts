@@ -500,3 +500,35 @@ test.describe('F5 — the auto-opened Beyond panel outlives the Beyond band', ()
     }
   });
 });
+
+// ---------------------------------------------------------------------------
+// F6 — NEW, found while reviewing DIA-13's fix for F1/F2/F3 (PR #11 -> DIA-26).
+// Same root cause class (a re-render's replaceChildren() orphaning whatever
+// held focus), one cell DIA-13's fix does not cover.
+// ---------------------------------------------------------------------------
+
+test.describe('F6 — a room tab holds focus across a re-render that drops it from the room list', () => {
+  // Guards the DIA-26/F6 fix: captureFocus()/restoreFocus() now cover viewsRow tabs, not just hotspotsLayer.
+  test('F6.1 slider: a band change that shrinks the room list must not strand a focused room tab (R-24)', async ({
+    page,
+  }) => {
+    // F1.3/F1.4 cover a room tab surviving a room switch *within* band 750
+    // (same room list, tabs reused — see syncTabs' own comment: "the nodes
+    // are reused ... only rebuilt when a different band brings different
+    // rooms"). This is the other half: the band itself changes to one with
+    // fewer rooms, so viewsRow's tabs (not just the hotspot layer) get
+    // rebuilt out from under a tab that has keyboard focus.
+    await H.openApp(page);
+    await H.setBand(page, 750); // 4 rooms: ground, floor-2, top, street
+    const rooms = await H.roomIds(page);
+    const tab = page.locator(`.scene-views__button[data-view-id="${rooms[rooms.length - 1]}"]`);
+    await tab.focus();
+
+    // 80 has one room ("ground") — a strictly shorter list, so syncTabs
+    // must replaceChildren() the row.
+    await H.setBand(page, 80, 'mouse');
+
+    const focus = await H.settledFocusInfo(page);
+    expect(H.focusIsLost(focus), `focus after the band change was ${JSON.stringify(focus)}`).toBe(false);
+  });
+});

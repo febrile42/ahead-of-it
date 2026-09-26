@@ -346,8 +346,16 @@ if (sliderRoot && toggleRoot && viewsRow && sceneWrap && stepper && canvas && ho
   // orphans any open panel's B4 return-focus target. captureFocus() reads
   // the pre-render identity of a focused hotspot (not the node itself
   // — the node is about to die); restoreFocus() finds its replacement in
-  // the freshly rebuilt layer and focuses that instead.
-  type FocusCapture = { kind: 'hotspot'; hotspotId: string } | { kind: 'zoom'; viewId: string } | null;
+  // the freshly rebuilt layer and focuses that instead. DIA-26/F6: a room
+  // tab in #scene-views is rebuilt by syncTabs() the same way and is
+  // covered too — Safari doesn't focus a range input on drag (R-20), so a
+  // tab-focused visitor who drags the slider into a different band's room
+  // list would otherwise lose focus to <body>.
+  type FocusCapture =
+    | { kind: 'hotspot'; hotspotId: string }
+    | { kind: 'zoom'; viewId: string }
+    | { kind: 'tab'; viewId: string }
+    | null;
 
   function captureFocus(): FocusCapture {
     const active = document.activeElement;
@@ -357,11 +365,21 @@ if (sliderRoot && toggleRoot && viewsRow && sceneWrap && stepper && canvas && ho
       if (hotspotId) return { kind: 'hotspot', hotspotId };
       return viewId ? { kind: 'zoom', viewId } : null;
     }
+    if (viewsRow!.contains(active) && active.dataset.viewId) {
+      return { kind: 'tab', viewId: active.dataset.viewId };
+    }
     return null;
   }
 
   function restoreFocus(captured: FocusCapture) {
     if (!captured) return;
+    if (captured.kind === 'tab') {
+      const tabs = Array.from(viewsRow!.querySelectorAll<HTMLButtonElement>('.scene-views__button'));
+      const same = tabs.find((t) => t.dataset.viewId === captured.viewId);
+      const selected = tabs.find((t) => t.getAttribute('aria-selected') === 'true');
+      (same ?? selected ?? slider.input).focus();
+      return;
+    }
     const selector =
       captured.kind === 'hotspot'
         ? `[data-hotspot-id="${CSS.escape(captured.hotspotId)}"]`
