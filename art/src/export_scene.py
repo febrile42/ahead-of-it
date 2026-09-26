@@ -28,7 +28,7 @@ import os
 from PIL import Image
 
 from .dsl import Canvas, save_png
-from . import closeups, compose, layout
+from . import closeups, compose, layout, motion
 from .closeups import CLOSEUP_W, CLOSEUP_H
 from .vox import dotted
 
@@ -315,6 +315,7 @@ def _band_model(lib: compose.Library, band: int) -> dict:
             placements, lines = resolve_view(lib, band, state, view_id, origin)
             per_state[state] = _entries_for_view(lib, placements, lines, band, state,
                                                  view_id, (w, h))
+            motion.assign(lib.manifest, band, state, view_id, per_state[state])
         rooms.append((view_id, w, h, per_state))
     primaries = {}
     for state in STATES:
@@ -354,22 +355,24 @@ def _closeup_rect(band: int, view_id: str, label: str, boxes: list, room_w: int,
     return {"x": rx, "y": ry, "w": cw, "h": ch}
 
 
-def _entry_bounds(lib: compose.Library, e: dict):
-    m = lib.manifest.get(e["sprite"]) or _manifest_additions[e["sprite"]]
-    ax, ay = m["anchor"]
-    return e["x"] - ax, e["y"] - ay, e["x"] - ax + m["w"], e["y"] - ay + m["h"]
-
-
 def _crop_entries(lib: compose.Library, entries: list, rect: dict) -> list:
-    """The room's entries that paint anything inside `rect`, translated into the
-    close-up's own coordinates (negative where they overhang), paint order kept."""
+    """The room's entries that paint anything inside `rect` at any moment (a walker's
+    swept box, PH2-01), translated into the close-up's own coordinates (negative where
+    they overhang), paint order kept. Motion is copied, every walk `to` translated like
+    `x`, `y`; `start` and `rate` unchanged, so the close-up is the room in time too."""
     out = []
     rx, ry, rw, rh = rect["x"], rect["y"], rect["w"], rect["h"]
     for e in entries:
-        x0, y0, x1, y1 = _entry_bounds(lib, e)
+        m = lib.manifest.get(e["sprite"]) or _manifest_additions[e["sprite"]]
+        x0, y0, x1, y1 = motion.swept_box({e["sprite"]: m}, e)
         if x1 <= rx or y1 <= ry or x0 >= rx + rw or y0 >= ry + rh:
             continue
-        out.append({**e, "x": e["x"] - rx, "y": e["y"] - ry})
+        c = {**e, "x": e["x"] - rx, "y": e["y"] - ry}
+        if "walk" in e.get("motion", {}):
+            c["motion"] = {**e["motion"], "walk": [
+                dict(leg, to=[leg["to"][0] - rx, leg["to"][1] - ry]) if "to" in leg
+                else dict(leg) for leg in e["motion"]["walk"]]}
+        out.append(c)
     return out
 
 

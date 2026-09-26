@@ -2264,6 +2264,30 @@
           "duration": 0,
           "file": "paper-slope.png"
         }
+      ],
+      "sign": [
+        {
+          "duration": 900,
+          "file": "paper-slope.png"
+        },
+        {
+          "duration": 220,
+          "file": "paper-slope-sign-1.png"
+        },
+        {
+          "duration": 220,
+          "file": "paper-slope.png"
+        },
+        {
+          "duration": 220,
+          "file": "paper-slope-sign-1.png"
+        }
+      ],
+      "sign-1": [
+        {
+          "duration": 0,
+          "file": "paper-slope-sign-1.png"
+        }
       ]
     },
     "h": 51,
@@ -3412,10 +3436,58 @@
           "file": "worker-idle-left.png"
         }
       ],
+      "idle-left-shuffle": [
+        {
+          "duration": 1300,
+          "file": "worker-idle-left.png"
+        },
+        {
+          "duration": 220,
+          "file": "worker-shuffle-a-left.png"
+        },
+        {
+          "duration": 260,
+          "file": "worker-shuffle-b-left.png"
+        }
+      ],
+      "idle-left-turn": [
+        {
+          "duration": 2600,
+          "file": "worker-idle-left.png"
+        },
+        {
+          "duration": 1400,
+          "file": "worker-idle-down.png"
+        }
+      ],
       "idle-right": [
         {
           "duration": 0,
           "file": "worker-idle-right.png"
+        }
+      ],
+      "idle-right-shuffle": [
+        {
+          "duration": 1300,
+          "file": "worker-idle-right.png"
+        },
+        {
+          "duration": 220,
+          "file": "worker-shuffle-a-right.png"
+        },
+        {
+          "duration": 260,
+          "file": "worker-shuffle-b-right.png"
+        }
+      ],
+      "idle-right-turn": [
+        {
+          "duration": 2600,
+          "file": "worker-idle-right.png"
+        },
+        {
+          "duration": 1400,
+          "file": "worker-idle-down.png"
         }
       ],
       "idle-up": [
@@ -3458,6 +3530,30 @@
         {
           "duration": 120,
           "file": "worker-right-3.png"
+        }
+      ],
+      "shuffle-a-left": [
+        {
+          "duration": 0,
+          "file": "worker-shuffle-a-left.png"
+        }
+      ],
+      "shuffle-a-right": [
+        {
+          "duration": 0,
+          "file": "worker-shuffle-a-right.png"
+        }
+      ],
+      "shuffle-b-left": [
+        {
+          "duration": 0,
+          "file": "worker-shuffle-b-left.png"
+        }
+      ],
+      "shuffle-b-right": [
+        {
+          "duration": 0,
+          "file": "worker-shuffle-b-right.png"
         }
       ],
       "step-left": [
@@ -3530,10 +3626,58 @@
           "file": "worker-b-idle-left.png"
         }
       ],
+      "idle-left-shuffle": [
+        {
+          "duration": 1300,
+          "file": "worker-b-idle-left.png"
+        },
+        {
+          "duration": 220,
+          "file": "worker-b-shuffle-a-left.png"
+        },
+        {
+          "duration": 260,
+          "file": "worker-b-shuffle-b-left.png"
+        }
+      ],
+      "idle-left-turn": [
+        {
+          "duration": 2600,
+          "file": "worker-b-idle-left.png"
+        },
+        {
+          "duration": 1400,
+          "file": "worker-b-idle-down.png"
+        }
+      ],
       "idle-right": [
         {
           "duration": 0,
           "file": "worker-b-idle-right.png"
+        }
+      ],
+      "idle-right-shuffle": [
+        {
+          "duration": 1300,
+          "file": "worker-b-idle-right.png"
+        },
+        {
+          "duration": 220,
+          "file": "worker-b-shuffle-a-right.png"
+        },
+        {
+          "duration": 260,
+          "file": "worker-b-shuffle-b-right.png"
+        }
+      ],
+      "idle-right-turn": [
+        {
+          "duration": 2600,
+          "file": "worker-b-idle-right.png"
+        },
+        {
+          "duration": 1400,
+          "file": "worker-b-idle-down.png"
         }
       ],
       "idle-up": [
@@ -3576,6 +3720,30 @@
         {
           "duration": 120,
           "file": "worker-b-right-3.png"
+        }
+      ],
+      "shuffle-a-left": [
+        {
+          "duration": 0,
+          "file": "worker-b-shuffle-a-left.png"
+        }
+      ],
+      "shuffle-a-right": [
+        {
+          "duration": 0,
+          "file": "worker-b-shuffle-a-right.png"
+        }
+      ],
+      "shuffle-b-left": [
+        {
+          "duration": 0,
+          "file": "worker-b-shuffle-b-left.png"
+        }
+      ],
+      "shuffle-b-right": [
+        {
+          "duration": 0,
+          "file": "worker-b-shuffle-b-right.png"
         }
       ],
       "step-left": [
@@ -3758,10 +3926,58 @@
           "file": "worker-c-idle-left.png"
         }
       ],
+      "idle-left-shuffle": [
+        {
+          "duration": 1300,
+          "file": "worker-c-idle-left.png"
+        },
+        {
+          "duration": 220,
+          "file": "worker-c-shuffle-a-left.png"
+        },
+        {
+          "duration": 260,
+          "file": "worker-c-shuffle-b-left.png"
+        }
+      ],
+      "idle-left-turn": [
+        {
+          "duration": 2600,
+          "file": "worker-c-idle-left.png"
+        },
+        {
+          "duration": 1400,
+          "file": "worker-c-idle-down.png"
+        }
+      ],
       "idle-right": [
         {
           "duration": 0,
           "file": "worker-c-idle-right.png"
+        }
+      ],
+      "idle-right-shuffle": [
+        {
+          "duration": 1300,
+          "file": "worker-c-idle-right.png"
+        },
+        {
+          "duration": 220,
+          "file": "worker-c-shuffle-a-right.png"
+        },
+        {
+          "duration": 260,
+          "file": "worker-c-shuffle-b-right.png"
+        }
+      ],
+      "idle-right-turn": [
+        {
+          "duration": 2600,
+          "file": "worker-c-idle-right.png"
+        },
+        {
+          "duration": 1400,
+          "file": "worker-c-idle-down.png"
         }
       ],
       "idle-up": [
@@ -3804,6 +4020,30 @@
         {
           "duration": 120,
           "file": "worker-c-right-3.png"
+        }
+      ],
+      "shuffle-a-left": [
+        {
+          "duration": 0,
+          "file": "worker-c-shuffle-a-left.png"
+        }
+      ],
+      "shuffle-a-right": [
+        {
+          "duration": 0,
+          "file": "worker-c-shuffle-a-right.png"
+        }
+      ],
+      "shuffle-b-left": [
+        {
+          "duration": 0,
+          "file": "worker-c-shuffle-b-left.png"
+        }
+      ],
+      "shuffle-b-right": [
+        {
+          "duration": 0,
+          "file": "worker-c-shuffle-b-right.png"
         }
       ],
       "step-left": [
@@ -4214,10 +4454,58 @@
           "file": "worker-d-idle-left.png"
         }
       ],
+      "idle-left-shuffle": [
+        {
+          "duration": 1300,
+          "file": "worker-d-idle-left.png"
+        },
+        {
+          "duration": 220,
+          "file": "worker-d-shuffle-a-left.png"
+        },
+        {
+          "duration": 260,
+          "file": "worker-d-shuffle-b-left.png"
+        }
+      ],
+      "idle-left-turn": [
+        {
+          "duration": 2600,
+          "file": "worker-d-idle-left.png"
+        },
+        {
+          "duration": 1400,
+          "file": "worker-d-idle-down.png"
+        }
+      ],
       "idle-right": [
         {
           "duration": 0,
           "file": "worker-d-idle-right.png"
+        }
+      ],
+      "idle-right-shuffle": [
+        {
+          "duration": 1300,
+          "file": "worker-d-idle-right.png"
+        },
+        {
+          "duration": 220,
+          "file": "worker-d-shuffle-a-right.png"
+        },
+        {
+          "duration": 260,
+          "file": "worker-d-shuffle-b-right.png"
+        }
+      ],
+      "idle-right-turn": [
+        {
+          "duration": 2600,
+          "file": "worker-d-idle-right.png"
+        },
+        {
+          "duration": 1400,
+          "file": "worker-d-idle-down.png"
         }
       ],
       "idle-up": [
@@ -4260,6 +4548,30 @@
         {
           "duration": 120,
           "file": "worker-d-right-3.png"
+        }
+      ],
+      "shuffle-a-left": [
+        {
+          "duration": 0,
+          "file": "worker-d-shuffle-a-left.png"
+        }
+      ],
+      "shuffle-a-right": [
+        {
+          "duration": 0,
+          "file": "worker-d-shuffle-a-right.png"
+        }
+      ],
+      "shuffle-b-left": [
+        {
+          "duration": 0,
+          "file": "worker-d-shuffle-b-left.png"
+        }
+      ],
+      "shuffle-b-right": [
+        {
+          "duration": 0,
+          "file": "worker-d-shuffle-b-right.png"
         }
       ],
       "step-left": [
@@ -4332,10 +4644,58 @@
           "file": "worker-e-idle-left.png"
         }
       ],
+      "idle-left-shuffle": [
+        {
+          "duration": 1300,
+          "file": "worker-e-idle-left.png"
+        },
+        {
+          "duration": 220,
+          "file": "worker-e-shuffle-a-left.png"
+        },
+        {
+          "duration": 260,
+          "file": "worker-e-shuffle-b-left.png"
+        }
+      ],
+      "idle-left-turn": [
+        {
+          "duration": 2600,
+          "file": "worker-e-idle-left.png"
+        },
+        {
+          "duration": 1400,
+          "file": "worker-e-idle-down.png"
+        }
+      ],
       "idle-right": [
         {
           "duration": 0,
           "file": "worker-e-idle-right.png"
+        }
+      ],
+      "idle-right-shuffle": [
+        {
+          "duration": 1300,
+          "file": "worker-e-idle-right.png"
+        },
+        {
+          "duration": 220,
+          "file": "worker-e-shuffle-a-right.png"
+        },
+        {
+          "duration": 260,
+          "file": "worker-e-shuffle-b-right.png"
+        }
+      ],
+      "idle-right-turn": [
+        {
+          "duration": 2600,
+          "file": "worker-e-idle-right.png"
+        },
+        {
+          "duration": 1400,
+          "file": "worker-e-idle-down.png"
         }
       ],
       "idle-up": [
@@ -4378,6 +4738,30 @@
         {
           "duration": 120,
           "file": "worker-e-right-3.png"
+        }
+      ],
+      "shuffle-a-left": [
+        {
+          "duration": 0,
+          "file": "worker-e-shuffle-a-left.png"
+        }
+      ],
+      "shuffle-a-right": [
+        {
+          "duration": 0,
+          "file": "worker-e-shuffle-a-right.png"
+        }
+      ],
+      "shuffle-b-left": [
+        {
+          "duration": 0,
+          "file": "worker-e-shuffle-b-left.png"
+        }
+      ],
+      "shuffle-b-right": [
+        {
+          "duration": 0,
+          "file": "worker-e-shuffle-b-right.png"
         }
       ],
       "step-left": [
@@ -4708,6 +5092,16 @@
           "file": "worker-huddle-a-dongle.png"
         }
       ],
+      "a-dongle-try": [
+        {
+          "duration": 700,
+          "file": "worker-huddle-a-dongle.png"
+        },
+        {
+          "duration": 450,
+          "file": "worker-huddle-a.png"
+        }
+      ],
       "b": [
         {
           "duration": 0,
@@ -4718,6 +5112,16 @@
         {
           "duration": 0,
           "file": "worker-huddle-b-dongle.png"
+        }
+      ],
+      "b-dongle-try": [
+        {
+          "duration": 700,
+          "file": "worker-huddle-b-dongle.png"
+        },
+        {
+          "duration": 450,
+          "file": "worker-huddle-b.png"
         }
       ],
       "c": [
@@ -4732,6 +5136,16 @@
           "file": "worker-huddle-c-dongle.png"
         }
       ],
+      "c-dongle-try": [
+        {
+          "duration": 700,
+          "file": "worker-huddle-c-dongle.png"
+        },
+        {
+          "duration": 450,
+          "file": "worker-huddle-c.png"
+        }
+      ],
       "d": [
         {
           "duration": 0,
@@ -4744,6 +5158,16 @@
           "file": "worker-huddle-d-dongle.png"
         }
       ],
+      "d-dongle-try": [
+        {
+          "duration": 700,
+          "file": "worker-huddle-d-dongle.png"
+        },
+        {
+          "duration": 450,
+          "file": "worker-huddle-d.png"
+        }
+      ],
       "e": [
         {
           "duration": 0,
@@ -4754,6 +5178,16 @@
         {
           "duration": 0,
           "file": "worker-huddle-e-dongle.png"
+        }
+      ],
+      "e-dongle-try": [
+        {
+          "duration": 700,
+          "file": "worker-huddle-e-dongle.png"
+        },
+        {
+          "duration": 450,
+          "file": "worker-huddle-e.png"
         }
       ]
     },
@@ -5384,10 +5818,118 @@
           "file": "worker-seated-a.png"
         }
       ],
+      "a-nod": [
+        {
+          "duration": 2400,
+          "file": "worker-seated-a.png"
+        },
+        {
+          "duration": 450,
+          "file": "worker-seated-a-type-n.png"
+        }
+      ],
+      "a-type": [
+        {
+          "duration": 420,
+          "file": "worker-seated-a.png"
+        },
+        {
+          "duration": 160,
+          "file": "worker-seated-a-type-l.png"
+        },
+        {
+          "duration": 160,
+          "file": "worker-seated-a.png"
+        },
+        {
+          "duration": 160,
+          "file": "worker-seated-a-type-r.png"
+        },
+        {
+          "duration": 900,
+          "file": "worker-seated-a.png"
+        },
+        {
+          "duration": 600,
+          "file": "worker-seated-a-type-n.png"
+        }
+      ],
+      "a-type-l": [
+        {
+          "duration": 0,
+          "file": "worker-seated-a-type-l.png"
+        }
+      ],
+      "a-type-n": [
+        {
+          "duration": 0,
+          "file": "worker-seated-a-type-n.png"
+        }
+      ],
+      "a-type-r": [
+        {
+          "duration": 0,
+          "file": "worker-seated-a-type-r.png"
+        }
+      ],
       "b": [
         {
           "duration": 0,
           "file": "worker-seated-b.png"
+        }
+      ],
+      "b-nod": [
+        {
+          "duration": 2400,
+          "file": "worker-seated-b.png"
+        },
+        {
+          "duration": 450,
+          "file": "worker-seated-b-type-n.png"
+        }
+      ],
+      "b-type": [
+        {
+          "duration": 420,
+          "file": "worker-seated-b.png"
+        },
+        {
+          "duration": 160,
+          "file": "worker-seated-b-type-l.png"
+        },
+        {
+          "duration": 160,
+          "file": "worker-seated-b.png"
+        },
+        {
+          "duration": 160,
+          "file": "worker-seated-b-type-r.png"
+        },
+        {
+          "duration": 900,
+          "file": "worker-seated-b.png"
+        },
+        {
+          "duration": 600,
+          "file": "worker-seated-b-type-n.png"
+        }
+      ],
+      "b-type-l": [
+        {
+          "duration": 0,
+          "file": "worker-seated-b-type-l.png"
+        }
+      ],
+      "b-type-n": [
+        {
+          "duration": 0,
+          "file": "worker-seated-b-type-n.png"
+        }
+      ],
+      "b-type-r": [
+        {
+          "duration": 0,
+          "file": "worker-seated-b-type-r.png"
         }
       ],
       "c": [
@@ -5396,16 +5938,178 @@
           "file": "worker-seated-c.png"
         }
       ],
+      "c-nod": [
+        {
+          "duration": 2400,
+          "file": "worker-seated-c.png"
+        },
+        {
+          "duration": 450,
+          "file": "worker-seated-c-type-n.png"
+        }
+      ],
+      "c-type": [
+        {
+          "duration": 420,
+          "file": "worker-seated-c.png"
+        },
+        {
+          "duration": 160,
+          "file": "worker-seated-c-type-l.png"
+        },
+        {
+          "duration": 160,
+          "file": "worker-seated-c.png"
+        },
+        {
+          "duration": 160,
+          "file": "worker-seated-c-type-r.png"
+        },
+        {
+          "duration": 900,
+          "file": "worker-seated-c.png"
+        },
+        {
+          "duration": 600,
+          "file": "worker-seated-c-type-n.png"
+        }
+      ],
+      "c-type-l": [
+        {
+          "duration": 0,
+          "file": "worker-seated-c-type-l.png"
+        }
+      ],
+      "c-type-n": [
+        {
+          "duration": 0,
+          "file": "worker-seated-c-type-n.png"
+        }
+      ],
+      "c-type-r": [
+        {
+          "duration": 0,
+          "file": "worker-seated-c-type-r.png"
+        }
+      ],
       "d": [
         {
           "duration": 0,
           "file": "worker-seated-d.png"
         }
       ],
+      "d-nod": [
+        {
+          "duration": 2400,
+          "file": "worker-seated-d.png"
+        },
+        {
+          "duration": 450,
+          "file": "worker-seated-d-type-n.png"
+        }
+      ],
+      "d-type": [
+        {
+          "duration": 420,
+          "file": "worker-seated-d.png"
+        },
+        {
+          "duration": 160,
+          "file": "worker-seated-d-type-l.png"
+        },
+        {
+          "duration": 160,
+          "file": "worker-seated-d.png"
+        },
+        {
+          "duration": 160,
+          "file": "worker-seated-d-type-r.png"
+        },
+        {
+          "duration": 900,
+          "file": "worker-seated-d.png"
+        },
+        {
+          "duration": 600,
+          "file": "worker-seated-d-type-n.png"
+        }
+      ],
+      "d-type-l": [
+        {
+          "duration": 0,
+          "file": "worker-seated-d-type-l.png"
+        }
+      ],
+      "d-type-n": [
+        {
+          "duration": 0,
+          "file": "worker-seated-d-type-n.png"
+        }
+      ],
+      "d-type-r": [
+        {
+          "duration": 0,
+          "file": "worker-seated-d-type-r.png"
+        }
+      ],
       "e": [
         {
           "duration": 0,
           "file": "worker-seated-e.png"
+        }
+      ],
+      "e-nod": [
+        {
+          "duration": 2400,
+          "file": "worker-seated-e.png"
+        },
+        {
+          "duration": 450,
+          "file": "worker-seated-e-type-n.png"
+        }
+      ],
+      "e-type": [
+        {
+          "duration": 420,
+          "file": "worker-seated-e.png"
+        },
+        {
+          "duration": 160,
+          "file": "worker-seated-e-type-l.png"
+        },
+        {
+          "duration": 160,
+          "file": "worker-seated-e.png"
+        },
+        {
+          "duration": 160,
+          "file": "worker-seated-e-type-r.png"
+        },
+        {
+          "duration": 900,
+          "file": "worker-seated-e.png"
+        },
+        {
+          "duration": 600,
+          "file": "worker-seated-e-type-n.png"
+        }
+      ],
+      "e-type-l": [
+        {
+          "duration": 0,
+          "file": "worker-seated-e-type-l.png"
+        }
+      ],
+      "e-type-n": [
+        {
+          "duration": 0,
+          "file": "worker-seated-e-type-n.png"
+        }
+      ],
+      "e-type-r": [
+        {
+          "duration": 0,
+          "file": "worker-seated-e-type-r.png"
         }
       ]
     },
@@ -5508,6 +6212,22 @@
         {
           "duration": 0,
           "file": "worker-seated-josh.png"
+        }
+      ],
+      "point-1": [
+        {
+          "duration": 0,
+          "file": "worker-seated-josh-point-1.png"
+        }
+      ],
+      "talk": [
+        {
+          "duration": 2600,
+          "file": "worker-seated-josh.png"
+        },
+        {
+          "duration": 900,
+          "file": "worker-seated-josh-point-1.png"
         }
       ]
     },

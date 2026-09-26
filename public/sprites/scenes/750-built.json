@@ -1375,10 +1375,13 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "b",
+          "frame": "b-type",
           "x": 277,
           "y": 125,
-          "depth": 9.01
+          "depth": 9.01,
+          "motion": {
+            "start": 1052
+          }
         },
         {
           "sprite": "sla-board",
@@ -1400,12 +1403,15 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "a",
+          "frame": "a-type",
           "x": 181,
           "y": 141,
           "depth": 11.01,
           "gagId": "G1.2",
-          "part": "pit"
+          "part": "pit",
+          "motion": {
+            "start": 591
+          }
         },
         {
           "sprite": "desk",
@@ -1418,12 +1424,15 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "e",
+          "frame": "e-type",
           "x": 293,
           "y": 149,
           "depth": 12.01,
           "gagId": "G2.1",
-          "part": "helpdesk"
+          "part": "helpdesk",
+          "motion": {
+            "start": 199
+          }
         },
         {
           "sprite": "desk-padlock",
@@ -1445,21 +1454,27 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "c",
+          "frame": "c-type",
           "x": 213,
           "y": 157,
           "depth": 13.01,
           "gagId": "G1.2",
-          "part": "pit"
+          "part": "pit",
+          "motion": {
+            "start": 1883
+          }
         },
         {
           "sprite": "worker-seated",
-          "frame": "e",
+          "frame": "e-type",
           "x": 149,
           "y": 157,
           "depth": 13.01,
           "gagId": "G1.2",
-          "part": "pit"
+          "part": "pit",
+          "motion": {
+            "start": 305
+          }
         },
         {
           "sprite": "worker-card",
@@ -1488,12 +1503,15 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "d",
+          "frame": "d-type",
           "x": 181,
           "y": 173,
           "depth": 15.01,
           "gagId": "G1.2",
-          "part": "pit"
+          "part": "pit",
+          "motion": {
+            "start": 715
+          }
         },
         {
           "sprite": "robot",
@@ -1533,12 +1551,15 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "e",
+          "frame": "e-type",
           "x": 229,
           "y": 197,
           "depth": 18.01,
           "gagId": "G3.1",
-          "part": "desk"
+          "part": "desk",
+          "motion": {
+            "start": 976
+          }
         },
         {
           "sprite": "infosec",
@@ -2235,12 +2256,15 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "a",
+          "frame": "a-type",
           "x": 148,
           "y": 137,
           "depth": 11.01,
           "gagId": "G1.2",
-          "part": "pit"
+          "part": "pit",
+          "motion": {
+            "start": 591
+          }
         },
         {
           "sprite": "desk-padlock",
@@ -2262,21 +2286,27 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "c",
+          "frame": "c-type",
           "x": 180,
           "y": 153,
           "depth": 13.01,
           "gagId": "G1.2",
-          "part": "pit"
+          "part": "pit",
+          "motion": {
+            "start": 1883
+          }
         },
         {
           "sprite": "worker-seated",
-          "frame": "e",
+          "frame": "e-type",
           "x": 116,
           "y": 153,
           "depth": 13.01,
           "gagId": "G1.2",
-          "part": "pit"
+          "part": "pit",
+          "motion": {
+            "start": 305
+          }
         },
         {
           "sprite": "fx-net-750-built-ground",
@@ -3067,12 +3097,15 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "a",
+          "frame": "a-type",
           "x": 181,
           "y": 84,
           "depth": 11.01,
           "gagId": "G1.2",
-          "part": "pit"
+          "part": "pit",
+          "motion": {
+            "start": 591
+          }
         },
         {
           "sprite": "desk-padlock",
@@ -3085,12 +3118,15 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "e",
+          "frame": "e-type",
           "x": 149,
           "y": 100,
           "depth": 13.01,
           "gagId": "G1.2",
-          "part": "pit"
+          "part": "pit",
+          "motion": {
+            "start": 305
+          }
         },
         {
           "sprite": "desk-padlock",
@@ -3103,12 +3139,15 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "d",
+          "frame": "d-type",
           "x": 181,
           "y": 116,
           "depth": 15.01,
           "gagId": "G1.2",
-          "part": "pit"
+          "part": "pit",
+          "motion": {
+            "start": 715
+          }
         },
         {
           "sprite": "front-door",
@@ -3992,10 +4031,13 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "b",
+          "frame": "b-type",
           "x": 154,
           "y": 35,
-          "depth": 9.01
+          "depth": 9.01,
+          "motion": {
+            "start": 1052
+          }
         },
         {
           "sprite": "sla-board",
@@ -4017,12 +4059,15 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "a",
+          "frame": "a-type",
           "x": 58,
           "y": 51,
           "depth": 11.01,
           "gagId": "G1.2",
-          "part": "pit"
+          "part": "pit",
+          "motion": {
+            "start": 591
+          }
         },
         {
           "sprite": "desk",
@@ -4035,12 +4080,15 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "e",
+          "frame": "e-type",
           "x": 170,
           "y": 59,
           "depth": 12.01,
           "gagId": "G2.1",
-          "part": "helpdesk"
+          "part": "helpdesk",
+          "motion": {
+            "start": 199
+          }
         },
         {
           "sprite": "desk-padlock",
@@ -4062,21 +4110,27 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "c",
+          "frame": "c-type",
           "x": 90,
           "y": 67,
           "depth": 13.01,
           "gagId": "G1.2",
-          "part": "pit"
+          "part": "pit",
+          "motion": {
+            "start": 1883
+          }
         },
         {
           "sprite": "worker-seated",
-          "frame": "e",
+          "frame": "e-type",
           "x": 26,
           "y": 67,
           "depth": 13.01,
           "gagId": "G1.2",
-          "part": "pit"
+          "part": "pit",
+          "motion": {
+            "start": 305
+          }
         },
         {
           "sprite": "worker-card",
@@ -4105,12 +4159,15 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "d",
+          "frame": "d-type",
           "x": 58,
           "y": 83,
           "depth": 15.01,
           "gagId": "G1.2",
-          "part": "pit"
+          "part": "pit",
+          "motion": {
+            "start": 715
+          }
         },
         {
           "sprite": "robot",
@@ -4150,12 +4207,15 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "e",
+          "frame": "e-type",
           "x": 106,
           "y": 107,
           "depth": 18.01,
           "gagId": "G3.1",
-          "part": "desk"
+          "part": "desk",
+          "motion": {
+            "start": 976
+          }
         },
         {
           "sprite": "infosec",
@@ -4935,10 +4995,13 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "b",
+          "frame": "b-type",
           "x": 162,
           "y": 116,
-          "depth": 9.01
+          "depth": 9.01,
+          "motion": {
+            "start": 1052
+          }
         },
         {
           "sprite": "desk-padlock",
@@ -4951,12 +5014,15 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "a",
+          "frame": "a-type",
           "x": 66,
           "y": 132,
           "depth": 11.01,
           "gagId": "G1.2",
-          "part": "pit"
+          "part": "pit",
+          "motion": {
+            "start": 591
+          }
         },
         {
           "sprite": "desk",
@@ -4969,12 +5035,15 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "e",
+          "frame": "e-type",
           "x": 178,
           "y": 140,
           "depth": 12.01,
           "gagId": "G2.1",
-          "part": "helpdesk"
+          "part": "helpdesk",
+          "motion": {
+            "start": 199
+          }
         },
         {
           "sprite": "desk-padlock",
@@ -4996,21 +5065,27 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "c",
+          "frame": "c-type",
           "x": 98,
           "y": 148,
           "depth": 13.01,
           "gagId": "G1.2",
-          "part": "pit"
+          "part": "pit",
+          "motion": {
+            "start": 1883
+          }
         },
         {
           "sprite": "worker-seated",
-          "frame": "e",
+          "frame": "e-type",
           "x": 34,
           "y": 148,
           "depth": 13.01,
           "gagId": "G1.2",
-          "part": "pit"
+          "part": "pit",
+          "motion": {
+            "start": 305
+          }
         },
         {
           "sprite": "robot",
@@ -5610,10 +5685,13 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "b",
+          "frame": "b-type",
           "x": 109,
           "y": 100,
-          "depth": 9.01
+          "depth": 9.01,
+          "motion": {
+            "start": 1052
+          }
         },
         {
           "sprite": "sla-board",
@@ -5635,12 +5713,15 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "a",
+          "frame": "a-type",
           "x": 13,
           "y": 116,
           "depth": 11.01,
           "gagId": "G1.2",
-          "part": "pit"
+          "part": "pit",
+          "motion": {
+            "start": 591
+          }
         },
         {
           "sprite": "desk",
@@ -5653,12 +5734,15 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "e",
+          "frame": "e-type",
           "x": 125,
           "y": 124,
           "depth": 12.01,
           "gagId": "G2.1",
-          "part": "helpdesk"
+          "part": "helpdesk",
+          "motion": {
+            "start": 199
+          }
         },
         {
           "sprite": "desk-padlock",
@@ -5671,12 +5755,15 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "c",
+          "frame": "c-type",
           "x": 45,
           "y": 132,
           "depth": 13.01,
           "gagId": "G1.2",
-          "part": "pit"
+          "part": "pit",
+          "motion": {
+            "start": 1883
+          }
         },
         {
           "sprite": "worker-card",
@@ -5705,12 +5792,15 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "d",
+          "frame": "d-type",
           "x": 13,
           "y": 148,
           "depth": 15.01,
           "gagId": "G1.2",
-          "part": "pit"
+          "part": "pit",
+          "motion": {
+            "start": 715
+          }
         },
         {
           "sprite": "robot",
@@ -6471,10 +6561,13 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "b",
+          "frame": "b-type",
           "x": 109,
           "y": 43,
-          "depth": 9.01
+          "depth": 9.01,
+          "motion": {
+            "start": 1052
+          }
         },
         {
           "sprite": "sla-board",
@@ -6496,12 +6589,15 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "a",
+          "frame": "a-type",
           "x": 13,
           "y": 59,
           "depth": 11.01,
           "gagId": "G1.2",
-          "part": "pit"
+          "part": "pit",
+          "motion": {
+            "start": 591
+          }
         },
         {
           "sprite": "desk",
@@ -6514,12 +6610,15 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "e",
+          "frame": "e-type",
           "x": 125,
           "y": 67,
           "depth": 12.01,
           "gagId": "G2.1",
-          "part": "helpdesk"
+          "part": "helpdesk",
+          "motion": {
+            "start": 199
+          }
         },
         {
           "sprite": "desk-padlock",
@@ -6532,12 +6631,15 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "c",
+          "frame": "c-type",
           "x": 45,
           "y": 75,
           "depth": 13.01,
           "gagId": "G1.2",
-          "part": "pit"
+          "part": "pit",
+          "motion": {
+            "start": 1883
+          }
         },
         {
           "sprite": "worker-card",
@@ -6566,12 +6668,15 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "d",
+          "frame": "d-type",
           "x": 13,
           "y": 91,
           "depth": 15.01,
           "gagId": "G1.2",
-          "part": "pit"
+          "part": "pit",
+          "motion": {
+            "start": 715
+          }
         },
         {
           "sprite": "robot",
@@ -6602,12 +6707,15 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "e",
+          "frame": "e-type",
           "x": 61,
           "y": 115,
           "depth": 18.01,
           "gagId": "G3.1",
-          "part": "desk"
+          "part": "desk",
+          "motion": {
+            "start": 976
+          }
         },
         {
           "sprite": "fx-net-750-built-ground",
@@ -7838,19 +7946,25 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "a",
+          "frame": "a-type",
           "x": 229,
           "y": 117,
           "depth": 8.01,
           "gagId": "G4.2",
-          "part": "desk"
+          "part": "desk",
+          "motion": {
+            "start": 1416
+          }
         },
         {
           "sprite": "worker-seated",
-          "frame": "b",
+          "frame": "b-type",
           "x": 101,
           "y": 117,
-          "depth": 8.01
+          "depth": 8.01,
+          "motion": {
+            "start": 1838
+          }
         },
         {
           "sprite": "glass-r",
@@ -7879,12 +7993,15 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "e",
+          "frame": "e-type",
           "x": 53,
           "y": 125,
           "depth": 9.01,
           "gagId": "G7.4",
-          "part": "chain"
+          "part": "chain",
+          "motion": {
+            "start": 1564
+          }
         },
         {
           "sprite": "glass-r-door",
@@ -7922,12 +8039,15 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "e",
+          "frame": "e-type",
           "x": 165,
           "y": 133,
           "depth": 10.01,
           "gagId": "G4.3",
-          "part": "desks"
+          "part": "desks",
+          "motion": {
+            "start": 469
+          }
         },
         {
           "sprite": "worker-seated-turned",
@@ -7940,12 +8060,15 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "a",
+          "frame": "a-nod",
           "x": 261,
           "y": 133,
           "depth": 10.01,
           "gagId": "G2.4",
-          "part": "room"
+          "part": "room",
+          "motion": {
+            "start": 854
+          }
         },
         {
           "sprite": "glass-r",
@@ -7956,12 +8079,15 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "c",
+          "frame": "c-nod",
           "x": 277,
           "y": 141,
           "depth": 11.01,
           "gagId": "G2.4",
-          "part": "room"
+          "part": "room",
+          "motion": {
+            "start": 574
+          }
         },
         {
           "sprite": "sign-pipeline",
@@ -8024,19 +8150,25 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "e",
+          "frame": "e-nod",
           "x": 293,
           "y": 149,
           "depth": 12.01,
           "gagId": "G2.4",
-          "part": "room"
+          "part": "room",
+          "motion": {
+            "start": 1832
+          }
         },
         {
           "sprite": "worker-seated",
-          "frame": "a",
+          "frame": "a-type",
           "x": 197,
           "y": 149,
-          "depth": 12.01
+          "depth": 12.01,
+          "motion": {
+            "start": 113
+          }
         },
         {
           "sprite": "glass-c",
@@ -8056,12 +8188,15 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "d",
+          "frame": "d-nod",
           "x": 309,
           "y": 157,
           "depth": 13.01,
           "gagId": "G2.4",
-          "part": "room"
+          "part": "room",
+          "motion": {
+            "start": 760
+          }
         },
         {
           "sprite": "glass-c",
@@ -8688,10 +8823,13 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "b",
+          "frame": "b-type",
           "x": 101,
           "y": 88,
-          "depth": 8.01
+          "depth": 8.01,
+          "motion": {
+            "start": 1838
+          }
         },
         {
           "sprite": "cabinet-locked",
@@ -8713,12 +8851,15 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "e",
+          "frame": "e-type",
           "x": 53,
           "y": 96,
           "depth": 9.01,
           "gagId": "G7.4",
-          "part": "chain"
+          "part": "chain",
+          "motion": {
+            "start": 1564
+          }
         },
         {
           "sprite": "desk",
@@ -8740,12 +8881,15 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "e",
+          "frame": "e-type",
           "x": 165,
           "y": 104,
           "depth": 10.01,
           "gagId": "G4.3",
-          "part": "desks"
+          "part": "desks",
+          "motion": {
+            "start": 469
+          }
         },
         {
           "sprite": "worker-seated-turned",
@@ -9383,19 +9527,25 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "a",
+          "frame": "a-type",
           "x": 113,
           "y": 108,
           "depth": 8.01,
           "gagId": "G4.2",
-          "part": "desk"
+          "part": "desk",
+          "motion": {
+            "start": 1416
+          }
         },
         {
           "sprite": "worker-seated",
-          "frame": "b",
+          "frame": "b-type",
           "x": -15,
           "y": 108,
-          "depth": 8.01
+          "depth": 8.01,
+          "motion": {
+            "start": 1838
+          }
         },
         {
           "sprite": "glass-r",
@@ -9440,12 +9590,15 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "e",
+          "frame": "e-type",
           "x": 49,
           "y": 124,
           "depth": 10.01,
           "gagId": "G4.3",
-          "part": "desks"
+          "part": "desks",
+          "motion": {
+            "start": 469
+          }
         },
         {
           "sprite": "worker-seated-turned",
@@ -9458,12 +9611,15 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "a",
+          "frame": "a-nod",
           "x": 145,
           "y": 124,
           "depth": 10.01,
           "gagId": "G2.4",
-          "part": "room"
+          "part": "room",
+          "motion": {
+            "start": 854
+          }
         },
         {
           "sprite": "glass-r",
@@ -9474,12 +9630,15 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "c",
+          "frame": "c-nod",
           "x": 161,
           "y": 132,
           "depth": 11.01,
           "gagId": "G2.4",
-          "part": "room"
+          "part": "room",
+          "motion": {
+            "start": 574
+          }
         },
         {
           "sprite": "sign-pipeline",
@@ -9533,28 +9692,37 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "e",
+          "frame": "e-nod",
           "x": 177,
           "y": 140,
           "depth": 12.01,
           "gagId": "G2.4",
-          "part": "room"
+          "part": "room",
+          "motion": {
+            "start": 1832
+          }
         },
         {
           "sprite": "worker-seated",
-          "frame": "a",
+          "frame": "a-type",
           "x": 81,
           "y": 140,
-          "depth": 12.01
+          "depth": 12.01,
+          "motion": {
+            "start": 113
+          }
         },
         {
           "sprite": "worker-seated",
-          "frame": "d",
+          "frame": "d-nod",
           "x": 193,
           "y": 148,
           "depth": 13.01,
           "gagId": "G2.4",
-          "part": "room"
+          "part": "room",
+          "motion": {
+            "start": 760
+          }
         },
         {
           "sprite": "card-report",
@@ -10462,19 +10630,25 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "a",
+          "frame": "a-type",
           "x": 147,
           "y": 61,
           "depth": 8.01,
           "gagId": "G4.2",
-          "part": "desk"
+          "part": "desk",
+          "motion": {
+            "start": 1416
+          }
         },
         {
           "sprite": "worker-seated",
-          "frame": "b",
+          "frame": "b-type",
           "x": 19,
           "y": 61,
-          "depth": 8.01
+          "depth": 8.01,
+          "motion": {
+            "start": 1838
+          }
         },
         {
           "sprite": "glass-r",
@@ -10519,12 +10693,15 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "e",
+          "frame": "e-type",
           "x": 83,
           "y": 77,
           "depth": 10.01,
           "gagId": "G4.3",
-          "part": "desks"
+          "part": "desks",
+          "motion": {
+            "start": 469
+          }
         },
         {
           "sprite": "worker-seated-turned",
@@ -10537,12 +10714,15 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "a",
+          "frame": "a-nod",
           "x": 179,
           "y": 77,
           "depth": 10.01,
           "gagId": "G2.4",
-          "part": "room"
+          "part": "room",
+          "motion": {
+            "start": 854
+          }
         },
         {
           "sprite": "glass-r",
@@ -10553,12 +10733,15 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "c",
+          "frame": "c-nod",
           "x": 195,
           "y": 85,
           "depth": 11.01,
           "gagId": "G2.4",
-          "part": "room"
+          "part": "room",
+          "motion": {
+            "start": 574
+          }
         },
         {
           "sprite": "sign-pipeline",
@@ -10612,10 +10795,13 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "a",
+          "frame": "a-type",
           "x": 115,
           "y": 93,
-          "depth": 12.01
+          "depth": 12.01,
+          "motion": {
+            "start": 113
+          }
         },
         {
           "sprite": "glass-c",
@@ -11304,12 +11490,15 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "a",
+          "frame": "a-type",
           "x": 63,
           "y": 41,
           "depth": 8.01,
           "gagId": "G4.2",
-          "part": "desk"
+          "part": "desk",
+          "motion": {
+            "start": 1416
+          }
         },
         {
           "sprite": "glass-r",
@@ -11345,21 +11534,27 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "e",
+          "frame": "e-type",
           "x": -1,
           "y": 57,
           "depth": 10.01,
           "gagId": "G4.3",
-          "part": "desks"
+          "part": "desks",
+          "motion": {
+            "start": 469
+          }
         },
         {
           "sprite": "worker-seated",
-          "frame": "a",
+          "frame": "a-nod",
           "x": 95,
           "y": 57,
           "depth": 10.01,
           "gagId": "G2.4",
-          "part": "room"
+          "part": "room",
+          "motion": {
+            "start": 854
+          }
         },
         {
           "sprite": "glass-r",
@@ -11370,12 +11565,15 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "c",
+          "frame": "c-nod",
           "x": 111,
           "y": 65,
           "depth": 11.01,
           "gagId": "G2.4",
-          "part": "room"
+          "part": "room",
+          "motion": {
+            "start": 574
+          }
         },
         {
           "sprite": "sign-pipeline",
@@ -11429,19 +11627,25 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "e",
+          "frame": "e-nod",
           "x": 127,
           "y": 73,
           "depth": 12.01,
           "gagId": "G2.4",
-          "part": "room"
+          "part": "room",
+          "motion": {
+            "start": 1832
+          }
         },
         {
           "sprite": "worker-seated",
-          "frame": "a",
+          "frame": "a-type",
           "x": 31,
           "y": 73,
-          "depth": 12.01
+          "depth": 12.01,
+          "motion": {
+            "start": 113
+          }
         },
         {
           "sprite": "glass-c",
@@ -11452,12 +11656,15 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "d",
+          "frame": "d-nod",
           "x": 143,
           "y": 81,
           "depth": 13.01,
           "gagId": "G2.4",
-          "part": "room"
+          "part": "room",
+          "motion": {
+            "start": 760
+          }
         },
         {
           "sprite": "glass-c",
@@ -12004,12 +12211,15 @@
         },
         {
           "sprite": "worker-seated-josh",
-          "frame": "default",
+          "frame": "talk",
           "x": 148,
           "y": 111,
           "depth": 4.94,
           "gagId": "G7.2",
-          "part": "meeting"
+          "part": "meeting",
+          "motion": {
+            "start": 1745
+          }
         },
         {
           "sprite": "nameplate-tech",
@@ -12022,12 +12232,15 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "c",
+          "frame": "c-nod",
           "x": 93,
           "y": 97,
           "depth": 5.5,
           "gagId": "G7.2",
-          "part": "meeting"
+          "part": "meeting",
+          "motion": {
+            "start": 1182
+          }
         },
         {
           "sprite": "glass-c-corner",
@@ -12038,12 +12251,15 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "d",
+          "frame": "d-nod",
           "x": 109,
           "y": 105,
           "depth": 6.5,
           "gagId": "G7.2",
-          "part": "meeting"
+          "part": "meeting",
+          "motion": {
+            "start": 538
+          }
         },
         {
           "sprite": "glass-c",
@@ -12054,12 +12270,15 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "a",
+          "frame": "a-nod",
           "x": 125,
           "y": 113,
           "depth": 7.5,
           "gagId": "G7.2",
-          "part": "meeting"
+          "part": "meeting",
+          "motion": {
+            "start": 1300
+          }
         },
         {
           "sprite": "glass-c",
@@ -12611,12 +12830,15 @@
         },
         {
           "sprite": "worker-seated-josh",
-          "frame": "default",
+          "frame": "talk",
           "x": 126,
           "y": 90,
           "depth": 4.94,
           "gagId": "G7.2",
-          "part": "meeting"
+          "part": "meeting",
+          "motion": {
+            "start": 1745
+          }
         },
         {
           "sprite": "nameplate-tech",
@@ -12629,21 +12851,27 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "c",
+          "frame": "c-nod",
           "x": 71,
           "y": 76,
           "depth": 5.5,
           "gagId": "G7.2",
-          "part": "meeting"
+          "part": "meeting",
+          "motion": {
+            "start": 1182
+          }
         },
         {
           "sprite": "worker-seated",
-          "frame": "d",
+          "frame": "d-nod",
           "x": 87,
           "y": 84,
           "depth": 6.5,
           "gagId": "G7.2",
-          "part": "meeting"
+          "part": "meeting",
+          "motion": {
+            "start": 538
+          }
         },
         {
           "sprite": "glass-c",
@@ -12654,12 +12882,15 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "a",
+          "frame": "a-nod",
           "x": 103,
           "y": 92,
           "depth": 7.5,
           "gagId": "G7.2",
-          "part": "meeting"
+          "part": "meeting",
+          "motion": {
+            "start": 1300
+          }
         },
         {
           "sprite": "glass-c",
@@ -13795,21 +14026,27 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "b",
+          "frame": "b-type",
           "x": 133,
           "y": 109,
           "depth": 3.01,
           "gagId": "G5.2",
-          "part": "wing"
+          "part": "wing",
+          "motion": {
+            "start": 1337
+          }
         },
         {
           "sprite": "worker-seated",
-          "frame": "a",
+          "frame": "a-type",
           "x": 101,
           "y": 109,
           "depth": 3.01,
           "gagId": "G5.2",
-          "part": "wing"
+          "part": "wing",
+          "motion": {
+            "start": 725
+          }
         },
         {
           "sprite": "tv-live-inset",
@@ -13840,12 +14077,15 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "c",
+          "frame": "c-type",
           "x": 101,
           "y": 125,
           "depth": 5.01,
           "gagId": "G5.2",
-          "part": "wing"
+          "part": "wing",
+          "motion": {
+            "start": 602
+          }
         },
         {
           "sprite": "chair",
@@ -13863,7 +14103,10 @@
           "y": 133,
           "depth": 6.01,
           "gagId": "G2.4",
-          "part": "inset"
+          "part": "inset",
+          "motion": {
+            "start": 1004
+          }
         },
         {
           "sprite": "partition-r",
@@ -13883,12 +14126,15 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "d",
+          "frame": "d-type",
           "x": 37,
           "y": 141,
           "depth": 7.01,
           "gagId": "G5.6",
-          "part": "data"
+          "part": "data",
+          "motion": {
+            "start": 380
+          }
         },
         {
           "sprite": "partition-r",
@@ -13904,7 +14150,10 @@
           "y": 144,
           "depth": 8.4,
           "gagId": "G6.3",
-          "part": "map"
+          "part": "map",
+          "motion": {
+            "start": 1620
+          }
         },
         {
           "sprite": "partition-c",
@@ -13987,7 +14236,10 @@
           "y": 162,
           "depth": 12.0,
           "gagId": "G6.4",
-          "part": "door"
+          "part": "door",
+          "motion": {
+            "start": 1701
+          }
         },
         {
           "sprite": "shell",
@@ -14806,21 +15058,27 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "b",
+          "frame": "b-type",
           "x": 133,
           "y": 35,
           "depth": 3.01,
           "gagId": "G5.2",
-          "part": "wing"
+          "part": "wing",
+          "motion": {
+            "start": 1337
+          }
         },
         {
           "sprite": "worker-seated",
-          "frame": "a",
+          "frame": "a-type",
           "x": 101,
           "y": 35,
           "depth": 3.01,
           "gagId": "G5.2",
-          "part": "wing"
+          "part": "wing",
+          "motion": {
+            "start": 725
+          }
         },
         {
           "sprite": "tv-live-inset",
@@ -14851,12 +15109,15 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "c",
+          "frame": "c-type",
           "x": 101,
           "y": 51,
           "depth": 5.01,
           "gagId": "G5.2",
-          "part": "wing"
+          "part": "wing",
+          "motion": {
+            "start": 602
+          }
         },
         {
           "sprite": "chair",
@@ -14874,7 +15135,10 @@
           "y": 59,
           "depth": 6.01,
           "gagId": "G2.4",
-          "part": "inset"
+          "part": "inset",
+          "motion": {
+            "start": 1004
+          }
         },
         {
           "sprite": "desk",
@@ -14887,12 +15151,15 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "d",
+          "frame": "d-type",
           "x": 37,
           "y": 67,
           "depth": 7.01,
           "gagId": "G5.6",
-          "part": "data"
+          "part": "data",
+          "motion": {
+            "start": 380
+          }
         },
         {
           "sprite": "partition-r",
@@ -14982,7 +15249,10 @@
           "y": 88,
           "depth": 12.0,
           "gagId": "G6.4",
-          "part": "door"
+          "part": "door",
+          "motion": {
+            "start": 1701
+          }
         },
         {
           "sprite": "shell",
@@ -15663,21 +15933,27 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "b",
+          "frame": "b-type",
           "x": 83,
           "y": 77,
           "depth": 3.01,
           "gagId": "G5.2",
-          "part": "wing"
+          "part": "wing",
+          "motion": {
+            "start": 1337
+          }
         },
         {
           "sprite": "worker-seated",
-          "frame": "a",
+          "frame": "a-type",
           "x": 51,
           "y": 77,
           "depth": 3.01,
           "gagId": "G5.2",
-          "part": "wing"
+          "part": "wing",
+          "motion": {
+            "start": 725
+          }
         },
         {
           "sprite": "tv-live-inset",
@@ -15708,12 +15984,15 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "c",
+          "frame": "c-type",
           "x": 51,
           "y": 93,
           "depth": 5.01,
           "gagId": "G5.2",
-          "part": "wing"
+          "part": "wing",
+          "motion": {
+            "start": 602
+          }
         },
         {
           "sprite": "chair",
@@ -15731,7 +16010,10 @@
           "y": 101,
           "depth": 6.01,
           "gagId": "G2.4",
-          "part": "inset"
+          "part": "inset",
+          "motion": {
+            "start": 1004
+          }
         },
         {
           "sprite": "partition-r",
@@ -15751,12 +16033,15 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "d",
+          "frame": "d-type",
           "x": -13,
           "y": 109,
           "depth": 7.01,
           "gagId": "G5.6",
-          "part": "data"
+          "part": "data",
+          "motion": {
+            "start": 380
+          }
         },
         {
           "sprite": "partition-r",
@@ -15772,7 +16057,10 @@
           "y": 112,
           "depth": 8.4,
           "gagId": "G6.3",
-          "part": "map"
+          "part": "map",
+          "motion": {
+            "start": 1620
+          }
         },
         {
           "sprite": "partition-r",
@@ -15827,7 +16115,10 @@
           "y": 130,
           "depth": 12.0,
           "gagId": "G6.4",
-          "part": "door"
+          "part": "door",
+          "motion": {
+            "start": 1701
+          }
         },
         {
           "sprite": "inset-door-propped",
@@ -16620,21 +16911,27 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "b",
+          "frame": "b-type",
           "x": 43,
           "y": 1,
           "depth": 3.01,
           "gagId": "G5.2",
-          "part": "wing"
+          "part": "wing",
+          "motion": {
+            "start": 1337
+          }
         },
         {
           "sprite": "worker-seated",
-          "frame": "a",
+          "frame": "a-type",
           "x": 11,
           "y": 1,
           "depth": 3.01,
           "gagId": "G5.2",
-          "part": "wing"
+          "part": "wing",
+          "motion": {
+            "start": 725
+          }
         },
         {
           "sprite": "tv-live-inset",
@@ -16665,12 +16962,15 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "c",
+          "frame": "c-type",
           "x": 11,
           "y": 17,
           "depth": 5.01,
           "gagId": "G5.2",
-          "part": "wing"
+          "part": "wing",
+          "motion": {
+            "start": 602
+          }
         },
         {
           "sprite": "chair",
@@ -16688,7 +16988,10 @@
           "y": 25,
           "depth": 6.01,
           "gagId": "G2.4",
-          "part": "inset"
+          "part": "inset",
+          "motion": {
+            "start": 1004
+          }
         },
         {
           "sprite": "partition-r",
@@ -16711,7 +17014,10 @@
           "y": 36,
           "depth": 8.4,
           "gagId": "G6.3",
-          "part": "map"
+          "part": "map",
+          "motion": {
+            "start": 1620
+          }
         },
         {
           "sprite": "partition-r",
@@ -16750,7 +17056,10 @@
           "y": 54,
           "depth": 12.0,
           "gagId": "G6.4",
-          "part": "door"
+          "part": "door",
+          "motion": {
+            "start": 1701
+          }
         },
         {
           "sprite": "shell",

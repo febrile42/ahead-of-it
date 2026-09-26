@@ -380,7 +380,7 @@ def _h(*a) -> int:
 SLOPE_MARKS = ("badge-red", "shirt-1", "badge-green", "sticky", "desk-wood", "glass-dark")
 
 
-def _paper_slope(iso: Iso, c: Canvas):
+def _paper_slope(iso: Iso, c: Canvas, frame: int = 0):
     """An avalanche of paper over a desk and the person at it: a lumpy heap highest
     against the back of the desk, sliding down and out across the floor toward the
     viewer and to the right, loose sheets fanned at its foot. Every sheet carries a logo
@@ -427,20 +427,37 @@ def _paper_slope(iso: Iso, c: Canvas):
                 right="wall-shadow")
     # the hand and the pen, up out of the slope's left flank. DIA-3 review: at the top
     # the AUTO-RENEWED card covered it; here it stands clear against the paper.
+    # PH2-01 `frame` 1: still signing under there — the fist a pixel higher, the pen
+    # tipped upright mid-stroke. Frame 0 is the still, unchanged.
     x, y = iso.pt(1.0, 7.0, 13.0)
-    for k in range(7):                                      # the forearm, a cuff at its base
+    lift = 1 if frame == 1 else 0
+    for k in range(7 + lift):                               # the forearm, a cuff at its base
         c.point(x, y - k, "outline")
         c.point(x + 1, y - k, "shirt-1" if k < 2 else "skin-1")
         c.point(x + 2, y - k, "shirt-1" if k < 2 else "skin-1")
         c.point(x + 3, y - k, "outline")
-    hx, hy = x + 1, y - 8                                   # the fist
+    hx, hy = x + 1, y - 8 - lift                            # the fist
     c.rect(hx - 1, hy - 2, hx + 3, hy + 1, "outline")
     c.rect(hx, hy - 1, hx + 2, hy, "skin-1")
+    slant = 3 if frame == 1 else 2
     for k in range(6):                                      # the pen, held up
-        c.point(hx + 3 + k // 2, hy - 2 - k, "shirt-1-dark")
-        c.point(hx + 4 + k // 2, hy - 2 - k, "outline")
-    c.point(hx + 5, hy - 8, "outline")
+        c.point(hx + 3 + k // slant, hy - 2 - k, "shirt-1-dark")
+        c.point(hx + 4 + k // slant, hy - 2 - k, "outline")
+    c.point(hx + 3 + 5 // slant, hy - 8, "outline")
     return {"top": iso.pt(7.0, 3.0, 22.0)}
+
+
+def paper_slope() -> Sprite:
+    """The still plus PH2-01's `sign` beat (a single-file key that motion.LOOP_KEYS
+    threads after the still). Both frames share the still's canvas and anchor."""
+    from ..vox import make_anim
+    s = make_anim(_paper_slope, 2, size=160, key="sign-1", ms=0)
+    still = make(_paper_slope, size=160)
+    assert (s.w, s.h, s.anchor) == (still.w, still.h, still.anchor), "sign beat grew the canvas"
+    assert s.canvas.img.tobytes() == still.canvas.img.tobytes()
+    frames, _ms = s.anims["sign-1"]
+    s.anims = {"sign-1": ([frames[1]], 0)}
+    return s
 
 
 def card_autorenewed() -> Canvas:
@@ -620,13 +637,13 @@ JOSH_LOOK = dict(t="shirt-1-dark", T="pants-1", p="pants-1", s="skin-1", h="hair
                  style="short")
 
 
-def josh_front() -> Canvas:
+def josh_front(gesture: bool = False) -> Canvas:
     """Josh at the head of the table, facing us, in the chair that is empty without him.
     No table in front of him, so he is drawn whole: the seated front body, then his lap
     and legs down to the floor."""
     LOOKS["j"] = JOSH_LOOK
     try:
-        top = seated_front_frame("j")
+        top = seated_front_frame("j", gesture=gesture)
     finally:
         del LOOKS["j"]
     c = Canvas(SEATED_FRONT_W, JOSH_H)
@@ -716,16 +733,21 @@ JOSH_H = SEATED_FRONT_H + 6        # Josh at the head seat, legs and all
 SEATED_FRONT_ANCHOR = (8, 18)
 
 
-def seated_front_frame(look_name: str) -> Canvas:
+def seated_front_frame(look_name: str, gesture: bool = False) -> Canvas:
     """Across the table, facing us: head and shoulders over the table top, forearms on
-    it. The table (drawn after) hides everything below the chest."""
+    it. The table (drawn after) hides everything below the chest. `gesture` (PH2-01):
+    the right forearm comes up, hand open at the shoulder, making a point."""
     from .worker import _torso_front, _head_front
     look = LOOKS[look_name]
     f = Fig(SEATED_FRONT_W, SEATED_FRONT_H)
     body = Fig()
     _torso_front(body, 0)
     body.blob(R(2, 9, 3, 14), "t")
-    body.blob(R(12, 9, 13, 14), "T")
+    if gesture:
+        body.blob(R(12, 9, 13, 11) | R(13, 5, 14, 8),
+                  lambda p: "s" if p[1] <= 6 else "T")
+    else:
+        body.blob(R(12, 9, 13, 14), "T")
     _head_front(body, look["style"], 0)
     _place(f, body, 0, 1)
     return f.to_canvas(look)
@@ -791,7 +813,7 @@ def build_all() -> dict:
         "worker-card": _per_look(card_frames, CARD_ANCHOR, 0),
         "doc-gate": make(_gate),
         # floor 2
-        "paper-slope": make(_paper_slope, size=160),
+        "paper-slope": paper_slope(),
         "card-autorenewed": Sprite(card_autorenewed(), (card_autorenewed().w // 2, 14)),
         "finance-panel": make(_finance_panel),
         "calendar-renewals": Sprite(renewal_calendar(), (10, 17)),
@@ -814,7 +836,10 @@ def build_all() -> dict:
             taken=make(lambda iso, c: _head_chair(iso, c, False), size=200)),
         "worker-seated-front": _per_look(lambda lk: {lk: [seated_front_frame(lk)]},
                                          SEATED_FRONT_ANCHOR, 0),
-        "worker-seated-josh": Sprite(josh_front(), (SEATED_FRONT_W // 2, JOSH_H)),
+        # PH2-01 (R-07): in the meeting, making a point now and then (`talk`, threaded
+        # by motion.LOOP_KEYS from the still and `point-1`)
+        "worker-seated-josh": Sprite(josh_front(), (SEATED_FRONT_W // 2, JOSH_H),
+                                     anims={"point-1": ([josh_front(True)], 0)}),
         "whiteboard-next": Sprite(whiteboard_next(), (whiteboard_next().w // 2, 28)),
         "nameplate-tech": Sprite(nameplate(), (nameplate().w // 2, NAMEPLATE_H)),
     }

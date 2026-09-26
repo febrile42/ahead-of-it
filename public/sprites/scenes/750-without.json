@@ -1096,7 +1096,10 @@
           "y": 124,
           "depth": 0.5,
           "gagId": "G6.1",
-          "part": "balloons"
+          "part": "balloons",
+          "motion": {
+            "start": 884
+          }
         },
         {
           "sprite": "closet-shelf",
@@ -1177,12 +1180,16 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "c",
+          "frame": "c-type",
           "x": 197,
           "y": 85,
           "depth": 4.01,
           "gagId": "G5.4",
-          "part": "phones"
+          "part": "phones",
+          "motion": {
+            "start": 1379,
+            "rate": 1.5
+          }
         },
         {
           "sprite": "cable-spill",
@@ -1209,12 +1216,16 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "d",
+          "frame": "d-type",
           "x": 213,
           "y": 93,
           "depth": 5.01,
           "gagId": "G5.4",
-          "part": "phones"
+          "part": "phones",
+          "motion": {
+            "start": 29,
+            "rate": 1.5
+          }
         },
         {
           "sprite": "partition-c",
@@ -1255,7 +1266,10 @@
           "y": 101,
           "depth": 6.8,
           "gagId": "G5.4",
-          "part": "phones"
+          "part": "phones",
+          "motion": {
+            "start": 1117
+          }
         },
         {
           "sprite": "partition-c",
@@ -1323,7 +1337,10 @@
           "y": 116,
           "depth": 8.1,
           "gagId": "G5.3",
-          "part": "server"
+          "part": "server",
+          "motion": {
+            "start": 990
+          }
         },
         {
           "sprite": "plant",
@@ -1343,19 +1360,26 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "b",
+          "frame": "b-type",
           "x": 277,
           "y": 125,
-          "depth": 9.01
+          "depth": 9.01,
+          "motion": {
+            "start": 1612,
+            "rate": 1.5
+          }
         },
         {
           "sprite": "worker-c",
-          "frame": "idle-left",
+          "frame": "idle-left-shuffle",
           "x": 266,
           "y": 130,
           "depth": 10.6,
           "gagId": "G2.1",
-          "part": "queue"
+          "part": "queue",
+          "motion": {
+            "start": 508
+          }
         },
         {
           "sprite": "desk-notes",
@@ -1368,12 +1392,16 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "a",
+          "frame": "a-type",
           "x": 181,
           "y": 141,
           "depth": 11.01,
           "gagId": "G1.2",
-          "part": "pit"
+          "part": "pit",
+          "motion": {
+            "start": 807,
+            "rate": 1.5
+          }
         },
         {
           "sprite": "worker-queue",
@@ -1386,12 +1414,15 @@
         },
         {
           "sprite": "worker-e",
-          "frame": "idle-left",
+          "frame": "idle-left-shuffle",
           "x": 286,
           "y": 140,
           "depth": 11.84,
           "gagId": "G2.1",
-          "part": "queue"
+          "part": "queue",
+          "motion": {
+            "start": 1803
+          }
         },
         {
           "sprite": "desk-notes",
@@ -1413,21 +1444,29 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "c",
+          "frame": "c-type",
           "x": 213,
           "y": 157,
           "depth": 13.01,
           "gagId": "G1.2",
-          "part": "pit"
+          "part": "pit",
+          "motion": {
+            "start": 1486,
+            "rate": 1.5
+          }
         },
         {
           "sprite": "worker-seated",
-          "frame": "e",
+          "frame": "e-type",
           "x": 149,
           "y": 157,
           "depth": 13.01,
           "gagId": "G1.2",
-          "part": "pit"
+          "part": "pit",
+          "motion": {
+            "start": 232,
+            "rate": 1.5
+          }
         },
         {
           "sprite": "sign-caution",
@@ -1456,12 +1495,16 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "d",
+          "frame": "d-type",
           "x": 181,
           "y": 173,
           "depth": 15.01,
           "gagId": "G1.2",
-          "part": "pit"
+          "part": "pit",
+          "motion": {
+            "start": 1432,
+            "rate": 1.5
+          }
         },
         {
           "sprite": "robot",
@@ -1470,7 +1513,10 @@
           "y": 168,
           "depth": 15.4,
           "gagId": "G7.1",
-          "part": "robot"
+          "part": "robot",
+          "motion": {
+            "start": 1012
+          }
         },
         {
           "sprite": "front-door",
@@ -1497,7 +1543,10 @@
           "y": 166,
           "depth": 18.01,
           "gagId": "G3.1",
-          "part": "desk"
+          "part": "desk",
+          "motion": {
+            "start": 1406
+          }
         },
         {
           "sprite": "worker-coat",
@@ -1515,7 +1564,10 @@
           "y": 190,
           "depth": 18.5,
           "gagId": "G4.1",
-          "part": "door"
+          "part": "door",
+          "motion": {
+            "start": 1345
+          }
         },
         {
           "sprite": "balloon-welcome",
@@ -1524,7 +1576,10 @@
           "y": 189,
           "depth": 19.4,
           "gagId": "G3.1",
-          "part": "desk"
+          "part": "desk",
+          "motion": {
+            "start": 912
+          }
         },
         {
           "sprite": "fx-net-750-without-ground",
@@ -1560,7 +1615,10 @@
           "y": 142,
           "depth": 15,
           "gagId": "G4.1",
-          "part": "deal"
+          "part": "deal",
+          "motion": {
+            "start": 701
+          }
         },
         {
           "sprite": "balloon-head",
@@ -2142,12 +2200,16 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "c",
+          "frame": "c-type",
           "x": 164,
           "y": 81,
           "depth": 4.01,
           "gagId": "G5.4",
-          "part": "phones"
+          "part": "phones",
+          "motion": {
+            "start": 1379,
+            "rate": 1.5
+          }
         },
         {
           "sprite": "cable-spill",
@@ -2174,12 +2236,16 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "d",
+          "frame": "d-type",
           "x": 180,
           "y": 89,
           "depth": 5.01,
           "gagId": "G5.4",
-          "part": "phones"
+          "part": "phones",
+          "motion": {
+            "start": 29,
+            "rate": 1.5
+          }
         },
         {
           "sprite": "partition-c",
@@ -2261,7 +2327,10 @@
           "y": 112,
           "depth": 8.1,
           "gagId": "G5.3",
-          "part": "server"
+          "part": "server",
+          "motion": {
+            "start": 990
+          }
         },
         {
           "sprite": "desk-notes",
@@ -2274,12 +2343,16 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "a",
+          "frame": "a-type",
           "x": 148,
           "y": 137,
           "depth": 11.01,
           "gagId": "G1.2",
-          "part": "pit"
+          "part": "pit",
+          "motion": {
+            "start": 807,
+            "rate": 1.5
+          }
         },
         {
           "sprite": "desk-notes",
@@ -2301,21 +2374,29 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "c",
+          "frame": "c-type",
           "x": 180,
           "y": 153,
           "depth": 13.01,
           "gagId": "G1.2",
-          "part": "pit"
+          "part": "pit",
+          "motion": {
+            "start": 1486,
+            "rate": 1.5
+          }
         },
         {
           "sprite": "worker-seated",
-          "frame": "e",
+          "frame": "e-type",
           "x": 116,
           "y": 153,
           "depth": 13.01,
           "gagId": "G1.2",
-          "part": "pit"
+          "part": "pit",
+          "motion": {
+            "start": 232,
+            "rate": 1.5
+          }
         },
         {
           "sprite": "fx-net-750-without-ground",
@@ -2351,7 +2432,10 @@
           "y": 138,
           "depth": 15,
           "gagId": "G4.1",
-          "part": "deal"
+          "part": "deal",
+          "motion": {
+            "start": 701
+          }
         },
         {
           "sprite": "balloon-head",
@@ -3168,7 +3252,10 @@
           "y": 59,
           "depth": 8.1,
           "gagId": "G5.3",
-          "part": "server"
+          "part": "server",
+          "motion": {
+            "start": 990
+          }
         },
         {
           "sprite": "plant",
@@ -3188,12 +3275,16 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "a",
+          "frame": "a-type",
           "x": 181,
           "y": 84,
           "depth": 11.01,
           "gagId": "G1.2",
-          "part": "pit"
+          "part": "pit",
+          "motion": {
+            "start": 807,
+            "rate": 1.5
+          }
         },
         {
           "sprite": "desk-notes",
@@ -3206,12 +3297,16 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "e",
+          "frame": "e-type",
           "x": 149,
           "y": 100,
           "depth": 13.01,
           "gagId": "G1.2",
-          "part": "pit"
+          "part": "pit",
+          "motion": {
+            "start": 232,
+            "rate": 1.5
+          }
         },
         {
           "sprite": "sign-caution",
@@ -3233,12 +3328,16 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "d",
+          "frame": "d-type",
           "x": 181,
           "y": 116,
           "depth": 15.01,
           "gagId": "G1.2",
-          "part": "pit"
+          "part": "pit",
+          "motion": {
+            "start": 1432,
+            "rate": 1.5
+          }
         },
         {
           "sprite": "front-door",
@@ -3256,7 +3355,10 @@
           "y": 133,
           "depth": 18.5,
           "gagId": "G4.1",
-          "part": "door"
+          "part": "door",
+          "motion": {
+            "start": 1345
+          }
         },
         {
           "sprite": "fx-net-750-without-ground",
@@ -3292,7 +3394,10 @@
           "y": 85,
           "depth": 15,
           "gagId": "G4.1",
-          "part": "deal"
+          "part": "deal",
+          "motion": {
+            "start": 701
+          }
         },
         {
           "sprite": "balloon-head",
@@ -4065,12 +4170,16 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "d",
+          "frame": "d-type",
           "x": 90,
           "y": 3,
           "depth": 5.01,
           "gagId": "G5.4",
-          "part": "phones"
+          "part": "phones",
+          "motion": {
+            "start": 29,
+            "rate": 1.5
+          }
         },
         {
           "sprite": "partition-r",
@@ -4095,7 +4204,10 @@
           "y": 11,
           "depth": 6.8,
           "gagId": "G5.4",
-          "part": "phones"
+          "part": "phones",
+          "motion": {
+            "start": 1117
+          }
         },
         {
           "sprite": "receipt-runaway",
@@ -4122,7 +4234,10 @@
           "y": 26,
           "depth": 8.1,
           "gagId": "G5.3",
-          "part": "server"
+          "part": "server",
+          "motion": {
+            "start": 990
+          }
         },
         {
           "sprite": "desk-dev",
@@ -4135,19 +4250,26 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "b",
+          "frame": "b-type",
           "x": 154,
           "y": 35,
-          "depth": 9.01
+          "depth": 9.01,
+          "motion": {
+            "start": 1612,
+            "rate": 1.5
+          }
         },
         {
           "sprite": "worker-c",
-          "frame": "idle-left",
+          "frame": "idle-left-shuffle",
           "x": 143,
           "y": 40,
           "depth": 10.6,
           "gagId": "G2.1",
-          "part": "queue"
+          "part": "queue",
+          "motion": {
+            "start": 508
+          }
         },
         {
           "sprite": "desk-notes",
@@ -4160,12 +4282,16 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "a",
+          "frame": "a-type",
           "x": 58,
           "y": 51,
           "depth": 11.01,
           "gagId": "G1.2",
-          "part": "pit"
+          "part": "pit",
+          "motion": {
+            "start": 807,
+            "rate": 1.5
+          }
         },
         {
           "sprite": "worker-queue",
@@ -4178,12 +4304,15 @@
         },
         {
           "sprite": "worker-e",
-          "frame": "idle-left",
+          "frame": "idle-left-shuffle",
           "x": 163,
           "y": 50,
           "depth": 11.84,
           "gagId": "G2.1",
-          "part": "queue"
+          "part": "queue",
+          "motion": {
+            "start": 1803
+          }
         },
         {
           "sprite": "desk-notes",
@@ -4205,21 +4334,29 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "c",
+          "frame": "c-type",
           "x": 90,
           "y": 67,
           "depth": 13.01,
           "gagId": "G1.2",
-          "part": "pit"
+          "part": "pit",
+          "motion": {
+            "start": 1486,
+            "rate": 1.5
+          }
         },
         {
           "sprite": "worker-seated",
-          "frame": "e",
+          "frame": "e-type",
           "x": 26,
           "y": 67,
           "depth": 13.01,
           "gagId": "G1.2",
-          "part": "pit"
+          "part": "pit",
+          "motion": {
+            "start": 232,
+            "rate": 1.5
+          }
         },
         {
           "sprite": "worker-card",
@@ -4239,12 +4376,16 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "d",
+          "frame": "d-type",
           "x": 58,
           "y": 83,
           "depth": 15.01,
           "gagId": "G1.2",
-          "part": "pit"
+          "part": "pit",
+          "motion": {
+            "start": 1432,
+            "rate": 1.5
+          }
         },
         {
           "sprite": "robot",
@@ -4253,7 +4394,10 @@
           "y": 78,
           "depth": 15.4,
           "gagId": "G7.1",
-          "part": "robot"
+          "part": "robot",
+          "motion": {
+            "start": 1012
+          }
         },
         {
           "sprite": "front-door",
@@ -4280,7 +4424,10 @@
           "y": 76,
           "depth": 18.01,
           "gagId": "G3.1",
-          "part": "desk"
+          "part": "desk",
+          "motion": {
+            "start": 1406
+          }
         },
         {
           "sprite": "worker-coat",
@@ -4298,7 +4445,10 @@
           "y": 100,
           "depth": 18.5,
           "gagId": "G4.1",
-          "part": "door"
+          "part": "door",
+          "motion": {
+            "start": 1345
+          }
         },
         {
           "sprite": "balloon-welcome",
@@ -4307,7 +4457,10 @@
           "y": 99,
           "depth": 19.4,
           "gagId": "G3.1",
-          "part": "desk"
+          "part": "desk",
+          "motion": {
+            "start": 912
+          }
         },
         {
           "sprite": "fx-net-750-without-ground",
@@ -4334,7 +4487,10 @@
           "y": 52,
           "depth": 15,
           "gagId": "G4.1",
-          "part": "deal"
+          "part": "deal",
+          "motion": {
+            "start": 701
+          }
         },
         {
           "sprite": "balloon-head",
@@ -4957,12 +5113,16 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "c",
+          "frame": "c-type",
           "x": 82,
           "y": 76,
           "depth": 4.01,
           "gagId": "G5.4",
-          "part": "phones"
+          "part": "phones",
+          "motion": {
+            "start": 1379,
+            "rate": 1.5
+          }
         },
         {
           "sprite": "cable-spill",
@@ -4989,12 +5149,16 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "d",
+          "frame": "d-type",
           "x": 98,
           "y": 84,
           "depth": 5.01,
           "gagId": "G5.4",
-          "part": "phones"
+          "part": "phones",
+          "motion": {
+            "start": 29,
+            "rate": 1.5
+          }
         },
         {
           "sprite": "partition-r",
@@ -5028,7 +5192,10 @@
           "y": 92,
           "depth": 6.8,
           "gagId": "G5.4",
-          "part": "phones"
+          "part": "phones",
+          "motion": {
+            "start": 1117
+          }
         },
         {
           "sprite": "partition-r-end",
@@ -5062,7 +5229,10 @@
           "y": 107,
           "depth": 8.1,
           "gagId": "G5.3",
-          "part": "server"
+          "part": "server",
+          "motion": {
+            "start": 990
+          }
         },
         {
           "sprite": "desk-dev",
@@ -5075,19 +5245,26 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "b",
+          "frame": "b-type",
           "x": 162,
           "y": 116,
-          "depth": 9.01
+          "depth": 9.01,
+          "motion": {
+            "start": 1612,
+            "rate": 1.5
+          }
         },
         {
           "sprite": "worker-c",
-          "frame": "idle-left",
+          "frame": "idle-left-shuffle",
           "x": 151,
           "y": 121,
           "depth": 10.6,
           "gagId": "G2.1",
-          "part": "queue"
+          "part": "queue",
+          "motion": {
+            "start": 508
+          }
         },
         {
           "sprite": "desk-notes",
@@ -5100,12 +5277,16 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "a",
+          "frame": "a-type",
           "x": 66,
           "y": 132,
           "depth": 11.01,
           "gagId": "G1.2",
-          "part": "pit"
+          "part": "pit",
+          "motion": {
+            "start": 807,
+            "rate": 1.5
+          }
         },
         {
           "sprite": "worker-queue",
@@ -5118,12 +5299,15 @@
         },
         {
           "sprite": "worker-e",
-          "frame": "idle-left",
+          "frame": "idle-left-shuffle",
           "x": 171,
           "y": 131,
           "depth": 11.84,
           "gagId": "G2.1",
-          "part": "queue"
+          "part": "queue",
+          "motion": {
+            "start": 1803
+          }
         },
         {
           "sprite": "desk-notes",
@@ -5145,21 +5329,29 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "c",
+          "frame": "c-type",
           "x": 98,
           "y": 148,
           "depth": 13.01,
           "gagId": "G1.2",
-          "part": "pit"
+          "part": "pit",
+          "motion": {
+            "start": 1486,
+            "rate": 1.5
+          }
         },
         {
           "sprite": "worker-seated",
-          "frame": "e",
+          "frame": "e-type",
           "x": 34,
           "y": 148,
           "depth": 13.01,
           "gagId": "G1.2",
-          "part": "pit"
+          "part": "pit",
+          "motion": {
+            "start": 232,
+            "rate": 1.5
+          }
         },
         {
           "sprite": "robot",
@@ -5168,7 +5360,10 @@
           "y": 159,
           "depth": 15.4,
           "gagId": "G7.1",
-          "part": "robot"
+          "part": "robot",
+          "motion": {
+            "start": 1012
+          }
         },
         {
           "sprite": "fx-net-750-without-ground",
@@ -5195,7 +5390,10 @@
           "y": 133,
           "depth": 15,
           "gagId": "G4.1",
-          "part": "deal"
+          "part": "deal",
+          "motion": {
+            "start": 701
+          }
         },
         {
           "sprite": "balloon-head",
@@ -5659,7 +5857,10 @@
           "y": 99,
           "depth": 0.5,
           "gagId": "G6.1",
-          "part": "balloons"
+          "part": "balloons",
+          "motion": {
+            "start": 884
+          }
         },
         {
           "sprite": "closet-shelf",
@@ -5697,12 +5898,16 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "c",
+          "frame": "c-type",
           "x": 29,
           "y": 60,
           "depth": 4.01,
           "gagId": "G5.4",
-          "part": "phones"
+          "part": "phones",
+          "motion": {
+            "start": 1379,
+            "rate": 1.5
+          }
         },
         {
           "sprite": "desk-phone",
@@ -5715,12 +5920,16 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "d",
+          "frame": "d-type",
           "x": 45,
           "y": 68,
           "depth": 5.01,
           "gagId": "G5.4",
-          "part": "phones"
+          "part": "phones",
+          "motion": {
+            "start": 29,
+            "rate": 1.5
+          }
         },
         {
           "sprite": "desk-coinphone",
@@ -5738,7 +5947,10 @@
           "y": 76,
           "depth": 6.8,
           "gagId": "G5.4",
-          "part": "phones"
+          "part": "phones",
+          "motion": {
+            "start": 1117
+          }
         },
         {
           "sprite": "receipt-runaway",
@@ -5760,19 +5972,26 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "b",
+          "frame": "b-type",
           "x": 109,
           "y": 100,
-          "depth": 9.01
+          "depth": 9.01,
+          "motion": {
+            "start": 1612,
+            "rate": 1.5
+          }
         },
         {
           "sprite": "worker-c",
-          "frame": "idle-left",
+          "frame": "idle-left-shuffle",
           "x": 98,
           "y": 105,
           "depth": 10.6,
           "gagId": "G2.1",
-          "part": "queue"
+          "part": "queue",
+          "motion": {
+            "start": 508
+          }
         },
         {
           "sprite": "desk-notes",
@@ -5785,12 +6004,16 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "a",
+          "frame": "a-type",
           "x": 13,
           "y": 116,
           "depth": 11.01,
           "gagId": "G1.2",
-          "part": "pit"
+          "part": "pit",
+          "motion": {
+            "start": 807,
+            "rate": 1.5
+          }
         },
         {
           "sprite": "worker-queue",
@@ -5803,12 +6026,15 @@
         },
         {
           "sprite": "worker-e",
-          "frame": "idle-left",
+          "frame": "idle-left-shuffle",
           "x": 118,
           "y": 115,
           "depth": 11.84,
           "gagId": "G2.1",
-          "part": "queue"
+          "part": "queue",
+          "motion": {
+            "start": 1803
+          }
         },
         {
           "sprite": "desk-notes",
@@ -5821,12 +6047,16 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "c",
+          "frame": "c-type",
           "x": 45,
           "y": 132,
           "depth": 13.01,
           "gagId": "G1.2",
-          "part": "pit"
+          "part": "pit",
+          "motion": {
+            "start": 1486,
+            "rate": 1.5
+          }
         },
         {
           "sprite": "worker-card",
@@ -5846,12 +6076,16 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "d",
+          "frame": "d-type",
           "x": 13,
           "y": 148,
           "depth": 15.01,
           "gagId": "G1.2",
-          "part": "pit"
+          "part": "pit",
+          "motion": {
+            "start": 1432,
+            "rate": 1.5
+          }
         },
         {
           "sprite": "robot",
@@ -5860,7 +6094,10 @@
           "y": 143,
           "depth": 15.4,
           "gagId": "G7.1",
-          "part": "robot"
+          "part": "robot",
+          "motion": {
+            "start": 1012
+          }
         },
         {
           "sprite": "calendar-flip",
@@ -5869,7 +6106,10 @@
           "y": 141,
           "depth": 18.01,
           "gagId": "G3.1",
-          "part": "desk"
+          "part": "desk",
+          "motion": {
+            "start": 1406
+          }
         },
         {
           "sprite": "fx-net-750-without-ground",
@@ -5896,7 +6136,10 @@
           "y": 117,
           "depth": 15,
           "gagId": "G4.1",
-          "part": "deal"
+          "part": "deal",
+          "motion": {
+            "start": 701
+          }
         },
         {
           "sprite": "balloon-head",
@@ -6535,7 +6778,10 @@
           "y": 42,
           "depth": 0.5,
           "gagId": "G6.1",
-          "part": "balloons"
+          "part": "balloons",
+          "motion": {
+            "start": 884
+          }
         },
         {
           "sprite": "phone-knot",
@@ -6557,12 +6803,16 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "c",
+          "frame": "c-type",
           "x": 29,
           "y": 3,
           "depth": 4.01,
           "gagId": "G5.4",
-          "part": "phones"
+          "part": "phones",
+          "motion": {
+            "start": 1379,
+            "rate": 1.5
+          }
         },
         {
           "sprite": "desk-phone",
@@ -6575,12 +6825,16 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "d",
+          "frame": "d-type",
           "x": 45,
           "y": 11,
           "depth": 5.01,
           "gagId": "G5.4",
-          "part": "phones"
+          "part": "phones",
+          "motion": {
+            "start": 29,
+            "rate": 1.5
+          }
         },
         {
           "sprite": "desk-coinphone",
@@ -6598,7 +6852,10 @@
           "y": 19,
           "depth": 6.8,
           "gagId": "G5.4",
-          "part": "phones"
+          "part": "phones",
+          "motion": {
+            "start": 1117
+          }
         },
         {
           "sprite": "receipt-runaway",
@@ -6620,19 +6877,26 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "b",
+          "frame": "b-type",
           "x": 109,
           "y": 43,
-          "depth": 9.01
+          "depth": 9.01,
+          "motion": {
+            "start": 1612,
+            "rate": 1.5
+          }
         },
         {
           "sprite": "worker-c",
-          "frame": "idle-left",
+          "frame": "idle-left-shuffle",
           "x": 98,
           "y": 48,
           "depth": 10.6,
           "gagId": "G2.1",
-          "part": "queue"
+          "part": "queue",
+          "motion": {
+            "start": 508
+          }
         },
         {
           "sprite": "desk-notes",
@@ -6645,12 +6909,16 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "a",
+          "frame": "a-type",
           "x": 13,
           "y": 59,
           "depth": 11.01,
           "gagId": "G1.2",
-          "part": "pit"
+          "part": "pit",
+          "motion": {
+            "start": 807,
+            "rate": 1.5
+          }
         },
         {
           "sprite": "worker-queue",
@@ -6663,12 +6931,15 @@
         },
         {
           "sprite": "worker-e",
-          "frame": "idle-left",
+          "frame": "idle-left-shuffle",
           "x": 118,
           "y": 58,
           "depth": 11.84,
           "gagId": "G2.1",
-          "part": "queue"
+          "part": "queue",
+          "motion": {
+            "start": 1803
+          }
         },
         {
           "sprite": "desk-notes",
@@ -6681,12 +6952,16 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "c",
+          "frame": "c-type",
           "x": 45,
           "y": 75,
           "depth": 13.01,
           "gagId": "G1.2",
-          "part": "pit"
+          "part": "pit",
+          "motion": {
+            "start": 1486,
+            "rate": 1.5
+          }
         },
         {
           "sprite": "worker-card",
@@ -6706,12 +6981,16 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "d",
+          "frame": "d-type",
           "x": 13,
           "y": 91,
           "depth": 15.01,
           "gagId": "G1.2",
-          "part": "pit"
+          "part": "pit",
+          "motion": {
+            "start": 1432,
+            "rate": 1.5
+          }
         },
         {
           "sprite": "robot",
@@ -6720,7 +6999,10 @@
           "y": 86,
           "depth": 15.4,
           "gagId": "G7.1",
-          "part": "robot"
+          "part": "robot",
+          "motion": {
+            "start": 1012
+          }
         },
         {
           "sprite": "desk-bare",
@@ -6738,7 +7020,10 @@
           "y": 84,
           "depth": 18.01,
           "gagId": "G3.1",
-          "part": "desk"
+          "part": "desk",
+          "motion": {
+            "start": 1406
+          }
         },
         {
           "sprite": "worker-coat",
@@ -6756,7 +7041,10 @@
           "y": 107,
           "depth": 19.4,
           "gagId": "G3.1",
-          "part": "desk"
+          "part": "desk",
+          "motion": {
+            "start": 912
+          }
         },
         {
           "sprite": "fx-net-750-without-ground",
@@ -6783,7 +7071,10 @@
           "y": 60,
           "depth": 15,
           "gagId": "G4.1",
-          "part": "deal"
+          "part": "deal",
+          "motion": {
+            "start": 701
+          }
         },
         {
           "sprite": "balloon-head",
@@ -7957,7 +8248,10 @@
           "y": 97,
           "depth": 6.45,
           "gagId": "G7.3",
-          "part": "hats"
+          "part": "hats",
+          "motion": {
+            "start": 1346
+          }
         },
         {
           "sprite": "desk",
@@ -7991,14 +8285,21 @@
           "y": 117,
           "depth": 8.01,
           "gagId": "G4.2",
-          "part": "desk"
+          "part": "desk",
+          "motion": {
+            "start": 1261
+          }
         },
         {
           "sprite": "worker-seated",
-          "frame": "b",
+          "frame": "b-type",
           "x": 101,
           "y": 117,
-          "depth": 8.01
+          "depth": 8.01,
+          "motion": {
+            "start": 227,
+            "rate": 1.5
+          }
         },
         {
           "sprite": "glass-r",
@@ -8061,12 +8362,16 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "e",
+          "frame": "e-type",
           "x": 165,
           "y": 133,
           "depth": 10.01,
           "gagId": "G4.3",
-          "part": "desks"
+          "part": "desks",
+          "motion": {
+            "start": 1526,
+            "rate": 1.5
+          }
         },
         {
           "sprite": "worker-seated-turned",
@@ -8100,7 +8405,10 @@
           "y": 135,
           "depth": 11.24,
           "gagId": "G4.3",
-          "part": "desks"
+          "part": "desks",
+          "motion": {
+            "start": 951
+          }
         },
         {
           "sprite": "worker-point",
@@ -8113,12 +8421,15 @@
         },
         {
           "sprite": "worker-huddle",
-          "frame": "c-dongle",
+          "frame": "c-dongle-try",
           "x": 260,
           "y": 140,
           "depth": 11.85,
           "gagId": "G2.4",
-          "part": "room"
+          "part": "room",
+          "motion": {
+            "start": 9
+          }
         },
         {
           "sprite": "finance-panel",
@@ -8145,19 +8456,26 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "a",
+          "frame": "a-type",
           "x": 197,
           "y": 149,
-          "depth": 12.01
+          "depth": 12.01,
+          "motion": {
+            "start": 167,
+            "rate": 1.5
+          }
         },
         {
           "sprite": "paper-slope",
-          "frame": "default",
+          "frame": "sign",
           "x": 197,
           "y": 149,
           "depth": 12.5,
           "gagId": "G6.2",
-          "part": "slope"
+          "part": "slope",
+          "motion": {
+            "start": 1766
+          }
         },
         {
           "sprite": "glass-c",
@@ -8214,7 +8532,10 @@
           "y": 180,
           "depth": 16.9,
           "gagId": "G7.3a",
-          "part": "board"
+          "part": "board",
+          "motion": {
+            "start": 1690
+          }
         },
         {
           "sprite": "whiteboard-requests",
@@ -8232,7 +8553,10 @@
           "y": 186,
           "depth": 17.6,
           "gagId": "G7.3a",
-          "part": "board"
+          "part": "board",
+          "motion": {
+            "start": 515
+          }
         },
         {
           "sprite": "card-customers",
@@ -8798,7 +9122,10 @@
           "y": 68,
           "depth": 6.45,
           "gagId": "G7.3",
-          "part": "hats"
+          "part": "hats",
+          "motion": {
+            "start": 1346
+          }
         },
         {
           "sprite": "desk",
@@ -8809,10 +9136,14 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "b",
+          "frame": "b-type",
           "x": 101,
           "y": 88,
-          "depth": 8.01
+          "depth": 8.01,
+          "motion": {
+            "start": 227,
+            "rate": 1.5
+          }
         },
         {
           "sprite": "cabinet-locked",
@@ -8852,12 +9183,16 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "e",
+          "frame": "e-type",
           "x": 165,
           "y": 104,
           "depth": 10.01,
           "gagId": "G4.3",
-          "part": "desks"
+          "part": "desks",
+          "motion": {
+            "start": 1526,
+            "rate": 1.5
+          }
         },
         {
           "sprite": "worker-seated-turned",
@@ -8875,7 +9210,10 @@
           "y": 106,
           "depth": 11.24,
           "gagId": "G4.3",
-          "part": "desks"
+          "part": "desks",
+          "motion": {
+            "start": 951
+          }
         },
         {
           "sprite": "worker-point",
@@ -8888,12 +9226,15 @@
         },
         {
           "sprite": "paper-slope",
-          "frame": "default",
+          "frame": "sign",
           "x": 197,
           "y": 120,
           "depth": 12.5,
           "gagId": "G6.2",
-          "part": "slope"
+          "part": "slope",
+          "motion": {
+            "start": 1766
+          }
         },
         {
           "sprite": "worker-card",
@@ -9482,14 +9823,21 @@
           "y": 108,
           "depth": 8.01,
           "gagId": "G4.2",
-          "part": "desk"
+          "part": "desk",
+          "motion": {
+            "start": 1261
+          }
         },
         {
           "sprite": "worker-seated",
-          "frame": "b",
+          "frame": "b-type",
           "x": -15,
           "y": 108,
-          "depth": 8.01
+          "depth": 8.01,
+          "motion": {
+            "start": 227,
+            "rate": 1.5
+          }
         },
         {
           "sprite": "glass-r",
@@ -9534,12 +9882,16 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "e",
+          "frame": "e-type",
           "x": 49,
           "y": 124,
           "depth": 10.01,
           "gagId": "G4.3",
-          "part": "desks"
+          "part": "desks",
+          "motion": {
+            "start": 1526,
+            "rate": 1.5
+          }
         },
         {
           "sprite": "worker-seated-turned",
@@ -9573,16 +9925,22 @@
           "y": 126,
           "depth": 11.24,
           "gagId": "G4.3",
-          "part": "desks"
+          "part": "desks",
+          "motion": {
+            "start": 951
+          }
         },
         {
           "sprite": "worker-huddle",
-          "frame": "c-dongle",
+          "frame": "c-dongle-try",
           "x": 144,
           "y": 131,
           "depth": 11.85,
           "gagId": "G2.4",
-          "part": "room"
+          "part": "room",
+          "motion": {
+            "start": 9
+          }
         },
         {
           "sprite": "finance-panel",
@@ -9609,19 +9967,26 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "a",
+          "frame": "a-type",
           "x": 81,
           "y": 140,
-          "depth": 12.01
+          "depth": 12.01,
+          "motion": {
+            "start": 167,
+            "rate": 1.5
+          }
         },
         {
           "sprite": "paper-slope",
-          "frame": "default",
+          "frame": "sign",
           "x": 81,
           "y": 140,
           "depth": 12.5,
           "gagId": "G6.2",
-          "part": "slope"
+          "part": "slope",
+          "motion": {
+            "start": 1766
+          }
         },
         {
           "sprite": "worker-huddle",
@@ -10491,7 +10856,10 @@
           "y": 41,
           "depth": 6.45,
           "gagId": "G7.3",
-          "part": "hats"
+          "part": "hats",
+          "motion": {
+            "start": 1346
+          }
         },
         {
           "sprite": "desk",
@@ -10525,14 +10893,21 @@
           "y": 61,
           "depth": 8.01,
           "gagId": "G4.2",
-          "part": "desk"
+          "part": "desk",
+          "motion": {
+            "start": 1261
+          }
         },
         {
           "sprite": "worker-seated",
-          "frame": "b",
+          "frame": "b-type",
           "x": 19,
           "y": 61,
-          "depth": 8.01
+          "depth": 8.01,
+          "motion": {
+            "start": 227,
+            "rate": 1.5
+          }
         },
         {
           "sprite": "glass-r",
@@ -10577,12 +10952,16 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "e",
+          "frame": "e-type",
           "x": 83,
           "y": 77,
           "depth": 10.01,
           "gagId": "G4.3",
-          "part": "desks"
+          "part": "desks",
+          "motion": {
+            "start": 1526,
+            "rate": 1.5
+          }
         },
         {
           "sprite": "worker-seated-turned",
@@ -10616,16 +10995,22 @@
           "y": 79,
           "depth": 11.24,
           "gagId": "G4.3",
-          "part": "desks"
+          "part": "desks",
+          "motion": {
+            "start": 951
+          }
         },
         {
           "sprite": "worker-huddle",
-          "frame": "c-dongle",
+          "frame": "c-dongle-try",
           "x": 178,
           "y": 84,
           "depth": 11.85,
           "gagId": "G2.4",
-          "part": "room"
+          "part": "room",
+          "motion": {
+            "start": 9
+          }
         },
         {
           "sprite": "finance-panel",
@@ -10652,19 +11037,26 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "a",
+          "frame": "a-type",
           "x": 115,
           "y": 93,
-          "depth": 12.01
+          "depth": 12.01,
+          "motion": {
+            "start": 167,
+            "rate": 1.5
+          }
         },
         {
           "sprite": "paper-slope",
-          "frame": "default",
+          "frame": "sign",
           "x": 115,
           "y": 93,
           "depth": 12.5,
           "gagId": "G6.2",
-          "part": "slope"
+          "part": "slope",
+          "motion": {
+            "start": 1766
+          }
         },
         {
           "sprite": "glass-c",
@@ -10696,7 +11088,10 @@
           "y": 124,
           "depth": 16.9,
           "gagId": "G7.3a",
-          "part": "board"
+          "part": "board",
+          "motion": {
+            "start": 1690
+          }
         },
         {
           "sprite": "whiteboard-requests",
@@ -10714,7 +11109,10 @@
           "y": 130,
           "depth": 17.6,
           "gagId": "G7.3a",
-          "part": "board"
+          "part": "board",
+          "motion": {
+            "start": 515
+          }
         },
         {
           "sprite": "card-customers",
@@ -11385,7 +11783,10 @@
           "y": 41,
           "depth": 8.01,
           "gagId": "G4.2",
-          "part": "desk"
+          "part": "desk",
+          "motion": {
+            "start": 1261
+          }
         },
         {
           "sprite": "glass-r",
@@ -11421,12 +11822,16 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "e",
+          "frame": "e-type",
           "x": -1,
           "y": 57,
           "depth": 10.01,
           "gagId": "G4.3",
-          "part": "desks"
+          "part": "desks",
+          "motion": {
+            "start": 1526,
+            "rate": 1.5
+          }
         },
         {
           "sprite": "glass-r",
@@ -11446,12 +11851,15 @@
         },
         {
           "sprite": "worker-huddle",
-          "frame": "c-dongle",
+          "frame": "c-dongle-try",
           "x": 94,
           "y": 64,
           "depth": 11.85,
           "gagId": "G2.4",
-          "part": "room"
+          "part": "room",
+          "motion": {
+            "start": 9
+          }
         },
         {
           "sprite": "finance-panel",
@@ -11478,19 +11886,26 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "a",
+          "frame": "a-type",
           "x": 31,
           "y": 73,
-          "depth": 12.01
+          "depth": 12.01,
+          "motion": {
+            "start": 167,
+            "rate": 1.5
+          }
         },
         {
           "sprite": "paper-slope",
-          "frame": "default",
+          "frame": "sign",
           "x": 31,
           "y": 73,
           "depth": 12.5,
           "gagId": "G6.2",
-          "part": "slope"
+          "part": "slope",
+          "motion": {
+            "start": 1766
+          }
         },
         {
           "sprite": "glass-c",
@@ -11538,7 +11953,10 @@
           "y": 104,
           "depth": 16.9,
           "gagId": "G7.3a",
-          "part": "board"
+          "part": "board",
+          "motion": {
+            "start": 1690
+          }
         },
         {
           "sprite": "whiteboard-requests",
@@ -11556,7 +11974,10 @@
           "y": 110,
           "depth": 17.6,
           "gagId": "G7.3a",
-          "part": "board"
+          "part": "board",
+          "motion": {
+            "start": 515
+          }
         },
         {
           "sprite": "card-customers",
@@ -12098,12 +12519,15 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "c",
+          "frame": "c-nod",
           "x": 93,
           "y": 97,
           "depth": 5.5,
           "gagId": "G7.2",
-          "part": "meeting"
+          "part": "meeting",
+          "motion": {
+            "start": 691
+          }
         },
         {
           "sprite": "glass-c-corner",
@@ -12114,12 +12538,15 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "d",
+          "frame": "d-nod",
           "x": 109,
           "y": 105,
           "depth": 6.5,
           "gagId": "G7.2",
-          "part": "meeting"
+          "part": "meeting",
+          "motion": {
+            "start": 1629
+          }
         },
         {
           "sprite": "glass-c",
@@ -12130,12 +12557,15 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "a",
+          "frame": "a-nod",
           "x": 125,
           "y": 113,
           "depth": 7.5,
           "gagId": "G7.2",
-          "part": "meeting"
+          "part": "meeting",
+          "motion": {
+            "start": 1259
+          }
         },
         {
           "sprite": "glass-c",
@@ -12696,21 +13126,27 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "c",
+          "frame": "c-nod",
           "x": 71,
           "y": 76,
           "depth": 5.5,
           "gagId": "G7.2",
-          "part": "meeting"
+          "part": "meeting",
+          "motion": {
+            "start": 691
+          }
         },
         {
           "sprite": "worker-seated",
-          "frame": "d",
+          "frame": "d-nod",
           "x": 87,
           "y": 84,
           "depth": 6.5,
           "gagId": "G7.2",
-          "part": "meeting"
+          "part": "meeting",
+          "motion": {
+            "start": 1629
+          }
         },
         {
           "sprite": "glass-c",
@@ -12721,12 +13157,15 @@
         },
         {
           "sprite": "worker-seated",
-          "frame": "a",
+          "frame": "a-nod",
           "x": 103,
           "y": 92,
           "depth": 7.5,
           "gagId": "G7.2",
-          "part": "meeting"
+          "part": "meeting",
+          "motion": {
+            "start": 1259
+          }
         },
         {
           "sprite": "glass-c",
@@ -13780,7 +14219,10 @@
           "y": 101,
           "depth": 2,
           "gagId": "G5.2",
-          "part": "wing"
+          "part": "wing",
+          "motion": {
+            "start": 360
+          }
         },
         {
           "sprite": "desk-drives",
@@ -13807,7 +14249,10 @@
           "y": 109,
           "depth": 4.0,
           "gagId": "G5.2",
-          "part": "wing"
+          "part": "wing",
+          "motion": {
+            "start": 1974
+          }
         },
         {
           "sprite": "worker-phone-up",
@@ -13816,7 +14261,10 @@
           "y": 107,
           "depth": 4.0,
           "gagId": "G5.2",
-          "part": "wing"
+          "part": "wing",
+          "motion": {
+            "start": 966
+          }
         },
         {
           "sprite": "worker-wave",
@@ -13825,7 +14273,10 @@
           "y": 111,
           "depth": 4.25,
           "gagId": "G2.4",
-          "part": "inset"
+          "part": "inset",
+          "motion": {
+            "start": 1478
+          }
         },
         {
           "sprite": "tv-frozen-inset",
@@ -13870,7 +14321,10 @@
           "y": 106,
           "depth": 5.5,
           "gagId": "G5.2",
-          "part": "wing"
+          "part": "wing",
+          "motion": {
+            "start": 546
+          }
         },
         {
           "sprite": "chair",
@@ -13904,7 +14358,10 @@
           "y": 141,
           "depth": 7.02,
           "gagId": "G5.6",
-          "part": "data"
+          "part": "data",
+          "motion": {
+            "start": 1222
+          }
         },
         {
           "sprite": "partition-r",
@@ -13920,7 +14377,10 @@
           "y": 144,
           "depth": 8.4,
           "gagId": "G6.3",
-          "part": "map"
+          "part": "map",
+          "motion": {
+            "start": 1607
+          }
         },
         {
           "sprite": "partition-c",
@@ -13994,7 +14454,10 @@
           "y": 162,
           "depth": 12.0,
           "gagId": "G6.4",
-          "part": "door"
+          "part": "door",
+          "motion": {
+            "start": 149
+          }
         },
         {
           "sprite": "truck-c",
@@ -14763,7 +15226,10 @@
           "y": 27,
           "depth": 2,
           "gagId": "G5.2",
-          "part": "wing"
+          "part": "wing",
+          "motion": {
+            "start": 360
+          }
         },
         {
           "sprite": "desk-drives",
@@ -14790,7 +15256,10 @@
           "y": 35,
           "depth": 4.0,
           "gagId": "G5.2",
-          "part": "wing"
+          "part": "wing",
+          "motion": {
+            "start": 1974
+          }
         },
         {
           "sprite": "worker-phone-up",
@@ -14799,7 +15268,10 @@
           "y": 33,
           "depth": 4.0,
           "gagId": "G5.2",
-          "part": "wing"
+          "part": "wing",
+          "motion": {
+            "start": 966
+          }
         },
         {
           "sprite": "worker-wave",
@@ -14808,7 +15280,10 @@
           "y": 37,
           "depth": 4.25,
           "gagId": "G2.4",
-          "part": "inset"
+          "part": "inset",
+          "motion": {
+            "start": 1478
+          }
         },
         {
           "sprite": "tv-frozen-inset",
@@ -14853,7 +15328,10 @@
           "y": 32,
           "depth": 5.5,
           "gagId": "G5.2",
-          "part": "wing"
+          "part": "wing",
+          "motion": {
+            "start": 546
+          }
         },
         {
           "sprite": "chair",
@@ -14880,7 +15358,10 @@
           "y": 67,
           "depth": 7.02,
           "gagId": "G5.6",
-          "part": "data"
+          "part": "data",
+          "motion": {
+            "start": 1222
+          }
         },
         {
           "sprite": "partition-r",
@@ -14961,7 +15442,10 @@
           "y": 88,
           "depth": 12.0,
           "gagId": "G6.4",
-          "part": "door"
+          "part": "door",
+          "motion": {
+            "start": 149
+          }
         },
         {
           "sprite": "truck-c",
@@ -15588,7 +16072,10 @@
           "y": 69,
           "depth": 2,
           "gagId": "G5.2",
-          "part": "wing"
+          "part": "wing",
+          "motion": {
+            "start": 360
+          }
         },
         {
           "sprite": "desk-drives",
@@ -15615,7 +16102,10 @@
           "y": 77,
           "depth": 4.0,
           "gagId": "G5.2",
-          "part": "wing"
+          "part": "wing",
+          "motion": {
+            "start": 1974
+          }
         },
         {
           "sprite": "worker-phone-up",
@@ -15624,7 +16114,10 @@
           "y": 75,
           "depth": 4.0,
           "gagId": "G5.2",
-          "part": "wing"
+          "part": "wing",
+          "motion": {
+            "start": 966
+          }
         },
         {
           "sprite": "worker-wave",
@@ -15633,7 +16126,10 @@
           "y": 79,
           "depth": 4.25,
           "gagId": "G2.4",
-          "part": "inset"
+          "part": "inset",
+          "motion": {
+            "start": 1478
+          }
         },
         {
           "sprite": "tv-frozen-inset",
@@ -15678,7 +16174,10 @@
           "y": 74,
           "depth": 5.5,
           "gagId": "G5.2",
-          "part": "wing"
+          "part": "wing",
+          "motion": {
+            "start": 546
+          }
         },
         {
           "sprite": "chair",
@@ -15712,7 +16211,10 @@
           "y": 109,
           "depth": 7.02,
           "gagId": "G5.6",
-          "part": "data"
+          "part": "data",
+          "motion": {
+            "start": 1222
+          }
         },
         {
           "sprite": "partition-r",
@@ -15728,7 +16230,10 @@
           "y": 112,
           "depth": 8.4,
           "gagId": "G6.3",
-          "part": "map"
+          "part": "map",
+          "motion": {
+            "start": 1607
+          }
         },
         {
           "sprite": "partition-r",
@@ -15774,7 +16279,10 @@
           "y": 130,
           "depth": 12.0,
           "gagId": "G6.4",
-          "part": "door"
+          "part": "door",
+          "motion": {
+            "start": 149
+          }
         },
         {
           "sprite": "inset-door-propped",
@@ -16537,7 +17045,10 @@
           "y": 1,
           "depth": 4.0,
           "gagId": "G5.2",
-          "part": "wing"
+          "part": "wing",
+          "motion": {
+            "start": 1974
+          }
         },
         {
           "sprite": "worker-wave",
@@ -16546,7 +17057,10 @@
           "y": 3,
           "depth": 4.25,
           "gagId": "G2.4",
-          "part": "inset"
+          "part": "inset",
+          "motion": {
+            "start": 1478
+          }
         },
         {
           "sprite": "tv-frozen-inset",
@@ -16605,7 +17119,10 @@
           "y": 36,
           "depth": 8.4,
           "gagId": "G6.3",
-          "part": "map"
+          "part": "map",
+          "motion": {
+            "start": 1607
+          }
         },
         {
           "sprite": "partition-r",
@@ -16644,7 +17161,10 @@
           "y": 54,
           "depth": 12.0,
           "gagId": "G6.4",
-          "part": "door"
+          "part": "door",
+          "motion": {
+            "start": 149
+          }
         },
         {
           "sprite": "truck-c",

@@ -33,6 +33,18 @@ the last bullets of SCENE-FORMAT.md "Views: rooms and close-ups"):
                          entries reproduce that same render cropped at its `rect` (D-042).
                          The reference is re-derived from the layout, never read back
                          from the export — the "web == art" guarantee D-035 promises.
+  10. motion (PH2-01)   — SCENE-FORMAT.md "Motion": `motion` has only start/rate/walk;
+                         start an int >= 0, rate one of 0.5/1/1.5/2; an in-place loop's
+                         key has >= 2 files, every duration > 0; every file of an
+                         animated key has the sprite's canvas; walk legs are move/hold
+                         legs naming real keys, only on entries with no gagId, closing
+                         back on the rest pose, <= 12 px/s built and <= 24 without; a
+                         walker's swept box stays inside its room and meets no hotspot in
+                         any close-up, and its sprite is in the other state's room
+                         (D-041); at t = 0 every entry is at rest; every close-up painted
+                         at every sampled t (100 ms steps over each loop) equals its room
+                         painted at t cropped at `rect`; and a walker's fixed paint order
+                         matches the pipeline's depth-sorted render at every sample.
 
 Usage: python3 art/checks/check_scenes.py
 Exit 0 if every check passes (warnings still print); exit 1 and print every failure
@@ -50,7 +62,7 @@ _HERE = os.path.dirname(os.path.abspath(__file__))
 _REPO_ROOT = os.path.dirname(os.path.dirname(_HERE))
 sys.path.insert(0, _REPO_ROOT)
 
-from art.src import compose, export_scene  # noqa: E402
+from art.src import compose, export_scene, layout, motion  # noqa: E402
 
 SPRITES_DIR = os.path.join(_REPO_ROOT, "public", "sprites")
 SCENES_DIR = os.path.join(SPRITES_DIR, "scenes")
@@ -111,6 +123,164 @@ def check_pixel_parity():
                     what = "its room" if v.get("kind") == "room" else "its room cropped at rect"
                     fail(f"{band}-{state}.json:{v['id']} — pixel parity: painted view "
                          f"!= compose.render of {what} ({diffs} pixels differ of {w * h})")
+
+
+MOTION_KEYS = {"start", "rate", "walk"}
+WALK_SPEED_MAX = {"built": 12, "without": 24}     # native px/s (SCENE-FORMAT "Motion")
+
+
+def check_motion(manifest: dict):
+    """Check 10 (PH2-01): the JSON rules, then the pixel rules with the reference
+    player (`motion.paint_at`, the contract's arithmetic)."""
+    from PIL import Image
+    lib = compose.Library(SPRITES_DIR)
+    sizes: dict = {}
+
+    def file_size(fname):
+        if fname not in sizes:
+            with Image.open(os.path.join(SPRITES_DIR, fname)) as im:
+                sizes[fname] = im.size
+        return sizes[fname]
+
+    for sprite, m in manifest.items():
+        for key, files in m["frames"].items():
+            if len(files) < 2:
+                continue
+            for f_ in files:
+                if file_size(f_["file"]) != (m["w"], m["h"]):
+                    fail(f"manifest {sprite}.{key} — {f_['file']} is "
+                         f"{file_size(f_['file'])}, not the sprite's {m['w']}x{m['h']}")
+                if f_["duration"] <= 0:
+                    fail(f"manifest {sprite}.{key} — {f_['file']} has duration "
+                         f"{f_['duration']} in an animated key")
+
+    def is_loop(sprite, key):
+        fs = manifest[sprite]["frames"].get(key, [])
+        return len(fs) >= 2 and all(f_["duration"] > 0 for f_ in fs)
+
+    for band in export_scene.DRAWN_BANDS:
+        docs = {s: load_json(os.path.join(SCENES_DIR, f"{band}-{s}.json"))
+                for s in export_scene.STATES}
+        for state, doc in docs.items():
+            fname = f"{band}-{state}.json"
+            rooms = {v["id"]: v for v in doc["views"] if v["kind"] == "room"}
+            for v in doc["views"]:
+                vid = v["id"]
+                for i, e in enumerate(v["entries"]):
+                    mo = e.get("motion")
+                    if mo is None:
+                        continue
+                    where = f"{fname}:{vid}[{i}] {e['sprite']}"
+                    if set(mo) - MOTION_KEYS:
+                        fail(f"{where} — unknown motion fields {sorted(set(mo) - MOTION_KEYS)}")
+                    if not isinstance(mo.get("start", 0), int) or mo.get("start", 0) < 0:
+                        fail(f"{where} — start {mo.get('start')!r}, want an int >= 0")
+                    if mo.get("rate", 1) not in motion.RATES:
+                        fail(f"{where} — rate {mo.get('rate')!r} not in {motion.RATES}")
+                    if "walk" not in mo:
+                        if not is_loop(e["sprite"], e["frame"]):
+                            fail(f"{where} — in-place motion on {e['frame']!r}, which is "
+                                 f"not a loop (>= 2 files, durations > 0)")
+                        continue
+                    if e.get("gagId"):
+                        fail(f"{where} — part of {e['gagId']} but walks (gag parts "
+                             f"animate in place only)")
+                    x, y, speed_bad = e["x"], e["y"], False
+                    for leg in mo["walk"]:
+                        if not is_loop(e["sprite"], leg.get("frame")) and \
+                                leg.get("frame") not in manifest[e["sprite"]]["frames"]:
+                            fail(f"{where} — walk frame {leg.get('frame')!r} is not a key")
+                        if "to" in leg:
+                            if not isinstance(leg.get("ms"), int) or leg["ms"] <= 0:
+                                fail(f"{where} — move leg ms {leg.get('ms')!r}")
+                                continue
+                            d = math.hypot(leg["to"][0] - x, leg["to"][1] - y)
+                            if d * 1000 / leg["ms"] > WALK_SPEED_MAX[state]:
+                                speed_bad = True
+                            x, y = leg["to"]
+                        elif not isinstance(leg.get("hold"), int) or leg["hold"] <= 0:
+                            fail(f"{where} — leg {leg} is neither a move nor a hold")
+                    if (x, y) != (e["x"], e["y"]):
+                        fail(f"{where} — walk ends at {(x, y)}, not the rest pose "
+                             f"{(e['x'], e['y'])}: the loop must close")
+                    if speed_bad:
+                        fail(f"{where} — a leg is faster than {WALK_SPEED_MAX[state]} px/s")
+                    x0, y0, x1, y1 = motion.swept_box(manifest, e)
+                    w, h = v["size"]["w"], v["size"]["h"]
+                    if v["kind"] == "room" and (x0 < 0 or y0 < 0 or x1 > w or y1 > h):
+                        fail(f"{where} — swept box {(x0, y0, x1, y1)} leaves the room")
+                    for h_ in v.get("hotspots", []):
+                        if x0 < h_["x"] + h_["w"] and x1 > h_["x"] and \
+                                y0 < h_["y"] + h_["h"] and y1 > h_["y"]:
+                            fail(f"{where} — swept box meets hotspot "
+                                 f"{h_['gagId']}/{h_['part']} (D-038 item 3)")
+                    if v["kind"] == "room":
+                        other = "built" if state == "without" else "without"
+                        o_room = [r for r in docs[other]["views"] if r["id"] == vid]
+                        if not o_room or e["sprite"] not in {q["sprite"] for q in
+                                                             o_room[0]["entries"]}:
+                            fail(f"{where} — walker's look is not in the {other} room "
+                                 f"(D-041 item 1: same person, both states)")
+
+            # rest at t = 0
+            for v in doc["views"]:
+                for e in v["entries"]:
+                    x, y, fr, idx = motion.pose_at(manifest, e, 0)
+                    if (x, y, fr, idx) != (e["x"], e["y"], e["frame"], 0):
+                        fail(f"{fname}:{v['id']} {e['sprite']} — not at rest at t = 0")
+
+            # close-up == room at t, cropped; walker paint order == depth-sorted render
+            for rid, room in rooms.items():
+                kids = [v for v in doc["views"] if v.get("parent") == rid]
+                w, h = room["size"]["w"], room["size"]["h"]
+                seen: dict = {}
+                walkers = [i for i, e in enumerate(room["entries"])
+                           if "walk" in e.get("motion", {})]
+                ref_room = None
+                if walkers:
+                    origin, _size = export_scene.view_frame(lib, band, rid)
+                    ref_room, _lines = export_scene.resolve_view(lib, band, state, rid, origin)
+                for t in motion.sample_times(room["entries"]):
+                    at = motion.entries_at(manifest, room["entries"], t)
+                    sig = tuple((q["x"], q["y"], q["frame"], q["index"]) for q in at)
+                    if sig in seen:
+                        continue
+                    seen[sig] = t
+                    img = export_scene.paint_entries(lib, at, w, h)
+                    for k in kids:
+                        r = k["rect"]
+                        want = img.crop((r["x"], r["y"], r["x"] + r["w"], r["y"] + r["h"]))
+                        got = motion.paint_at(lib, k["entries"], r["w"], r["h"], t)
+                        if got.tobytes() != want.tobytes():
+                            fail(f"{fname}:{k['id']} — at t = {t} ms the close-up is not "
+                                 f"its room cropped at rect (D-042 item 3, in time)")
+                    if walkers:
+                        _check_walker_order(lib, band, state, rid, room, at, img, t, fname)
+
+
+def _check_walker_order(lib, band, state, rid, room, at, img, t, fname):
+    """The pipeline's own depth-sorted render of the moment: the layout's placements with
+    each walker moved to its pose at t, its depth moved with it (a floor step of dy
+    screen px is dy / 8 in depth), rendered by compose.render."""
+    origin, size = export_scene.view_frame(lib, band, rid)
+    resolved = compose.resolve(lib, export_scene._site_only(lib, layout.scene(band, state)[rid]),
+                               origin)
+    for rest, now in zip(room["entries"], at):
+        if "walk" not in rest.get("motion", {}):
+            continue
+        match = [q for q in resolved if "line" not in q and q["sprite"] == rest["sprite"]
+                 and (q["x"], q["y"]) == (rest["x"], rest["y"])]
+        if len(match) != 1:
+            fail(f"{fname}:{rid} — walker {rest['sprite']} matches {len(match)} layout "
+                 f"placements, want 1")
+            return
+        q = match[0]
+        q["depth"] = q.get("depth", 0) + (now["y"] - rest["y"]) / 8
+        q["x"], q["y"], q["frame"], q["index"] = now["x"], now["y"], now["frame"], now["index"]
+    ref = compose.render(lib, resolved, size).img
+    if ref.tobytes() != img.tobytes():
+        fail(f"{fname}:{rid} — at t = {t} ms a walker's fixed paint order differs from the "
+             f"depth-sorted render (re-route the walk)")
 
 
 def check_determinism():
@@ -331,6 +501,7 @@ def main():
                  f"labels/order (D-042a)")
 
     check_pixel_parity()
+    check_motion(manifest)
     check_determinism()
 
     if warnings:
@@ -346,7 +517,7 @@ def main():
         sys.exit(1)
     print("PASS — scene export checks (schema 2): rooms + close-ups, skeleton, default, "
           "manifest refs, coverage, bounds, spacing, beyond alias, pixel parity "
-          "(rooms and close-up crops), determinism.")
+          "(rooms and close-up crops), motion (PH2-01), determinism.")
 
 
 if __name__ == "__main__":

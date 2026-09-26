@@ -22,7 +22,7 @@ from art.src.dsl import Canvas, save_png, scale_nn
 from art.src import iso
 from art.src.sprites import floor, wall, desk, worker, badge_reader, room, band80, poses
 from art.src.sprites import band150, band220, street, band360, band490, band610, band750
-from art.src import compose, layout, export_scene
+from art.src import compose, layout, export_scene, motion
 from art.src.vox import Sprite
 
 SPRITES_DIR = os.path.join(_REPO_ROOT, "public", "sprites")
@@ -130,7 +130,12 @@ def build_worker(manifest, registry):
                                           worker.QUEUE_ANCHOR)
     registry["worker-queue"] = Frames({k: v[0] for k, v in q.items()}, worker.QUEUE_ANCHOR)
     seated = {look: [worker.seated_frame(look)] for look in worker.LOOK_NAMES}
-    manifest["worker-seated"] = save_entry("worker-seated", seated, desk.W, desk.H, desk.ANCHOR)
+    # PH2-01 typing beats: single-file keys that motion.LOOP_KEYS threads between the
+    # rest file to make `<look>-type`
+    beats = {f"{look}-type-{b}": [worker.seated_frame(look, beat=b)]
+             for look in worker.LOOK_NAMES for b in ("l", "r", "n")}
+    manifest["worker-seated"] = save_entry("worker-seated", {**seated, **beats}, desk.W,
+                                           desk.H, desk.ANCHOR)
     for look, cv in seated.items():
         registry[f"worker-seated-{look}"] = Sprite(cv[0], desk.ANCHOR)
     peel = {look: poses.peel_frames(look) for look in worker.LOOK_NAMES}
@@ -304,6 +309,9 @@ def build_manifest():
     # PH1-07: the VISITOR callout is for the 4x previews only; at 1x the chest sticker
     # on `visitor` carries it. The flag tells the renderer to leave it out.
     manifest["tag-visitor"]["preview_only"] = True
+
+    # PH2-01: loop keys threaded from files that already exist (SCENE-FORMAT "Motion")
+    motion.add_loop_keys(manifest)
 
     manifest_path = os.path.join(SPRITES_DIR, "manifest.json")
     with open(manifest_path, "w") as f:

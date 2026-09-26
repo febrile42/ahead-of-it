@@ -175,6 +175,27 @@ the still's canvas size and anchor, each with a `duration` in ms (`vox.make_anim
 `"preview_only": true` (`tag-visitor`) exists for the 4× previews and is not drawn by the
 site renderer.
 
+## Motion (PH2-01)
+
+The scene files carry `motion` per `docs/product/SCENE-FORMAT.md` § Motion; which entry
+moves and how is decided in `art/src/motion.py`, never by hand.
+
+- **Rest is the still.** A loop key is *threaded* from files that already exist
+  (`motion.LOOP_KEYS`): its first file is the still itself, by reference, so an entry
+  switched to the loop paints today's pixels at rest and no PNG is duplicated. A new beat
+  is drawn as a single-file key (`<look>-type-l`, `sign-1`, `point-1`) and threaded in.
+- **Beats are 1 px.** Typing drops one upper arm a pixel; a nod dips the head a pixel; a
+  queue shuffle is the walk's own legs with a 1 px dip. Anything bigger reads as a new
+  pose, not the same person breathing.
+- **Calm vs without.** Built plays at rate 1; `without` seated workers type at 1.5 and
+  the gag parts play their own loops. `art/checks/motion_report.py` measures it: built's
+  changed-pixel rate is below without's on every band's default view.
+- **Gag parts move in place only.** People in a meeting (G2.4 built, G7.2) nod rather
+  than type; Josh (G7.2 built, R-07) makes a point now and then — in the meeting, not at
+  a keyboard.
+- **No walkers yet.** Only ambient people may walk, and none stands free today (see
+  `motion.WALKS`). The exporter and `check_scenes.py` check 10 support them.
+
 ## Legibility at 1× (PH1-07)
 
 A gag's key object must read at native size, not only in the 4× preview:

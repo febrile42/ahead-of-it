@@ -304,6 +304,16 @@ def step_frames(look_name: str = "a") -> dict:
     return {"step-right": [right], "step-left": [right.mirror_h()]}
 
 
+def shuffle_frames(look_name: str = "a") -> dict:
+    """PH2-01: standing in a queue, shifting weight: the near foot eases forward with a
+    1 px dip, then the far heel lifts. Played between long `idle-*` holds (G2.1)."""
+    look = LOOKS[look_name]
+    a = _side(look, "fwd", "stand", 0, 1).to_canvas(look)
+    b = _side(look, "stand", "lift", 0, 0).to_canvas(look)
+    return {"shuffle-a-right": [a], "shuffle-b-right": [b],
+            "shuffle-a-left": [a.mirror_h()], "shuffle-b-left": [b.mirror_h()]}
+
+
 def build_all() -> dict:
     """The spike's contract: {direction: [frame0..frame3]} for the default look."""
     return walk_frames("a")
@@ -313,6 +323,7 @@ def look_frames(look_name: str) -> dict:
     frames = dict(walk_frames(look_name))
     frames.update(idle_frames(look_name))
     frames.update(step_frames(look_name))
+    frames.update(shuffle_frames(look_name))
     return frames
 
 
@@ -350,19 +361,23 @@ def queue_frame(look_name: str, facing: str = "left") -> Canvas:
 
 # -- seated at a desk -----------------------------------------------------------
 
-def seated_frame(look_name: str, turned: bool = False, arm=None) -> Canvas:
+def seated_frame(look_name: str, turned: bool = False, arm=None, beat=None) -> Canvas:
     """A worker in the desk group's chair, seen from behind, hands on the desk.
     Same 32x40 canvas and anchor as `desk`: paste it at the same point, over any desk
-    variant. The chair's backrest is redrawn over the worker's lower back."""
+    variant. The chair's backrest is redrawn over the worker's lower back.
+
+    `beat` (PH2-01 typing, style.md "Motion"): "l" / "r" drops that upper arm a pixel
+    (a key pressed), "n" dips the head a pixel (a glance at the keyboard). None is the
+    rest pose, unchanged."""
     look = LOOKS[look_name]
     f = Fig(desk_mod.W, desk_mod.H)
     body = Fig()
     _torso_front(body, 0)
     # arms reach forward onto the desk: from behind, only the upper arms show,
     # angled in toward the keyboard
-    body.blob(R(2, 9, 3, 13), "t")
-    body.blob(R(12, 9, 13, 13), "T")
-    _head_back(body, look["style"], 0)
+    body.blob(R(2, 10, 3, 14) if beat == "l" else R(2, 9, 3, 13), "t")
+    body.blob(R(12, 10, 13, 14) if beat == "r" else R(12, 9, 13, 13), "T")
+    _head_back(body, look["style"], 1 if beat == "n" else 0)
     # place hips on the seat: chair centre (c 2.5, r 6) -> screen x 9; seat top y ~28.
     # A turned desk (PH1-07) has its chair at (c 6, r 2.5): x 23, same height; the back
     # view is symmetric, so the same body just moves across.
