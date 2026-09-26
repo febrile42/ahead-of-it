@@ -47,6 +47,10 @@ if (sliderRoot && toggleRoot && viewsRow && sceneWrap && stepper && canvas && ho
   let band: BandId = 80;
   let state: SceneState = 'built';
   let hasMovedSlider = false;
+  // R-06a/m2: the nudge's only job is getting the visitor to toggle once —
+  // once they have (in either direction), it is spent for the session,
+  // independent of whether it was ever shown (DIA-11/DIA-17).
+  let nudgeSpent = false;
   let currentViewId: string | null = null;
   // D-042a: the scene last drawn (both states share a skeleton, so it is
   // valid for either), what the nav handlers step over without waiting on
@@ -554,7 +558,9 @@ if (sliderRoot && toggleRoot && viewsRow && sceneWrap && stepper && canvas && ho
     pendingAnnounce = null;
     if (!hasMovedSlider) {
       hasMovedSlider = true;
-      toggle.showNudge(); // R-06a: the static nudge, once, after the first slider move.
+      if (!nudgeSpent) {
+        toggle.showNudge(); // R-06a: the static nudge, once, after the first slider move.
+      }
     }
     if (band === 'beyond') {
       // R-01b: the Beyond band opens its panel automatically. B4: it must
@@ -576,6 +582,7 @@ if (sliderRoot && toggleRoot && viewsRow && sceneWrap && stepper && canvas && ho
 
   toggle.onChange((newState) => {
     state = newState;
+    nudgeSpent = true; // DIA-17: latch on the first toggle, shown or not (R-06a: once per session).
     toggle.hideNudge(); // m2: the nudge's only job was getting them to toggle once.
     void render();
   });
