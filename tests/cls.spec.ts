@@ -15,16 +15,24 @@ import { interceptFixtureScenes } from './scene-source';
 // though the Lighthouse lab run (simulated throttling, Lantern) passed
 // with CLS 0 because the bundle ran before first paint under simulation.
 // Real throttling — CDP CPU + network emulation on a real Chromium — is
-// the only way to catch this, hence its own file and its own (optionally
-// pinned) browser executable.
-test.use({
-  launchOptions: process.env.CHROME_PATH ? { executablePath: process.env.CHROME_PATH } : {},
-});
+// the only way to catch this, hence its own file. The pinned CHROME_PATH
+// binary (so this shares one Chromium with Lighthouse in CI) lives on the
+// `chromium` project in playwright.config.ts, not a file-level test.use
+// here — a file-level override applied to every test in this file
+// regardless of project, so under `webkit-iphone` it launched the Chrome
+// binary through WebKit's launch protocol and crashed (DIA-15 follow-up).
 
 const VIEWPORT = { width: 390, height: 844 };
 
 test.describe('CLS under throttling (PH1-04 review S1)', () => {
-  test('cumulative layout shift stays under 0.1 at 390px, 4x CPU / 1.6 Mbps', async ({ page }) => {
+  test('cumulative layout shift stays under 0.1 at 390px, 4x CPU / 1.6 Mbps', async ({ page, browserName }) => {
+    // DIA-18: newCDPSession is a Chromium-only API (line 16-18's own
+    // rationale for real CDP throttling already assumes Chromium) — on
+    // the webkit-iphone project this throws before the test can even
+    // start, which isn't a DPR/rendering bug, just the wrong engine for
+    // this technique. There's no WebKit equivalent to emulate CPU/network
+    // throttling from Playwright, so skip rather than fake a result.
+    test.skip(browserName !== 'chromium', 'CDP throttling is Chromium-only; not testable on WebKit');
     const client = await page.context().newCDPSession(page);
     await client.send('Network.enable');
     // ~1.6 Mbps down / 750 Kbps up, 150ms latency — the review's own

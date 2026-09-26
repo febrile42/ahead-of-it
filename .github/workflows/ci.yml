@@ -40,9 +40,11 @@ jobs:
       # Playwright's own Chromium is reused for both the e2e smoke tests
       # and Lighthouse CI (via CHROME_PATH below), so there's exactly one
       # browser download per run and one binary the whole check suite
-      # agrees on.
-      - name: Install Playwright Chromium
-        run: npx playwright install --with-deps chromium
+      # agrees on. WebKit runs the DIA-15 `webkit-iphone` project — the
+      # closest engine-level proxy for iOS Safari, the site's primary
+      # real-world target (R-20), available on a Linux runner.
+      - name: Install Playwright browsers (Chromium, WebKit)
+        run: npx playwright install --with-deps chromium webkit
 
       - name: Resolve CHROME_PATH from the Playwright cache
         run: |
@@ -57,6 +59,10 @@ jobs:
         run: npm run build
 
       # R-21/R-16/R-26 smoke + unit tests (tests/**, src/**/*.test.ts).
+      # e2e runs on both `chromium` and `webkit-iphone` projects (DIA-15) —
+      # every PR into develop, not just pushes, since iOS Safari is the
+      # primary target and a merged regression there is worse than the
+      # extra CI minutes.
       - name: Test
         run: npm run test
 

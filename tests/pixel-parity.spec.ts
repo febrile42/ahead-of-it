@@ -158,7 +158,16 @@ async function gotoAtScale1(page: Page, c: ParityCase) {
   // floor(cssAvailH*dpr/nativeH)))` at exactly 1 for this view's own
   // native size (every D-036 view is <= 360x240; giving the wrap up to
   // 300 css px wide / native height + 400 tall at dpr 1 can't reach
-  // scale 2 on either axis for anything up to 599px native).
+  // scale 2 on either axis for anything up to 599px native). This math is
+  // dpr-1-only by construction, so it needs the page's own dpr pinned to
+  // 1 too (DIA-18) — the webkit-iphone project's `iPhone 14` descriptor
+  // carries deviceScaleFactor: 3, and chooseScale correctly picks a
+  // higher scale there since it *is* dpr-aware (R-25); goldens were
+  // captured at dpr 1, so the test's job is to hold dpr at 1, not to
+  // redo chooseScale's own math here — see the file-level `test.use`
+  // below, which is the only place dpr can actually be pinned
+  // (deviceScaleFactor is a context-creation option, not something a
+  // live page can change).
   await page.setViewportSize({ width: 300, height: Math.max(700, c.viewSize.h + 400) });
   await page.route('**/sprites/scenes/index.json', (route) =>
     route.fulfill({ contentType: 'application/json', body: c.indexBody })
@@ -280,6 +289,15 @@ async function comparePixels(page: Page, goldenPath: string) {
     };
   }, b64);
 }
+
+// DIA-18: every golden under tests/fixtures/ and art/preview/views/ was
+// captured at dpr 1, and gotoAtScale1's viewport math (above) only holds
+// chooseScale at scale 1 when dpr is 1 too. Pinning it here — the one
+// place Playwright lets a test override a project's context options —
+// keeps this file's own "scale 1" contract project-independent, instead
+// of every project's device descriptor (e.g. webkit-iphone's `iPhone 14`,
+// deviceScaleFactor: 3) leaking into which scale chooseScale picks.
+test.use({ deviceScaleFactor: 1 });
 
 function runParityCase(c: ParityCase) {
   test(`${c.label} matches its golden at scale 1`, async ({ page }) => {
