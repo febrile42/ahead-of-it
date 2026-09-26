@@ -2149,8 +2149,8 @@
   },
   "moving-truck": {
     "anchor": [
-      21,
-      40
+      24,
+      41
     ],
     "frames": {
       "default": [
@@ -2160,8 +2160,8 @@
         }
       ]
     },
-    "h": 44,
-    "w": 63
+    "h": 46,
+    "w": 71
   },
   "nameplate-tech": {
     "anchor": [
@@ -3827,7 +3827,7 @@
   "worker-cable": {
     "anchor": [
       8,
-      26
+      28
     ],
     "frames": {
       "a-cable": [
@@ -3897,8 +3897,8 @@
         }
       ]
     },
-    "h": 26,
-    "w": 20
+    "h": 28,
+    "w": 30
   },
   "worker-card": {
     "anchor": [

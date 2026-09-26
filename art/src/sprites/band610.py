@@ -459,7 +459,7 @@ def _shell(iso: Iso, c: Canvas, fitted: bool):
     concrete floor plate, walls cut to stubs so the inside shows, a column at each front
     corner and a door frame. Without, bare grey concrete with nothing in it. Built, the
     same shell fitted out: a cable tray along the back walls, a badge reader by the
-    door, a camera dome over it, a room (glass stubs) with a camera bar."""
+    door, a room (glass stubs) with a camera bar."""
     S = SHELL
     iso.floor_shadow(0, 0, S, S, grow=1.5, grow_r=0.6)
     fl = iso.box(0, 0, -5, S, S, 0, top="wall-shadow" if not fitted else "floor-top",
@@ -516,9 +516,8 @@ def _shell(iso: Iso, c: Canvas, fitted: bool):
         x, y = iso.left_px(S, d1 + 1.2, 14.0)                 # the reader, green
         c.rect(x - 1, y - 3, x + 2, y + 2, "outline")
         c.rect(x, y - 2, x + 1, y + 1, "badge-green")
-        x, y = iso.pt((d0 + d1) / 2, S, 25.5)                 # the dome over the door
-        c.rect(x - 2, y, x + 2, y + 2, "outline")
-        c.rect(x - 1, y, x + 1, y + 1, "badge-body")
+        # no camera dome over the door: at 390px it never read on the pale frame, so it
+        # came out as it did at 490 (DIA-73, D-041)
 
 
 def banner_sqft() -> Canvas:
@@ -536,27 +535,72 @@ def banner_sqft() -> Canvas:
 
 
 def _moving_truck(iso: Iso, c: Canvas):
-    """A box truck parked along +r, its cab toward the viewer: a tall white box with a
-    blue band, the roller door up at the back and a ramp down onto the pavement."""
+    """A yellow box truck parked along +r, cab away from the viewer, its back to the
+    shell: the roller door rolled up on a dark hold with boxes in it, a ramp down onto the
+    pavement and two boxes on their way in. Yellow so it can never be taken for G5.1's
+    white courier van in the same close-up (DIA-73); wheels showing below the body."""
     C0, C1 = 0.5, 7.5
-    iso.floor_shadow(C0, -9.0, C1, 11.0, grow=1.0, grow_r=0.4)
-    for rr in (-5.0, 3.5, 8.5):
-        iso.box(C1 - 0.4, rr - 1.1, 0, C1 + 0.1, rr + 1.1, 2.6, top="outline",
-                left="outline", right="chair-dark", outline="outline")
-    box = iso.box(C0, -9.0, 1.8, C1, 5.5, 16.0, top="paper", left="wall", right="wall-shadow")
-    iso.paint(box, "R", C1, lambda rr, z: "shirt-1" if 9.0 <= z < 11.0 else None)
-    iso.paint(box, "L", 5.5, lambda cc, z: "shirt-1" if 9.0 <= z < 11.0 else None)
-    cab = iso.box(C0, 5.5, 1.8, C1, 10.5, 11.0, top="wall", left="wall", right="wall-shadow")
-    iso.paint(cab, "L", 10.5, lambda cc, z: "glass" if 6.4 <= z < 10.0 and C0 + 0.8 <= cc < C1 - 0.8
-              else ("sticky" if z < 3.2 and (cc < C0 + 1.2 or cc >= C1 - 1.2) else None))
-    iso.paint(cab, "R", C1, lambda rr, z: "glass-dark" if 6.4 <= z < 10.0 and rr < 9.0 else None)
-    # the ramp, down from the back (the -r end) onto the pavement
-    iso.box(C0 + 1.5, -15.0, 0, C1 - 1.5, -9.0, 1.2, top="badge-body", left="chair-mid",
+    Z0 = 2.6                                               # the body rides above its wheels
+    iso.floor_shadow(C0, -15.0, C1, 4.5, grow=1.0, grow_r=0.4)
+    cab = iso.box(C0, -15.0, Z0, C1, -10.0, 11.0, top="sticky", left="sticky",
+                  right="desk-wood")
+    iso.paint(cab, "R", C1, lambda rr, z: "glass-dark" if 6.4 <= z < 10.0 and rr >= -13.8
+              and rr < -10.6 else None)
+    body = iso.box(C0, -10.0, Z0, C1, 4.5, 16.0, top="sticky", left="sticky",
+                   right="desk-wood", edge="desk-wood")
+    iso.paint(body, "R", C1, lambda rr, z: "desk-wood-dark" if Z0 <= z < Z0 + 1.0 else
+              "sticky" if 10.0 <= z < 11.5 and -9.0 <= rr < 3.5 else None)   # the livery stripe
+    # the back: the roller door rolled up into a drum under the roof, the hold dark,
+    # a stack of boxes inside
+    iso.paint(body, "L", 4.5, lambda cc, z: (
+        "sticky" if cc < C0 + 0.8 or cc >= C1 - 0.8 or z < Z0 + 0.8 else
+        "wall-trim" if z >= 13.0 else
+        "desk-wood" if C0 + 1.6 <= cc < C0 + 4.4 and z < Z0 + 5.6 else
+        "outline"))
+    # wheels under the near side, tyres dark with a grey hub
+    for rr in (-12.5, 1.0):
+        w = iso.box(C1 - 0.5, rr - 1.5, 0, C1 + 0.2, rr + 1.5, 3.6, top="outline",
+                    left="outline", right="outline")
+        iso.paint(w, "R", C1 + 0.2, lambda r2, z, rr=rr: "chair-mid"
+                  if abs(r2 - rr) < 0.6 and 1.2 <= z < 2.4 else None)
+    # the ramp, down from the hold onto the pavement, and two boxes carried out
+    iso.box(C0 + 1.2, 4.5, 0, C1 - 1.2, 10.5, 1.2, top="badge-body", left="chair-mid",
             right="chair-dark")
+    for (bc, br, bz, s) in ((C0 + 1.6, 5.2, 1.2, 3.2), (C0 + 2.2, 11.2, 0, 3.6)):
+        b = iso.box(bc, br, bz, bc + s, br + s, bz + s, top="desk-wood", left="desk-wood",
+                    right="desk-wood-dark", edge="desk-wood-dark")
+        iso.paint(b, "T", bz + s, lambda cc, rr, bc=bc, s=s: "sticky"
+                  if abs(cc - (bc + s / 2)) < 0.5 else None)
 
 
-CABLE_W, CABLE_H = 20, 26
-CABLE_ANCHOR = (8, 26)
+CABLE_W, CABLE_H = 30, 28
+CABLE_ANCHOR = (8, 28)
+# The cable (DIA-73): down from the fist, once round a loop and away along the floor,
+# 2 px thick in the network pink so it reads on the pale shell floor. It is the whole
+# network so far — that is the joke.
+CABLE_IN = [(18, 10), (19, 13), (20, 15)]                    # fist -> the loop
+CABLE_OUT = [(20, 20), (20, 23), (22, 25), (29, 25)]         # the loop -> along the floor
+CABLE_LOOP = (23.5, 17.5, 4.3, 2.3)                          # centre, outer and inner radius
+
+
+def _run(path) -> set:
+    """A 2 px cable through `path`: horizontal pairs where it falls steeply, vertical
+    pairs where it runs flat, so a diagonal never swells to 3 px."""
+    pts = set()
+    for (x0, y0), (x1, y1) in zip(path, path[1:]):
+        n = max(abs(x1 - x0), abs(y1 - y0))
+        steep = abs(y1 - y0) >= abs(x1 - x0)
+        for i in range(n + 1):
+            x, y = round(x0 + (x1 - x0) * i / n), round(y0 + (y1 - y0) * i / n)
+            pts |= {(x, y), (x + 1, y) if steep else (x, y + 1)}
+    return pts
+
+
+def _cable_pts() -> set:
+    cx, cy, ro, ri = CABLE_LOOP
+    loop = {(x, y) for x in range(CABLE_W) for y in range(CABLE_H)
+            if ri ** 2 <= (x + 0.5 - cx) ** 2 + (y + 0.5 - cy) ** 2 <= ro ** 2}
+    return loop | _run(CABLE_IN) | _run(CABLE_OUT)
 
 
 def cable_frames(look_name: str) -> dict:
@@ -578,27 +622,27 @@ def cable_frames(look_name: str) -> dict:
         if key == "cable":
             body.px[(6, 5)] = body.px[(9, 5)] = "s"
             body.px[(6, 4)] = body.px[(9, 4)] = "e"
-        _place(f, body, 0, 2)
+        _place(f, body, 0, 4)
         if key == "cable":
-            # forearm up and out to the side, the cable hanging from the fist in a loop
-            arm = {(13, 11), (14, 11), (14, 10), (15, 10), (15, 9), (16, 9), (16, 8), (17, 8)}
-            fist = {(17, 6), (18, 6), (17, 7), (18, 7)}
+            # forearm up and out to the side, the plug held up in the fist, the cable
+            # hanging from it in a loop and trailing off along the floor
+            f.blob(_cable_pts(), "n", ring="outer")
+            arm = {(13, 13), (14, 13), (14, 12), (15, 12), (15, 11), (16, 11), (16, 10),
+                   (17, 10)}
+            fist = R(17, 7, 18, 9)
             f.blob(arm | fist, lambda p: "s" if p in fist else "T", ring="outer")
-            f.blob(R(17, 3, 18, 5), "l")                        # the plug, grey
-            for (x, y) in ((18, 8), (18, 9), (19, 10), (19, 11), (19, 12), (18, 13),
-                           (18, 14), (17, 15), (17, 16), (17, 17), (18, 18), (18, 19)):
-                f.put(x, y, "B")
+            f.blob(R(17, 3, 18, 6), lambda p: "Y" if p[1] == 3 else "V")   # the plug
         else:
-            arm = {(x, y) for x in range(13, 16) for y in (12, 13)}
+            arm = {(x, y) for x in range(13, 16) for y in (14, 15)}
             f.blob(arm, "T", ring="outer")
-            f.blob(R(9, 9, 17, 17), lambda p: "b" if p[0] in (9, 17) or p[1] in (9, 17) else "V")
-            for y in (11, 13, 15):
+            f.blob(R(9, 11, 17, 19), lambda p: "b" if p[0] in (9, 17) or p[1] in (11, 19) else "V")
+            for y in (13, 15, 17):
                 f.put(11, y, "g")
                 f.put(12, y + 1, "g")
                 f.put(13, y, "g")
                 for x in range(14, 16):
                     f.put(x, y, "k")
-        out[key] = f.to_canvas(dict(look, B="shirt-1", g="shirt-2-dark"))
+        out[key] = f.to_canvas(dict(look, g="shirt-2-dark"))
     return {f"{look_name}-{k}": [v] for k, v in out.items()}
 
 
@@ -606,39 +650,59 @@ def cable_frames(look_name: str) -> dict:
 
 MAP_W, MAP_H = 30, 26
 # Six pins, one per office (BANDS-AND-GAGS.md §610: two by 2019, one in 2022, three in
-# 2023). The map is abstract on purpose — a green land shape, no coastline anyone could
-# place and no names (D-014) — so the pins say "how many", never "where".
-PINS_OLD = [(7, 7), (12, 10), (17, 13)]
-PINS_NEW = [(10, 17), (21, 9), (23, 15)]
+# 2023). The map is abstract on purpose — a made-up coastline no one could place and no
+# names (D-014) — so the pins say "how many", never "where". It has to read as a *map*
+# cold (DIA-73: the green blob with red dots read as a berry bush): folded paper in three
+# panels, a grid, sea and a coastline edge. The three new pins are bigger and red, the
+# old ones small and blue.
+PINS_OLD = [(14, 6), (17, 15), (24, 5)]
+PINS_NEW = [(13, 22), (21, 10), (25, 19)]
+MAP_FOLDS = (10, 20)                                         # the creases, x
+
+
+def _land(x: int, y: int) -> bool:
+    """Land east of a ragged coast with one deep bay."""
+    import math
+    coast = 9.0 + 3.0 * math.sin(y / 3.2) + (5.0 if 15 <= y <= 19 else 0.0)
+    return x >= coast
 
 
 def map_frames() -> list[Canvas]:
-    """A map on a signpost: a framed board, a green land shape on blue, six pins; the
-    three that opened this year (2023) blink in (frame 1 hides them)."""
+    """A folded paper map on a signpost: sea to the west, a ragged coast with a dark
+    edge, land with a faint grid, the middle of three fold panels in shade, six pins;
+    the three that opened this year (2023) are the big red ones and blink in (frame 1
+    hides them)."""
     out = []
     for i in range(2):
         c = Canvas(MAP_W, MAP_H + 8)
-        c.rect(0, 0, MAP_W - 1, MAP_H - 1, "outline")
-        c.rect(1, 1, MAP_W - 2, MAP_H - 2, "glass")
-        land = set()
-        for y in range(3, MAP_H - 3):
-            for x in range(3, MAP_W - 3):
-                if ((x - 15) / 12.5) ** 2 + ((y - 12) / 9.0) ** 2 <= 1.0 and not (
-                        x > 20 and y < 6) and not (x < 6 and y > 17):
-                    land.add((x, y))
-        for (x, y) in land:
-            c.point(x, y, "badge-green")
-        for (x, y) in land:
-            if (x, y + 1) not in land:
-                c.point(x, y, "shirt-2-dark")
-        pins = PINS_OLD + (PINS_NEW if i == 0 else [])
-        for (x, y) in pins:
-            c.rect(x - 1, y - 3, x + 1, y - 1, "outline")
-            c.point(x, y - 2, "badge-red")
-            c.point(x, y, "outline")
         for k in range(8):                                    # the post
             c.point(MAP_W // 2, MAP_H + k, "outline")
             c.point(MAP_W // 2 + 1, MAP_H + k, "chair-mid")
+        c.rect(0, 0, MAP_W - 1, MAP_H - 1, "outline")
+        for y in range(1, MAP_H - 1):
+            for x in range(1, MAP_W - 1):
+                mid = MAP_FOLDS[0] <= x < MAP_FOLDS[1]        # the middle panel, in shade
+                if not _land(x, y):
+                    col = "glass-dark" if mid else "glass"
+                elif any(not _land(x + dx, y + dy) for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1))):
+                    col = "shirt-1-dark"                      # the coastline edge
+                elif x % 6 == 3 or y % 6 == 3:
+                    col = "wall-trim" if mid else "floor-left"   # the grid
+                else:
+                    col = "floor-left" if mid else "floor-top"
+                c.point(x, y, col)
+        for fx in MAP_FOLDS:                                  # the fold notches
+            c.point(fx, 0, "paper")
+            c.point(fx, MAP_H - 1, "paper")
+        for (x, y) in PINS_OLD:
+            c.rect(x - 1, y - 2, x + 1, y, "outline")
+            c.point(x, y - 1, "shirt-1")
+        if i == 0:
+            for (x, y) in PINS_NEW:
+                c.rect(x - 2, y - 4, x + 2, y, "outline")
+                c.rect(x - 1, y - 3, x + 1, y - 1, "badge-red")
+                c.point(x - 1, y - 3, "paper")
+                c.point(x, y + 1, "outline")
         out.append(c)
     return out
 
