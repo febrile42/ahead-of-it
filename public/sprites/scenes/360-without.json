@@ -10368,6 +10368,43 @@
           "depth": 10.95
         },
         {
+          "sprite": "worker-b",
+          "frame": "idle-down",
+          "x": 304,
+          "y": 149,
+          "depth": 11.5,
+          "motion": {
+            "start": 345,
+            "rate": 2,
+            "walk": [
+              {
+                "frame": "left",
+                "to": [
+                  262,
+                  170
+                ],
+                "ms": 2350
+              },
+              {
+                "frame": "idle-down",
+                "hold": 400
+              },
+              {
+                "frame": "up",
+                "to": [
+                  304,
+                  149
+                ],
+                "ms": 2350
+              },
+              {
+                "frame": "idle-down",
+                "hold": 400
+              }
+            ]
+          }
+        },
+        {
           "sprite": "partition-c",
           "frame": "default",
           "x": 69,
@@ -11705,6 +11742,43 @@
           "x": 8,
           "y": 64,
           "depth": 10.95
+        },
+        {
+          "sprite": "worker-b",
+          "frame": "idle-down",
+          "x": 195,
+          "y": 68,
+          "depth": 11.5,
+          "motion": {
+            "start": 345,
+            "rate": 2,
+            "walk": [
+              {
+                "frame": "left",
+                "to": [
+                  153,
+                  89
+                ],
+                "ms": 2350
+              },
+              {
+                "frame": "idle-down",
+                "hold": 400
+              },
+              {
+                "frame": "up",
+                "to": [
+                  195,
+                  68
+                ],
+                "ms": 2350
+              },
+              {
+                "frame": "idle-down",
+                "hold": 400
+              }
+            ]
+          }
         },
         {
           "sprite": "partition-r",
