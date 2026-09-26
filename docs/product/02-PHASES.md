@@ -24,10 +24,15 @@ Exit criteria
 
 *Prove the mechanic with stock art. Already shareable if it works.*
 
-> **Progress (2026-09-24):** every deliverable below is merged on `develop` (the "building
-> assembler" became the scene seam, D-035). The art pipeline went in-house (D-024, D-034),
-> and bands 80/150/220 are final. Remaining: art for 360–750, then the exit criteria. Live
-> state is in `docs/STATUS.md`.
+> **Progress (2026-09-26): conditionally met, pending hallway test (D-040).** Every
+> deliverable below is merged on `develop` (the "building assembler" became the scene seam,
+> D-035; gags are tapped in phone-scale close-ups, D-042). The art pipeline went in-house
+> (D-024, D-034), and all seven bands plus the `1,000+` stop are final in both states
+> (PH1-12). Exit criteria: bands placed and clickable at 390px ✅; staging preview works ✅;
+> the hallway test (gag naming and toggle discoverability) is **deferred by Josh, not
+> waived**, and is unrun; its kit is merged (PR #2). The internal picture review (DIA-70)
+> rated three gags weak: G6.3 and G6.1 are redrawn and now read, and G3.1's redraw is
+> landing (PR #39). None blocks Phase 2. Live state is in `docs/STATUS.md`.
 
 Deliverables
 - Repo scaffold: build tooling, `wrangler.jsonc` (assets-only Worker), CI for staging preview on `develop`. (S, brief from M)
@@ -57,6 +62,9 @@ Exit criteria
 > is eventually run is redrawn — in-house, hours, not a re-commission.
 
 ## Phase 2 — The switch and the workers
+
+> **Progress (2026-09-26): starting.** Briefs PH2-01…04 and D-043 are merged (PR #35);
+> dispatch order is in `docs/briefs/README.md`, PH2-02 (`prefers-reduced-motion`) first.
 
 Deliverables
 - Toggle + nudge (R-06, R-06a, R-07) polished; **band-crossing moment**: when the slider crosses into a band, the new threat briefly appears *already handled* (Q-20 item 5). (S, copy by M)
