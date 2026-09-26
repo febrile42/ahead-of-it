@@ -21,7 +21,7 @@ Built
 from __future__ import annotations
 
 from ..dsl import Canvas
-from ..vox import Iso, Sprite, dotted, make, make_anim
+from ..vox import Iso, Sprite, make, make_anim
 from .. import glyphs
 from . import desk as desk_mod
 from .band80 import _rows
@@ -46,33 +46,60 @@ def _panel(iso: Iso):
     return iso.left_px(p["r1"], (p["c0"] + p["c1"]) / 2 - 0.8, 17.0)
 
 
-# The laptop's footprint on the desk top, in world units. The built state fills it;
-# the without state draws its outline and nothing else.
-LAPTOP = dict(c0=3.4, c1=6.8, r0=1.6, r1=3.6)
+# The laptop, in world units: a base on the desk top and a lid standing at its back
+# edge. The built state draws it; the without state draws the dashed ghost of exactly
+# this solid and nothing else, so the two can never drift apart.
+LAPTOP = dict(c0=3.0, c1=7.0, r0=1.6, r1=3.6)
+LID = dict(r0=1.1, r1=1.6, h=7.0)
+# the ghost's dash: `on` rim pixels in paper, then `off` in GHOST_GAP, round the rim
+GHOST_ON, GHOST_OFF, GHOST_GAP = 2, 2, "badge-red"
 
 
-def _absent_laptop(iso: Iso, c: Canvas, z: float):
-    """A ghost rectangle on the desktop with exactly the built laptop's footprint.
+def _laptop(iso: Iso, top: float):
+    """Open, screen toward the chair. The lid is tall on purpose (DIA-75): at 390 px
+    the lid is what says *laptop*, and its silhouette is what the without state traces."""
+    lp, ld = LAPTOP, LID
+    iso.box(lp["c0"], lp["r0"], top, lp["c1"], lp["r1"], top + 0.6, top="chair-mid",
+            left="badge-body", right="chair-dark")
+    lid = iso.box(lp["c0"], ld["r0"], top, lp["c1"], ld["r1"], top + ld["h"],
+                  top="chair-dark", left="monitor-frame", right="outline")
+    iso.paint(lid, "L", ld["r1"], lambda cc, z: "monitor-screen"
+              if lp["c0"] + 0.5 <= cc < lp["c1"] - 0.5 and top + 1.0 <= z < top + ld["h"] - 0.8
+              else None)
 
-    A bare brown desk reads as "a desk" — it has no way of telling you that something
-    is missing, because nothing missing has a silhouette. An outline does: it is the one
-    mark that says *the thing that should be here isn't*, and it turns the empty desktop
-    from scenery into the subject. Drawn in `paper` with an `outline` halo under it, not
-    in `net` magenta, which this pipeline reserves for network lines: `paper` is the
-    brightest mark on the desk and the halo keeps it from dissolving where it crosses
-    the desk's own edge.
 
-    **Continuous, not dashed** (DIA-21). The previous pass dashed it two on, two off, on
-    the theory that a solid rectangle would read as a mat. At 1x the drawn rectangle is
-    only about 10 x 6 px, so dashing broke it into 2 px runs and it arrived as four or
-    five stray pale pixels on brown — noise, not a shape. A 1 px continuous outline at
-    the same footprint is still far too thin to read as a sheet of paper, and it is the
-    only treatment at this size that resolves into a rectangle at all."""
-    lp = LAPTOP
-    corners = [iso.pt(lp["c0"], lp["r0"], z), iso.pt(lp["c1"], lp["r0"], z),
-               iso.pt(lp["c1"], lp["r1"], z), iso.pt(lp["c0"], lp["r1"], z)]
-    for p0, p1 in zip(corners, corners[1:] + corners[:1]):
-        dotted(c, p0, p1, colour="paper", on=1, period=1, halo="outline")
+def _absent_laptop(iso: Iso, c: Canvas, top: float):
+    """The dashed ghost of the built laptop: its exact silhouette, lid and base, traced
+    round the rim, two pixels of `paper` then two of `badge-red`.
+
+    History, because this is the fifth look at one mark (DIA-9/21/28/70/75). A *flat*
+    outline of the laptop's footprint — dashed, then continuous — was on the desk for
+    three passes and never read: a rectangle lying on a desk is a tray, a placemat, a
+    sheet of paper, whatever its colour or line weight. What says *laptop* at 390 px is
+    the lid standing up, and a dashed line is the convention for *something goes here*.
+    So the ghost is the whole solid, not its footprint: the silhouette is rendered from
+    `_laptop` itself on a scratch canvas (it cannot drift from the built state) and its
+    rim pixels are dashed. White-and-red holds on the brown desk and the grey panel
+    alike, which a single colour does not. Nothing inside the rim is drawn: the panel
+    and the desk show through, which is the point."""
+    scratch = Canvas(c.w, c.h)
+    _laptop(Iso(scratch, (iso.ox, iso.oy)), top)
+    px = scratch.img.load()
+    solid = {(x, y) for x in range(scratch.w) for y in range(scratch.h) if px[x, y][3]}
+    rim = {p for p in solid
+           if any((p[0] + dx, p[1] + dy) not in solid
+                  for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)))}
+    # walk the rim from its top-left pixel, always to the nearest unvisited rim pixel
+    # (ties broken by position, so the walk — and the dash phase — is deterministic)
+    walk = [min(rim, key=lambda p: (p[1], p[0]))]
+    left = rim - {walk[0]}
+    while left:
+        q = walk[-1]
+        nxt = min(left, key=lambda p: (abs(p[0] - q[0]) + abs(p[1] - q[1]), p[1], p[0]))
+        walk.append(nxt)
+        left.discard(nxt)
+    for i, p in enumerate(walk):
+        c.point(*p, "paper" if i % (GHOST_ON + GHOST_OFF) < GHOST_ON else GHOST_GAP)
 
 
 def _desk_bare(iso: Iso, c: Canvas, laptop=False):
@@ -87,15 +114,8 @@ def _desk_bare(iso: Iso, c: Canvas, laptop=False):
     if not laptop:
         _absent_laptop(iso, c, top)
     if laptop:
-        # the laptop, open, screen toward the chair; a badge on its lanyard; a coffee.
-        # Its base is LAPTOP exactly — the same rectangle the without state dashes.
-        lp = LAPTOP
-        iso.box(lp["c0"], lp["r0"], top, lp["c1"], lp["r1"], top + 0.6, top="chair-mid",
-                left="badge-body", right="chair-dark")
-        lid = iso.box(3.4, 1.2, top, 6.8, 1.7, top + 4.6, top="chair-dark",
-                      left="monitor-frame", right="outline")
-        iso.paint(lid, "L", 1.7, lambda cc, z: "monitor-screen"
-                  if 3.8 <= cc < 6.4 and top + 0.8 <= z < top + 4.0 else None)
+        # the laptop; a badge on its lanyard; a coffee
+        _laptop(iso, top)
         iso.box(1.0, 2.6, top, 2.8, 3.6, top + 0.3, top="paper", left="paper",
                 right="wall-shadow", outline="outline")          # the badge
         x0, y0 = iso.pt(1.0, 2.6, top + 0.3)
