@@ -15,10 +15,16 @@ if (!process.env.CHROME_PATH) {
   );
 }
 
+// DIA-91: honour PREVIEW_PORT (same env var playwright.config.ts already
+// reads) so a worktree or CI job with its own port doesn't collide with a
+// preview server already listening on 4173 elsewhere. `npm run preview`
+// inherits this process's env, so it picks up the same port.
+const PORT = Number(process.env.PREVIEW_PORT ?? 4173);
+
 module.exports = {
   ci: {
     collect: {
-      url: ['http://localhost:4173/'],
+      url: [`http://localhost:${PORT}/`],
       startServerCommand: 'npm run preview',
       // Match the host, not "Local:": vite colours its banner, and the reset code
       // lands between "Local" and ":", so /Local:/ never matched and every run
