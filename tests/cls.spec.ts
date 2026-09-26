@@ -1,6 +1,92 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 import * as H from './interaction-helpers';
 import { interceptFixtureScenes } from './scene-source';
+
+/** Records every layout-shift entry's raw sources (node identity + rect
+ * delta), not just the summed value, so a CI failure's assertion message
+ * can show *what* moved without anyone needing to reproduce it first. */
+async function installClsObserver(page: Page): Promise<void> {
+  await page.addInitScript(() => {
+    const w = window as unknown as {
+      __clsValue: number;
+      __clsSources: Array<{ node: string; prev: unknown; curr: unknown }>;
+    };
+    w.__clsValue = 0;
+    w.__clsSources = [];
+    const observer = new PerformanceObserver((list) => {
+      for (const entry of list.getEntries()) {
+        const shift = entry as unknown as {
+          value: number;
+          sources?: Array<{ node?: Element; previousRect: unknown; currentRect: unknown }>;
+        };
+        w.__clsValue += shift.value;
+        for (const source of shift.sources ?? []) {
+          const node = source.node;
+          w.__clsSources.push({
+            node: node ? `${node.id ? `#${node.id}` : ''}${node.className ? `.${node.className}` : node.tagName}` : '(unknown)',
+            prev: source.previousRect,
+            curr: source.currentRect,
+          });
+        }
+      }
+    });
+    observer.observe({ type: 'layout-shift', buffered: true });
+  });
+}
+
+/** DIA-65 CI flake: a fixed wall-clock settle (`waitForTimeout`) assumes
+ * every render's layout-shift entries land within that window. A congested
+ * CI runner breaks that assumption — reproduced under CDP CPU throttling
+ * (1x-16x): the always-present, already-covered first-load shift landed
+ * late enough that a fixed 300/500ms settle missed it, so it got counted
+ * against whichever step read `__clsValue` next instead of the step that
+ * actually caused it (`band 750: room-tab switch to floor-2` in CI's case).
+ * Polling for the value to stop changing across real animation frames
+ * removes the wall-clock dependency entirely — it waits exactly as long as
+ * the browser needs to finish dispatching entries, on any machine speed. */
+async function settleCls(page: Page): Promise<number> {
+  return page.evaluate(
+    () =>
+      new Promise<number>((resolve) => {
+        const w = window as unknown as { __clsValue: number };
+        let stableFrames = 0;
+        let last = w.__clsValue;
+        let frames = 0;
+        function tick() {
+          frames += 1;
+          if (w.__clsValue === last) {
+            stableFrames += 1;
+          } else {
+            stableFrames = 0;
+            last = w.__clsValue;
+          }
+          // DIA-65 CI flake round 2: the dispatch of a layout-shift entry
+          // is queued on the same main-thread task queue as rAF, so a
+          // congested thread delays both together — but the margin still
+          // needs to be wide enough that dispatch reliably wins the race
+          // against a handful of otherwise-idle rAF ticks. 12 consecutive
+          // unchanged frames (~200ms at 60fps, proportionally longer under
+          // load, since each "frame" only advances once the thread is
+          // actually free) replaces the original 5; the 480-frame cap is
+          // still just a safety valve against a genuinely still-shifting
+          // page, not a real-world limit.
+          if (stableFrames >= 12 || frames >= 480) {
+            resolve(w.__clsValue);
+            return;
+          }
+          requestAnimationFrame(tick);
+        }
+        requestAnimationFrame(tick);
+      })
+  );
+}
+
+async function clsSources(page: Page): Promise<string> {
+  const sources = await page.evaluate(
+    () => (window as unknown as { __clsSources: unknown[] }).__clsSources
+  );
+  return sources.length ? ` — sources: ${JSON.stringify(sources)}` : '';
+}
 
 // PH1-09/D-035: the default band (80) needs a real scene file to measure
 // CLS/scroll against something other than the "not drawn yet" placeholder.
@@ -89,32 +175,22 @@ test.describe('CLS under throttling (PH1-04 review S1)', () => {
 // the button. Counting every entry, unfiltered, is what actually caught it.
 test.describe('CLS across view and band switches stays 0 (DIA-46 item 3)', () => {
   test('stepping, whole floor, a room tab, the toggle, and band 750<->80 all measure zero shift', async ({ page }) => {
-    await page.addInitScript(() => {
-      const w = window as unknown as { __clsValue: number };
-      w.__clsValue = 0;
-      const observer = new PerformanceObserver((list) => {
-        for (const entry of list.getEntries()) {
-          const shift = entry as unknown as { value: number };
-          w.__clsValue += shift.value;
-        }
-      });
-      observer.observe({ type: 'layout-shift', buffered: true });
-    });
+    await installClsObserver(page);
 
     await interceptFixtureScenes(page);
     await page.setViewportSize(VIEWPORT);
     await page.goto('/');
     await page.waitForFunction(() => document.body.dataset.renderedToken !== undefined);
-    await page.waitForTimeout(300); // let the first-load shift (covered above) settle before measuring deltas
+    await settleCls(page); // let the first-load shift (covered above) settle before measuring deltas
 
     async function clsOf(action: () => Promise<unknown>, label: string): Promise<void> {
       await page.evaluate(() => {
-        (window as unknown as { __clsValue: number }).__clsValue = 0;
+        (window as unknown as { __clsValue: number; __clsSources: unknown[] }).__clsValue = 0;
+        (window as unknown as { __clsValue: number; __clsSources: unknown[] }).__clsSources = [];
       });
       await action();
-      await page.waitForTimeout(300);
-      const cls = await page.evaluate(() => (window as unknown as { __clsValue: number }).__clsValue);
-      expect(cls, `${label}: expected 0 layout shift, measured ${cls}`).toBe(0);
+      const cls = await settleCls(page);
+      expect(cls, `${label}: expected 0 layout shift, measured ${cls}${await clsSources(page)}`).toBe(0);
     }
 
     await H.setBand(page, 750);
@@ -128,6 +204,61 @@ test.describe('CLS across view and band switches stays 0 (DIA-46 item 3)', () =>
     await clsOf(() => H.setBand(page, 80), 'switching band 750 -> 80');
     await clsOf(() => H.setBand(page, 750), 'switching band 80 -> 750');
     await clsOf(() => H.setState(page, 'built'), 'toggling back to the built state');
+  });
+});
+
+// DIA-65: the test above only exercised band 750's own close-up<->room and
+// tab switches, plus band 750<->80. `#hotspots-layer` was resized *and*
+// repositioned (`style.left`) to track the canvas's centred box on every
+// view change (src/main.ts's sizeAndPositionCanvas) — any view that doesn't
+// fill the full .scene-wrap box moves the layer's own left edge, and Chrome
+// counts that as a shift regardless of hadRecentInput (DIA-51 review, same
+// as above). This covers it for *every* band the app can currently draw
+// (`numericTestableBands()` — whatever `tests/fixtures/` or a landed real
+// export currently provides, so this starts asserting more bands the moment
+// more scene files land, no change needed here), both directions of a
+// close-up<->room switch, a room-tab switch, and a full walk of every
+// adjacent band pair in both directions (including the bands that only ever
+// render the "not drawn yet" placeholder — that placeholder box must not
+// move either).
+test.describe('CLS is exactly 0 across every band/view switch (DIA-65)', () => {
+  test('close-up<->room, a room-tab switch per drawn band, and every adjacent band pair (forward and back) measure zero shift', async ({
+    page,
+  }) => {
+    await installClsObserver(page);
+
+    await interceptFixtureScenes(page);
+    await page.setViewportSize(VIEWPORT);
+    await page.goto('/');
+    await page.waitForFunction(() => document.body.dataset.renderedToken !== undefined);
+    await settleCls(page); // let the first-load shift (covered above) settle before measuring deltas
+
+    async function clsOf(action: () => Promise<unknown>, label: string): Promise<void> {
+      await page.evaluate(() => {
+        (window as unknown as { __clsValue: number; __clsSources: unknown[] }).__clsValue = 0;
+        (window as unknown as { __clsValue: number; __clsSources: unknown[] }).__clsSources = [];
+      });
+      await action();
+      const cls = await settleCls(page);
+      expect(cls, `${label}: expected 0 layout shift, measured ${cls}${await clsSources(page)}`).toBe(0);
+    }
+
+    for (const band of H.numericTestableBands()) {
+      await clsOf(() => H.setBand(page, band), `band ${band}: switching to it`);
+      await clsOf(() => H.toggleWholeFloor(page), `band ${band}: close-up -> room`);
+      await clsOf(() => H.toggleWholeFloor(page), `band ${band}: room -> close-up`);
+      const rooms = await H.roomIds(page);
+      const current = await H.currentRoomId(page);
+      const otherRoom = rooms.find((r) => r !== current) ?? rooms[0];
+      await clsOf(() => H.setRoom(page, otherRoom), `band ${band}: room-tab switch to ${otherRoom}`);
+    }
+
+    for (const band of H.BAND_ORDER) {
+      await clsOf(() => H.setBand(page, band), `band walk forward -> ${band}`);
+    }
+    for (const band of [...H.BAND_ORDER].reverse()) {
+      await clsOf(() => H.setBand(page, band), `band walk backward -> ${band}`);
+    }
   });
 });
 

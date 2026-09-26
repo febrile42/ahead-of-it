@@ -72,28 +72,43 @@ function renderBeats(container: HTMLElement, fields: PanelFields, thumbnailState
   // always 'without' in practice (R-04: the panel always shows what was
   // prevented), kept as a param so a future built-state thumbnail is a
   // one-line change here.
-  const thumb = document.createElement('div');
-  thumb.className = 'panel__thumb';
-  thumb.setAttribute('aria-hidden', 'true');
-  const thumbImg = document.createElement('img');
-  thumbImg.src = `/sprites/thumbs/${fields.id}.png`;
-  thumbImg.alt = '';
-  thumbImg.width = 64;
-  thumbImg.height = 48;
-  // Fix round item 8 / review fix 5: no thumb exported for this gag yet
-  // (public/sprites/thumbs/ is still incomplete pre-PH1-08b) shouldn't
-  // show a browser's broken-image icon — hide the whole frame instead of
-  // leaving a visibly broken box in a shipped panel.
-  thumbImg.onerror = () => {
-    thumb.hidden = true;
-  };
-  thumb.dataset.state = thumbnailState;
-  thumb.append(thumbImg);
+  //
+  // DIA-65: the Beyond panel's fields (beyondPanelFields()) are a bare
+  // PanelFields, not a Gag — there is no single hotspot/without-scene
+  // moment for the exporter to have cropped a thumbnail from, and
+  // `/sprites/thumbs/B.png` (or whatever its id is) never exists. Building
+  // the frame there anyway just meant thumbImg.onerror hid it a frame
+  // later, after the panel had already been laid out visible — a real,
+  // measured layout shift (R-01b's auto-opened Beyond panel was the only
+  // thing in the whole app that reached this path, hence only ever
+  // caught reaching 'beyond'). `'band' in fields` is exactly the
+  // distinction Gag vs. bare PanelFields already draws (build-content.ts).
   const preventedP = document.createElement('p');
   const preventedLabel = document.createElement('strong');
   preventedLabel.textContent = 'What it prevented:';
   preventedP.append(preventedLabel, document.createTextNode(` ${fields.prevented}`));
-  prevented.append(thumb, preventedP);
+  if ('band' in fields) {
+    const thumb = document.createElement('div');
+    thumb.className = 'panel__thumb';
+    thumb.setAttribute('aria-hidden', 'true');
+    const thumbImg = document.createElement('img');
+    thumbImg.src = `/sprites/thumbs/${fields.id}.png`;
+    thumbImg.alt = '';
+    thumbImg.width = 64;
+    thumbImg.height = 48;
+    // Fix round item 8 / review fix 5: no thumb exported for this gag yet
+    // (public/sprites/thumbs/ is still incomplete pre-PH1-08b) shouldn't
+    // show a browser's broken-image icon — hide the whole frame instead of
+    // leaving a visibly broken box in a shipped panel.
+    thumbImg.onerror = () => {
+      thumb.hidden = true;
+    };
+    thumb.dataset.state = thumbnailState;
+    thumb.append(thumbImg);
+    prevented.append(thumb, preventedP);
+  } else {
+    prevented.append(preventedP);
+  }
 
   container.append(strip, title, already, prevented);
 
@@ -186,11 +201,29 @@ export function beyondPanelFields(): PanelFields {
   return getBeyond().panel;
 }
 
-/** Positions `button` over the canvas from a rect in the layout's native units: centred on the rect's centre (B2), never smaller than 44 css px (R-20). Returns the centre. */
+/**
+ * DIA-65: the canvas's own on-screen box (css px, relative to
+ * `.hotspots-layer`'s permanently-fixed origin — see main.ts's
+ * `sizeAndPositionCanvas`). `#hotspots-layer` itself is never resized or
+ * moved any more (a real Chromium run showed that even a fixed-top-left
+ * resize of an *existing* element still scores as a layout shift), so every
+ * hotspot button now carries the canvas's offset/scale itself, in pixels,
+ * instead of relying on `%` positions resolved against a container box that
+ * used to track the canvas exactly.
+ */
+export interface CanvasBox {
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+}
+
+/** Positions `button` over the canvas from a rect in the layout's native units: centred on the rect's centre (B2), never smaller than 44 css px (R-20). Returns the centre, in the same buffer units as `rect`. */
 function placeButton(
   button: HTMLButtonElement,
   rect: { x: number; y: number; w: number; h: number },
-  layout: { bufferW: number; bufferH: number }
+  layout: { bufferW: number; bufferH: number },
+  canvasBox: CanvasBox
 ): { cx: number; cy: number } {
   button.style.position = 'absolute';
   // B2: position from the rect's centre, not its top-left corner —
@@ -198,8 +231,8 @@ function placeButton(
   // centres on has to be (x + w/2, y + h/2).
   const cx = rect.x + rect.w / 2;
   const cy = rect.y + rect.h / 2;
-  button.style.left = `${(cx / layout.bufferW) * 100}%`;
-  button.style.top = `${(cy / layout.bufferH) * 100}%`;
+  button.style.left = `${canvasBox.left + (cx / layout.bufferW) * canvasBox.width}px`;
+  button.style.top = `${canvasBox.top + (cy / layout.bufferH) * canvasBox.height}px`;
   button.style.minWidth = `${MIN_TAP_PX}px`;
   button.style.minHeight = `${MIN_TAP_PX}px`;
   button.style.transform = 'translate(-50%, -50%)';
@@ -216,6 +249,7 @@ function placeButton(
 export function renderHotspots(
   container: HTMLElement,
   layout: SceneLayout,
+  canvasBox: CanvasBox,
   onOpen: (gagId: string, button: HTMLButtonElement) => void
 ): void {
   container.replaceChildren();
@@ -237,7 +271,7 @@ export function renderHotspots(
     // gag, checked by layout.test.ts's coverage test).
     const title = panelFieldsFor(hotspot.gagId)?.title ?? hotspot.gagId;
     button.setAttribute('aria-label', title);
-    const { cx, cy } = placeButton(button, hotspot, layout);
+    const { cx, cy } = placeButton(button, hotspot, layout, canvasBox);
     // Test-only (S4): the exact centre point in buffer units, so
     // tests/scene.spec.ts can assert the rendered button centre matches
     // within 1px without duplicating the layout math.
@@ -264,6 +298,7 @@ export function renderHotspots(
 export function renderZoomTargets(
   container: HTMLElement,
   layout: ZoomLayout,
+  canvasBox: CanvasBox,
   onZoom: (viewId: string, button: HTMLButtonElement) => void
 ): void {
   container.replaceChildren();
@@ -289,13 +324,12 @@ export function renderZoomTargets(
     return button;
   });
 
-  // Real rendered box (css px): the layer is given an explicit pixel
-  // width/height by main.ts's sizeAndPositionCanvas before this runs, so
-  // its own box is the room's on-screen size regardless of the buffer's
-  // native-pixel units.
-  const containerBox = container.getBoundingClientRect();
-  const cssW = containerBox.width || layout.bufferW;
-  const cssH = containerBox.height || layout.bufferH;
+  // DIA-65: chip placement works in the canvas's own box (css px), not the
+  // (now permanently full-size) container's — `canvasBox` is main.ts's
+  // sizeAndPositionCanvas result, the room's actual on-screen size,
+  // regardless of the buffer's native-pixel units.
+  const cssW = canvasBox.width || layout.bufferW;
+  const cssH = canvasBox.height || layout.bufferH;
 
   const chips: Chip[] = layout.targets.map((target, i) => {
     const box = buttons[i].getBoundingClientRect();
@@ -311,8 +345,8 @@ export function renderZoomTargets(
 
   buttons.forEach((button, i) => {
     const { x, y } = positions[i];
-    button.style.left = `${x}px`;
-    button.style.top = `${y}px`;
+    button.style.left = `${canvasBox.left + x}px`;
+    button.style.top = `${canvasBox.top + y}px`;
     button.style.transform = 'translate(-50%, -50%)';
     button.dataset.cx = String(x);
     button.dataset.cy = String(y);

@@ -25,6 +25,7 @@ import {
 } from './scene/scene';
 import type { SceneFile, SceneView } from './scene/scene';
 import { createChecklist } from './ui/checklist';
+import type { CanvasBox } from './ui/panel';
 import { beyondPanelFields, createPanel, panelFieldsFor, renderHotspots, renderZoomTargets } from './ui/panel';
 import { ui } from './ui/strings';
 import type { SceneState } from './ui/toggle';
@@ -37,7 +38,7 @@ const toggleRoot = document.querySelector<HTMLDivElement>('#toggle-root');
 const viewsRow = document.querySelector<HTMLDivElement>('#scene-views');
 const sceneWrap = document.querySelector<HTMLDivElement>('#scene-wrap');
 const stepper = document.querySelector<HTMLDivElement>('#scene-stepper');
-const canvas = document.querySelector<HTMLCanvasElement>('#scene-canvas');
+let canvas = document.querySelector<HTMLCanvasElement>('#scene-canvas');
 const hotspotsLayer = document.querySelector<HTMLDivElement>('#hotspots-layer');
 const panelRoot = document.querySelector<HTMLDivElement>('#panel-root');
 const checklistRoot = document.querySelector<HTMLDivElement>('#checklist-root');
@@ -205,11 +206,15 @@ if (sliderRoot && toggleRoot && viewsRow && sceneWrap && stepper && canvas && ho
     return button;
   }
 
-  /** Room tabs, one line, one per room. Persistent within a band: the nodes are reused (so a click, an arrow key or the toggle keeps focus) and only rebuilt when a different band brings different rooms. */
+  /** Room tabs, one line, one per room. Persistent within a band when the labels don't change (so a click, an arrow key or the toggle keeps focus); rebuilt — as brand-new nodes, never resized in place — when a different band brings different rooms *or* the same rooms with a different close-up count (DIA-65: two bands can share a room id but not its label text, and a `flex: 0 0 auto` button that changes width in place shifts every tab after it). */
   function syncTabs(scene: SceneFile, activeRoomId: string | undefined) {
     const roomList = rooms(scene);
+    const labels = roomList.map((room) => ui('roomTab', { room: room.label, count: primaryCount(closeupsOf(scene, room.id)) }));
     const existing = Array.from(viewsRow!.querySelectorAll<HTMLButtonElement>('.scene-views__button'));
-    if (existing.length !== roomList.length || existing.some((b, i) => b.dataset.viewId !== roomList[i].id)) {
+    const needsRebuild =
+      existing.length !== roomList.length ||
+      existing.some((b, i) => b.dataset.viewId !== roomList[i].id || b.textContent !== labels[i]);
+    if (needsRebuild) {
       viewsRow!.replaceChildren(...roomList.map((room) => makeTab(room.id)));
     }
     const tabs = Array.from(viewsRow!.querySelectorAll<HTMLButtonElement>('.scene-views__button'));
@@ -217,7 +222,7 @@ if (sliderRoot && toggleRoot && viewsRow && sceneWrap && stepper && canvas && ho
       const tab = tabs[i];
       const count = primaryCount(closeupsOf(scene, room.id));
       const selected = room.id === activeRoomId;
-      tab.textContent = ui('roomTab', { room: room.label, count });
+      tab.textContent = labels[i];
       tab.setAttribute('aria-label', ui('roomTabName', { room: room.label, count }));
       tab.setAttribute('aria-selected', String(selected));
       tab.tabIndex = selected ? 0 : -1;
@@ -264,15 +269,34 @@ if (sliderRoot && toggleRoot && viewsRow && sceneWrap && stepper && canvas && ho
     floorButton!.setAttribute('aria-disabled', 'false');
   }
 
-  /** Sizes the canvas + hotspots layer in device pixels per SCENE-FORMAT's
-   * two-axis `s = max(1, min(floor(cssAvailW*dpr/nativeW),
+  /** Sizes the canvas in device pixels per SCENE-FORMAT's two-axis
+   * `s = max(1, min(floor(cssAvailW*dpr/nativeW),
    * floor(cssAvailH*dpr/nativeH)))` (fix round item 7 / review fix 4 —
    * scaling on width alone could grow a view taller than `.scene-wrap`'s
    * own box and force an internal vertical scroll), scrolls to the
    * view's `focus` rect (with the "scroll for more" hint) when the view
    * is wider than what fits, and centres the canvas horizontally when it
-   * isn't. */
-  function sizeAndPositionCanvas(view: SceneView) {
+   * isn't. Returns the canvas's own box (in css px, relative to
+   * `.scene-wrap`) so the caller can place hotspot buttons over it —
+   * DIA-65: `#hotspots-layer` itself is never resized or repositioned
+   * (see `.hotspots-layer` in style.css: it permanently spans all of
+   * `.scene-wrap`, which is the one thing D-042a already keeps constant
+   * across every view/band/state). A real Chromium run confirmed that
+   * resizing an *existing* element — even one whose top-left never moves —
+   * still scores as a layout shift; only a box that never changes at all
+   * scores zero. Moving the size/offset math from the layer's own CSS box
+   * into each hotspot button's pixel position (panel.ts's `CanvasBox`
+   * parameter) keeps the layer's box permanently invariant instead.
+   *
+   * The canvas itself can't take the same "never changes" trick — its box
+   * genuinely needs to be a different size for a room vs. a close-up — so
+   * a live #scene-canvas would still register the resize as a shift even
+   * with the centring math removed. A browser's layout-shift tracking only
+   * ever diffs a node against *its own* previous frame, so it never charges
+   * a freshly-inserted node (nothing to diff against, DIA-65). Swapping in
+   * a brand-new canvas already sized and positioned correctly — instead of
+   * mutating the live one in place — sidesteps the resize entirely. */
+  function sizeAndPositionCanvas(view: SceneView): CanvasBox {
     const dpr = window.devicePixelRatio || 1;
     const cssAvailW = sceneWrap!.clientWidth || window.innerWidth;
     const cssAvailH = sceneWrap!.clientHeight || 240;
@@ -281,12 +305,14 @@ if (sliderRoot && toggleRoot && viewsRow && sceneWrap && stepper && canvas && ho
     const backingH = view.size.h * scale;
     const cssW = backingW / dpr;
     const cssH = backingH / dpr;
-    canvas!.width = backingW;
-    canvas!.height = backingH;
-    canvas!.style.width = `${cssW}px`;
-    canvas!.style.height = `${cssH}px`;
-    hotspotsLayer!.style.width = `${cssW}px`;
-    hotspotsLayer!.style.height = `${cssH}px`;
+    const fresh = document.createElement('canvas');
+    fresh.id = canvas!.id;
+    canvas!.replaceWith(fresh);
+    canvas = fresh;
+    canvas.width = backingW;
+    canvas.height = backingH;
+    canvas.style.width = `${cssW}px`;
+    canvas.style.height = `${cssH}px`;
     // CLS: .scene-wrap stays 3:2 and the same size for every view
     // (D-042a) — a 180x120 close-up at 2 css px per art px and a 360x240
     // room at 1 both fill it, and anything smaller sits centred in it —
@@ -299,18 +325,17 @@ if (sliderRoot && toggleRoot && viewsRow && sceneWrap && stepper && canvas && ho
       sceneWrap!.scrollLeft = view.focus.x * focusScale;
       sceneWrap!.scrollTop = view.focus.y * focusScale;
       canvas!.style.marginLeft = '0px';
-      hotspotsLayer!.style.left = '0px';
-    } else {
-      sceneWrap!.scrollLeft = 0;
-      sceneWrap!.scrollTop = 0;
-      // Centre horizontally when the view is narrower than the wrap
-      // (review fix 4) — canvas and hotspotsLayer move together so
-      // hotspot buttons (positioned as % of the layer) stay aligned
-      // with the picture under them.
-      const offsetLeft = Math.max(0, (cssAvailW - cssW) / 2);
-      canvas!.style.marginLeft = `${offsetLeft}px`;
-      hotspotsLayer!.style.left = `${offsetLeft}px`;
+      return { left: 0, top: 0, width: cssW, height: cssH };
     }
+    sceneWrap!.scrollLeft = 0;
+    sceneWrap!.scrollTop = 0;
+    // Centre horizontally when the view is narrower than the wrap (review
+    // fix 4) — the offset is now baked into each hotspot button's own left
+    // (panel.ts), not into a shared layer position, so canvas and hotspots
+    // stay aligned without either one moving as a DOM node.
+    const offsetLeft = Math.max(0, (cssAvailW - cssW) / 2);
+    canvas!.style.marginLeft = `${offsetLeft}px`;
+    return { left: offsetLeft, top: 0, width: cssW, height: cssH };
   }
 
   function openPanel(gagId: string, source: HTMLElement) {
@@ -480,15 +505,15 @@ if (sliderRoot && toggleRoot && viewsRow && sceneWrap && stepper && canvas && ho
     currentScene = scene;
     syncTabs(scene, roomOf(scene, view)?.id);
     syncStepper(scene, view);
-    sizeAndPositionCanvas(view);
+    const canvasBox = sizeAndPositionCanvas(view);
     await renderScene(canvas!, view, state);
     if (token !== renderToken) return; // superseded by a newer render — drop this stale paint
     if (view.kind === 'room') {
-      renderZoomTargets(hotspotsLayer!, toZoomLayout(scene, view), (viewId) =>
+      renderZoomTargets(hotspotsLayer!, toZoomLayout(scene, view), canvasBox, (viewId) =>
         selectView(viewId, { focus: { kind: 'floor' } })
       );
     } else {
-      renderHotspots(hotspotsLayer!, toSceneLayout(view), openPanel);
+      renderHotspots(hotspotsLayer!, toSceneLayout(view), canvasBox, openPanel);
     }
     restoreFocus(focusCapture);
     const paintKey = `${band}/${state}`;

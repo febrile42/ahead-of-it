@@ -236,6 +236,17 @@ h1 {
   position: absolute;
   top: 0;
   left: 0;
+  /* DIA-65: every child button is itself `position: absolute`, so without
+     an explicit size this collapses to 0x0 (absolutely-positioned children
+     don't contribute to an auto-sized parent) — the layer would still be
+     hit-testable (overflow is visible, so out-of-box children still
+     render and respond to clicks/focus) but anything that reads its own
+     rect, e.g. tests/scene.spec.ts's centring check, would see a 0-size
+     box. `.scene-wrap`'s own box is already permanently fixed for every
+     view/band/state (D-042a) — spanning 100% of it makes the layer's own
+     box that exact same constant, never resized by main.ts again. */
+  width: 100%;
+  height: 100%;
 }
 
 .hotspot {
@@ -348,6 +359,18 @@ h1 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
+  /* DIA-65 CI flake round 2: a room's short "Room: Floor 2" label wraps
+     to 1 line while a close-up's longer position label wraps to 2 —
+     genuinely and deterministically, in whatever font-fallback CI's
+     Chromium resolves "system-ui, sans-serif" to (this never reproduced
+     with this sandbox's own fonts, but CI measured the identical 0.000104
+     shift twice, on two different commits, which a timing race never
+     would). Reserving 2 lines' worth of height always means going from 2
+     lines of real text to 1 never shrinks the box. min-height, not
+     height, because unitless line-height rounds to a sub-pixel value
+     that can differ by a hair from what two live text lines actually
+     take. */
+  min-height: calc(0.8rem * 1.15 * 2);
 }
 
 /* A visible affordance (not just a scrollbar) that a view scrolls further

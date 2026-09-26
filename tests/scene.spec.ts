@@ -110,6 +110,7 @@ test.describe('every band x both states (PH1-09 acceptance)', () => {
         }
 
         const layerHandle = page.locator('#hotspots-layer');
+        const canvasHandle = page.locator('#scene-canvas');
         const hotspots = page.locator('.hotspot');
         await expect(hotspots).toHaveCount(expectedHotspotCount(band, state));
 
@@ -120,13 +121,18 @@ test.describe('every band x both states (PH1-09 acceptance)', () => {
           await button.focus();
           await expect(button).toBeFocused();
 
-          // Recomputed per hotspot: focusing an off-screen hotspot
-          // auto-scrolls .scene-wrap (the horizontally-scrolling
-          // container — see src/style.css), which moves
-          // #hotspots-layer relative to the viewport along with it.
-          const layerBox = await layerHandle.boundingBox();
-          expect(layerBox).not.toBeNull();
-          const scale = layerBox!.width / bufferW;
+          // DIA-65: #hotspots-layer permanently spans .scene-wrap's own
+          // (already-constant, D-042a) box now, so it no longer tracks the
+          // canvas's size/position the way it used to — the scale and the
+          // origin a hotspot's data-cx/cy (buffer units) are placed against
+          // both come from #scene-canvas's own box instead. Recomputed per
+          // hotspot: focusing an off-screen hotspot auto-scrolls
+          // .scene-wrap (the horizontally-scrolling container — see
+          // src/style.css), which moves the canvas relative to the
+          // viewport along with it.
+          const canvasBox = await canvasHandle.boundingBox();
+          expect(canvasBox).not.toBeNull();
+          const scale = canvasBox!.width / bufferW;
 
           const box = await button.boundingBox();
           expect(box?.width).toBeGreaterThanOrEqual(44);
@@ -137,8 +143,8 @@ test.describe('every band x both states (PH1-09 acceptance)', () => {
           // just be positioned "somewhere".
           const expectCx = Number(await button.getAttribute('data-cx'));
           const expectCy = Number(await button.getAttribute('data-cy'));
-          const actualCx = box!.x - layerBox!.x + box!.width / 2;
-          const actualCy = box!.y - layerBox!.y + box!.height / 2;
+          const actualCx = box!.x - canvasBox!.x + box!.width / 2;
+          const actualCy = box!.y - canvasBox!.y + box!.height / 2;
           expect(Math.abs(actualCx - expectCx * scale)).toBeLessThanOrEqual(1);
           expect(Math.abs(actualCy - expectCy * scale)).toBeLessThanOrEqual(1);
         }
