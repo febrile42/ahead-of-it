@@ -117,6 +117,15 @@ h1 {
   margin: 0.5rem 0 0;
   font-style: italic;
   min-height: 1.2em; /* S1, see .slider__label */
+  /* DIA-51: visibility, not the `hidden` attribute — the subtitle's two
+     lines stay reserved in the layout in both states, same trick as
+     .toggle__nudge below, so the without-state toggle never shifts
+     .scene-views/.scene-wrap/.scene-stepper up underneath it. */
+  visibility: visible;
+}
+
+.toggle__subtitle--hidden {
+  visibility: hidden;
 }
 
 .toggle__nudge {

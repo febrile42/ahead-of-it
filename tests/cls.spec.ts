@@ -80,6 +80,13 @@ test.describe('CLS under throttling (PH1-04 review S1)', () => {
 // sizeAndPositionCanvas keeps .scene-wrap's box, the tab row and the
 // stepper row at a constant height across every view/band/state (D-042a),
 // so this locks that in rather than leaving it merely true by inspection.
+//
+// DIA-51 review: every step here is a click or keypress, so a plain
+// hadRecentInput filter can never fail on a real click-driven shift —
+// Chrome itself marks the toggle's own layout-shift entry hadRecentInput:
+// true and the guard below used to throw it away, even though the tagline
+// collapsing and the scene jumping 29px is fully visible to whoever pressed
+// the button. Counting every entry, unfiltered, is what actually caught it.
 test.describe('CLS across view and band switches stays 0 (DIA-46 item 3)', () => {
   test('stepping, whole floor, a room tab, the toggle, and band 750<->80 all measure zero shift', async ({ page }) => {
     await page.addInitScript(() => {
@@ -87,8 +94,8 @@ test.describe('CLS across view and band switches stays 0 (DIA-46 item 3)', () =>
       w.__clsValue = 0;
       const observer = new PerformanceObserver((list) => {
         for (const entry of list.getEntries()) {
-          const shift = entry as unknown as { hadRecentInput: boolean; value: number };
-          if (!shift.hadRecentInput) w.__clsValue += shift.value;
+          const shift = entry as unknown as { value: number };
+          w.__clsValue += shift.value;
         }
       });
       observer.observe({ type: 'layout-shift', buffered: true });

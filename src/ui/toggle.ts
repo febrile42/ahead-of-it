@@ -38,7 +38,14 @@ export function createToggle(container: HTMLElement, initial: SceneState = 'buil
   function render() {
     button!.textContent = state === 'built' ? copy.toggleToWithout : copy.toggleToBuilt;
     button!.setAttribute('aria-pressed', state === 'without' ? 'true' : 'false');
-    subtitle!.hidden = state !== 'built';
+    // DIA-51: toggle a visibility class, not the `hidden` attribute —
+    // `hidden` is `display: none`, which drops the subtitle's box from
+    // layout and shifts .scene-views/.scene-wrap/.scene-stepper up 29px
+    // underneath the visitor's thumb. Keeping the box present but invisible
+    // (see .toggle__subtitle--hidden) reserves its space in both states.
+    const hide = state !== 'built';
+    subtitle!.classList.toggle('toggle__subtitle--hidden', hide);
+    subtitle!.setAttribute('aria-hidden', String(hide));
   }
 
   button.addEventListener('click', () => {
