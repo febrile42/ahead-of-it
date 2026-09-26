@@ -109,11 +109,28 @@ axis, each with a 1 px `outline` pixel under it so it reads on floor and wall al
 everything except billboard labels. Without: the visitor's laptop to the router and to
 every monitor. Built: the visitor's laptop to the firewall, and it stops there.
 
+DIA-5: the lines start at `wifi-card`, a paper callout with the Wi-Fi fan on it in `net`,
+its tail on the laptop, in both states. It names the dots; where they end is the gag.
+The same dotted line is how the street's link crosses the open ground between HQ's plot
+and the inset office's (`link-hop-r`, `link-hop-c`): off the road, the link is the
+network.
+
 ## Cutaway rooms (PH1-06)
 
 Back walls are full height (40 units). Walls that would hide a room's contents — the
 closet's front partitions — are cut away at 7 units, with a dark (`chair-dark`) cut
 top: the dollhouse convention, and the architectural sign that the wall continues up.
+
+**Upper floors (DIA-5).** Every view but `ground` stands on the storey below it:
+`slab-l-upper` / `slab-r-upper` are the slab plus 15 units of exterior wall with one
+window per tile, HQ's window from `street.py`, cut off square. That is what says
+"upstairs"; a room with only a slab reads as a second ground floor.
+
+**The street is two plots (DIA-5).** HQ's plot and the inset office's plot each have
+their own slab, with open ground between them (`ROOMS["street"]["plates"]`). The road
+leaves one plot and arrives at the other; on one shared plate the inset read as HQ's
+annex. HQ's plot runs a column past the block on its shaded side, where the block
+throws most of a tile of shadow (`floor_shadow(grow=7)`): a 2-unit rim read as floating.
 
 ## Looks and poses (PH1-06)
 
@@ -260,3 +277,36 @@ A gag's key object must read at native size, not only in the 4× preview:
 - **The hat (G7.3a).** A rounded red crown, a white band with PRODUCT in the glyphs,
   a brim wider than both, set on the crown of the head so the face shows (38 x 36);
   the wearer stands clear of the board's OWNER: line.
+
+## Bands 360 and 490 (PH1-11)
+
+- **A band may re-compose a room.** Nine ground-floor primaries by 490 do not fit band
+  80's 10 x 7 room at 44 px, so from 360 `ground` is a new 12 x 9 picture
+  (`layout._ground360`). Placements carry `since` / `until` (the old room's items stop at
+  360, the new room's start there) and keep their own `band`, so every earlier gag is
+  re-placed in its quiet form and 80-220 stay pixel-identical. The street is re-composed
+  the same way (`_street360`): HQ is a narrower block (`hq-5`, `hq-6`: 4 x 3 tiles) at
+  the plate's back-right so six storeys fit 240 px and nothing on the left is behind it;
+  the inset office grows to 5 x 5.
+- **Ground floor from 360.** The closet runs down the back-left wall: router at the back
+  (G1.1), `MAIN / SERVER` tower with two stacked fans and `DO NOT / TURN OFF` at the front
+  (G5.3, the callback). The phone row stands beside it on the back-right wall; phones sit
+  where a monitor would, so a seated worker never hides one, and their cords run in front
+  of the chairs to one knot outside the closet door. The coin box's user stands at the
+  row's end in profile (the gesture is the joke). The pit is mid-floor, the lobby by the
+  front door, the trolley beside the closet, the taped cable in one run
+  (`cable-tape-360`) round the front-left, the new hire (490) in the front-right corner.
+- **Labels that are the joke are billboards,** in the 3 x 5 glyphs: `MAIN SERVER`,
+  `DO NOT TURN OFF`, `-33%`, `VIRTUALISED`, the five hats, `FINAL` / `FINAL2` /
+  `FINAL-real` (lowercase `r e a l` and `-`, `%` added to `glyphs.py`), `WELCOME!`.
+- **G7.3** walks the aisle along floor-2's back-left wall (the room gains a row): without,
+  one manager, arms out for balance, under five stacked hats; built, five people in the
+  same aisle, one hat each (the PRODUCT hat at the whiteboard drops at 360: it walked).
+- **G3.1** is a monitorless desk with a cubicle panel for the calendar; the new hire
+  wears a maroon coat and a yellow knitted hat, so "still dressed to leave" reads from
+  behind; the `WELCOME!` tag hangs to the right of the calendar, never over it.
+- **G6.4** uses two segments of the inset's +c partition, a plain one between them: the
+  badge door shut with its reader on the back post (the tapper stands beside it, not in
+  front of the door), and the next door swung out into the street with a chair holding it.
+- **Polish.** `note-dave` hangs on a string from the trolley's grip (anchor = string
+  top); the frozen screens' spinner sits on a dark disc, eight dots with a fading tail.

@@ -269,6 +269,21 @@ def _sign_caution(iso: Iso, c: Canvas):
     glyphs.draw(c, "TION", x0 + (w - glyphs.text_width("TION")) // 2, y0 + 8, "outline")
 
 
+def _tape_360(iso, c):
+    """PH1-11: band 360's re-composed ground floor routes the cable in one run, anchored
+    on the tile in front of the closet's front wall (col 1, row 5): out under the wall,
+    down past the lobby, along the front of the room, and up into the pit."""
+    pts = [(4.0, 0.4), (4.0, 27.2), (43.2, 27.2), (43.2, 14.0)]
+    marks = []
+    for (a, b), (a2, b2) in zip(pts, pts[1:]):
+        along = "r" if a == a2 else "c"
+        n = int(max(abs(a2 - a), abs(b2 - b)) / TAPE_EVERY)
+        for k in range(n):
+            t = (k + 0.5) / n
+            marks.append((a + (a2 - a) * t, b + (b2 - b) * t, along))
+    _tape_run(iso, pts, marks)
+
+
 # -- G2.3 without: the lobby ------------------------------------------------------------
 
 SOFA = dict(c0=0.5, c1=5.5, r0=1.0, r1=15.0)
@@ -345,6 +360,33 @@ def wifi() -> Canvas:
     ]
     c = Canvas(7, 5)
     _rows(c, rows, 0, 0, {"n": "net"})
+    return c
+
+
+def wifi_card() -> Canvas:
+    """A callout card with the Wi-Fi fan on it in the network colour, its tail on the
+    visitor's laptop (DIA-5 item 1). It names the dotted lines: without it the magenta
+    dots were only dots, but with the symbol they start at, they are this laptop's
+    Wi-Fi, and where they end is the gag. It is a paper card, as `DEV` and `VISITOR` are,
+    because a bare 11 px fan was a pink smudge at 390 px. Anchor: the tail tip."""
+    fan = [
+        "...nnnnn...",
+        ".nn.....nn.",
+        "n...nnn...n",
+        "..nn...nn..",
+        "...........",
+        ".....n.....",
+    ]
+    fw, fh = len(fan[0]), len(fan)
+    w, h = fw + 4, fh + 4
+    c = Canvas(w, h + 3)
+    c.rect(0, 0, w - 1, h - 1, "outline")
+    c.rect(1, 1, w - 2, h - 2, "paper")
+    _rows(c, fan, 2, 2, {"n": "net"})
+    # the tail, bottom-left, down toward the laptop
+    for k in range(3):
+        c.rect(2, h - 1 + k, 4 - k, h - 1 + k, "outline")
+    c.point(3, h - 1, "paper")
     return c
 
 
@@ -456,6 +498,7 @@ def build_all() -> dict:
     tag = tag_visitor()
     board = sla_board()
     w = wifi()
+    wc = wifi_card()
     return {
         # without
         "closet-shelf": make_anim(_closet_shelf, 2, ms=350),
@@ -468,11 +511,13 @@ def build_all() -> dict:
         "cable-tape-c": make(_tape_c),
         "cable-tape-r": make(_tape_r),
         "cable-tape-turn": make(_tape_turn),
+        "cable-tape-360": make(_tape_360, size=256),
         "sign-caution": make(_sign_caution),
         "sofa": make(_sofa),
         "plant": make(_plant),
         "tag-visitor": Sprite(tag, (tag.w - 3, tag.h)),
         "wifi": Sprite(w, (3, w.h)),
+        "wifi-card": Sprite(wc, (2, wc.h - 1)),
         # built
         "rack": make(_rack),
         "firewall": make(_firewall),

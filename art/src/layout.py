@@ -4,7 +4,7 @@ list of placements that `compose.py` renders from the manifest and the shipped P
 
 **Views are rooms, not crops (PH1-10, D-037 item 8).** `ground` is HQ's ground-floor
 room, `floor-2` the room one storey up, `street` the exterior: HQ's front door, the road
-and the inset office on one pavement plate. Each has its own walls (or kerb), floor and
+and the inset office, on two plots with open ground between (DIA-5). Each has its own walls (or kerb), floor and
 slab, and its canvas is fitted to what is drawn in it (`view_frame`), so no view edge
 ever cuts a person or a desk. A placement says which view it lives in (`view`, default
 `ground`); each gag's primary part lives in its D-036 home view.
@@ -45,6 +45,10 @@ ROOMS = {
         (80, dict(kind="room", cols=10, rows=7, closet=True, tray=True,
                   back_l={4: "wall-back-l-door"},
                   back_r_windows=(3, 7, 9))),
+        # PH1-11: re-composed for nine primaries (see _ground360)
+        (360, dict(kind="room", cols=12, rows=9, closet=(1, 4), tray=True,
+                   back_l={5: "wall-back-l-door"},
+                   back_r_windows=(6, 10))),
     ],
     "floor-2": [
         (150, dict(kind="room", cols=8, rows=7,
@@ -53,9 +57,25 @@ ROOMS = {
         (220, dict(kind="room", cols=12, rows=7,
                    back_l={2: "wall-back-l-window", 4: "wall-back-l-window"},
                    back_r_windows=(3, 7))),
+        # PH1-11: a row deeper, so the aisle along the back-left wall (G7.3) runs clear
+        (360, dict(kind="room", cols=12, rows=8,
+                   back_l={2: "wall-back-l-window", 4: "wall-back-l-window"},
+                   back_r_windows=(3, 7))),
     ],
+    # DIA-5: two plots, not one plate. HQ's block and the inset office's stood on one
+    # pavement, so the inset read as HQ's annex, "part of the same room"; now each has
+    # its own plot and slab with open ground between, and the road leaves one plot and
+    # arrives at the other. HQ's plot also runs a column past the building on its shaded
+    # (+c) side, so its cast shadow has pavement to fall on (item 2).
     "street": [
-        (150, dict(kind="street", cols=10, rows=8)),
+        (150, dict(kind="street", cols=11, rows=9,
+                   plates=[dict(c0=3, c1=10, r0=0, r1=4),      # HQ
+                           dict(c0=0, c1=5, r0=6, r1=8)])),    # the inset office
+        # PH1-11: HQ moves to the back-right as a taller, narrower block; the inset
+        # office on the left grows to 5 x 5 (G5.6 and, at 490, G6.4 live in it)
+        (360, dict(kind="street", cols=12, rows=8,
+                   plates=[dict(c0=7, c1=11, r0=0, r1=5),
+                           dict(c0=0, c1=5, r0=3, r1=7)])),
     ],
 }
 
@@ -85,18 +105,28 @@ def structure(view: str, band: int, state: str) -> list:
     r = room(view, band)
     cols, rows = r["cols"], r["rows"]
     out = []
-    for col in range(cols):
-        out.append(_t("slab-l", col, rows - 1, layer="base"))
-    for row in range(rows):
-        out.append(_t("slab-r", cols - 1, row, layer="base"))
     if r["kind"] == "street":
-        for row in range(rows):
-            for col in range(cols):
-                out.append(_t("pavement", col, row, layer="base"))
+        for pl in r["plates"]:
+            for col in range(pl["c0"], pl["c1"] + 1):
+                out.append(_t("slab-l", col, pl["r1"], layer="base"))
+            for row in range(pl["r0"], pl["r1"] + 1):
+                out.append(_t("slab-r", pl["c1"], row, layer="base"))
+            for row in range(pl["r0"], pl["r1"] + 1):
+                for col in range(pl["c0"], pl["c1"] + 1):
+                    out.append(_t("pavement", col, row, layer="base"))
         return out
+    # DIA-5 item 3: an upper floor stands on the storey below, and shows it
+    sl, sr = ("slab-l", "slab-r") if view == "ground" else ("slab-l-upper", "slab-r-upper")
+    for col in range(cols):
+        out.append(_t(sl, col, rows - 1, layer="base"))
+    for row in range(rows):
+        out.append(_t(sr, cols - 1, row, layer="base"))
     for row in range(rows):
         for col in range(cols):
-            closet = r.get("closet") and col <= 1 and row <= 1
+            cl = r.get("closet")
+            if cl is True:
+                cl = (1, 1)
+            closet = bool(cl) and col <= cl[0] and row <= cl[1]
             out.append(_t("floor-closet" if closet else "floor-office", col, row,
                           layer="base"))
     out.append(_t("wall-corner", 0, 0, layer="base"))
@@ -119,6 +149,14 @@ def structure(view: str, band: int, state: str) -> list:
 B80_DESKS = [(6, 3), (8, 3), (6, 5), (8, 5)]
 DEV = (5, 0)          # the developer's desk, back-right wall
 HELP = (8, 1)         # built: the support desk, where the queue stood
+
+
+def _wifi(**kw) -> dict:
+    """DIA-5 item 1: the Wi-Fi fan over the visitor's laptop, both states, so the magenta
+    dots read as *this laptop's Wi-Fi* before anyone asks where they go. Over the lines,
+    like every label."""
+    return dict(sprite="wifi-card", attach={"id": "visitor", "offset": [7, -12]}, layer="over",
+                gag="G2.3", part="lobby", **kw)
 
 
 def _band80() -> list:
@@ -214,20 +252,25 @@ def _band80() -> list:
                      "to": {"id": "firewall", "point": "net"}}))
     P.append(dict(sprite="tag-visitor", attach={"id": "visitor", "offset": [-3, -25]},
                   layer="over", quiet="drop", gag="G2.3", part="lobby"))
+    P.append(_wifi())
     for p in P:
         p.setdefault("band", 80)
         p.setdefault("view", "ground")
+        p.setdefault("until", 360)       # PH1-11: the ground floor is re-composed at 360
     return P
 
 
 # -- band 150: floor 2 (finance, the CRMs, the CEO's desk); the street ------------------
 
-# The street plate (10 x 8): HQ stands along the back, c 3..10, r 0..3, its front door on
-# the front-left face at c 5..6; the road runs out of the door toward the viewer, turns,
-# and reaches the inset office (c 0..3, r 5..8) at its front-right doorway.
+# The street (11 x 9, two plots): HQ stands along the back of its plot, c 3..9, r 0..2,
+# its front door on the front-left face at c 5..6; the road runs out of the door toward
+# the viewer and off the plot's front edge. Across a row of open ground it comes back
+# onto the inset office's plot (office c 0..2, r 6..8), turns, and reaches its
+# front-right doorway.
 HQ = dict(c0=3, c1=10, r0=0, r1=3)
 HQ_DOOR = 5          # the door is on the front-left face of tile (HQ_DOOR, r1 - 1)
-INSET = dict(c0=0, c1=2, r0=5, r1=7)
+INSET = dict(c0=0, c1=2, r0=6, r1=8)
+GAP_150 = (5, 5)     # the open ground the road crosses between the plots
 
 
 def _inset(band: int) -> list:
@@ -338,17 +381,23 @@ def _band150() -> list:
         _f("courier", d + 0.45, dr + 0.65, frame="right", depth=dr + d + 0.8, states=W,
            quiet="drop", view=S, gag="G5.1", part="handover"),
     ]
-    road = [(d, dr, "road-r"), (d, dr + 1, "road-r"), (d, dr + 2, "road-r"),
-            (d, dr + 3, "road-turn"), (d - 1, dr + 3, "road-c"), (d - 2, dr + 3, "road-c")]
+    road = [(d, dr, "road-r"), (d, dr + 1, "road-r"),                 # HQ's plot
+            (d, dr + 3, "road-r"), (d, dr + 4, "road-turn"),            # the inset's
+            (d - 1, dr + 4, "road-c"), (d - 2, dr + 4, "road-c")]
     link = {"road-r": "link-r", "road-turn": "link-turn", "road-c": "link-c"}
     P += [_t(n, c, r, layer="base", view=S) for (c, r, n) in road]
     P += [_t(link[n], c, r, layer="base", states=B, view=S) for (c, r, n) in road]
+    # built: across the open ground the link goes on as a network line (the VPN);
+    # without, nothing crosses it but the truck
+    P.append(_t("link-hop-r", *GAP_150, layer="base", states=B, view=S))
     P.append(_t("truck", d, dr + 1, dy=4, depth=d + dr + 2.5, states=W, view=S,
                 gag="G5.1", part="truck", primary=False))
     P += [dict(p, view=S) for p in _inset(150)]
     for p in P:
         p.setdefault("band", 150)
         p.setdefault("view", "ground")
+        if p["view"] in ("ground", "street"):
+            p.setdefault("until", 360)   # PH1-11: re-composed at 360 (_ground360 etc.)
     return P
 
 
@@ -393,7 +442,8 @@ def _band220() -> list:
            gag="G7.3a", part="board"),
         _f("engineer", WB[0] + 1.2, WB[1] - 0.6, frame="point-left", states=W,
            gag="G7.3a", part="board"),
-        _f("worker-hat", WB[0] + 2.1, WB[1] - 0.2, frame="e-left", states=B,
+        # PH1-11: the PRODUCT hat walks off at 360 (G7.3), so she leaves the board
+        _f("worker-hat", WB[0] + 2.1, WB[1] - 0.2, frame="e-left", states=B, quiet="drop",
            gag="G7.3a", part="board"),
     ]
     # more of the floor: a desk in the new bay
@@ -421,16 +471,415 @@ def _band220() -> list:
         _t("camera-bar", *tv, depth=i["r0"] + 1.6, states=B, view=S, band=220,
            gag="G2.4", part="inset", primary=False),
         # built: someone on the call, facing the screen, the wave returned
-        _t("chair", i["c0"] + 1, i["r0"] + 1, states=B, view=S, band=220,
+        # the chair stays in both states. G2.4's diff is the screen and the pose — a
+        # frozen call and someone standing at it, or a live one and the wave returned
+        # from the chair — and the chair vanishing as well was read as the building
+        # changing between states (DIA-9 drift 2). Standing next to your own empty
+        # chair is what you do when the call has died, so nothing is lost.
+        _t("chair", i["c0"] + 1, i["r0"] + 1, view=S, band=220,
            gag="G2.4", part="inset", primary=False),
         _t("worker-seated-wave", i["c0"] + 1, i["r0"] + 1, frame="a",
            depth=i["c0"] + i["r0"] + 3.01, states=B, view=S, band=220,
            gag="G2.4", part="inset", primary=False),
     ]
+    for p in P:
+        if p["view"] == S:
+            p.setdefault("until", 360)   # PH1-11: the street is re-composed at 360
     return P
 
 
-PLACEMENTS = {80: _band80(), 150: _band150(), 220: _band220()}
+# -- band 360: the ground floor, re-composed ----------------------------------------------
+
+# PH1-11. Nine ground-floor primaries by 490 (D-036 rule 4) don't fit band 80's 10 x 7
+# room at >= 44 px, so from 360 the ground floor is a new, bigger picture (12 x 9): the
+# closet runs down the back-left wall with the router at the back and the main server
+# at the front (G5.3 is a callback to G1.1: the same closet, again), the phone row
+# along the back-right wall beside it with its cords knotted into the closet door, the
+# developer and his queue further along that wall, the pit in the middle, the lobby by
+# the front door on the back-left wall, the trolley and the taped cable on the open
+# floor between them, and the front row for band 490's new hire. Every earlier gag is
+# re-placed here in its quiet form (the `band` it keeps says how quiet).
+
+CL = dict(c1=1, r1=4, door=2)          # the closet: cols 0..1, rows 0..4, door on row 2
+G_DEV = (8, 0)
+G_HELP = (10, 1)
+G_PIT = [(6, 4), (8, 4), (6, 6), (8, 6)]
+PHONES = [3, 4, 5]                     # the phone row, back-right wall, row 0
+LOBBY = 6                              # the sofa's rear tile row; the door is on row 5
+
+
+def _ground360() -> list:
+    P = []
+    # the closet's cutaway partitions: the front (+r) edge, and the +c edge with its door
+    for col in range(CL["c1"] + 1):
+        P.append(_t("partition-c", col, CL["r1"], depth=col + CL["r1"] + 1.95, band=80))
+    for row in range(CL["r1"] + 1):
+        if row == CL["door"]:
+            P.append(_t("partition-r-door-open", CL["c1"], row, depth=CL["c1"] + row + 1.9,
+                        states=W, band=80))
+            P.append(_t("partition-r-door-closed", CL["c1"], row,
+                        depth=CL["c1"] + row + 1.9, states=B, band=80))
+        else:
+            name = "partition-r-end" if row == CL["r1"] else "partition-r"
+            P.append(_t(name, CL["c1"], row, depth=CL["c1"] + row + 1.95, band=80))
+    # G1.1, at the back of the closet
+    P += [
+        _t("closet-shelf", 0, 0, depth=0.6, states=W, id="router", gag="G1.1",
+           part="closet", band=80),
+        _t("mop-bucket", 0, 1, depth=1.5, states=W, gag="G1.1", part="closet", band=80),
+        _t("box-fan", 1, 1, dx=-10, dy=-3, depth=2.2, states=W, gag="G1.1",
+           part="closet", band=80),
+        _t("cable-spill", CL["c1"] + 1, CL["door"], depth=CL["door"] + 2.6, states=W,
+           band=80),
+        _t("rack", 0, 0, depth=0.8, states=B, gag="G1.1", part="closet", band=80),
+        _t("firewall", 0, 0, depth=0.81, states=B, id="firewall", gag="G1.1",
+           part="closet", band=80),
+    ]
+    # G5.3, at the front of the same closet: the main server, two fans on it, the sign
+    P += [
+        # depth 6.3, not 3.2: at 3.2 a closet upright sorted in front of the sign and
+        # took a column out of the final F, the same way the fan's wind streaks were
+        # eating MAIN SERVER's R. A sign taped to a cutaway wall should never be behind
+        # anything in the room it labels.
+        _f("sign-dnto", 0.12, 2.2, dy=-25, depth=6.3, states=W, gag="G5.3",
+           part="server"),
+        _t("server-tower", 0, 3, states=W, id="tower", gag="G5.3", part="server"),
+        dict(sprite="label-main-server", attach={"id": "tower", "point": "label"},
+             states=W, gag="G5.3", part="server"),
+        # quiet after 360 (DIA-5, D-041): at 490 the fan on its crate beside the tower
+        # merged tower, crate and the shelf behind into one pile; the face-on fan out
+        # front carries "kept alive by fans" on its own (DIA-9)
+        _t("box-fan-l", 1, 3, dx=-2, depth=5.0, states=W, quiet="drop", gag="G5.3",
+           part="server"),
+        # The second fan comes off its crate and out onto the open floor, face-on and
+        # half again the size (DIA-9: "weak — something is wrong in that closet reads,
+        # it is being kept alive by household fans does not"). Two 3/4-turned grey
+        # squares inside an alcove of crates, shelves and a tower were simply more
+        # boxes; a circle out in the open is the one silhouette nothing else in this
+        # corner can be mistaken for, and being outside the closet it has pale floor
+        # behind it instead of clutter.
+        _t("box-fan-face", 2, 5, dx=-9, depth=8.0, states=W, gag="G5.3", part="server"),
+        # ...and the beat that was written down but never drawn: the person who touched
+        # it. Mid-step backing away, both hands up, facing the tower. ~12 px, and it is
+        # the difference between "a corner with machines in it" and "nobody in this
+        # building may touch that".
+        # not `quiet="drop"`: the crowd extras around a gag can thin out at later bands,
+        # but this figure *is* the gag's read, and at 490 the fan was left standing on
+        # open floor with nobody recoiling from it
+        _f("worker-flinch", 2, 5, dx=15, dy=15, frame="c-left", depth=8.1, states=W,
+           gag="G5.3", part="server"),
+        _t("rack", 0, 3, depth=3.8, states=B, id="rack2", gag="G5.3", part="server"),
+        _f("card-virtualised", 0.12, 4.3, dy=-28, depth=3.2, states=B, gag="G5.3",
+           part="server"),
+        _f("icon-dr", 0.12, 2.35, dy=-24, depth=3.1, states=B, gag="G5.3",
+           part="server"),
+    ]
+    # G5.4, the phone row: two phones and the coin box, the cords knotted into the
+    # closet door / headsets, no cords, the receipt on the wall
+    looks = {3: "c", 4: "d"}
+    for col in PHONES:
+        if col in looks:
+            P.append(_t("desk-phone", col, 0, states=W, gag="G5.4", part="phones"))
+            P.append(_t("worker-seated", col, 0, frame=looks[col], depth=col + 1.01,
+                        states=W, gag="G5.4", part="phones"))
+        else:
+            P.append(_t("desk-coinphone", col, 0, states=W, gag="G5.4", part="phones"))
+            P.append(_f("worker-coin", col + 1.55, 0.5, frame="b-left", depth=col + 1.8,
+                        states=W, gag="G5.4", part="phones"))
+        P.append(_t("desk", col, 0, states=B, gag="G5.4", part="phones"))
+        # `c`, `d`, `b` — not `c`, `b`, `d`. The without row seats `c` and `d` at the
+        # first two desks and sends the third person to the coin phone, so the built row
+        # has to seat `c` and `d` at those same two desks or the toggle changes a
+        # bystander's shirt at desk two for no reason the picture gives (DIA-21 §3).
+        # With this order only `b` moves, which is the story: one person got up.
+        P.append(_t("worker-seated-headset", col, 0, frame="cdb"[col - PHONES[0]],
+                    depth=col + 1.01, states=B, gag="G5.4", part="phones"))
+    P += [
+        _t("phone-knot", CL["c1"] + 1, 1, depth=3.4, layer="main", states=W, gag="G5.4",
+           part="phones"),
+        _f("receipt-33", 4.55, 0.02, dy=-25, depth=0.5, states=B, gag="G5.4",
+           part="phones"),
+        # the same receipt, unspooled: the primary read for G5.4 (DIA-9). It hangs on
+        # the clear stretch of back-right wall past the last phone desk — the phones
+        # themselves stay, but they are no longer being asked to carry the gag — and
+        # pools on the open floor in front of it, where nothing else is drawn.
+        _f("receipt-runaway", 6.85, 1.05, depth=7.6, states=W, gag="G5.4",
+           part="phones"),
+    ]
+    # G2.1, the developer and his queue further along the back-right wall
+    dc, dr = G_DEV
+    P += [
+        _t("desk-dev", dc, dr, states=W, id="desk-dev", gag="G2.1", part="queue", band=80),
+        _t("desk-dev-built", dc, dr, states=B, band=80),
+        _t("worker-seated", dc, dr, frame="b", depth=dc + dr + 1.01, band=80),
+    ]
+    queue = [("worker-c", "idle-left"), ("worker-queue", "a-left"), ("worker-e", "idle-left"),
+             ("worker-d", "idle-left"), ("worker-b", "idle-left"), ("worker-c", "idle-left")]
+    for i, (spr, fr) in enumerate(queue):
+        P.append(_f(spr, dc + 0.95 + i * 0.62, 1.65, frame=fr, states=W,
+                    quiet="drop" if i >= 3 else "keep", gag="G2.1", part="queue", band=80))
+    hc, hr = G_HELP
+    P += [
+        _t("desk", hc, hr, states=B, gag="G2.1", part="helpdesk", band=80),
+        _t("worker-seated", hc, hr, frame="e", depth=hc + hr + 1.01, states=B,
+           gag="G2.1", part="helpdesk", band=80),
+        _f("sla-board", hc + 0.45, hr - 0.6, depth=hc + hr - 0.15, states=B,
+           gag="G2.1", part="helpdesk", band=80),
+    ]
+    # G1.2, the pit
+    # One look per seat, and the same four people in both states. The previous pass held
+    # two maps and they disagreed at G_PIT[2]: that chair was look "e" in built and look
+    # "c" in without, so flipping the toggle changed a bystander's hair and shirt, and a
+    # viewer who sees people swapped stops believing the two pictures are the same
+    # building (DIA-9 drift 1). It also left one chair empty in without only — which at
+    # band 80 is the colleague whose sticky note is being peeled, but the peeler goes
+    # quiet at 360, so at this band the empty chair explained nothing. Here G1.2 is
+    # carried entirely by the monitors: sticky notes, or padlocks. Nothing else moves.
+    PIT_LOOK = dict(zip(G_PIT, "aced"))
+    for (col, row) in G_PIT:
+        P.append(_t("desk-notes", col, row, states=W, id=f"pit-{col}-{row}",
+                    gag="G1.2", part="pit", band=80))
+        P.append(_t("desk-padlock", col, row, states=B, gag="G1.2", part="pit", band=80))
+        P.append(_t("worker-seated", col, row, frame=PIT_LOOK[(col, row)],
+                    depth=col + row + 1.01, gag="G1.2", part="pit", band=80))
+    # G2.3, the lobby by the front door
+    P += [
+        _t("sofa", 0, LOBBY, depth=LOBBY + 1.5, gag="G2.3", part="lobby", band=80),
+        _t("plant", 0, 8, depth=8.4, band=80),
+        _f("visitor", 0.95, LOBBY + 1.05, depth=LOBBY + 1.9, id="visitor", gag="G2.3",
+           part="lobby", band=80),
+    ]
+    for tgt in ["router"] + [f"pit-{c}-{r}" for (c, r) in G_PIT]:
+        P.append(dict(line="dotted", layer="over", states=W, gag="G2.3", part="lobby",
+                      band=80, **{"from": {"id": "visitor", "point": "net"},
+                                  "to": {"id": tgt, "point": "net"}}))
+    P.append(dict(line="dotted", layer="over", states=B, gag="G2.3", part="lobby", band=80,
+                  **{"from": {"id": "visitor", "point": "net"},
+                     "to": {"id": "firewall", "point": "net"}}))
+    P.append(_wifi(band=80))
+    # G3.2, the trolley on open floor beside the closet / the shelf in its place
+    P += [
+        _t("trolley", 3, 4, states=W, id="trolley", gag="G3.2", part="trolley", band=150),
+        dict(sprite="note-dave-r", attach={"id": "trolley", "point": "note-tip"},
+             states=W, layer="over", gag="G3.2", part="trolley", band=150),
+        _t("laptop-shelf", 3, 4, states=B, gag="G3.2", part="trolley", band=150),
+    ]
+    # G2.2, the taped cable: out under the closet's front wall, down past the lobby,
+    # along the front of the room and up into the pit; the sign at the corner
+    P += [
+        _t("cable-tape-360", 1, 5, layer="base", states=W, band=80),
+        _t("sign-caution", 4, 8, dx=-4, dy=-2, depth=13.2, states=W, gag="G2.2",
+           part="cable", band=80),
+        _f("worker-c", 3.2, 8.5, frame="step-right", depth=14.0, states=W, quiet="drop",
+           gag="G2.2", part="cable", band=80),
+    ]
+    for p in P:
+        p.setdefault("band", 360)
+        p["since"] = 360
+        p["view"] = "ground"
+    return P
+
+
+# -- band 360: floor 2's corridor (G7.3) -------------------------------------------------
+
+WALL_C = 0.95         # floor-2: the aisle along the back-left wall, clear of every desk
+
+
+def _band360() -> list:
+    """G7.3 walks the aisle along floor-2's back-left wall (the "first-floor corridor"),
+    well clear of the CRM desks' cards: without, one manager under five hats; built,
+    five people in the same aisle with one hat each."""
+    F2 = "floor-2"
+    P = [
+        _f("worker-hats", WALL_C + 0.2, 5.3, frame="wobble", view=F2, gag="G7.3",
+           part="hats"),
+    ]
+    # built: five hats on five heads; the original manager (look a) keeps INFRA
+    for k, (label, look) in enumerate((("product", "e"), ("sec", "b"), ("infra", "a"),
+                                       ("dev", "d"), ("support", "c"))):
+        P.append(_f("worker-onehat", WALL_C, 2.0 + 1.45 * k, frame=f"{look}-{label}",
+                    states=B, view=F2, gag="G7.3", part="hats"))
+    for p in P:
+        p.setdefault("band", 360)
+        p.setdefault("states", W)
+    return P
+
+
+# -- band 360: the street, re-composed ---------------------------------------------------
+
+HQ2 = dict(anchor=(10, 2), door=(8, 2))     # hq-5 / hq-6: c 7..10, r 0..2
+INSET2 = dict(c0=0, c1=4, r0=3, r1=7)       # 5 x 5, doorway on the +c side at row 4
+INSET2_DOOR = 4
+GAP_360 = (6, 4)                            # DIA-5: open ground between the two plots
+BADGE_ROW, PROPPED_ROW = 5, 7               # G6.4's two doors, same +c side (490)
+G56 = (0, 6)                                # G5.6's desk: back-left wall, under a window
+
+
+def _street360() -> list:
+    S = "street"
+    i = INSET2
+    P = []
+    # HQ: five storeys at 360, six at 490 (the storeys narrated in BANDS-AND-GAGS.md)
+    P.append(_t("hq-5", *HQ2["anchor"], depth=1.0, band=360, until=490))
+    P.append(_t("hq-6", *HQ2["anchor"], depth=1.0, band=490, since=490))
+    # G5.1: HQ's door (the handover itself went quiet at 220), the road, the truck / link
+    d, dr = HQ2["door"]
+    P += [
+        _t("hq-door", d, dr, frame="open", depth=1.1, states=W, gag="G5.1",
+           part="handover", band=150),
+        _t("hq-door", d, dr, frame="closed", depth=1.1, states=B, gag="G5.1",
+           part="handover", band=150),
+    ]
+    # DIA-5: the road leaves HQ's plot at its back-left edge (c 7) and comes back onto
+    # the inset office's plot at c 5; GAP_360 between is open ground
+    road = [(d, dr + 1, "road-r"), (d, dr + 2, "road-turn")] + \
+           [(cc, dr + 2, "road-c") for cc in range(d - 1, i["c1"], -1) if cc != GAP_360[0]]
+    link = {"road-r": "link-r", "road-turn": "link-turn", "road-c": "link-c"}
+    P += [_t(n, c, r, layer="base", band=150) for (c, r, n) in road]
+    P += [_t(link[n], c, r, layer="base", states=B, band=150) for (c, r, n) in road]
+    P.append(_t("link-hop-c", *GAP_360, layer="base", states=B, band=150))
+    P.append(_t("truck-c", d - 1, dr + 2, dy=1, depth=d + dr + 2.5, states=W,
+                gag="G5.1", part="truck", primary=False, band=150))
+    # the inset office: floor, back walls (a window on the back-right for the NAS), the
+    # cutaway front partitions with the doorway the road reaches
+    for row in range(i["r0"], i["r1"] + 1):
+        for col in range(i["c0"], i["c1"] + 1):
+            P.append(_t("floor-office", col, row, layer="base", band=150))
+    P.append(_t("wall-corner", i["c0"], i["r0"], layer="base", band=150))
+    for row in range(i["r0"], i["r1"] + 1):
+        name = "wall-back-l-end" if row == i["r1"] else (
+            "wall-back-l-window" if row == G56[1] - 2 else "wall-back-l")
+        P.append(_t(name, i["c0"], row, layer="base", band=150))
+    for col in range(i["c0"], i["c1"] + 1):
+        name = "wall-back-r-end" if col == i["c1"] else (
+            "wall-back-r-window" if col == i["c1"] - 1 else "wall-back-r")
+        P.append(_t(name, col, i["r0"], layer="base", band=150))
+    for col in range(i["c0"], i["c1"] + 1):
+        name = "partition-c-end" if col == i["c1"] else "partition-c"
+        P.append(_t(name, col, i["r1"], depth=col + i["r1"] + 1.95, band=150))
+    for row in range(i["r0"], i["r1"] + 1):
+        if row == INSET2_DOOR:
+            name = "partition-r-doorway"
+        elif row in (BADGE_ROW, PROPPED_ROW):
+            continue                      # drawn per band below
+        else:
+            name = "partition-r"
+        P.append(_t(name, i["c1"], row, depth=i["c1"] + row + 1.95, band=150))
+    for row in (BADGE_ROW, PROPPED_ROW):
+        name = "partition-r-end" if row == i["r1"] else "partition-r"
+        # (from 490 G6.4's doors take these two segments)
+        P.append(_t(name, i["c1"], row, depth=i["c1"] + row + 1.95, band=150, until=490))
+    # a desk under the back-right window, someone at it (both states)
+    P.append(_t("desk", i["c1"] - 1, i["r0"], band=150))
+    P.append(_t("worker-seated", i["c1"] - 1, i["r0"], frame="b",
+                depth=i["c1"] - 1 + i["r0"] + 1.01, band=150))
+    # G2.4's inset part: the screen on the back-right wall, the waver beside it / the
+    # camera bar, the wave returned from a chair
+    tv = (i["c0"], i["r0"])
+    P += [
+        _t("tv-frozen-inset", *tv, depth=i["r0"] + 1.5, states=W, band=220, gag="G2.4",
+           part="inset", primary=False),
+        _f("worker-wave", i["c0"] + 0.3, i["r0"] + 0.95, frame="c-right", states=W,
+           band=220, gag="G2.4", part="inset", primary=False),
+        _t("tv-live-inset", *tv, depth=i["r0"] + 1.5, states=B, band=220, gag="G2.4",
+           part="inset", primary=False),
+        _t("camera-bar", *tv, depth=i["r0"] + 1.6, states=B, band=220, gag="G2.4",
+           part="inset", primary=False),
+        # both states — see the note on the same placement in the band-220 street
+        _t("chair", i["c0"] + 1, i["r0"] + 1, band=220, gag="G2.4",
+           part="inset", primary=False),
+        _t("worker-seated-wave", i["c0"] + 1, i["r0"] + 1, frame="a",
+           depth=i["c0"] + i["r0"] + 3.01, states=B, band=220, gag="G2.4", part="inset",
+           primary=False),
+    ]
+    # G5.6: the desk by the window, the drives on it, someone under it, the NAS on the
+    # sill / the same desk, a storage icon on its screen, its owner sitting up
+    dc, drr = G56
+    P += [
+        _t("desk-drives", dc, drr, states=W, id="drives-desk", gag="G5.6", part="data",
+           band=360),
+        dict(sprite="drives-final", attach={"id": "drives-desk", "point": "drives"},
+             states=W, layer="over", gag="G5.6", part="data", band=360),
+        _t("worker-under", dc, drr, frame="hunt", depth=dc + drr + 1.02, states=W,
+           gag="G5.6", part="data", band=360),
+        _t("nas", i["c0"], drr - 2, dy=-18, depth=drr - 0.8, layer="main",
+           states=W, gag="G5.6", part="data", band=360),
+        _t("desk", dc, drr, states=B, id="data-desk", gag="G5.6", part="data", band=360),
+        _t("worker-seated", dc, drr, frame="d", depth=dc + drr + 1.01, states=B,
+           gag="G5.6", part="data", band=360),
+        dict(sprite="icon-storage", attach={"id": "data-desk", "point": "net"}, states=B,
+             layer="over", gag="G5.6", part="data", band=360),
+    ]
+    for p in P:
+        p.setdefault("band", 360)
+        p["since"] = max(360, p.get("since", 360))
+        p["view"] = S
+    return P
+
+
+# -- band 490: the new hire (ground), the badge that doesn't (street) ---------------------
+
+NEW_HIRE = (11, 6)          # the front row's end, clear of the pit and the queue
+
+
+def _band490() -> list:
+    c, r = NEW_HIRE
+    P = [
+        # G3.1 without: a bare desk, the coat still on, the calendar shedding pages, the
+        # balloon going soft / a laptop, a badge, a coffee, one calendar page
+        _t("desk-bare", c, r, states=W, id="hire-desk", gag="G3.1", part="desk"),
+        dict(sprite="calendar-flip", frame="flip", attach={"id": "hire-desk", "point": "cal"},
+             states=W, gag="G3.1", part="desk"),
+        _t("worker-coat", c, r, depth=c + r + 1.01, states=W, gag="G3.1", part="desk"),
+        # the balloon lies on the *floor*, in front of the desk beside the hire's bag —
+        # not on the desktop. On the slab it landed inside the grey cubicle column's
+        # silhouette at 1x and read as a red drawer belonging to the calendar unit, and
+        # a desk with a red mass on it is not a bare desk (DIA-21). Down here it is a
+        # thing on the floor that nobody picked up, the desktop is left genuinely empty
+        # so the ghost rectangle is the only mark on it, and the two cues stop competing.
+        _f("balloon-welcome", c - 0.45, r + 1.45, frame="deflate",
+           depth=c + r + 2.4, states=W, gag="G3.1", part="desk"),
+        _t("desk-laptop", c, r, states=B, id="hire-desk-b", gag="G3.1", part="desk"),
+        dict(sprite="calendar-one", attach={"id": "hire-desk-b", "point": "cal"},
+             states=B, gag="G3.1", part="desk"),
+        _t("worker-seated", c, r, frame="e", depth=c + r + 1.01, states=B, gag="G3.1",
+           part="desk"),
+    ]
+    for p in P:
+        p.setdefault("band", 490)
+        p["since"] = 490
+        p["view"] = "ground"
+    i = INSET2
+    S = []
+    # G6.4: the inset office's door, shut, the reader red, someone tapping a badge at it;
+    # the next door propped open with an office chair / the reader green, the door
+    # shut, the chair back at a desk. No camera dome: DIA-37 rated it "doesn't read"
+    # twice over, and the green reader and the returned chair already carry "built".
+    S += [
+        _t("inset-door-badge", i["c1"], BADGE_ROW, frame="red", depth=i["c1"] + BADGE_ROW + 1.95,
+           states=W, gag="G6.4", part="door"),
+        _t("inset-door-badge", i["c1"], BADGE_ROW, frame="green",
+           depth=i["c1"] + BADGE_ROW + 1.95, states=B, gag="G6.4", part="door"),
+        _t("inset-door-propped", i["c1"], PROPPED_ROW, frame="propped",
+           depth=i["c1"] + PROPPED_ROW + 1.95, states=W, gag="G6.4", part="door"),
+        _t("inset-door-propped", i["c1"], PROPPED_ROW, frame="closed",
+           depth=i["c1"] + PROPPED_ROW + 1.95, states=B, gag="G6.4", part="door"),
+        _f("worker-badge", i["c1"] + 1.55, BADGE_ROW + 0.08, frame="c-left",
+           depth=i["c1"] + BADGE_ROW + 3.0, gag="G6.4", part="door"),
+        # the desk the chair came from (chairless: `desk-drives` is the plain desk
+        # without its chair); built, the chair is back at it
+        _t("desk-drives", 2, i["r1"] - 1, band=490),
+        _t("chair-back", 2, i["r1"] - 1, states=B, gag="G6.4", part="chair", primary=False),
+    ]
+    for p in S:
+        p.setdefault("band", 490)
+        p["since"] = 490
+        p["view"] = "street"
+    return P + S
+
+
+PLACEMENTS = {80: _band80(), 150: _band150(), 220: _band220(),
+              360: _ground360() + _band360() + _street360(), 490: _band490()}
 
 # A later band's building replaces an earlier one's (HQ gains a storey): the earlier
 # sprite is superseded rather than drawn twice.
@@ -453,7 +902,11 @@ def scene(band: int, state: str) -> dict:
         for p in group:
             if state not in p.get("states", BOTH):
                 continue
-            if b < band:
+            # PH1-11: a band may re-compose a room (the ground floor from 360); what
+            # the old room held stops at `until`, the new room starts at `since`
+            if not (p.get("since", 0) <= band < p.get("until", 10 ** 6)):
+                continue
+            if p.get("band", b) < band:
                 q = p.get("quiet", "keep")
                 if q == "drop":
                     continue

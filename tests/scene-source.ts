@@ -18,11 +18,17 @@ export interface SceneIndex {
 export interface SceneHotspot {
   gagId: string;
   part?: string;
+  primary?: boolean;
   placeholder?: boolean;
 }
 
 export interface SceneView {
   id: string;
+  kind: 'room' | 'closeup';
+  parent?: string;
+  label: string;
+  size: { w: number; h: number };
+  rect?: { x: number; y: number; w: number; h: number };
   default?: boolean;
   hotspots: SceneHotspot[];
 }
@@ -33,8 +39,10 @@ export interface SceneFile {
   views: SceneView[];
 }
 
+/** True once the D-042 exporter has landed: `public/sprites/scenes/` exists AND is schema 2. While it is schema 1 the painter refuses it ("not drawn yet"), so the specs run on the hand-written fixtures instead — and start asserting the real export the moment it is schema 2, with no change here. */
 export function hasRealScenes(): boolean {
-  return existsSync(`${realDir}index.json`);
+  if (!existsSync(`${realDir}index.json`)) return false;
+  return (JSON.parse(readFileSync(`${realDir}index.json`, 'utf-8')) as { schema?: number }).schema === 2;
 }
 
 export function sceneSourceDir(): string {
@@ -50,7 +58,7 @@ export function readSceneFile(fileName: string): SceneFile {
 }
 
 /**
- * Serves the hand-written band-80 fixture at the real `/sprites/scenes/…`
+ * Serves the hand-written band-80 and band-750 fixtures at the real `/sprites/scenes/…`
  * URLs the app fetches — but ONLY when the real export doesn't exist yet.
  * When it does, this is a no-op and every request hits the dev/preview
  * server's actual public/sprites/scenes/ directory: a merge that lands
@@ -62,7 +70,7 @@ export async function interceptFixtureScenes(page: Page): Promise<void> {
   await page.route('**/sprites/scenes/index.json', (route) =>
     route.fulfill({ contentType: 'application/json', body: index })
   );
-  for (const fileName of ['80-built.json', '80-without.json']) {
+  for (const fileName of ['80-built.json', '80-without.json', '750-built.json', '750-without.json']) {
     const body = readFileSync(`${fixturesDir}${fileName}`, 'utf-8');
     await page.route(`**/sprites/scenes/${fileName}`, (route) =>
       route.fulfill({ contentType: 'application/json', body })
@@ -88,7 +96,7 @@ export function expectedHotspotCount(band: number | 'beyond', state: 'built' | '
   const fileName = entry[state];
   if (!fileName) return 0;
   const scene = readSceneFile(fileName);
-  const view = scene.views.find((v) => v.default) ?? scene.views[0];
+  const view = scene.views.find((v) => v.default) ?? scene.views.find((v) => v.kind === 'closeup') ?? scene.views[0];
   return view ? view.hotspots.length : 0;
 }
 

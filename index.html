@@ -40,13 +40,27 @@
         <p class="toggle__subtitle"></p>
         <p class="toggle__nudge"></p>
       </div>
-      <!-- S1: width/height reserve the scene's final box (src/scene/layout.ts's
-           BUFFER_W x BUFFER_H, 680x520 — checked against drift by
-           src/scene/canvas-size.test.ts) so the canvas doesn't grow from
-           the browser's 300x150 default once main.ts sizes it. -->
+      <!-- D-042a: the room tab row above the scene and the stepper row
+           below it are static shell too, each a fixed height, so a band
+           or view change never moves the page (CLS 0). src/main.ts fills
+           the tabs in from the scene file and the labels from
+           content.json's `ui` block; nothing visitor-read is written here.
+           Both prev/next start aria-disabled (never `disabled`, so focus
+           is not lost at either end). -->
+      <div class="scene-views" id="scene-views" role="tablist" aria-label="Building view"></div>
+      <!-- S1: width/height reserve the scene's final box (3:2, D-042a:
+           full viewport width up to 430px, so a 180x120 close-up paints at
+           >= 1.9 css px per art px on a 360px phone) so the canvas doesn't
+           grow from the browser's 300x150 default once main.ts sizes it. -->
       <div class="scene-wrap" id="scene-wrap">
-        <canvas id="scene-canvas" width="680" height="520"></canvas>
+        <canvas id="scene-canvas" width="360" height="240"></canvas>
         <div class="hotspots-layer" id="hotspots-layer"></div>
+      </div>
+      <div class="scene-stepper" id="scene-stepper">
+        <button type="button" class="scene-stepper__button scene-stepper__prev" aria-disabled="true">&#8249;</button>
+        <p class="scene-stepper__label"></p>
+        <button type="button" class="scene-stepper__button scene-stepper__next" aria-disabled="true">&#8250;</button>
+        <button type="button" class="scene-stepper__floor" aria-pressed="false" aria-disabled="true"></button>
       </div>
       <div id="panel-root"></div>
       <div id="checklist-root"></div>

@@ -1,9 +1,13 @@
 {
-  "schema": 1,
+  "schema": 2,
   "bands": {
     "80": {
       "built": "80-built.json",
       "without": "80-without.json"
+    },
+    "750": {
+      "built": "750-built.json",
+      "without": "750-without.json"
     }
   },
   "beyond": "750",

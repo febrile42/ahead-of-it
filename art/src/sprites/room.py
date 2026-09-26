@@ -258,6 +258,44 @@ def _slab_r(iso: Iso):
     iso.outline(set(faces), "outline", "v")
 
 
+LOWER_H = 15.0      # how much of the storey below an upper floor shows under its slab
+
+
+def _slab_upper(iso: Iso, side: str):
+    """DIA-5 item 3: an upper floor's slab sits on the top of the storey below it — a
+    strip of exterior wall with its row of windows, cut off square — so floor-2 reads
+    as upstairs, not as a second ground-floor room. The windows are HQ's (street.py),
+    so the room below is recognisably the same building. One tile's run of it."""
+    if side == "l":
+        _slab_l(iso)
+        f = iso.box(0, 7.9, -5 - LOWER_H, 8, 8, -5, top=None, left="wall", right=None,
+                    outline=None)
+        iso.paint(f, "L", 8, _lower_window("glass"))
+        iso.outline(set(f), "outline", "v")
+    else:
+        _slab_r(iso)
+        f = iso.box(7.9, 0, -5 - LOWER_H, 8, 8, -5, top=None, left=None,
+                    right="wall-shadow", outline=None)
+        iso.paint(f, "R", 8, _lower_window("glass-dark"))
+        iso.outline(set(f), "outline", "v")
+
+
+def _lower_window(glass: str):
+    z0, z1 = -5 - LOWER_H + 3.0, -5 - 2.0
+
+    def fn(u, z):
+        if not (1.8 <= u < 6.2 and z0 <= z < z1):
+            return None
+        if u < 2.3 or u >= 5.7 or z < z0 + 0.6 or z >= z1 - 0.6:
+            return "outline"
+        if abs(u - 4.0) < 0.3:
+            return "wall-trim"
+        if z > z1 - 3 and u < 3.4:
+            return "glass-highlight"
+        return glass
+    return fn
+
+
 def build_all() -> dict:
     """{name: Sprite}. Floors are returned as Sprites too (anchor (16, 16))."""
     from ..vox import Sprite
@@ -287,5 +325,7 @@ def build_all() -> dict:
         "glass-r-door": make(lambda iso, c: _glass(iso, "r", door=True)),
         "slab-l": make(lambda iso, c: _slab_l(iso)),
         "slab-r": make(lambda iso, c: _slab_r(iso)),
+        "slab-l-upper": make(lambda iso, c: _slab_upper(iso, "l")),
+        "slab-r-upper": make(lambda iso, c: _slab_upper(iso, "r")),
     }
     return out

@@ -287,3 +287,130 @@ HQ's exterior with the road and the inset office. Amends D-037 items 2, 7 and 8:
 5. G2.4's second part is staged as one call: the inset office's screen shows the HQ worker
    frozen mid-wave, with an inset worker beside it waving back. That is the drawable reading
    of "a worker on each side waving".
+
+**D-039 · 2026-09-25 · A band may re-compose a room, not only add to it.**
+Recorded after the fact: PH1-11 (`5be5870`, merged as DIA-29) introduced the mechanism, and
+the D-038 rule that a view is a *composed room* had no answer for a room that stops fitting.
+At 360 the ground floor could not seat nine primary hotspots 44 px apart (D-036 rule 7, no
+exceptions per D-038) by adding to the 220 room, so the room itself was re-laid.
+1. **Mechanism (`art/src/layout.py`).** A placement may carry `since` and `until`, in
+   headcount-band units: it is on screen only when `since <= band < until`. `scene()` applies
+   the window before the quiet rules, so it is a filter on *which room*, not on how loud.
+   Band 80's ground floor and 150/220's ground and street placements end at `until=360`; the
+   360 ground and street are placed with `since=360`; HQ is `hq-5` for `360 <= band < 490`
+   and `hq-6` from 490.
+2. **What stays true.** R-03a: band N still holds every gag with band <= N in the matching
+   state; a re-composed gag is re-placed, never dropped. Quiet rules still key on the
+   placement's own `band`, so a band-80 gag re-placed in the 360 room is quieted like any
+   earlier-band gag. D-038's "no exceptions" is untouched: every re-composed room passes the
+   44 px and two-part rules on its own (closest ground pair at 360: G1.1/G5.3, 47 px).
+3. **Consequence for content and evidence.** The same gag can sit somewhere else in a later
+   band, and a view's size can change (ground 282 x 188 at 220, 346 x 220 at 360; HQ's
+   footprint goes from 7 x 3 tiles at 150/220, `hq-3`/`hq-4`, to 4 x 3, `hq-5`/`hq-6`, from
+   360). That is scenery, not a receipt (D-038 item 4). `BANDS-AND-GAGS.md` "Where" is the
+   *home view* (D-036), not a coordinate; where the two differ, the home view wins.
+4. **Consequence for the exporter.** `since`/`until` are art-side only. They are resolved
+   when the scene is built and are **not written to the scene files**. The exporter emits a
+   plain, complete `entries` list per band x state x view.
+5. **Consequence for the painter: none, deliberately.** The web reads scene files and never
+   sees a window (D-035). It must not learn to compare bands, cache a room across bands, or
+   assume a gag's hotspot is where it was at the previous band. Each band's file is
+   self-contained. Hotspots are derived from the file being painted, so buttons follow the
+   re-composed room automatically.
+6. **Guardrail.** Any use of `since`/`until` to hide an art-rule failure rather than to fit a
+   larger room is an exception under D-038 item 3 and needs its own decision.
+
+**D-041 · 2026-09-25 · Three 360/490 "without" lines follow the art that reads.**
+Three rounds of picture review at 390px (DIA-9, DIA-21, DIA-28) showed that three locked
+"without" lines could not be drawn legibly as written. `BANDS-AND-GAGS.md` now describes
+what is drawn. (D-039 is held for the room re-composition rule and D-040 for the
+hallway-test kit, both still on open branches.) No receipt, date or figure changes.
+1. **G3.1:** the coat and the `WELCOME!` balloon are removed. A worn coat changes the hire's
+   torso colour between states, which breaks the rule that a person must not change across
+   the toggle. With the coat off the hire, nowhere in that corner reads. The absence is
+   carried by an outline where the laptop should be.
+2. **G5.4:** the bill on the wall carries **no figure**. `−33%` is E-10, the saving VoIP
+   delivered. It belongs only to the "already" state, and E-10 never gives a base figure to
+   print instead. What carries the gag is the roll: a bill that will not stop.
+3. **G5.3:** "everyone freezes" is replaced by the drawn beat, one figure backing away with
+   their hands up.
+Deferred to the Phase 1 polish list, not rated weak: the G6.4 camera dome, the §5 closet
+density, `DAVE?` on the trolley body, and the G5.1 truck reading as a crate.
+
+**D-042 · 2026-09-25 · Phone-scale close-up views; rooms become establishing shots.**
+Josh flagged on DIA-36 that the art is too small on phones, and the Art Director measured
+it: inside the 360:240 box a 390 px phone paints current rooms at 1.0–1.33 css px per art
+px, so a 24 px person is about 4 mm tall. Reviews had been judging 4× plates. Gags per room
+grow with the band (750: 12 on ground), and at 1× a 12-gag room cannot "read cold at 390 in
+under 2 s". Proposal: DIA-36 document `proposal`. Accepted with one change (item 1: 180 × 120,
+not 195 × 130). Amends D-036 rules 2, 4, 6 and 7 and D-038 item 1:
+1. **Close-ups.** A close-up view is at most **180 × 120 native px** and holds **1–3
+   primary hotspots**. 195 × 130 lands on exactly 2 css px per art px only from 390 px up;
+   at 360/375 px it drops to 1.5. 180 × 120 lands on 1.9–2.33 on every phone 360–430 px
+   wide at dpr 2, 2.625 and 3. That is the size the art is judged at.
+2. **Rooms stay.** Each D-036 room (`ground`, `floor-2`…, `top`, `street`) is kept as the
+   establishing view for its close-ups. A room exists only if it has at least one
+   close-up. Rooms carry **no gag hotspots**, because at 1× they would be tap targets
+   millimetres apart. How a visitor gets from a room to its close-ups is the web's call
+   (item 7).
+3. **Sprites unchanged.** A close-up is a rectangle cut from its parent room's own
+   native render, not a new drawing. Its parity golden is that crop, and `check_scenes.py`
+   proves it equals the room render at `rect`. This is D-038's "each room's own render", not
+   the plate cropping D-038 retired.
+4. **Primaries.** Each gag has exactly one primary per file. It sits in a close-up whose
+   parent is the gag's home room (D-036 rule 4's table now names home *rooms*).
+   Non-primary parts may sit in other close-ups.
+5. **Spacing.** The rule is **44 css px** between primary centres on a 360–430 px phone.
+   In a close-up (≥ 1.9 css px per art px) that is **≥ 24 native px**, and `check_scenes.py`
+   and the contract test both enforce it with no exceptions (D-038 item 3 stands).
+6. **Default view.** The close-up holding the most of the current band's own primaries,
+   ties to the earlier one. First paint must be readable at true size. The room is one
+   step away.
+7. **Web's call, within limits.** Navigation (tabs grouped by room, tapping a room to
+   enter, or both), transitions and the scene box size belong to the Web Engineer. The
+   limits: a 180 × 120 close-up paints at ≥ 1.9 css px per art px at 360 and 390 px, dpr 2
+   and 3 (a Playwright assertion); about 10 close-ups at 750 stay reachable at 390 px by
+   touch and keyboard; the R-14 text list stays in sync. The contract fields
+   (`SCENE-FORMAT.md`: `kind`, `parent`, `rect`, id scheme) are proposed here, and the Web
+   Engineer can counter before the exporter merges.
+8. **Review at true size.** Every picture review (the "reads cold" test, legibility passes,
+   the hallway test) uses 390 px mocks at the real painted scale, never 4× plates.
+9. **Consequences.** The DIA-3 hold is lifted: 610/750 rooms are composed so that their
+   gags fall into clusters of ≤ 3 that each fit 180 × 120 at 24 px spacing. 80–490 are
+   re-exported, not redrawn. The exporter and `check_scenes.py` belong to the Art Director.
+   The painter, navigation and contract test belong to the Web Engineer. Both are merged
+   together in a scratch worktree before either lands on `develop` (the CLAUDE.md
+   integration rule).
+
+**D-042a · 2026-09-25 · Web sign-off on the close-up contract, and the navigation ruling
+(DIA-39; Web Engineer, within D-042 item 7).**
+Contract: `kind`, `parent`, `rect` and the `<room>.<n>` ids are accepted as proposed.
+Counters, all written into `SCENE-FORMAT.md`: (1) `schema` becomes 2, and the painter
+refuses any other value; (2) a close-up's entries, hotspots and `focus` are in the
+close-up's own coordinates and the painter applies no offset, so the painter stays dumb;
+(3) both states of a band share their view skeleton (ids, kinds, parents, labels, order)
+so the toggle keeps the visitor's place; (4) every view has a label of at most 24
+characters, reviewed once by the Product & Content Lead; (5) exactly one `default`, on a
+close-up. The contract test and `check_scenes.py` are split by who can see what: the test
+owns everything readable from the JSON, the script owns everything that needs a PNG;
+spacing and one-primary are checked by both, on purpose.
+Navigation, all three of D-042's options in layers, none of them hidden behind another:
+1. **Room tabs**, one line, horizontally scrollable, never wrapping (a wrapping row grew
+   with the band and would shift the page). Choosing a room lands on that room's default
+   close-up, not on the establishing shot, so a tap never leaves the visitor on a picture
+   with nothing to tap.
+2. **A stepper under the scene**: previous, "label · n of N", next, over all close-ups in
+   array order, crossing room boundaries. It alone reaches every gag; the tabs are
+   shortcuts. At either end it is `aria-disabled`, not `disabled`, so focus is not lost.
+3. **Whole floor**: a persistent control that shows the room's establishing shot. There
+   each of its close-ups is a "zoom in" button over the picture, drawn from the same array
+   (never a second list), so the picture and the buttons cannot disagree.
+Transition: a straight cut, no animation; a zoom from `rect` is possible later because a
+close-up is a crop of its room, but that belongs to the Phase 2 animation pass. No swipe
+gesture (it fights page scroll). The scene box does not shrink: it is 3:2 at every view,
+because a 180 × 120 close-up at 2 css px and a 360 × 240 room at 1 css px fill it exactly,
+which also holds CLS at zero. It is the full viewport width up to 430 px (this is what makes
+1.9 css px per art px true at 360 px: a padded 328 px box would give 1.5) and capped at
+720 px from 768 px. The R-14 checklist is by band and by gag, not by view, so it stays in
+sync by construction; the contract test's "every due gag has one primary in a close-up"
+is what keeps every gag on the list also reachable in the picture.

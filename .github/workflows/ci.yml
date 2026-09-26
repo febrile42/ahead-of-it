@@ -7,7 +7,14 @@ name: Checks and Deploy
 # push to develop/main; `preview` and `deploy-production` are gated on
 # `check` passing and keep their original push-only conditions (never on a
 # pull_request — there is nothing to deploy for a PR).
+#
+# workflow_dispatch lets `preview` be re-run against `develop` on demand
+# (e.g. after adding secrets, with no new commit to push) — a manual
+# dispatch still sets `github.ref` to the chosen branch, so `preview`'s
+# `github.ref == 'refs/heads/develop'` condition needs no change to work
+# under it.
 on:
+  workflow_dispatch: {}
   pull_request:
     branches:
       - develop
@@ -65,14 +72,22 @@ jobs:
 
       # R-23: performance >= 80, first-band transfer < 600 KB.
       - name: Lighthouse
+        id: lighthouse
         run: npm run check:lighthouse
 
+      # Skipped (not warned) when an earlier step failed and Lighthouse never ran;
+      # if it ran, the reports must exist, so an empty upload is an error.
       - name: Upload Lighthouse report
-        if: always()
+        if: ${{ always() && steps.lighthouse.conclusion != 'skipped' }}
         uses: actions/upload-artifact@v4
         with:
           name: lighthouse-report
           path: .lighthouseci
+          # upload-artifact@v4.4+ skips dot-directories by default, which made
+          # this step warn "No files were found" on every run while LHCI had
+          # in fact written its reports (DIA-4).
+          include-hidden-files: true
+          if-no-files-found: error
           retention-days: 14
 
   # ── develop → preview URL (staging-ahead-of-it.<subdomain>.workers.dev) ──
@@ -124,13 +139,56 @@ jobs:
       - name: Build
         run: npm run build
 
+      # Checked before the deploy, not after: wrangler's own deployment-url
+      # output is the common-case source of truth for BASE_URL below and
+      # this variable is only a fallback for it — but an unset fallback must
+      # never be discovered *after* a real production deploy has already
+      # happened. Fail here instead.
+      - name: Require WORKERS_DEV_SUBDOMAIN
+        env:
+          WORKERS_DEV_SUBDOMAIN: ${{ vars.WORKERS_DEV_SUBDOMAIN }}
+        run: |
+          if [ -z "$WORKERS_DEV_SUBDOMAIN" ]; then
+            echo "::error::WORKERS_DEV_SUBDOMAIN repo variable is unset. Add it in GitHub repo Settings > Secrets and variables > Actions > Variables — the Cloudflare account's workers.dev subdomain (e.g. joshua-gister) — before deploying to production, so the smoke test has a host to fall back to if wrangler emits no deployment-url." >&2
+            exit 1
+          fi
+
       - name: Deploy Worker
+        id: deploy
         uses: cloudflare/wrangler-action@v4.0.0
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           wranglerVersion: "4.138.0"
           command: deploy
+
+      # No custom domain yet (Phase 4, D-005/D-018) — workers.dev for now.
+      # The host is never hardcoded: wrangler's own `deployment-url` output is
+      # the truth, so renaming the Worker in wrangler.jsonc can't leave this
+      # pointed at a stale host. The composed fallback exists only for a
+      # wrangler-action version that stops emitting that output; it reads the
+      # Worker name from wrangler.jsonc rather than repeating it here, so
+      # there is exactly one place (wrangler.jsonc + this one subdomain
+      # variable) that can go stale, not two.
+      - name: Resolve deployed URL
+        env:
+          DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
+          WORKERS_DEV_SUBDOMAIN: ${{ vars.WORKERS_DEV_SUBDOMAIN }}
+        run: |
+          if [ -n "$DEPLOYMENT_URL" ]; then
+            echo "BASE_URL=$DEPLOYMENT_URL" >> "$GITHUB_ENV"
+            echo "Resolved BASE_URL from the wrangler deploy step: $DEPLOYMENT_URL"
+            exit 0
+          fi
+          echo "::warning::wrangler deploy emitted no deployment-url output; falling back to wrangler.jsonc name + WORKERS_DEV_SUBDOMAIN."
+          if [ -z "$WORKERS_DEV_SUBDOMAIN" ]; then
+            echo "::error::No deployment-url from wrangler, and the WORKERS_DEV_SUBDOMAIN repo variable is unset. Add it in GitHub repo Settings > Secrets and variables > Actions > Variables — the Cloudflare account's workers.dev subdomain (e.g. joshua-gister), so the smoke test host can be composed." >&2
+            exit 1
+          fi
+          WORKER_NAME=$(node scripts/print-worker-name.mjs)
+          BASE_URL="https://${WORKER_NAME}.${WORKERS_DEV_SUBDOMAIN}.workers.dev"
+          echo "BASE_URL=$BASE_URL" >> "$GITHUB_ENV"
+          echo "Composed BASE_URL from wrangler.jsonc name '$WORKER_NAME' + WORKERS_DEV_SUBDOMAIN: $BASE_URL"
 
       - name: Smoke test — pages serve, .git does not
         run: |
@@ -142,7 +200,5 @@ jobs:
             fi
             echo "Smoke test passed: $1 → HTTP $STATUS"
           }
-          # No custom domain yet (Phase 4, D-005/D-018) — workers.dev for now.
-          BASE_URL="https://ahead-of-it.joshua-gister.workers.dev"
           check "$BASE_URL/"             200
           check "$BASE_URL/.git/config"  404

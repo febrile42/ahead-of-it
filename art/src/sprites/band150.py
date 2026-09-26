@@ -155,14 +155,33 @@ def _trolley(iso: Iso, c: Canvas):
     for rr in (R0 + 0.4, R1 - 0.4):
         _thick(iso, [(B1, rr, ZT - 1.0), (B1 + 2.0, rr, HZ)], "wall-trim", width=1)
     _thick(iso, [(B1 + 2.2, R0 - 0.2, HZ), (B1 + 2.2, R1 + 0.2, HZ)], "badge-red", width=2)
-    # the note hangs low on the basket's near side, over the wire
-    x, y = iso.pt(11.5, R1, ZB + 2.0)
-    return {"note": (x, y)}
+    # PH1-11: the note hangs from the handle's grip on a loop of string, out over open
+    # floor, so the whole wire basket shows
+    x, y = iso.pt(B1 + 2.2, R0 + 1.2, HZ)
+    # DIA-5 (D-041): from 360 the note hangs from the grip's far tip instead (note_dave)
+    xt, yt = iso.pt(B1 + 2.2, R0 - 0.2, HZ)
+    return {"note": (x, y + 1), "note-tip": (xt, yt + 1)}
 
 
-def note_dave() -> Canvas:
-    """Yellow sticky note, `DAVE?` in the glyphs. Nobody knows whose laptop this was."""
-    return _card("DAVE?", fill="sticky", tape=False, pad=1)
+def note_dave(string_x: int | None = None) -> Canvas:
+    """Yellow sticky note, `DAVE?` in the glyphs. Nobody knows whose laptop this was.
+    PH1-11: it hangs on a short string from the trolley's handle; the anchor is the top
+    of the string (the `note` point on the grip)."""
+    card = _card("DAVE?", fill="sticky", tape=False, pad=1)
+    s = 4
+    c = Canvas(card.w, card.h + s)
+    for k in range(s):
+        c.point(card.w // 2 if string_x is None else string_x, k, "outline")
+    c.img.alpha_composite(card.img, (0, s))
+    return c
+
+
+# DIA-5 (D-041): in the 360+ ground floor (`note-dave-r`) the string ties on near the
+# card's left end, not its middle, so the card hangs out to the right of the grip over
+# clear floor instead of half across the dark end of the basket, where `DAVE?` read but
+# not cleanly. Band 80's room keeps the centred note: there the card already clears the
+# basket, and hanging it further right crowds G2.1's queue (D-036 rule 7).
+NOTE_STRING_X = 3
 
 
 # -- G3.2 built: the laptop shelf ------------------------------------------------------
@@ -421,26 +440,75 @@ def _link_turn(iso, c, frame):
     _link(iso, c, frame, [((4, 0), (4, 4)), ((4, 4), (0, 4))])
 
 
+def _link_hop(iso: Iso, c: Canvas, along: str):
+    """DIA-5 item 4: the link crossing the open ground between HQ's plot and the inset
+    office's. Off the pavement it goes on as a network line (style.md "On the network"),
+    because what joins two offices in two cities is the network, not a cable."""
+    from ..vox import dotted
+    p0, p1 = ((4, 0), (4, 8)) if along == "r" else ((0, 4), (8, 4))
+    dotted(c, iso.pt(p0[0], p0[1], 0.6), iso.pt(p1[0], p1[1], 0.6), "net", halo="outline")
+
+
 TRUCK_MS = 160
+# DIA-37: the van was cardboard brown, the colour of the parcel and the crates, and at
+# 390 px it read as two boxes before it read as a van. A generic white courier van with
+# one red stripe; the cab glass stays blue and the tyres dark.
+VAN = dict(top="paper", left="wall", right="wall-shadow", outline="outline")
+VAN_STRIPE = "badge-red"
 
 
 def _truck(iso: Iso, c: Canvas, frame: int):
-    """A tiny courier van driving +r (toward the viewer's lower left): brown box, cab
+    """A tiny courier van driving +r (toward the viewer's lower left): white box, cab
     in front, windscreen, wheels on the visible side. Frame 1 bobs the body 1 unit."""
     C0, C1 = 2.0, 6.0
     iso.floor_shadow(C0, 0.5, C1, 8.0, grow=0.8, grow_r=0.3)
-    for rr in (1.8, 6.2):                      # wheels on the +c side
-        iso.box(C1 - 0.4, rr - 0.9, 0, C1 + 0.1, rr + 0.9, 2.2, top="outline",
-                left="outline", right="chair-dark", outline="outline")
     z = 1.5 + (0.6 if frame else 0)
-    f = iso.box(C0, 0.5, z, C1, 5.5, z + 7.0, top="desk-wood", left="desk-wood-dark",
-                right="hair-1")
-    iso.paint(f, "R", C1, lambda rr, zz: "sticky" if z + 4.0 <= zz < z + 5.0 else None)
-    cab = iso.box(C0, 5.5, z, C1, 8.0, z + 4.8, top="desk-wood", left="desk-wood-dark",
-                  right="hair-1")
+    f = iso.box(C0, 0.5, z, C1, 5.5, z + 7.0, **VAN)
+    iso.paint(f, "R", C1, lambda rr, zz: VAN_STRIPE if z + 4.0 <= zz < z + 5.0 else None)
+    cab = iso.box(C0, 5.5, z, C1, 8.0, z + 4.8, **VAN)
     iso.paint(cab, "L", 8.0, lambda cc, zz: "glass" if z + 2.4 <= zz < z + 4.2 and C0 + 0.5 <= cc < C1 - 0.5
               else ("sticky" if zz < z + 1.0 and (cc < C0 + 1.0 or cc >= C1 - 1.0) else None))
     iso.paint(cab, "R", C1, lambda rr, zz: "glass-dark" if z + 2.4 <= zz < z + 4.2 and rr < 7.4 else None)
+    # DIA-5 item 8: wheels you can see. They were 2 px stubs half under the body, and
+    # without them the van was a crate on a road; now two tyres with hubs stand proud
+    # of the body's bottom edge on the side facing us.
+    for rr in (1.9, 6.4):                      # wheels on the +c side
+        _wheel(iso, "R", C1, rr)
+
+
+def _wheel(iso: Iso, face: str, plane: float, u: float, h: float = 3.6):
+    """A tyre on a van's visible side, centred at `u` along the side, standing on the
+    road: a dark block with a grey hub, standing proud of the body's bottom edge."""
+    if face == "R":
+        f = iso.box(plane - 0.3, u - 1.5, 0, plane + 0.5, u + 1.5, h, top="outline",
+                    left="outline", right="outline", outline="outline")
+    else:
+        f = iso.box(u - 1.5, plane - 0.3, 0, u + 1.5, plane + 0.5, h, top="outline",
+                    left="outline", right="outline", outline="outline")
+    iso.paint(f, face, plane + 0.5, lambda a, zz: "badge-body"
+              if abs(a - u) < 0.7 and h / 2 - 0.6 <= zz < h / 2 + 0.6 else None)
+
+
+def _truck_c(iso: Iso, c: Canvas, frame: int):
+    """DIA-5 item 8: the courier van at 360+, where the road runs along -c toward the
+    inset office. The van drives that way, cab first, so we see its side (the +r face,
+    lit) and its back doors (+c). What makes it a van rather than a crate: a cab half
+    the height of the box behind it, a windscreen on the cab, a window in its door, and
+    two tyres standing out below the body on the side facing us. Frame 1 bobs the body."""
+    R0, R1 = 2.0, 6.0
+    CAB, BOX0, BOX1 = 0.4, 5.0, 12.4
+    iso.floor_shadow(CAB, R0, BOX1, R1, grow=0.8, grow_r=0.6)
+    z = 2.4 + (0.6 if frame else 0)
+    cargo = iso.box(BOX0, R0, z, BOX1, R1, z + 8.0, **VAN)
+    iso.paint(cargo, "L", R1, lambda cc, zz: VAN_STRIPE if z + 4.5 <= zz < z + 5.5 else None)
+    iso.paint(cargo, "R", BOX1, lambda rr, zz: "outline" if abs(rr - 4.0) < 0.3 else None)
+    cab = iso.box(CAB, R0, z, BOX0, R1, z + 4.4, **VAN)
+    # the windscreen along the cab roof's front edge, the door window on its side
+    iso.paint(cab, "T", z + 4.4, lambda cc, rr: "glass-dark" if cc < CAB + 1.6 else None)
+    iso.paint(cab, "L", R1, lambda cc, zz: "glass" if z + 2.0 <= zz < z + 3.8
+              and CAB + 1.4 <= cc < BOX0 - 0.6 else None)
+    for cc in (2.3, 10.0):
+        _wheel(iso, "L", R1, cc)
 
 
 # -- registry ---------------------------------------------------------------------------
@@ -452,6 +520,7 @@ def _desk_sprite(cv: Canvas, turned=False, kind="plain") -> Sprite:
 
 def build_all() -> dict:
     note = note_dave()
+    note_r = note_dave(NOTE_STRING_X)
     cust = card_customers()
     rep = card_report()
     pipe = sign_pipeline()
@@ -459,7 +528,8 @@ def build_all() -> dict:
         # without
         # parked along +r, nose to the wall, right across the closet door
         "trolley": make(_trolley),
-        "note-dave": Sprite(note, (note.w // 2, note.h)),
+        "note-dave": Sprite(note, (note.w // 2, 0)),
+        "note-dave-r": Sprite(note_r, (NOTE_STRING_X, 0)),
         "desk-retail-box": _desk_sprite(desk_retail_box()),
         "fishing-line": make(_fishing_line),
         "desk-sheet": _desk_sprite(desk_sheet()),
@@ -469,6 +539,7 @@ def build_all() -> dict:
         "road-c": make(_road_c),
         "road-turn": make(_road_turn),
         "truck": make_anim(_truck, 2, key="drive", ms=TRUCK_MS),
+        "truck-c": make_anim(_truck_c, 2, key="drive", ms=TRUCK_MS),
         # built
         "laptop-shelf": make(_laptop_shelf),
         "fishing-shield": make(_fishing_shield),
@@ -480,4 +551,6 @@ def build_all() -> dict:
         "link-r": make_anim(_link_r, 2, ms=LINK_MS),
         "link-c": make_anim(_link_c, 2, ms=LINK_MS),
         "link-turn": make_anim(_link_turn, 2, ms=LINK_MS),
+        "link-hop-r": make(lambda iso, c: _link_hop(iso, c, "r")),
+        "link-hop-c": make(lambda iso, c: _link_hop(iso, c, "c")),
     }
