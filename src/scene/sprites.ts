@@ -20,7 +20,7 @@ let manifestPromise: Promise<SpriteManifest> | null = null;
 
 export function loadManifest(): Promise<SpriteManifest> {
   if (!manifestPromise) {
-    manifestPromise = fetch('/sprites/manifest.json').then((res) => {
+    manifestPromise = fetch('/sprites/manifest.json', { cache: 'no-cache' }).then((res) => {
       if (!res.ok) throw new Error(`sprites/manifest.json: ${res.status}`);
       return res.json() as Promise<SpriteManifest>;
     });

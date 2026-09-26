@@ -86,8 +86,11 @@ export interface SceneIndex {
 
 let indexPromise: Promise<SceneIndex> | null = null;
 
+// DIA-102: scene files keep their names across exports, so a cached copy
+// must be revalidated — a stale schema-1 file sent returning visitors to
+// "not drawn yet" once this painter moved to schema 2.
 function fetchJson<T>(url: string): Promise<T> {
-  return fetch(url).then((res) => {
+  return fetch(url, { cache: 'no-cache' }).then((res) => {
     if (!res.ok) throw new Error(`${url}: ${res.status}`);
     return res.json() as Promise<T>;
   });
