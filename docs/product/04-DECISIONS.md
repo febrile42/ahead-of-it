@@ -320,6 +320,37 @@ exceptions per D-038) by adding to the 220 room, so the room itself was re-laid.
 6. **Guardrail.** Any use of `since`/`until` to hide an art-rule failure rather than to fit a
    larger room is an exception under D-038 item 3 and needs its own decision.
 
+**D-040 · 2026-09-25 · The hallway test is deferred, not dropped; the kit ships now.**
+The Phase 1 exit criterion stands as written in `02-PHASES.md`: a stranger names what each
+gag is from the without-state picture (≥ 4/5 per gag, or that gag is redrawn), and ≥ 4/5
+find and flip the toggle within 20 seconds unprompted (R-06a). **Josh has deferred running
+it.** Two reasons, both on the record: running it needs real strangers and his time
+(`STATUS.md`, "Needs Josh"), and on `develop` today 15 of the 26 gags are still placeholder
+boxes, so a run now could not close the criterion for them whatever it found.
+Consequences:
+1. **Phase 1 closes marked *conditionally met, pending hallway test*, said out loud** in
+   `STATUS.md` and `02-PHASES.md` — never quietly ticked. The criterion is not amended and
+   not waived; it is unrun.
+2. The kit is built and parked: `docs/hallway-test/` (README, protocol, generated scoring
+   sheet, results template, 390 px without-state screenshots) plus
+   `tools/hallway-test/build-kit.mjs`, which regenerates the sheet, the manifest and every
+   screenshot from the repo. Running the test later is prep-free: refresh, print, run.
+3. **Re-running the capture is how bands arrive.** Gags whose primary hotspot is still a
+   placeholder are skipped and listed in `manifest.json`'s `pendingArt`; when the art lands
+   they appear with no change to the kit. A results write-up must state which gags a run
+   did not cover.
+4. **A gag that later fails is redrawn, not renegotiated.** The art pipeline is in-house
+   (`art/`, Opus-drawn), so a redraw against a concrete note is hours of one agent's work,
+   not a re-commission — which is what makes deferring this gate cheap rather than risky.
+   The note is the participants' verbatim answers: what the picture read *as*.
+5. The kit operationalises the two thresholds so the sheet and the protocol cannot drift:
+   "a couple of seconds" for a gag = **5 s**, the toggle = **20 s**, five participants,
+   pass at four. Those numbers live in one place, `build-kit.mjs`, and are printed on the
+   sheet. Changing them needs a decision.
+6. The toggle half feeds Phase 2's nudge work. If the test runs *after* that polish ships, a
+   weak result means reworking it rather than discovering the problem, and the write-up must
+   say which of the two it is.
+
 **D-041 · 2026-09-25 · Three 360/490 "without" lines follow the art that reads.**
 Three rounds of picture review at 390px (DIA-9, DIA-21, DIA-28) showed that three locked
 "without" lines could not be drawn legibly as written. `BANDS-AND-GAGS.md` now describes

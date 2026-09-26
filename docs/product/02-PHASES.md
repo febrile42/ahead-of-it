@@ -48,6 +48,14 @@ Exit criteria
 - **Toggle discoverability:** in the same hallway test, ≥ 4/5 people find and flip "without" within 20 seconds unprompted (R-06a). If not, the nudge is redesigned before Phase 2.
 - Staging preview URL works; nothing served outside the build output.
 
+> **The two hallway-test criteria are deferred, not waived (D-040).** Josh has deferred
+> *running* the test; the criteria above stand unchanged. Phase 1 therefore closes marked
+> **conditionally met, pending hallway test** — said out loud here and in `STATUS.md`, never
+> quietly ticked. The kit to run it is built and parked: `docs/hallway-test/` (protocol,
+> generated scoring sheet, 390px without-state screenshots) and
+> `tools/hallway-test/build-kit.mjs` to regenerate all of it. A gag that fails when the test
+> is eventually run is redrawn — in-house, hours, not a re-commission.
+
 ## Phase 2 — The switch and the workers
 
 Deliverables

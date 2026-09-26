@@ -17,6 +17,7 @@
     "test": "npm run test:unit && npm run test:e2e",
     "check:employer": "bash scripts/check-employer.sh",
     "check:serving": "bash scripts/check-serving.sh",
+    "kit:hallway": "node tools/hallway-test/build-kit.mjs",
     "check:lighthouse": "lhci autorun --config=./lighthouserc.cjs",
     "check": "npm run build && npm run test && npm run check:serving && npm run check:lighthouse"
   },
