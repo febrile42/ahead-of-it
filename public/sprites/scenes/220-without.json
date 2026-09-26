@@ -917,6 +917,43 @@
           }
         },
         {
+          "sprite": "worker-d",
+          "frame": "idle-down",
+          "x": 32,
+          "y": 109,
+          "depth": 8.0,
+          "motion": {
+            "start": 1377,
+            "rate": 2,
+            "walk": [
+              {
+                "frame": "right",
+                "to": [
+                  46,
+                  116
+                ],
+                "ms": 780
+              },
+              {
+                "frame": "idle-down",
+                "hold": 400
+              },
+              {
+                "frame": "up",
+                "to": [
+                  32,
+                  109
+                ],
+                "ms": 780
+              },
+              {
+                "frame": "idle-down",
+                "hold": 400
+              }
+            ]
+          }
+        },
+        {
           "sprite": "worker-queue",
           "frame": "a-left",
           "x": 196,
@@ -941,7 +978,7 @@
           "gagId": "G2.1",
           "part": "queue",
           "motion": {
-            "start": 401
+            "start": 899
           }
         },
         {
@@ -978,7 +1015,7 @@
           "gagId": "G1.2",
           "part": "pit",
           "motion": {
-            "start": 402,
+            "start": 635,
             "rate": 1.5
           }
         },
@@ -1025,7 +1062,7 @@
           "gagId": "G1.2",
           "part": "pit",
           "motion": {
-            "start": 1767,
+            "start": 565,
             "rate": 1.5
           }
         },
@@ -1668,7 +1705,7 @@
           "gagId": "G2.1",
           "part": "queue",
           "motion": {
-            "start": 401
+            "start": 899
           }
         },
         {
@@ -1705,7 +1742,7 @@
           "gagId": "G1.2",
           "part": "pit",
           "motion": {
-            "start": 402,
+            "start": 635,
             "rate": 1.5
           }
         },
@@ -2362,6 +2399,43 @@
           }
         },
         {
+          "sprite": "worker-d",
+          "frame": "idle-down",
+          "x": 32,
+          "y": 102,
+          "depth": 8.0,
+          "motion": {
+            "start": 1377,
+            "rate": 2,
+            "walk": [
+              {
+                "frame": "right",
+                "to": [
+                  46,
+                  109
+                ],
+                "ms": 780
+              },
+              {
+                "frame": "idle-down",
+                "hold": 400
+              },
+              {
+                "frame": "up",
+                "to": [
+                  32,
+                  102
+                ],
+                "ms": 780
+              },
+              {
+                "frame": "idle-down",
+                "hold": 400
+              }
+            ]
+          }
+        },
+        {
           "sprite": "cable-tape-c",
           "frame": "default",
           "x": 85,
@@ -2402,7 +2476,7 @@
           "gagId": "G1.2",
           "part": "pit",
           "motion": {
-            "start": 402,
+            "start": 635,
             "rate": 1.5
           }
         },
@@ -2433,7 +2507,7 @@
           "gagId": "G1.2",
           "part": "pit",
           "motion": {
-            "start": 1767,
+            "start": 565,
             "rate": 1.5
           }
         },
@@ -3280,7 +3354,7 @@
           "gagId": "G2.1",
           "part": "queue",
           "motion": {
-            "start": 401
+            "start": 899
           }
         },
         {
@@ -3317,7 +3391,7 @@
           "gagId": "G1.2",
           "part": "pit",
           "motion": {
-            "start": 402,
+            "start": 635,
             "rate": 1.5
           }
         },
@@ -3364,7 +3438,7 @@
           "gagId": "G1.2",
           "part": "pit",
           "motion": {
-            "start": 1767,
+            "start": 565,
             "rate": 1.5
           }
         },
@@ -4055,7 +4129,7 @@
           "gagId": "G2.1",
           "part": "queue",
           "motion": {
-            "start": 401
+            "start": 899
           }
         },
         {
@@ -4092,7 +4166,7 @@
           "gagId": "G1.2",
           "part": "pit",
           "motion": {
-            "start": 402,
+            "start": 635,
             "rate": 1.5
           }
         },
@@ -4139,7 +4213,7 @@
           "gagId": "G1.2",
           "part": "pit",
           "motion": {
-            "start": 1767,
+            "start": 565,
             "rate": 1.5
           }
         },
@@ -7787,6 +7861,43 @@
           "part": "truck"
         },
         {
+          "sprite": "worker-b",
+          "frame": "idle-down",
+          "x": 304,
+          "y": 153,
+          "depth": 10.5,
+          "motion": {
+            "start": 885,
+            "rate": 2,
+            "walk": [
+              {
+                "frame": "left",
+                "to": [
+                  262,
+                  174
+                ],
+                "ms": 2350
+              },
+              {
+                "frame": "idle-down",
+                "hold": 400
+              },
+              {
+                "frame": "up",
+                "to": [
+                  304,
+                  153
+                ],
+                "ms": 2350
+              },
+              {
+                "frame": "idle-down",
+                "hold": 400
+              }
+            ]
+          }
+        },
+        {
           "sprite": "partition-c",
           "frame": "default",
           "x": 37,
@@ -7823,7 +7934,7 @@
           "gagId": "G5.1",
           "part": "inset-door",
           "motion": {
-            "start": 1088
+            "start": 1863
           }
         }
       ],
@@ -8468,7 +8579,7 @@
           "gagId": "G5.1",
           "part": "inset-door",
           "motion": {
-            "start": 1088
+            "start": 1863
           }
         }
       ],

@@ -1305,6 +1305,23 @@ for _b in (360, 490):
 PLACEMENTS[610] = _ground610() + _floor2_610(_F2_OLD) + _street610(_ST_OLD)
 PLACEMENTS[750] = _ground750() + _floor2_750() + _top750()
 
+# PH2-01 Part A2 (DIA-94, approved on DIA-94/DIA-95): the only people with no gag, so
+# the only people who walk (motion.WALKS). Same look and path in both states; each
+# stands at rest at the end the picture review asked for. Floor points are exact
+# 1/16 px multiples so the anchor lands on a whole pixel.
+#   W1, ground 80..220: by the plant, facing the room; paces toward the pit and stops
+#       >= 12 px short of G2.2's cable (DIA-95).
+#   W2, street 150..750: on the shaded pavement past HQ's right face, at its back end,
+#       away from G5.1's door (DIA-95). The 150/220 plot ends a column earlier.
+W1 = _f("worker-d", 1.34375, 6.65625, frame="idle-down", band=80, until=360)
+W2 = [_f("worker-b", 10.09375, 0.40625, frame="idle-down", view="street", band=150,
+         until=360),
+      _f("worker-b", 11.09375, 0.40625, frame="idle-down", view="street", band=360,
+         since=360)]
+PLACEMENTS[80].append(W1)
+PLACEMENTS[150].append(W2[0])
+PLACEMENTS[360].append(W2[1])
+
 # A later band's building replaces an earlier one's (HQ gains a storey): the earlier
 # sprite is superseded rather than drawn twice.
 SUPERSEDES = {"hq-4": "hq-3"}

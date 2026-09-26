@@ -261,10 +261,22 @@ def check_motion(manifest: dict):
 def _check_walker_order(lib, band, state, rid, room, at, img, t, fname):
     """The pipeline's own depth-sorted render of the moment: the layout's placements with
     each walker moved to its pose at t, its depth moved with it (a floor step of dy
-    screen px is dy / 8 in depth), rendered by compose.render."""
+    screen px is dy / 8 in depth), and every in-place loop on the file it plays at t
+    (DIA-94: without that, any typist mid-beat failed the proof), rendered by
+    compose.render."""
     origin, size = export_scene.view_frame(lib, band, rid)
     resolved = compose.resolve(lib, export_scene._site_only(lib, layout.scene(band, state)[rid]),
                                origin)
+    for rest, now in zip(room["entries"], at):
+        if "motion" in rest and "walk" not in rest["motion"]:
+            match = [q for q in resolved if "line" not in q and q["sprite"] == rest["sprite"]
+                     and (q["x"], q["y"]) == (rest["x"], rest["y"])
+                     and round(q["depth"], 3) == rest["depth"]]
+            if len(match) != 1:
+                fail(f"{fname}:{rid} — looping {rest['sprite']} matches {len(match)} layout "
+                     f"placements, want 1")
+                return
+            match[0]["frame"], match[0]["index"] = now["frame"], now["index"]
     for rest, now in zip(room["entries"], at):
         if "walk" not in rest.get("motion", {}):
             continue

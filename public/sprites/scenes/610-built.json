@@ -10788,6 +10788,42 @@
           "part": "door"
         },
         {
+          "sprite": "worker-b",
+          "frame": "idle-down",
+          "x": 304,
+          "y": 169,
+          "depth": 11.5,
+          "motion": {
+            "start": 1873,
+            "walk": [
+              {
+                "frame": "left",
+                "to": [
+                  262,
+                  190
+                ],
+                "ms": 5870
+              },
+              {
+                "frame": "idle-down",
+                "hold": 3000
+              },
+              {
+                "frame": "up",
+                "to": [
+                  304,
+                  169
+                ],
+                "ms": 5870
+              },
+              {
+                "frame": "idle-down",
+                "hold": 3000
+              }
+            ]
+          }
+        },
+        {
           "sprite": "partition-c",
           "frame": "default",
           "x": 69,
@@ -10810,7 +10846,7 @@
           "gagId": "G6.4",
           "part": "door",
           "motion": {
-            "start": 1234
+            "start": 1311
           }
         },
         {
@@ -11823,7 +11859,7 @@
           "gagId": "G6.4",
           "part": "door",
           "motion": {
-            "start": 1234
+            "start": 1311
           }
         },
         {
@@ -12689,7 +12725,7 @@
           "gagId": "G6.4",
           "part": "door",
           "motion": {
-            "start": 1234
+            "start": 1311
           }
         },
         {
@@ -13615,6 +13651,42 @@
           "part": "door"
         },
         {
+          "sprite": "worker-b",
+          "frame": "idle-down",
+          "x": 214,
+          "y": 61,
+          "depth": 11.5,
+          "motion": {
+            "start": 1873,
+            "walk": [
+              {
+                "frame": "left",
+                "to": [
+                  172,
+                  82
+                ],
+                "ms": 5870
+              },
+              {
+                "frame": "idle-down",
+                "hold": 3000
+              },
+              {
+                "frame": "up",
+                "to": [
+                  214,
+                  61
+                ],
+                "ms": 5870
+              },
+              {
+                "frame": "idle-down",
+                "hold": 3000
+              }
+            ]
+          }
+        },
+        {
           "sprite": "partition-r",
           "frame": "default",
           "x": 11,
@@ -13630,7 +13702,7 @@
           "gagId": "G6.4",
           "part": "door",
           "motion": {
-            "start": 1234
+            "start": 1311
           }
         },
         {

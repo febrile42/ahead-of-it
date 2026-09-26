@@ -82,11 +82,34 @@ def add_loop_keys(manifest: dict):
 # ---------------------------------------------------------------------------
 
 # Walkers (ambient people only). {(band, state, view, sprite, rest frame): (rate, legs)},
-# legs as in the contract but with `to` as a pixel offset from the rest pose. Empty:
-# the only standing people with no gagId (worker-card at 750) carry G7.1's card and the
-# doc gate's document, so walking them away would change a gag, and a new person would
-# change a rest pose, which PH2-01 forbids. Adding walkers is an art + golden decision.
-WALKS: dict = {}
+# legs as in the contract but with `to` as a pixel offset from the rest pose. The
+# people already in the scene all carry a gag, so the walkers are two added people
+# (layout.W1, layout.W2; PH2-01 Part A2, DIA-94), which changed those views' goldens.
+# Built strolls (~8 px/s, long holds facing the room); without hurries (~20 px/s,
+# faster legs, barely stops). Same path both states: only the pace differs.
+def _pace(d: tuple, state: str) -> tuple:
+    """(rate, legs) out along offset d and back, then a beat at rest."""
+    px = (d[0] ** 2 + d[1] ** 2) ** 0.5
+    speed, hold, rate = (8, 3000, 1) if state == "built" else (20, 400, 2)
+    ms = round(px * 1000 / speed / 10) * 10
+    out, back = ("right", "up") if d[0] > 0 else ("left", "up")
+    return rate, [{"frame": out, "to": list(d), "ms": ms},
+                  {"frame": "idle-down", "hold": hold},
+                  {"frame": back, "to": [0, 0], "ms": ms},
+                  {"frame": "idle-down", "hold": hold}]
+
+
+def _walks() -> dict:
+    w = {}
+    for state in ("built", "without"):
+        for band in (80, 150, 220):         # W1: toward the pit, stopping short of G2.2
+            w[(band, state, "ground", "worker-d", "idle-down")] = _pace((14, 7), state)
+        for band in (150, 220, 360, 490, 610, 750):     # W2: down the shaded pavement
+            w[(band, state, "street", "worker-b", "idle-down")] = _pace((-42, 21), state)
+    return w
+
+
+WALKS: dict = _walks()
 
 # gag parts that are people in a meeting, not at a desk: they nod, they do not type
 MEETING = {"G2.4", "G7.2"}

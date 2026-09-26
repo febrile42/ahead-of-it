@@ -921,6 +921,42 @@
           "depth": 6.4
         },
         {
+          "sprite": "worker-d",
+          "frame": "idle-down",
+          "x": 32,
+          "y": 109,
+          "depth": 8.0,
+          "motion": {
+            "start": 1851,
+            "walk": [
+              {
+                "frame": "right",
+                "to": [
+                  46,
+                  116
+                ],
+                "ms": 1960
+              },
+              {
+                "frame": "idle-down",
+                "hold": 3000
+              },
+              {
+                "frame": "up",
+                "to": [
+                  32,
+                  109
+                ],
+                "ms": 1960
+              },
+              {
+                "frame": "idle-down",
+                "hold": 3000
+              }
+            ]
+          }
+        },
+        {
           "sprite": "sla-board",
           "frame": "default",
           "x": 246,
@@ -956,7 +992,7 @@
           "gagId": "G1.2",
           "part": "pit",
           "motion": {
-            "start": 442
+            "start": 256
           }
         },
         {
@@ -968,7 +1004,7 @@
           "gagId": "G2.1",
           "part": "helpdesk",
           "motion": {
-            "start": 256
+            "start": 1927
           }
         },
         {
@@ -998,7 +1034,7 @@
           "gagId": "G1.2",
           "part": "pit",
           "motion": {
-            "start": 1550
+            "start": 736
           }
         },
         {
@@ -1010,7 +1046,7 @@
           "gagId": "G1.2",
           "part": "pit",
           "motion": {
-            "start": 736
+            "start": 1225
           }
         },
         {
@@ -1031,7 +1067,7 @@
           "gagId": "G1.2",
           "part": "pit",
           "motion": {
-            "start": 1637
+            "start": 939
           }
         },
         {
@@ -1665,7 +1701,7 @@
           "gagId": "G1.2",
           "part": "pit",
           "motion": {
-            "start": 442
+            "start": 256
           }
         },
         {
@@ -1677,7 +1713,7 @@
           "gagId": "G2.1",
           "part": "helpdesk",
           "motion": {
-            "start": 256
+            "start": 1927
           }
         },
         {
@@ -1707,7 +1743,7 @@
           "gagId": "G1.2",
           "part": "pit",
           "motion": {
-            "start": 1550
+            "start": 736
           }
         },
         {
@@ -1719,7 +1755,7 @@
           "gagId": "G1.2",
           "part": "pit",
           "motion": {
-            "start": 736
+            "start": 1225
           }
         },
         {
@@ -2320,6 +2356,42 @@
           "depth": 6.4
         },
         {
+          "sprite": "worker-d",
+          "frame": "idle-down",
+          "x": 32,
+          "y": 102,
+          "depth": 8.0,
+          "motion": {
+            "start": 1851,
+            "walk": [
+              {
+                "frame": "right",
+                "to": [
+                  46,
+                  109
+                ],
+                "ms": 1960
+              },
+              {
+                "frame": "idle-down",
+                "hold": 3000
+              },
+              {
+                "frame": "up",
+                "to": [
+                  32,
+                  102
+                ],
+                "ms": 1960
+              },
+              {
+                "frame": "idle-down",
+                "hold": 3000
+              }
+            ]
+          }
+        },
+        {
           "sprite": "desk-padlock",
           "frame": "default",
           "x": 165,
@@ -2337,7 +2409,7 @@
           "gagId": "G1.2",
           "part": "pit",
           "motion": {
-            "start": 442
+            "start": 256
           }
         },
         {
@@ -2358,7 +2430,7 @@
           "gagId": "G1.2",
           "part": "pit",
           "motion": {
-            "start": 736
+            "start": 1225
           }
         },
         {
@@ -2379,7 +2451,7 @@
           "gagId": "G1.2",
           "part": "pit",
           "motion": {
-            "start": 1637
+            "start": 939
           }
         },
         {
@@ -3201,7 +3273,7 @@
           "gagId": "G1.2",
           "part": "pit",
           "motion": {
-            "start": 442
+            "start": 256
           }
         },
         {
@@ -3213,7 +3285,7 @@
           "gagId": "G2.1",
           "part": "helpdesk",
           "motion": {
-            "start": 256
+            "start": 1927
           }
         },
         {
@@ -3243,7 +3315,7 @@
           "gagId": "G1.2",
           "part": "pit",
           "motion": {
-            "start": 1550
+            "start": 736
           }
         },
         {
@@ -3255,7 +3327,7 @@
           "gagId": "G1.2",
           "part": "pit",
           "motion": {
-            "start": 736
+            "start": 1225
           }
         },
         {
@@ -3276,7 +3348,7 @@
           "gagId": "G1.2",
           "part": "pit",
           "motion": {
-            "start": 1637
+            "start": 939
           }
         },
         {
@@ -3993,7 +4065,7 @@
           "gagId": "G1.2",
           "part": "pit",
           "motion": {
-            "start": 442
+            "start": 256
           }
         },
         {
@@ -4005,7 +4077,7 @@
           "gagId": "G2.1",
           "part": "helpdesk",
           "motion": {
-            "start": 256
+            "start": 1927
           }
         },
         {
@@ -4035,7 +4107,7 @@
           "gagId": "G1.2",
           "part": "pit",
           "motion": {
-            "start": 1550
+            "start": 736
           }
         },
         {
@@ -4047,7 +4119,7 @@
           "gagId": "G1.2",
           "part": "pit",
           "motion": {
-            "start": 736
+            "start": 1225
           }
         },
         {
@@ -4068,7 +4140,7 @@
           "gagId": "G1.2",
           "part": "pit",
           "motion": {
-            "start": 1637
+            "start": 939
           }
         },
         {
@@ -7747,6 +7819,42 @@
           "x": 85,
           "y": 149,
           "depth": 9.95
+        },
+        {
+          "sprite": "worker-b",
+          "frame": "idle-down",
+          "x": 304,
+          "y": 153,
+          "depth": 10.5,
+          "motion": {
+            "start": 1232,
+            "walk": [
+              {
+                "frame": "left",
+                "to": [
+                  262,
+                  174
+                ],
+                "ms": 5870
+              },
+              {
+                "frame": "idle-down",
+                "hold": 3000
+              },
+              {
+                "frame": "up",
+                "to": [
+                  304,
+                  153
+                ],
+                "ms": 5870
+              },
+              {
+                "frame": "idle-down",
+                "hold": 3000
+              }
+            ]
+          }
         },
         {
           "sprite": "partition-c",

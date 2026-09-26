@@ -912,6 +912,42 @@
           "depth": 6.4
         },
         {
+          "sprite": "worker-d",
+          "frame": "idle-down",
+          "x": 32,
+          "y": 109,
+          "depth": 8.0,
+          "motion": {
+            "start": 132,
+            "walk": [
+              {
+                "frame": "right",
+                "to": [
+                  46,
+                  116
+                ],
+                "ms": 1960
+              },
+              {
+                "frame": "idle-down",
+                "hold": 3000
+              },
+              {
+                "frame": "up",
+                "to": [
+                  32,
+                  109
+                ],
+                "ms": 1960
+              },
+              {
+                "frame": "idle-down",
+                "hold": 3000
+              }
+            ]
+          }
+        },
+        {
           "sprite": "sla-board",
           "frame": "default",
           "x": 246,
@@ -947,7 +983,7 @@
           "gagId": "G1.2",
           "part": "pit",
           "motion": {
-            "start": 1489
+            "start": 592
           }
         },
         {
@@ -959,7 +995,7 @@
           "gagId": "G2.1",
           "part": "helpdesk",
           "motion": {
-            "start": 592
+            "start": 1507
           }
         },
         {
@@ -971,7 +1007,7 @@
           "gagId": "G2.1",
           "part": "helpdesk",
           "motion": {
-            "start": 1507
+            "start": 463
           }
         },
         {
@@ -1001,7 +1037,7 @@
           "gagId": "G1.2",
           "part": "pit",
           "motion": {
-            "start": 1464
+            "start": 266
           }
         },
         {
@@ -1013,7 +1049,7 @@
           "gagId": "G1.2",
           "part": "pit",
           "motion": {
-            "start": 266
+            "start": 1555
           }
         },
         {
@@ -1034,7 +1070,7 @@
           "gagId": "G1.2",
           "part": "pit",
           "motion": {
-            "start": 839
+            "start": 628
           }
         },
         {
@@ -1624,6 +1660,42 @@
           }
         },
         {
+          "sprite": "worker-d",
+          "frame": "idle-down",
+          "x": 3,
+          "y": 109,
+          "depth": 8.0,
+          "motion": {
+            "start": 132,
+            "walk": [
+              {
+                "frame": "right",
+                "to": [
+                  17,
+                  116
+                ],
+                "ms": 1960
+              },
+              {
+                "frame": "idle-down",
+                "hold": 3000
+              },
+              {
+                "frame": "up",
+                "to": [
+                  3,
+                  109
+                ],
+                "ms": 1960
+              },
+              {
+                "frame": "idle-down",
+                "hold": 3000
+              }
+            ]
+          }
+        },
+        {
           "sprite": "desk-padlock",
           "frame": "default",
           "x": 136,
@@ -1641,7 +1713,7 @@
           "gagId": "G1.2",
           "part": "pit",
           "motion": {
-            "start": 1489
+            "start": 592
           }
         },
         {
@@ -1671,7 +1743,7 @@
           "gagId": "G1.2",
           "part": "pit",
           "motion": {
-            "start": 1464
+            "start": 266
           }
         },
         {
@@ -1683,7 +1755,7 @@
           "gagId": "G1.2",
           "part": "pit",
           "motion": {
-            "start": 266
+            "start": 1555
           }
         },
         {
@@ -2266,6 +2338,42 @@
           "depth": 6.4
         },
         {
+          "sprite": "worker-d",
+          "frame": "idle-down",
+          "x": 32,
+          "y": 102,
+          "depth": 8.0,
+          "motion": {
+            "start": 132,
+            "walk": [
+              {
+                "frame": "right",
+                "to": [
+                  46,
+                  109
+                ],
+                "ms": 1960
+              },
+              {
+                "frame": "idle-down",
+                "hold": 3000
+              },
+              {
+                "frame": "up",
+                "to": [
+                  32,
+                  102
+                ],
+                "ms": 1960
+              },
+              {
+                "frame": "idle-down",
+                "hold": 3000
+              }
+            ]
+          }
+        },
+        {
           "sprite": "desk-padlock",
           "frame": "default",
           "x": 165,
@@ -2283,7 +2391,7 @@
           "gagId": "G1.2",
           "part": "pit",
           "motion": {
-            "start": 1489
+            "start": 592
           }
         },
         {
@@ -2304,7 +2412,7 @@
           "gagId": "G1.2",
           "part": "pit",
           "motion": {
-            "start": 266
+            "start": 1555
           }
         },
         {
@@ -2325,7 +2433,7 @@
           "gagId": "G1.2",
           "part": "pit",
           "motion": {
-            "start": 839
+            "start": 628
           }
         },
         {
@@ -3138,7 +3246,7 @@
           "gagId": "G1.2",
           "part": "pit",
           "motion": {
-            "start": 1489
+            "start": 592
           }
         },
         {
@@ -3150,7 +3258,7 @@
           "gagId": "G2.1",
           "part": "helpdesk",
           "motion": {
-            "start": 592
+            "start": 1507
           }
         },
         {
@@ -3162,7 +3270,7 @@
           "gagId": "G2.1",
           "part": "helpdesk",
           "motion": {
-            "start": 1507
+            "start": 463
           }
         },
         {
@@ -3192,7 +3300,7 @@
           "gagId": "G1.2",
           "part": "pit",
           "motion": {
-            "start": 1464
+            "start": 266
           }
         },
         {
@@ -3204,7 +3312,7 @@
           "gagId": "G1.2",
           "part": "pit",
           "motion": {
-            "start": 266
+            "start": 1555
           }
         },
         {
@@ -3225,7 +3333,7 @@
           "gagId": "G1.2",
           "part": "pit",
           "motion": {
-            "start": 839
+            "start": 628
           }
         },
         {
@@ -3962,7 +4070,7 @@
           "gagId": "G1.2",
           "part": "pit",
           "motion": {
-            "start": 1489
+            "start": 592
           }
         },
         {
@@ -3974,7 +4082,7 @@
           "gagId": "G2.1",
           "part": "helpdesk",
           "motion": {
-            "start": 592
+            "start": 1507
           }
         },
         {
@@ -3986,7 +4094,7 @@
           "gagId": "G2.1",
           "part": "helpdesk",
           "motion": {
-            "start": 1507
+            "start": 463
           }
         },
         {
@@ -4016,7 +4124,7 @@
           "gagId": "G1.2",
           "part": "pit",
           "motion": {
-            "start": 1464
+            "start": 266
           }
         },
         {
@@ -4028,7 +4136,7 @@
           "gagId": "G1.2",
           "part": "pit",
           "motion": {
-            "start": 266
+            "start": 1555
           }
         },
         {
@@ -4049,7 +4157,7 @@
           "gagId": "G1.2",
           "part": "pit",
           "motion": {
-            "start": 839
+            "start": 628
           }
         },
         {
