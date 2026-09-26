@@ -12,7 +12,7 @@
 // what lets the same driver be used by a test that expects the current
 // (buggy) behaviour and by the regression test that expects the fixed one.
 import type { Locator, Page } from '@playwright/test';
-import { drawnBands as drawnNumericBands, interceptFixtureScenes } from './scene-source';
+import { drawnBands as drawnNumericBands, findGagView, interceptFixtureScenes } from './scene-source';
 
 /** Duplicated from src/scene/bands.ts for the same reason tests/scene.spec.ts
  * duplicates it: this file runs under Playwright's own Node ESM loader, which
@@ -413,6 +413,51 @@ export async function openHotspot(page: Page, gagId: string, via: InputMethod = 
     await hotspot.click();
   }
   await waitForPanelOpen(page);
+}
+
+/**
+ * Brings the close-up holding `gagId`'s hotspot on screen, then leaves the
+ * visitor there. No-op if it is already visible.
+ *
+ * DIA-56: a real schema-2 export's default view is a close-up, not
+ * necessarily the one holding whatever gag a spec cares about (an older
+ * single-view-per-band fixture made that assumption safe; it no longer is).
+ * A spec that needs to act on a specific gag should call this instead of
+ * assuming the band's current view already has it.
+ *
+ * Every hotspot lives on a close-up — a room view renders zoom targets, not
+ * hotspots (src/main.ts's render()) — so landing on any close-up of the
+ * current band/state and walking the stepper's full order (which crosses
+ * rooms, same as `forEachCloseup`) reaches every gag regardless of which
+ * room it belongs to.
+ */
+export async function showGag(page: Page, gagId: string): Promise<void> {
+  const alreadyVisible = await hotspots(page).evaluateAll(
+    (els, id) => els.some((el) => (el as HTMLElement).dataset.gagId === id),
+    gagId
+  );
+  if (alreadyVisible) return;
+
+  const band = await currentBand(page);
+  const state = await currentState(page);
+  if (band === undefined) throw new Error('showGag: no band rendered yet');
+  const target = findGagView(band === 'beyond' ? 'beyond' : Number(band), state, gagId);
+  if (!target) {
+    throw new Error(`showGag: no hotspot for gag "${gagId}" in the current band (${band}) / ${state} scene`);
+  }
+
+  if ((await currentView(page)) === (await currentRoomId(page))) {
+    await toggleWholeFloor(page);
+  }
+  while (!(await stepperInfo(page)).prevDisabled) {
+    await step(page, -1);
+  }
+  for (;;) {
+    if ((await currentView(page)) === target.id) return;
+    const moved = await step(page, 1);
+    if (!moved) break;
+  }
+  throw new Error(`showGag: walked every close-up but never reached view "${target.id}" for gag "${gagId}"`);
 }
 
 export async function panelIsOpen(page: Page): Promise<boolean> {

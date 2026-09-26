@@ -1,6 +1,7 @@
 import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { expect, test } from '@playwright/test';
+import * as H from './interaction-helpers';
 import { interceptFixtureScenes } from './scene-source';
 
 const G2_1_THUMB_PATH = fileURLToPath(new URL('../public/sprites/thumbs/G2.1.png', import.meta.url));
@@ -56,6 +57,7 @@ test.describe('keyboard: slider End and panel Escape (B4)', () => {
     await page.setViewportSize(VIEWPORT);
     await page.goto('/');
     await page.waitForFunction(() => document.body.dataset.renderedToken !== undefined);
+    await H.showGag(page, 'G2.1');
 
     const hotspot = page.locator('[data-gag-id="G2.1"]');
     await hotspot.focus();
@@ -77,6 +79,7 @@ test.describe('panel copy (B5): inline beat labels', () => {
     await page.setViewportSize(VIEWPORT);
     await page.goto('/');
     await page.waitForFunction(() => document.body.dataset.renderedToken !== undefined);
+    await H.showGag(page, 'G2.1');
 
     await page.locator('[data-gag-id="G2.1"]').click();
     await page.waitForTimeout(150);
@@ -108,6 +111,7 @@ test.describe('panel thumbnail (fix round item 8 / review fix 5)', () => {
     await page.setViewportSize(VIEWPORT);
     await page.goto('/');
     await page.waitForFunction(() => document.body.dataset.renderedToken !== undefined);
+    await H.showGag(page, 'G2.1');
 
     await page.locator('[data-gag-id="G2.1"]').click();
     const thumb = page.locator('.panel__thumb');
@@ -136,6 +140,7 @@ test.describe('panel thumbnail (fix round item 8 / review fix 5)', () => {
     await page.setViewportSize(VIEWPORT);
     await page.goto('/');
     await page.waitForFunction(() => document.body.dataset.renderedToken !== undefined);
+    await H.showGag(page, 'G2.1');
 
     await page.locator('[data-gag-id="G2.1"]').click();
     const thumb = page.locator('.panel__thumb');
@@ -194,6 +199,7 @@ test.describe('panel thumbnail (fix round item 8 / review fix 5)', () => {
     await page.setViewportSize(VIEWPORT);
     await page.goto('/');
     await page.waitForFunction(() => document.body.dataset.renderedToken !== undefined);
+    await H.showGag(page, 'G2.1');
 
     await page.locator('[data-gag-id="G2.1"]').click();
     const thumb = page.locator('.panel__thumb');

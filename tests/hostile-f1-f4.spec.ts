@@ -28,7 +28,7 @@ import { readFileSync } from 'node:fs';
 import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
 import * as H from './interaction-helpers';
-import { sceneSourceDir } from './scene-source';
+import { allGagIds, defaultViewGagIds, sceneSourceDir } from './scene-source';
 
 /** The gag ids the currently-rendered view actually has hotspots for. The
  * oracle for "does the open panel describe something that is on screen". */
@@ -60,9 +60,23 @@ async function expectPanelAgreesWithScene(page: Page, openedGagId: string) {
 
 test.describe('F1 — an open panel survives a re-render that removes its subject', () => {
   test('F1.1 slider: a band-80 gag panel must not sit over the band-750 building', async ({ page }) => {
+    // Data-driven pick (DIA-56): the premise under test is "a band-80 gag is
+    // not on the band-750 screen", not "the first hotspot at band 80 happens
+    // not to be". A real schema-2 export's band-80 default view can start
+    // with a gag that is *also* in band 750's default close-up — the app
+    // correctly keeps the panel open then, so hard-coding "first hotspot"
+    // made the test's premise false for that gag, not a defect.
+    const band750DefaultGags = new Set(defaultViewGagIds(750, 'built'));
+    const gagId = allGagIds(80, 'built').find((id) => !band750DefaultGags.has(id));
+    test.skip(
+      gagId === undefined,
+      "every band-80 gag is also in band 750's default view in this scene source — F1.1 has nothing to exercise"
+    );
+
     await H.openApp(page); // 390px, mouse
     await H.setBand(page, 80);
-    const gagId = await H.openFirstHotspot(page, 'mouse');
+    await H.showGag(page, gagId!);
+    await H.openHotspot(page, gagId!, 'mouse');
     const stripAtOpen = await H.panelStrip(page);
 
     await H.setBand(page, 750, 'mouse');
@@ -75,7 +89,7 @@ test.describe('F1 — an open panel survives a re-render that removes its subjec
     if (await H.panelIsOpen(page)) {
       expect(await H.panelStrip(page)).not.toBe(stripAtOpen);
     }
-    await expectPanelAgreesWithScene(page, gagId);
+    await expectPanelAgreesWithScene(page, gagId!);
   });
 
   test('F1.2 slider: Escape after a band change must not dump focus on <body> (B4/R-24)', async ({ page }) => {

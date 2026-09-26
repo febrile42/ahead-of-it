@@ -78,6 +78,24 @@ export async function interceptFixtureScenes(page: Page): Promise<void> {
   }
 }
 
+/** Reads the scene file for `band`/`state`, or undefined for a band this
+ * index has no entry (or no file for that state) for yet — same "not drawn
+ * yet" case `expectedHotspotCount` treats as zero. */
+function readBandSceneFile(band: number | 'beyond', state: 'built' | 'without'): SceneFile | undefined {
+  const index = readIndex();
+  const key = band === 'beyond' ? index.beyond : String(band);
+  const entry = index.bands[key];
+  const fileName = entry?.[state];
+  return fileName ? readSceneFile(fileName) : undefined;
+}
+
+/** Whichever view a fresh load of `scene` lands on (mirrors src/main.ts's
+ * `defaultView` fallback: the marked `default` view, else the first
+ * close-up, else the first view at all). */
+function pickDefaultView(scene: SceneFile): SceneView | undefined {
+  return scene.views.find((v) => v.default) ?? scene.views.find((v) => v.kind === 'closeup') ?? scene.views[0];
+}
+
 /**
  * The hotspot count the app will actually render for `band`/`state`:
  * whichever view is `default` in that band's scene file (mirrors
@@ -89,15 +107,39 @@ export async function interceptFixtureScenes(page: Page): Promise<void> {
  * just with a labelled box instead of art).
  */
 export function expectedHotspotCount(band: number | 'beyond', state: 'built' | 'without'): number {
-  const index = readIndex();
-  const key = band === 'beyond' ? index.beyond : String(band);
-  const entry = index.bands[key];
-  if (!entry) return 0;
-  const fileName = entry[state];
-  if (!fileName) return 0;
-  const scene = readSceneFile(fileName);
-  const view = scene.views.find((v) => v.default) ?? scene.views.find((v) => v.kind === 'closeup') ?? scene.views[0];
+  const scene = readBandSceneFile(band, state);
+  const view = scene && pickDefaultView(scene);
   return view ? view.hotspots.length : 0;
+}
+
+/** Every gagId with a hotspot in `band`/`state`'s *default* view — the view
+ * a fresh load or a slider change to that band actually lands on. DIA-56:
+ * a real schema-2 export's default view is a close-up, not necessarily the
+ * one holding any particular gag, so a spec choosing "a gag not on the
+ * band-750 screen" must check this instead of assuming it. */
+export function defaultViewGagIds(band: number | 'beyond', state: 'built' | 'without'): string[] {
+  const scene = readBandSceneFile(band, state);
+  const view = scene && pickDefaultView(scene);
+  return view ? view.hotspots.map((h) => h.gagId) : [];
+}
+
+/** Every gagId with a hotspot anywhere in `band`/`state`'s scene, across
+ * every view (not just the default one). */
+export function allGagIds(band: number | 'beyond', state: 'built' | 'without'): string[] {
+  const scene = readBandSceneFile(band, state);
+  return scene ? scene.views.flatMap((v) => v.hotspots.map((h) => h.gagId)) : [];
+}
+
+/** The view holding `gagId`'s hotspot in `band`/`state`'s scene, if any —
+ * the lookup `showGag` (interaction-helpers.ts) needs to walk the stepper
+ * to a specific gag regardless of which close-up now holds it. */
+export function findGagView(
+  band: number | 'beyond',
+  state: 'built' | 'without',
+  gagId: string
+): SceneView | undefined {
+  const scene = readBandSceneFile(band, state);
+  return scene?.views.find((v) => v.hotspots.some((h) => h.gagId === gagId));
 }
 
 /** Every band this index.json actually has a scene file for (both states) — used to scope per-view pixel parity to bands that are actually drawn. */
