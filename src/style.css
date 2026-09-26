@@ -246,24 +246,32 @@ h1 {
   outline-offset: 2px;
 }
 
-/* A room's "zoom in" target (D-042a): covers the close-up's rect; the
-   caption is the close-up's own label. */
+/* A room's "zoom in" target (DIA-55): a small label chip anchored on the
+   close-up's rect centre, not a button spanning the rect — a dense room's
+   rects overlap too much for spanning buttons to ever reach 44px without
+   covering each other (DIA-54). The chip's own text is what needs to be
+   readable and tappable, so it is sized to its content (never below 44px
+   on either axis) instead of to the rect; src/scene/layout.ts's
+   `placeChips` keeps chips apart regardless of how densely the rects
+   themselves overlap. */
 .hotspot--zoom {
-  display: flex;
-  align-items: flex-start;
-  justify-content: flex-start;
-  border-style: solid;
-  background: rgba(255, 255, 255, 0.08);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  border: none;
+  background: transparent;
 }
 
 .hotspot__caption {
-  margin: 2px;
-  padding: 1px 5px;
+  padding: 4px 8px;
   background: var(--ink);
   color: #fff;
-  border-radius: 3px;
+  border-radius: 999px;
   font: 600 0.7rem/1.2 system-ui, sans-serif;
-  text-align: left;
+  text-align: center;
+  white-space: nowrap;
 }
 
 /* --- Stepper (D-042a): previous, "label · n of N", next, whole floor --- */

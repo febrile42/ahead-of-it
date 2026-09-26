@@ -8,8 +8,8 @@
 // scale (R-20).
 import type { Gag, PanelFields } from '../content';
 import { getBeyond, getGags } from '../content';
-import type { SceneLayout, ZoomLayout } from '../scene/layout';
-import { resolveZoomOverlaps } from '../scene/layout';
+import type { Chip, SceneLayout, ZoomLayout } from '../scene/layout';
+import { placeChips } from '../scene/layout';
 import { createContactLine } from './contact';
 import { ui } from './strings';
 
@@ -250,14 +250,16 @@ export function renderHotspots(
 
 /**
  * D-042a: a room has no gag hotspots; instead one "zoom in" <button> per
- * close-up, covering that close-up's `rect` over the room picture (never
- * smaller than 44 css px). Same seam as `renderHotspots` — positioned from
- * the layout's native units, so the buttons cannot disagree with the
- * picture — and the visible caption is the close-up's own scene-file label.
- * Review fix (DIA-46 item 4): two close-up rects may overlap a little
- * on-screen (adjacent crops sharing a wall) — `resolveZoomOverlaps` splits
- * the shared strip between them first, so every button keeps an unobscured
- * hit area and no two ever cover the same point.
+ * close-up. DIA-55: the button is a small label chip anchored on the
+ * close-up's `rect` centre, not a button spanning the whole rect — a dense
+ * room's rects overlap too much for spanning buttons to ever reach 44px
+ * without covering each other (DIA-54; see src/scene/layout.ts's
+ * `placeChips` doc comment for the full story). The chip is inserted first
+ * so its real rendered size (label + CSS padding, already floored at 44px)
+ * can be measured, then `placeChips` finds each one a position — its
+ * anchor if that's free, else the nearest free spot — so two chips never
+ * cover the same point regardless of how densely the room's close-ups are
+ * packed.
  */
 export function renderZoomTargets(
   container: HTMLElement,
@@ -267,23 +269,52 @@ export function renderZoomTargets(
   container.replaceChildren();
   container.dataset.bufferW = String(layout.bufferW);
   container.dataset.bufferH = String(layout.bufferH);
-  for (const target of resolveZoomOverlaps(layout.targets)) {
+
+  const buttons = layout.targets.map((target) => {
     const button = document.createElement('button');
     button.type = 'button';
     button.className = 'hotspot hotspot--zoom';
     button.dataset.viewId = target.viewId;
     button.setAttribute('aria-label', ui('zoomIn', { label: target.label }));
-    const { cx, cy } = placeButton(button, target, layout);
-    button.style.width = `${(target.w / layout.bufferW) * 100}%`;
-    button.style.height = `${(target.h / layout.bufferH) * 100}%`;
-    button.dataset.cx = String(cx);
-    button.dataset.cy = String(cy);
+    button.style.position = 'absolute';
+
     const caption = document.createElement('span');
     caption.className = 'hotspot__caption';
     caption.setAttribute('aria-hidden', 'true');
     caption.textContent = target.label;
     button.append(caption);
+
     button.addEventListener('click', () => onZoom(target.viewId, button));
     container.append(button);
-  }
+    return button;
+  });
+
+  // Real rendered box (css px): the layer is given an explicit pixel
+  // width/height by main.ts's sizeAndPositionCanvas before this runs, so
+  // its own box is the room's on-screen size regardless of the buffer's
+  // native-pixel units.
+  const containerBox = container.getBoundingClientRect();
+  const cssW = containerBox.width || layout.bufferW;
+  const cssH = containerBox.height || layout.bufferH;
+
+  const chips: Chip[] = layout.targets.map((target, i) => {
+    const box = buttons[i].getBoundingClientRect();
+    return {
+      cx: ((target.x + target.w / 2) / layout.bufferW) * cssW,
+      cy: ((target.y + target.h / 2) / layout.bufferH) * cssH,
+      w: box.width,
+      h: box.height,
+    };
+  });
+
+  const positions = placeChips(chips, { w: cssW, h: cssH });
+
+  buttons.forEach((button, i) => {
+    const { x, y } = positions[i];
+    button.style.left = `${x}px`;
+    button.style.top = `${y}px`;
+    button.style.transform = 'translate(-50%, -50%)';
+    button.dataset.cx = String(x);
+    button.dataset.cy = String(y);
+  });
 }

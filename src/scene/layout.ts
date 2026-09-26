@@ -49,41 +49,105 @@ export interface ZoomLayout {
   targets: ZoomTarget[];
 }
 
-/** Review fix (DIA-46 item 4): SCENE-FORMAT allows adjacent close-up rects
- * to overlap a little (crops sharing a wall) — the room's "zoom in" buttons
- * still each need an unobscured hit area, so a tap near the shared edge
- * always lands on exactly one target. Splits every overlapping pair down
- * the middle of the overlap, along whichever axis overlaps least, so both
- * boxes keep their id/label and most of their footprint; only the box a
- * button is drawn from moves, never the scene file's own `rect`. Assumes
- * pairwise overlap is the only case a close-up crop produces in practice
- * (true of every fixture and export to date) — a three-way overlap would
- * need a second pass, which this does not attempt. */
-export function resolveZoomOverlaps<T extends { x: number; y: number; w: number; h: number }>(
-  targets: readonly T[]
-): T[] {
-  const rects = targets.map((t) => ({ ...t }));
-  for (let i = 0; i < rects.length; i += 1) {
-    for (let j = i + 1; j < rects.length; j += 1) {
-      const a = rects[i];
-      const b = rects[j];
-      const overlapX = Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x);
-      const overlapY = Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y);
-      if (overlapX <= 0 || overlapY <= 0) continue; // not overlapping
-      if (overlapX < overlapY) {
-        const mid = (Math.max(a.x, b.x) + Math.min(a.x + a.w, b.x + b.w)) / 2;
-        const [left, right] = a.x <= b.x ? [a, b] : [b, a];
-        left.w = mid - left.x;
-        right.w = right.x + right.w - mid;
-        right.x = mid;
-      } else {
-        const mid = (Math.max(a.y, b.y) + Math.min(a.y + a.h, b.y + b.h)) / 2;
-        const [top, bottom] = a.y <= b.y ? [a, b] : [b, a];
-        top.h = mid - top.y;
-        bottom.h = bottom.y + bottom.h - mid;
-        bottom.y = mid;
+/** DIA-55: a zoom-in chip's anchor and measured footprint, all in css px —
+ * `cx`/`cy` is the close-up rect's centre (converted from buffer units by
+ * the caller), `w`/`h` is the chip's own rendered size (its label plus
+ * padding, already clamped to the 44px minimum by CSS before it is
+ * measured). Order matches the room's close-ups array. */
+export interface Chip {
+  cx: number;
+  cy: number;
+  w: number;
+  h: number;
+}
+
+/** A chip's placed centre, in the same css-px space as its `Chip.cx/cy`. */
+export interface ChipPosition {
+  x: number;
+  y: number;
+}
+
+const CHIP_SEARCH_STEP = 6;
+
+function clampChipCentre(chip: Chip, bounds: { w: number; h: number }): ChipPosition {
+  const halfW = chip.w / 2;
+  const halfH = chip.h / 2;
+  const x = chip.w <= bounds.w ? Math.min(Math.max(chip.cx, halfW), bounds.w - halfW) : bounds.w / 2;
+  const y = chip.h <= bounds.h ? Math.min(Math.max(chip.cy, halfH), bounds.h - halfH) : bounds.h / 2;
+  return { x, y };
+}
+
+function chipsIntersect(
+  a: { x: number; y: number; w: number; h: number },
+  bx: number,
+  by: number,
+  bw: number,
+  bh: number
+): boolean {
+  const ax0 = a.x - a.w / 2;
+  const ax1 = a.x + a.w / 2;
+  const ay0 = a.y - a.h / 2;
+  const ay1 = a.y + a.h / 2;
+  const bx0 = bx - bw / 2;
+  const bx1 = bx + bw / 2;
+  const by0 = by - bh / 2;
+  const by1 = by + bh / 2;
+  return ax0 < bx1 && bx0 < ax1 && ay0 < by1 && by0 < ay1;
+}
+
+/**
+ * Replaces `resolveZoomOverlaps` (DIA-46 item 4) + panel.ts's old
+ * rect-spanning zoom-in button. That combination split a room's close-up
+ * rects on overlap, then `placeButton`'s 44px minimum regrew the resulting
+ * slivers straight back into their neighbours (DIA-54/DIA-55) — a dense
+ * room like band 750's `ground` (six 180x120 close-ups on a 348x220 room)
+ * always lost. The zoom-in target is now a small label chip anchored on
+ * the rect's centre instead of a button spanning the whole rect, so its
+ * footprint is its own text size, not a slice of a shrinking rect.
+ *
+ * Places each chip (in array order) at its anchor, clamped into `bounds`;
+ * if that overlaps an already-placed chip, searches an expanding square
+ * ring around the anchor (deterministic, no randomness) for the nearest
+ * free position that is inside bounds and clear of every chip placed so
+ * far. If none exists within the search radius, places it at the clamped
+ * anchor anyway and logs a warning — better an overlap a visitor can still
+ * read part of than a chip flung off the picture.
+ */
+export function placeChips(chips: readonly Chip[], bounds: { w: number; h: number }): ChipPosition[] {
+  const placed: Array<{ x: number; y: number; w: number; h: number }> = [];
+  const positions: ChipPosition[] = [];
+  const maxRadius = (bounds.w + bounds.h) * 2;
+
+  for (const chip of chips) {
+    const clamped = clampChipCentre(chip, bounds);
+    const isFree = (x: number, y: number) => !placed.some((p) => chipsIntersect(p, x, y, chip.w, chip.h));
+
+    let found: ChipPosition | null = isFree(clamped.x, clamped.y) ? clamped : null;
+
+    for (let radius = CHIP_SEARCH_STEP; !found && radius <= maxRadius; radius += CHIP_SEARCH_STEP) {
+      for (let dy = -radius; !found && dy <= radius; dy += CHIP_SEARCH_STEP) {
+        const onHorizontalEdge = Math.abs(dy) === radius;
+        const dxs = onHorizontalEdge
+          ? Array.from({ length: Math.floor((2 * radius) / CHIP_SEARCH_STEP) + 1 }, (_, i) => -radius + i * CHIP_SEARCH_STEP)
+          : [-radius, radius];
+        for (const dx of dxs) {
+          const candidate = clampChipCentre({ ...chip, cx: clamped.x + dx, cy: clamped.y + dy }, bounds);
+          if (isFree(candidate.x, candidate.y)) {
+            found = candidate;
+            break;
+          }
+        }
       }
     }
+
+    const final = found ?? clamped;
+    if (!found) {
+      // eslint-disable-next-line no-console
+      console.warn(`placeChips: no free position found for chip at (${chip.cx}, ${chip.cy}); leaving it overlapping`);
+    }
+    placed.push({ x: final.x, y: final.y, w: chip.w, h: chip.h });
+    positions.push(final);
   }
-  return rects;
+
+  return positions;
 }
