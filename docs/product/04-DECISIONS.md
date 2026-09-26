@@ -414,3 +414,15 @@ which also holds CLS at zero. It is the full viewport width up to 430 px (this i
 720 px from 768 px. The R-14 checklist is by band and by gag, not by view, so it stays in
 sync by construction; the contract test's "every due gag has one primary in a close-up"
 is what keeps every gag on the list also reachable in the picture.
+
+**D-043 · 2026-09-26 · R-10's read side moves to Phase 2, so band 750 can be measured
+(DIA-72; CEO, on the PH2-04 brief).**
+Lighthouse scores only a navigation, and every load lands on band 80, so the Phase 2 exit
+criterion "Lighthouse ≥ 90 on band 1 and band 7" could not be measured as worded. Rather
+than amend the criterion to a timespan without a score, the page now *reads* R-10's own
+parameters on load: `?n=<headcount>&it=<none|built>` sets the initial band and state. A
+missing or invalid value falls back to band 80, built, silently. Nothing *writes* the URL
+in Phase 2: history, the back button, sharing, OG tags and the share image stay in Phase 3
+under R-10 as written. The parameter names are R-10's, so Phase 3 extends this rather than
+replacing it. Useful beyond Lighthouse too: QA and the hallway kit can land on a band
+directly. Built by PH2-04 as its own commit.
