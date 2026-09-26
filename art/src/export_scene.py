@@ -5,18 +5,20 @@ Exports `public/sprites/scenes/<band>-<state>.json` + `index.json`, per the cont
 data `art/build.py` renders its review previews from — so the exported `entries` are the
 list each view is painted from.
 
-**Views are rooms (PH1-10, D-037 item 8).** `layout.scene(band, state)` returns one
-placement list per D-036 view — `ground`, `floor-2`, `street` — each a whole room (or,
-for `street`, the whole exterior plate). A view's canvas is fitted to what is drawn in
-it across *both* states (`compose.fit`), so the two states overlay pixel for pixel and no
-view edge cuts anything. There are no crop rectangles any more: a view's entries are its
-room's placements, in paint order, in the room's own coordinates.
+**Rooms and close-ups (PH1-10, then D-042).** `layout.scene(band, state)` returns one
+placement list per D-036 room — `ground`, `floor-2`, `street` — each a whole room (or,
+for `street`, the whole exterior plate). A room's canvas is fitted to what is drawn in it
+across *both* states (`compose.fit`), so the two states overlay pixel for pixel and no
+room edge cuts anything. Rooms are establishing shots and carry no hotspots. Each room is
+followed by its close-ups (`closeups.py`): 180 x 120 crops of the room, one rect for both
+states, centred on the gags they hold, whose entries and hotspots are translated into the
+close-up's own coordinates (SCENE-FORMAT.md "Views: rooms and close-ups").
 
 **Placeholders (bands 490-750, then 610-750 once 490 is drawn).** No composer exists
 yet, so every placeholder band re-exports the nearest drawn band's views verbatim plus one `placeholder: true` box per undrawn gag in
 its D-036 home view, placed where the room is emptiest and >= 48 px from every other
-primary (`_place_placeholders`). A view that band 220 doesn't have yet (`top`) is an
-empty canvas holding only its boxes.
+primary (`_place_placeholders`), grouped into "Not drawn yet" close-ups of their own. A
+room that band 490 doesn't have yet (`top`) is an empty canvas holding only its boxes.
 """
 from __future__ import annotations
 
@@ -26,7 +28,8 @@ import os
 from PIL import Image
 
 from .dsl import Canvas, save_png
-from . import compose, layout
+from . import closeups, compose, layout
+from .closeups import CLOSEUP_W, CLOSEUP_H
 from .vox import dotted
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
@@ -37,10 +40,10 @@ THUMBS_DIR = os.path.join(SPRITES_DIR, "thumbs")
 PREVIEW_VIEWS_DIR = os.path.join(_REPO_ROOT, "art", "preview", "views")
 
 STATES = ("without", "built")
-DRAWN_BANDS = (80, 150, 220, 360, 490)
-UNDRAWN_BANDS = (610, 750)
+DRAWN_BANDS = (80, 150, 220, 360, 490, 610, 750)
+UNDRAWN_BANDS = ()
 ALL_BANDS = DRAWN_BANDS + UNDRAWN_BANDS
-NEAREST_DRAWN = 490
+NEAREST_DRAWN = 750
 MAX_W, MAX_H = 360, 240          # D-036 rule 3
 
 # The part of a gag that carries its D-036 primary hotspot. A dict means the primary
@@ -54,6 +57,10 @@ HOME_PART = {
     # PH1-11
     "G5.3": "server", "G5.4": "phones", "G5.6": "data", "G7.3": "hats",
     "G3.1": "desk", "G6.4": "door",
+    # PH1-12
+    "G4.1": "door", "G3.3": "chart", "G5.2": "wing", "G6.3": "shell",
+    "G6.1": "balloons", "G6.2": "slope", "G7.1": "robot", "G7.2": "meeting",
+    "G7.4": "chain",
 }
 
 # D-036 rule 4: the view a gag's *primary* hotspot must be in. Not used to move
@@ -65,6 +72,9 @@ GAG_HOME_VIEW = {
     "G2.4": "floor-2", "G7.3a": "floor-2", "G5.1": "street",
     "G5.3": "ground", "G5.4": "ground", "G7.3": "floor-2", "G5.6": "street",
     "G3.1": "ground", "G6.4": "street",
+    "G4.1": "ground", "G3.3": "floor-2", "G5.2": "street", "G6.3": "street",
+    "G6.1": "ground", "G6.2": "floor-2", "G7.1": "ground", "G7.2": "top",
+    "G7.4": "floor-2",
 }
 
 # D-036 rule 4's view assignment for gags with no composer yet (no geometry to derive
@@ -77,19 +87,12 @@ PLACEHOLDER_VIEW = {
     "G7.4": "floor-2",                                                             # 750
 }
 # Gags newly introduced at each undrawn band (cumulative — R-03a).
-NEW_GAGS_AT = {
-    610: ["G4.1", "G5.2", "G3.3", "G6.3"],
-    750: ["G6.1", "G6.2", "G7.1", "G7.2", "G7.4"],
-}
+NEW_GAGS_AT: dict = {}
 
 PLACEHOLDER_BOX = 32   # native px, square
 PLACEHOLDER_GAP = 48   # min centre distance to any other primary; > 44 (rule 7)
 
 VIEW_ORDER = layout.VIEW_ORDER
-
-
-def _sort_views(vlist: list) -> list:
-    return sorted(vlist, key=lambda v: VIEW_ORDER.index(v["id"]))
 
 
 def _view_label(view_id: str) -> str:
@@ -275,6 +278,8 @@ def _point_of(lib, by_id, ref):
 
 
 _manifest_additions: dict = {}
+# (band, gag) -> (room id, close-up rect) of the gag's primary in `without`: thumbs
+_primary_closeup: dict = {}
 
 
 def _bake_overlay(segments, w, h, name):
@@ -293,48 +298,167 @@ def _bake_overlay(segments, w, h, name):
 
 
 # ---------------------------------------------------------------------------
-# real (drawn) bands
+# a band as a model: rooms (entries per state) + every gag part's rect in room coords
 # ---------------------------------------------------------------------------
 
-def _views_for_band(lib: compose.Library, band: int) -> list:
-    """[(view_id, w, h, {state: {entries, hotspots}})] in D-036 order."""
+def _band_model(lib: compose.Library, band: int) -> dict:
+    """{"rooms": [(view_id, w, h, {state: entries})], "groups": {state: {(view, gag,
+    part): [x0, y0, x1, y1]}}, "primaries": {state: {gag: part}}}, all in each room's
+    own coordinates. Fails if a primary is drawn outside its D-036 home room."""
     frames = {v: view_frame(lib, band, v) for v in layout.views(band)}
-    hotspots_by_state = _hotspots_for_band(lib, band, frames)
-    views_out = []
+    groups = _hotspots_for_band(lib, band, frames)
+    rooms = []
     for view_id in layout.views(band):
         origin, (w, h) = frames[view_id]
         per_state = {}
         for state in STATES:
             placements, lines = resolve_view(lib, band, state, view_id, origin)
-            entries = _entries_for_view(lib, placements, lines, band, state, view_id, (w, h))
-            groups = hotspots_by_state[state]
-            parts_by_gag: dict = {}
-            for (_v, gag, part) in groups:
-                parts_by_gag.setdefault(gag, set()).add(part)
-            primaries = {gag: _primary_part(gag, state, parts)
-                         for gag, parts in parts_by_gag.items()}
-            hs = []
-            for (v, gag, part), (gx0, gy0, gx1, gy1) in groups.items():
-                if v != view_id:
-                    continue
-                is_primary = primaries.get(gag) == part
-                if is_primary and GAG_HOME_VIEW.get(gag, view_id) != view_id:
-                    raise ValueError(f"band {band} {state}: {gag}'s primary part {part!r} "
-                                     f"is drawn in {view_id}, but its D-036 home view is "
-                                     f"{GAG_HOME_VIEW[gag]}")
-                hs.append({
-                    "gagId": gag, "part": part,
-                    "x": gx0, "y": gy0, "w": gx1 - gx0, "h": gy1 - gy0,
-                    "primary": is_primary,
+            per_state[state] = _entries_for_view(lib, placements, lines, band, state,
+                                                 view_id, (w, h))
+        rooms.append((view_id, w, h, per_state))
+    primaries = {}
+    for state in STATES:
+        parts_by_gag: dict = {}
+        for (_v, gag, part) in groups[state]:
+            parts_by_gag.setdefault(gag, set()).add(part)
+        primaries[state] = {g: _primary_part(g, state, ps) for g, ps in parts_by_gag.items()}
+        for (v, gag, part) in groups[state]:
+            if primaries[state][gag] == part and GAG_HOME_VIEW.get(gag, v) != v:
+                raise ValueError(f"band {band} {state}: {gag}'s primary part {part!r} is "
+                                 f"drawn in {v}, but its D-036 home view is "
+                                 f"{GAG_HOME_VIEW[gag]}")
+    return {"rooms": rooms, "groups": groups, "primaries": primaries,
+            "placeholder": set()}
+
+
+# ---------------------------------------------------------------------------
+# close-ups (D-042): crops of their parent room, in their own coordinates
+# ---------------------------------------------------------------------------
+
+def _closeup_rect(band: int, view_id: str, label: str, boxes: list, room_w: int,
+                  room_h: int) -> dict:
+    """A CLOSEUP_W x CLOSEUP_H rect centred on the union of `boxes` (both states), then
+    clamped inside the room. Fails if the cluster can't fit: re-cluster in closeups.py."""
+    if not boxes:
+        raise ValueError(f"band {band} {view_id} close-up {label!r} holds nothing drawn")
+    x0 = min(b[0] for b in boxes)
+    y0 = min(b[1] for b in boxes)
+    x1 = max(b[2] for b in boxes)
+    y1 = max(b[3] for b in boxes)
+    cw, ch = min(CLOSEUP_W, room_w), min(CLOSEUP_H, room_h)
+    if x1 - x0 > cw or y1 - y0 > ch:
+        raise ValueError(f"band {band} {view_id} close-up {label!r}: its gags span "
+                         f"{x1 - x0}x{y1 - y0}, over {cw}x{ch} — split the cluster")
+    rx = max(0, min((x0 + x1 - cw) // 2, room_w - cw))
+    ry = max(0, min((y0 + y1 - ch) // 2, room_h - ch))
+    return {"x": rx, "y": ry, "w": cw, "h": ch}
+
+
+def _entry_bounds(lib: compose.Library, e: dict):
+    m = lib.manifest.get(e["sprite"]) or _manifest_additions[e["sprite"]]
+    ax, ay = m["anchor"]
+    return e["x"] - ax, e["y"] - ay, e["x"] - ax + m["w"], e["y"] - ay + m["h"]
+
+
+def _crop_entries(lib: compose.Library, entries: list, rect: dict) -> list:
+    """The room's entries that paint anything inside `rect`, translated into the
+    close-up's own coordinates (negative where they overhang), paint order kept."""
+    out = []
+    rx, ry, rw, rh = rect["x"], rect["y"], rect["w"], rect["h"]
+    for e in entries:
+        x0, y0, x1, y1 = _entry_bounds(lib, e)
+        if x1 <= rx or y1 <= ry or x0 >= rx + rw or y0 >= ry + rh:
+            continue
+        out.append({**e, "x": e["x"] - rx, "y": e["y"] - ry})
+    return out
+
+
+def _clip(r, rect):
+    """Room-coord rect `r` clipped to `rect`, in close-up coords, or None if outside."""
+    rx, ry = rect["x"], rect["y"]
+    x0, y0 = max(r[0], rx), max(r[1], ry)
+    x1, y1 = min(r[2], rx + rect["w"]), min(r[3], ry + rect["h"])
+    if x0 >= x1 or y0 >= y1:
+        return None
+    return x0 - rx, y0 - ry, x1 - rx, y1 - ry
+
+
+def _closeup_specs(band: int, view_id: str, model: dict) -> list:
+    """[(label, gags)] for one room: the art's clusters (closeups.py), plus, on a
+    placeholder band, the placeholder boxes' own clusters."""
+    specs = list(closeups.closeups(view_id, model.get("closeup_band", band)))
+    specs += model.get("placeholder_specs", {}).get(view_id, [])
+    return specs
+
+
+def _build_views(lib: compose.Library, band: int, model: dict, own_gags: set) -> dict:
+    """{state: views[]} — each room followed directly by its close-ups (D-042)."""
+    groups, primaries = model["groups"], model["primaries"]
+    out = {s: [] for s in STATES}
+    claimed = set()
+    for view_id, w, h, entries_by_state in model["rooms"]:
+        specs = _closeup_specs(band, view_id, model)
+        if view_id != "ground" and not specs:
+            raise ValueError(f"band {band}: room {view_id} has no close-up (D-042) — it "
+                             f"should not exist yet")
+        rects = []
+        for label, gags in specs:
+            if len(label) > 24:
+                raise ValueError(f"close-up label {label!r} is over 24 characters")
+            boxes = [r for s in STATES for (v, g, _p), r in groups[s].items()
+                     if v == view_id and g in gags]
+            rects.append(_closeup_rect(band, view_id, label, boxes, w, h))
+        for state in STATES:
+            out[state].append({
+                "id": view_id, "kind": "room", "label": _view_label(view_id),
+                "size": {"w": w, "h": h}, "focus": {"x": 0, "y": 0, "w": w, "h": h},
+                "entries": entries_by_state[state], "hotspots": [],
+            })
+            for n, ((label, gags), rect) in enumerate(zip(specs, rects), start=1):
+                cid = f"{view_id}.{n}"
+                hs = []
+                for (v, g, p), r in groups[state].items():
+                    if v != view_id or g not in gags:
+                        continue
+                    is_primary = primaries[state].get(g) == p
+                    c = _clip(r, rect)
+                    if c is None:
+                        raise ValueError(f"band {band} {state}: {g}/{p} is outside "
+                                         f"close-up {cid} ({label})")
+                    if is_primary and (c[2] - c[0], c[3] - c[1]) != (r[2] - r[0], r[3] - r[1]):
+                        raise ValueError(f"band {band} {state}: {g}'s primary is cut by "
+                                         f"close-up {cid}'s rect")
+                    h_ = {"gagId": g, "part": p, "x": c[0], "y": c[1],
+                          "w": c[2] - c[0], "h": c[3] - c[1], "primary": is_primary}
+                    if (v, g, p) in model["placeholder"]:
+                        h_["placeholder"] = True
+                    hs.append(h_)
+                    claimed.add((state, v, g, p))
+                    if is_primary and state == "without":
+                        _primary_closeup[(band, g)] = (view_id, rect)
+                hs.sort(key=lambda h_: (h_["gagId"], h_["part"]))
+                n_prim = sum(1 for h_ in hs if h_["primary"])
+                if not 1 <= n_prim <= 3:
+                    raise ValueError(f"band {band} {state}: close-up {cid} ({label}) holds "
+                                     f"{n_prim} primaries, want 1-3 (D-042)")
+                out[state].append({
+                    "id": cid, "kind": "closeup", "parent": view_id, "label": label,
+                    "rect": dict(rect), "size": {"w": rect["w"], "h": rect["h"]},
+                    "focus": {"x": 0, "y": 0, "w": rect["w"], "h": rect["h"]},
+                    "entries": _crop_entries(lib, entries_by_state[state], rect),
+                    "hotspots": hs,
                 })
-            hs.sort(key=lambda h_: (h_["gagId"], h_["part"]))
-            per_state[state] = {"entries": entries, "hotspots": hs}
-        views_out.append((view_id, w, h, per_state))
-    return views_out
+    for state in STATES:
+        missed = [k for k in groups[state] if (state,) + k not in claimed]
+        if missed:
+            raise ValueError(f"band {band} {state}: gag parts in no close-up: {missed} — "
+                             f"add them to a cluster in closeups.py")
+        _mark_default(out[state], own_gags)
+    return out
 
 
 def _write_doc(band: int, state: str, vlist: list) -> str:
-    doc = {"schema": 1, "band": band, "state": state, "views": _sort_views(vlist)}
+    doc = {"schema": 2, "band": band, "state": state, "views": vlist}
     fname = f"{band}-{state}.json"
     with open(os.path.join(SCENES_DIR, fname), "w") as f:
         json.dump(doc, f, indent=2, sort_keys=False)
@@ -343,41 +467,33 @@ def _write_doc(band: int, state: str, vlist: list) -> str:
 
 
 def _mark_default(vlist: list, own_gags: set):
-    """D-036 rule 6: the view with the most primaries among the band's own gags; ties to
-    the earlier view (vlist is in D-036 order)."""
+    """D-042: the close-up with the most primaries among the band's own gags; ties to
+    the earlier one (vlist is in navigation order). Rooms are never the default."""
     def n(v):
         return sum(1 for h_ in v["hotspots"] if h_["primary"] and h_["gagId"] in own_gags)
     best = None
     for v in vlist:
-        if best is None or n(v) > n(best):
+        if v["kind"] == "closeup" and (best is None or n(v) > n(best)):
             best = v
     for v in vlist:
-        v["default"] = v is best
+        if v is best:
+            v["default"] = True
+        else:
+            v.pop("default", None)
+
+
+def _write_band(lib: compose.Library, band: int, model: dict, own_gags: set) -> dict:
+    views = _build_views(lib, band, model, own_gags)
+    return {state: _write_doc(band, state, views[state]) for state in STATES}
 
 
 def export_band(lib: compose.Library, band: int, band_new_gags: set) -> dict:
-    views = _views_for_band(lib, band)
-    files = {}
-    for state in STATES:
-        vlist = []
-        for view_id, w, h, per_state in views:
-            hs = per_state[state]["hotspots"]
-            if view_id != "ground" and not any(h_["primary"] for h_ in hs):
-                raise ValueError(f"band {band} {state}: view {view_id} holds no primary "
-                                 f"hotspot (D-036 rule 2) — it should not exist yet")
-            vlist.append({
-                "id": view_id, "label": _view_label(view_id), "size": {"w": w, "h": h},
-                "focus": {"x": 0, "y": 0, "w": w, "h": h},
-                "entries": per_state[state]["entries"],
-                "hotspots": hs,
-            })
-        _mark_default(vlist, band_new_gags)
-        files[state] = _write_doc(band, state, vlist)
-    return files
+    return _write_band(lib, band, _band_model(lib, band), band_new_gags)
 
 
 # ---------------------------------------------------------------------------
-# placeholder bands: the nearest drawn band's views + placeholder:true boxes
+# placeholder bands: the nearest drawn band's rooms and close-ups, plus
+# placeholder:true boxes in close-ups of their own
 # ---------------------------------------------------------------------------
 
 def _place_placeholders(img: Image.Image | None, w: int, h: int, hotspots: list,
@@ -422,37 +538,56 @@ def _place_placeholders(img: Image.Image | None, w: int, h: int, hotspots: list,
     return boxes, w, h
 
 
+def _cluster_boxes(boxes: list) -> list:
+    """Greedy, in placement order: up to 3 placeholder boxes per close-up whose union
+    fits CLOSEUP_W x CLOSEUP_H."""
+    clusters: list = []
+    for b in boxes:
+        for c in clusters:
+            xs = [q["x"] for q in c + [b]] + [q["x"] + q["w"] for q in c + [b]]
+            ys = [q["y"] for q in c + [b]] + [q["y"] + q["h"] for q in c + [b]]
+            if len(c) < 3 and max(xs) - min(xs) <= CLOSEUP_W and max(ys) - min(ys) <= CLOSEUP_H:
+                c.append(b)
+                break
+        else:
+            clusters.append([b])
+    return clusters
+
+
 def export_placeholder_band(lib: compose.Library, band: int, cumulative_new: list,
-                            base_views: list, base_imgs: dict) -> dict:
+                            base: dict, own_gags: set) -> dict:
     by_view_gags: dict = {}
     for gag in cumulative_new:
         by_view_gags.setdefault(PLACEHOLDER_VIEW[gag], []).append(gag)
 
-    files = {}
-    for state in STATES:
-        vlist = []
-        view_ids = [v for v, _, _, _ in base_views]
-        view_ids += [v for v in by_view_gags if v not in view_ids]
-        for view_id in view_ids:
-            base = next(((w, h, ps) for (vid, w, h, ps) in base_views if vid == view_id), None)
-            if base is None:
-                w, h, entries, hs, img = 200, 120, [], [], None
-            else:
-                w, h, per_state = base
-                entries = list(per_state[state]["entries"])
-                # drawn gags keep exactly the real hotspots band 220 exported
-                hs = [dict(h_) for h_ in per_state[state]["hotspots"]]
-                img = base_imgs[(state, view_id)]
-            boxes, w, h = _place_placeholders(img, w, h, hs, by_view_gags.get(view_id, []))
-            hs += boxes
-            vlist.append({
-                "id": view_id, "label": _view_label(view_id), "size": {"w": w, "h": h},
-                "focus": {"x": 0, "y": 0, "w": w, "h": h},
-                "default": view_id == "ground",
-                "entries": entries, "hotspots": hs,
-            })
-        files[state] = _write_doc(band, state, vlist)
-    return files
+    groups = {s: dict(base["groups"][s]) for s in STATES}
+    primaries = {s: dict(base["primaries"][s]) for s in STATES}
+    rooms_in = {v: (w, h, es) for (v, w, h, es) in base["rooms"]}
+    view_ids = [v for v in VIEW_ORDER if v in rooms_in or v in by_view_gags]
+    rooms, placeholder, specs = [], set(), {}
+    for view_id in view_ids:
+        if view_id in rooms_in:
+            w, h, entries = rooms_in[view_id]
+            img = paint_entries(lib, entries["without"], w, h)
+        else:
+            w, h, entries, img = 200, 120, {s: [] for s in STATES}, None
+        real = [{"x": r[0], "y": r[1], "w": r[2] - r[0], "h": r[3] - r[1],
+                 "primary": base["primaries"]["without"].get(g) == p}
+                for (v, g, p), r in base["groups"]["without"].items() if v == view_id]
+        boxes, w, h = _place_placeholders(img, w, h, real, by_view_gags.get(view_id, []))
+        for b in boxes:
+            key = (view_id, b["gagId"], "main")
+            for s in STATES:
+                groups[s][key] = [b["x"], b["y"], b["x"] + b["w"], b["y"] + b["h"]]
+                primaries[s][b["gagId"]] = "main"
+            placeholder.add(key)
+        specs[view_id] = [("Not drawn yet", [b["gagId"] for b in c])
+                          for c in _cluster_boxes(boxes)]
+        rooms.append((view_id, w, h, entries))
+    model = {"rooms": rooms, "groups": groups, "primaries": primaries,
+             "placeholder": placeholder, "placeholder_specs": specs,
+             "closeup_band": NEAREST_DRAWN}
+    return _write_band(lib, band, model, own_gags)
 
 
 # ---------------------------------------------------------------------------
@@ -506,6 +641,9 @@ def export_view_previews(lib: compose.Library) -> list:
 # ---------------------------------------------------------------------------
 
 def export_thumbs(lib: compose.Library) -> dict:
+    """R-04 / D-042: each gag's primary plus an 8 px margin, cut from the `without`
+    close-up that holds it (never past that close-up's rect), for the earliest drawn band
+    the gag appears in."""
     thumbs = {}
     for band in DRAWN_BANDS:
         frames = {v: view_frame(lib, band, v) for v in layout.views(band)}
@@ -517,12 +655,13 @@ def export_thumbs(lib: compose.Library) -> dict:
             if gag in thumbs:
                 continue
             part = _primary_part(gag, "without", parts)
-            view = next(v for (v, g, p) in groups if g == gag and p == part)
+            view, rect = _primary_closeup[(band, gag)]
             x0, y0, x1, y1 = groups[(view, gag, part)]
             img = render_view(lib, band, "without", view)
             m = 8
-            cx0, cy0 = max(x0 - m, 0), max(y0 - m, 0)
-            cx1, cy1 = min(x1 + m, img.width), min(y1 + m, img.height)
+            cx0, cy0 = max(x0 - m, rect["x"]), max(y0 - m, rect["y"])
+            cx1 = min(x1 + m, rect["x"] + rect["w"])
+            cy1 = min(y1 + m, rect["y"] + rect["h"])
             crop = Canvas(cx1 - cx0, cy1 - cy0)
             crop.img = img.crop((cx0, cy0, cx1, cy1))
             fname = f"{gag}.png"
@@ -540,7 +679,7 @@ def export_all():
     os.makedirs(THUMBS_DIR, exist_ok=True)
     lib = compose.Library(SPRITES_DIR)
 
-    index = {"schema": 1, "bands": {}, "beyond": "750", "thumbs": {}}
+    index = {"schema": 2, "bands": {}, "beyond": "750", "thumbs": {}}
 
     for band in DRAWN_BANDS:
         own_gags = {g for g in HOME_PART if _band_of(g) == band}
@@ -550,14 +689,12 @@ def export_all():
     # additions in so everything below can resolve them.
     lib.manifest.update(_manifest_additions)
 
-    base_views = _views_for_band(lib, NEAREST_DRAWN)
-    base_imgs = {(s, v): paint_entries(lib, ps[s]["entries"], w, h)
-                 for (v, w, h, ps) in base_views for s in STATES}
+    base = _band_model(lib, NEAREST_DRAWN)
     cumulative = []
     for band in UNDRAWN_BANDS:
         cumulative = cumulative + NEW_GAGS_AT[band]
-        index["bands"][str(band)] = export_placeholder_band(lib, band, cumulative,
-                                                            base_views, base_imgs)
+        index["bands"][str(band)] = export_placeholder_band(lib, band, cumulative, base,
+                                                            set(NEW_GAGS_AT[band]))
 
     index["thumbs"] = export_thumbs(lib)
     export_view_previews(lib)
@@ -584,6 +721,8 @@ _GAG_BAND = {
     "G2.4": 220, "G7.3a": 220,
     "G5.3": 360, "G5.4": 360, "G5.6": 360, "G7.3": 360,
     "G3.1": 490, "G6.4": 490,
+    "G4.1": 610, "G5.2": 610, "G3.3": 610, "G6.3": 610,
+    "G6.1": 750, "G6.2": 750, "G7.1": 750, "G7.2": 750, "G7.4": 750,
 }
 
 

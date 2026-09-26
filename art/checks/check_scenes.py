@@ -3,33 +3,36 @@
 and D-036. Reads the exported JSON + manifest back off disk, the way a reviewer who
 didn't write the exporter would.
 
-Checks:
+Checks (schema 2, D-042 — rooms + close-ups; the split with the web's contract test is
+the last bullets of SCENE-FORMAT.md "Views: rooms and close-ups"):
   1. determinism      — re-running the exporter reproduces byte-identical JSON + PNGs.
   2. manifest refs     — every `{sprite, frame}` an entry names resolves to a real
                          manifest key/frame (A2).
   3. coverage          — every gag with band <= N has >= 1 hotspot in both states of N.
-  4. views             — id set/order per D-036 rule 1; `ground` always present; a
-                         non-`ground` view holds >= 1 primary hotspot (rule 2); size
-                         w<=360, h<=240 (rule 3); `focus` in bounds of its view (the
-                         mastermind's ruling: focus is "the region to scroll to on a
-                         narrow viewport", not required to equal the whole view); every
-                         view has a non-empty string `label` (SCENE-FORMAT.md — a
-                         missing one showed as "undefined (N)" in the view tab row).
+  4. views             — `schema: 2`; rooms in D-036 order, `ground` first, each directly
+                         followed by its close-ups; a non-`ground` room has >= 1 close-up;
+                         rooms <= 360x240 with `hotspots: []`; close-ups <= 180x120,
+                         id `<room>.<n>` from 1, `parent` = the room they follow, integer
+                         `rect` inside the parent, `size` == rect w/h, 1-3 primaries;
+                         `focus` inside its view; `label` non-empty and <= 24 chars;
+                         exactly one `default`, on the close-up the D-042 rule picks;
+                         `built` and `without` share the skeleton (ids, kinds, parents,
+                         labels, order).
   5. hotspot bounds     — every hotspot rect sits inside its view's canvas.
-  6. one primary        — exactly one primary hotspot per gag per (band, state, its
-                         views); D-036 rule 4.
-  7. spacing            — primary hotspot centres >= 44 native px apart within a view
-                         (rule 7), no exceptions (PH1-10 cleared the band-80 debt).
+  6. one primary        — exactly one primary hotspot per gag per file, in a close-up
+                         whose parent is the gag's D-036 home room.
+  7. spacing            — primary hotspot centres >= 24 native px apart within a close-up
+                         (D-042), no exceptions.
   7b. two-part         — G3.2, G4.1, G2.4 (both states) and G5.1 (without) have >= 2
                          hotspots wherever they are drawn (SCENE-FORMAT.md).
-  8. beyond alias       — index.json's `beyond` points at band 750.
-  9. pixel parity       — for every drawn band x state x view, painting the exported
-                         `entries` in array order (exactly the contract's painter:
-                         anchor-adjusted, clipped to the canvas) reproduces that view's
-                         own room as `compose.render` draws it from the layout data,
-                         byte-for-byte in RGBA (PH1-10: views are rooms, not crops). Catches wrong entry
-                         order, missing entries, wrong offsets — the actual "web ==
-                         art" guarantee D-035 promises, not just a shared code path.
+  8. beyond alias       — index.json's `beyond` points at band 750; `schema: 2`.
+  9. pixel parity       — for every drawn band x state: each room's exported `entries`,
+                         painted in array order (the contract's painter: anchor-adjusted,
+                         clipped), reproduce that room as `compose.render` draws it from
+                         the layout data, byte-for-byte in RGBA; and each close-up's
+                         entries reproduce that same render cropped at its `rect` (D-042).
+                         The reference is re-derived from the layout, never read back
+                         from the export — the "web == art" guarantee D-035 promises.
 
 Usage: python3 art/checks/check_scenes.py
 Exit 0 if every check passes (warnings still print); exit 1 and print every failure
@@ -53,7 +56,10 @@ SPRITES_DIR = os.path.join(_REPO_ROOT, "public", "sprites")
 SCENES_DIR = os.path.join(SPRITES_DIR, "scenes")
 
 VIEW_ORDER = ["ground", "floor-2", "floor-3", "floor-4", "floor-5", "floor-6", "top", "street"]
-SPACING_MIN = 44
+SPACING_MIN = 24          # D-042: within a close-up
+CLOSEUP_MAX = (180, 120)
+ROOM_MAX = (360, 240)
+LABEL_MAX = 24
 # SCENE-FORMAT.md "Two-part gags": the states in which each is drawn in two places.
 TWO_PART = {"G3.2": ("without", "built"), "G4.1": ("without", "built"),
             "G2.4": ("without", "built"), "G5.1": ("without",)}
@@ -72,31 +78,39 @@ def load_json(path):
 
 
 def check_pixel_parity():
-    """D-035's real guarantee: for every drawn band x state x view, painting the
-    exported `entries` in array order — exactly the contract's painter (anchor-adjusted,
-    clipped to the view canvas) — reproduces the view's own room as `compose.render`
-    draws it straight from `layout` (PH1-10: each view is a room, not a crop of a plate),
-    byte-for-byte in RGBA, and at the same size. Independent of the exported JSON: the
-    reference is re-derived from the layout data, not read back from the export."""
+    """D-035's real guarantee: for every drawn band x state, painting a room's exported
+    `entries` in array order — exactly the contract's painter (anchor-adjusted, clipped
+    to the view canvas) — reproduces the room as `compose.render` draws it straight from
+    `layout`, byte-for-byte in RGBA and at the same size; and painting a close-up's
+    entries reproduces that same render cropped at the close-up's `rect` (D-042).
+    Independent of the exported JSON: the reference is re-derived from the layout data."""
     lib = compose.Library(SPRITES_DIR)
     for band in export_scene.DRAWN_BANDS:
         for state in export_scene.STATES:
             path = os.path.join(SCENES_DIR, f"{band}-{state}.json")
             doc = load_json(path)
+            renders = {}
             for v in doc["views"]:
                 w, h = v["size"]["w"], v["size"]["h"]
                 painted = export_scene.paint_entries(lib, v["entries"], w, h)
-                reference = export_scene.render_view(lib, band, state, v["id"])
+                room_id = v["id"] if v.get("kind") == "room" else v.get("parent")
+                if room_id not in renders:
+                    renders[room_id] = export_scene.render_view(lib, band, state, room_id)
+                reference = renders[room_id]
+                if v.get("kind") == "closeup":
+                    r = v["rect"]
+                    reference = reference.crop((r["x"], r["y"], r["x"] + r["w"],
+                                                r["y"] + r["h"]))
                 if reference.size != (w, h):
-                    fail(f"{band}-{state}.json:{v['id']} — view is {w}x{h} but its room "
-                         f"renders at {reference.size[0]}x{reference.size[1]}")
+                    fail(f"{band}-{state}.json:{v['id']} — view is {w}x{h} but its "
+                         f"reference is {reference.size[0]}x{reference.size[1]}")
                     continue
                 if painted.tobytes() != reference.tobytes():
                     diffs = sum(1 for a, b in zip(painted.getdata(), reference.getdata())
                                 if a != b)
+                    what = "its room" if v.get("kind") == "room" else "its room cropped at rect"
                     fail(f"{band}-{state}.json:{v['id']} — pixel parity: painted view "
-                         f"!= compose.render of its room ({diffs} pixels differ "
-                         f"of {w * h})")
+                         f"!= compose.render of {what} ({diffs} pixels differ of {w * h})")
 
 
 def check_determinism():
@@ -130,6 +144,8 @@ def main():
         manifest = json.load(f)
     index = load_json(os.path.join(SCENES_DIR, "index.json"))
 
+    if index.get("schema") != 2:
+        fail(f"index.json — schema {index.get('schema')!r}, want 2 (D-042)")
     if index.get("beyond") != "750":
         fail(f"beyond alias — index.json says beyond={index.get('beyond')!r}, want '750'")
 
@@ -146,6 +162,8 @@ def main():
     # cumulative gag -> introducing band, from src/content/content.json (ground truth)
     content = load_json(os.path.join(_REPO_ROOT, "src", "content", "content.json"))
     gag_band = {g["id"]: g["band"] for g in content["gags"]}
+    home = {**export_scene.PLACEHOLDER_VIEW, **export_scene.GAG_HOME_VIEW}   # D-036 table
+    skeletons: dict = {}
 
     for band_str, files in sorted(bands.items(), key=lambda kv: int(kv[0])):
         band = int(band_str)
@@ -162,28 +180,88 @@ def main():
             doc = load_json(path)
             if doc.get("band") != band or doc.get("state") != state:
                 fail(f"{fname} — band/state header mismatch: {doc.get('band')}/{doc.get('state')}")
+            if doc.get("schema") != 2:
+                fail(f"{fname} — schema {doc.get('schema')!r}, want 2 (D-042)")
             views = doc.get("views", [])
             view_ids = [v["id"] for v in views]
+            skeletons[(band, state)] = [(v.get("id"), v.get("kind"), v.get("parent"),
+                                         v.get("label")) for v in views]
 
-            if "ground" not in view_ids:
-                fail(f"{fname} — no 'ground' view (D-036 rule 2)")
+            if not views or views[0].get("id") != "ground" or views[0].get("kind") != "room":
+                fail(f"{fname} — first view must be the 'ground' room (D-036 rule 2)")
             if len(view_ids) != len(set(view_ids)):
                 fail(f"{fname} — duplicate view ids: {view_ids}")
-            order_idx = [VIEW_ORDER.index(v) for v in view_ids if v in VIEW_ORDER]
-            if order_idx != sorted(order_idx):
-                fail(f"{fname} — views out of D-036 order: {view_ids}")
+            rooms = [v["id"] for v in views if v.get("kind") == "room"]
+            order_idx = [VIEW_ORDER.index(r) if r in VIEW_ORDER else -1 for r in rooms]
+            if -1 in order_idx or order_idx != sorted(order_idx):
+                fail(f"{fname} — rooms not D-036 ids in D-036 order: {rooms}")
+
+            # structure: each room directly followed by its close-ups, numbered from 1
+            room_sizes: dict = {}
+            current, n_expected, n_closeups = None, 0, {}
+            for v in views:
+                kind = v.get("kind")
+                if kind == "room":
+                    current, n_expected = v["id"], 1
+                    room_sizes[current] = (v["size"]["w"], v["size"]["h"])
+                    n_closeups[current] = 0
+                elif kind == "closeup":
+                    want = f"{current}.{n_expected}"
+                    if v["id"] != want or v.get("parent") != current:
+                        fail(f"{fname}:{v['id']} — close-up out of place: want id {want!r} "
+                             f"with parent {current!r}, got parent {v.get('parent')!r}")
+                    n_expected += 1
+                    if current in n_closeups:
+                        n_closeups[current] += 1
+                else:
+                    fail(f"{fname}:{v['id']} — kind {kind!r}, want 'room' or 'closeup'")
+            for r, n in n_closeups.items():
+                if n == 0 and r != "ground":
+                    fail(f"{fname}:{r} — room has no close-up (D-042)")
 
             defaults = [v for v in views if v.get("default")]
-            if len(defaults) != 1:
-                fail(f"{fname} — {len(defaults)} default views, want exactly 1")
+            if len(defaults) != 1 or defaults[0].get("kind") != "closeup":
+                fail(f"{fname} — {len(defaults)} default views, want exactly 1 close-up")
+            else:
+                own = {g for g, b in gag_band.items() if b == band}
 
-            seen_gags_this_band = set()
-            doc_primary_count: dict = {}
+                def n_own(v):
+                    return sum(1 for h_ in v["hotspots"]
+                               if h_.get("primary") and h_["gagId"] in own)
+                best = None
+                for v in views:
+                    if v.get("kind") == "closeup" and (best is None or n_own(v) > n_own(best)):
+                        best = v
+                if defaults[0] is not best:
+                    fail(f"{fname} — default is {defaults[0]['id']}, but the D-042 rule "
+                         f"picks {best['id']}")
+
+            doc_primaries: dict = {}
             for v in views:
-                vid, size = v["id"], v["size"]
+                vid, size, kind = v["id"], v["size"], v.get("kind")
                 w, h = size["w"], size["h"]
-                if w > 360 or h > 240:
-                    fail(f"{fname}:{vid} — {w}x{h} exceeds 360x240 (D-036 rule 3)")
+                hs = v.get("hotspots", [])
+                if kind == "room":
+                    if w > ROOM_MAX[0] or h > ROOM_MAX[1]:
+                        fail(f"{fname}:{vid} — room {w}x{h} exceeds {ROOM_MAX} (D-036 rule 3)")
+                    if hs != []:
+                        fail(f"{fname}:{vid} — a room carries hotspots (D-042: none)")
+                elif kind == "closeup":
+                    if w > CLOSEUP_MAX[0] or h > CLOSEUP_MAX[1]:
+                        fail(f"{fname}:{vid} — close-up {w}x{h} exceeds {CLOSEUP_MAX}")
+                    r = v.get("rect") or {}
+                    pw, ph = room_sizes.get(v.get("parent"), (0, 0))
+                    vals = [r.get(k) for k in ("x", "y", "w", "h")]
+                    if not all(isinstance(q, int) for q in vals):
+                        fail(f"{fname}:{vid} — rect {r} not all integers")
+                    elif r["x"] < 0 or r["y"] < 0 or r["x"] + r["w"] > pw or r["y"] + r["h"] > ph:
+                        fail(f"{fname}:{vid} — rect {r} not inside parent {pw}x{ph}")
+                    elif (r["w"], r["h"]) != (w, h):
+                        fail(f"{fname}:{vid} — size {w}x{h} != rect {r['w']}x{r['h']}")
+                    n_prim = sum(1 for h_ in hs if h_.get("primary"))
+                    if not 1 <= n_prim <= 3:
+                        fail(f"{fname}:{vid} — {n_prim} primaries, want 1-3 (D-042)")
+
                 focus = v.get("focus", {})
                 fx, fy = focus.get("x"), focus.get("y")
                 fw, fh = focus.get("w"), focus.get("h")
@@ -191,12 +269,8 @@ def main():
                     fail(f"{fname}:{vid} — focus {focus} not in bounds of view {w}x{h}")
 
                 label = v.get("label")
-                if not isinstance(label, str) or not label.strip():
-                    fail(f"{fname}:{vid} — missing/empty label {label!r} (SCENE-FORMAT.md)")
-
-                hs = v.get("hotspots", [])
-                if vid != "ground" and not any(h_.get("primary") for h_ in hs):
-                    fail(f"{fname}:{vid} — non-ground view has no primary hotspot (rule 2)")
+                if not isinstance(label, str) or not label.strip() or len(label) > LABEL_MAX:
+                    fail(f"{fname}:{vid} — label {label!r} empty or over {LABEL_MAX} chars")
 
                 # manifest refs (A2)
                 for e in v.get("entries", []):
@@ -206,9 +280,7 @@ def main():
                         continue
                     frame = e.get("frame", "default")
                     # mastermind ruling: `frame` is always a manifest frame-name
-                    # string (e.g. "default", "green", "a-left"), never an integer
-                    # index — SCENE-FORMAT.md's `"frame": 2` example is not the
-                    # contract.
+                    # string (e.g. "default", "green", "a-left"), never an integer index
                     if not isinstance(frame, str):
                         fail(f"{fname}:{vid} — {spr!r} frame {frame!r} is not a "
                              f"manifest frame-name string (mastermind ruling)")
@@ -217,28 +289,28 @@ def main():
 
                 # hotspot bounds
                 primary_pts = []
-                by_gag: dict = {}
                 for h_ in hs:
                     x0, y0, hw, hh = h_["x"], h_["y"], h_["w"], h_["h"]
                     if x0 < 0 or y0 < 0 or x0 + hw > w or y0 + hh > h:
                         fail(f"{fname}:{vid} — hotspot {h_['gagId']}/{h_['part']} "
                              f"[{x0},{y0},{x0+hw},{y0+hh}] out of bounds {w}x{h}")
-                    doc_primary_count.setdefault(h_["gagId"], 0)
                     if h_.get("primary"):
                         primary_pts.append((h_["gagId"], x0 + hw / 2, y0 + hh / 2))
-                        seen_gags_this_band.add(h_["gagId"])
-                        doc_primary_count[h_["gagId"]] += 1
+                        doc_primaries.setdefault(h_["gagId"], []).append(v.get("parent"))
 
                 for (ga, xa, ya), (gb, xb, yb) in itertools.combinations(primary_pts, 2):
                     d = math.hypot(xa - xb, ya - yb)
                     if d < SPACING_MIN:
                         fail(f"{fname}:{vid} — primary hotspots {ga}/{gb} only "
-                             f"{d:.1f}px apart (< {SPACING_MIN}, D-036 rule 7)")
+                             f"{d:.1f}px apart (< {SPACING_MIN}, D-042)")
 
-            # exactly one primary hotspot per gag, across the whole doc (D-036 rule 4)
-            for gag, n in doc_primary_count.items():
-                if n != 1:
-                    fail(f"{fname} — {gag} has {n} primary hotspots across all views, want 1")
+            # exactly one primary per gag per file, under its home room (D-036 rule 4)
+            for gag, parents in doc_primaries.items():
+                if len(parents) != 1:
+                    fail(f"{fname} — {gag} has {len(parents)} primary hotspots, want 1")
+                elif parents[0] != home.get(gag, parents[0]):
+                    fail(f"{fname} — {gag}'s primary is under {parents[0]!r}, but its "
+                         f"home room is {home[gag]!r}")
 
             # two-part gags (SCENE-FORMAT.md): >= 2 hotspots, unless all placeholder
             for gag, states in TWO_PART.items():
@@ -252,6 +324,11 @@ def main():
                                    for gid in [h_["gagId"]]}
             if missing:
                 fail(f"{fname} — gags due by band {band} with no hotspot: {sorted(missing)}")
+
+        # both states share the skeleton, so the toggle keeps the visitor's place
+        if skeletons.get((band, "without")) != skeletons.get((band, "built")):
+            fail(f"band {band} — built and without differ in view ids/kinds/parents/"
+                 f"labels/order (D-042a)")
 
     check_pixel_parity()
     check_determinism()
@@ -267,9 +344,9 @@ def main():
         for f in failures:
             print(" -", f)
         sys.exit(1)
-    print("PASS — scene export checks: views, manifest refs, coverage, bounds, "
-          "spacing, beyond alias, pixel parity, "
-          "determinism.")
+    print("PASS — scene export checks (schema 2): rooms + close-ups, skeleton, default, "
+          "manifest refs, coverage, bounds, spacing, beyond alias, pixel parity "
+          "(rooms and close-up crops), determinism.")
 
 
 if __name__ == "__main__":

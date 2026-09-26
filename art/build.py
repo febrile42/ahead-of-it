@@ -21,7 +21,7 @@ sys.path.insert(0, _REPO_ROOT)
 from art.src.dsl import Canvas, save_png, scale_nn
 from art.src import iso
 from art.src.sprites import floor, wall, desk, worker, badge_reader, room, band80, poses
-from art.src.sprites import band150, band220, street, band360, band490
+from art.src.sprites import band150, band220, street, band360, band490, band610, band750
 from art.src import compose, layout, export_scene
 from art.src.vox import Sprite
 
@@ -287,7 +287,7 @@ def save_sprite(manifest, registry, name, spr):
 def build_props(manifest, registry):
     for group in (room.build_all(), band80.build_all(), band150.build_all(),
                   band220.build_all(), street.build_all(), band360.build_all(),
-                  band490.build_all()):
+                  band490.build_all(), band610.build_all(), band750.build_all()):
         for name, spr in group.items():
             save_sprite(manifest, registry, name, spr)
 
@@ -345,7 +345,7 @@ def build_sheet(static, badge_rendered, worker_rendered, registry):
         items.append(registry[name].canvas)
     for group in (room.build_all(), band80.build_all(), band150.build_all(),
                   band220.build_all(), street.build_all(), band360.build_all(),
-                  band490.build_all()):
+                  band490.build_all(), band610.build_all(), band750.build_all()):
         for name in group:
             items.append(registry[name].canvas)
     # PH1-07 poses, one look each (all five ship): every frame, so the animation is

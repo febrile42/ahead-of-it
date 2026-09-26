@@ -1,5 +1,5 @@
 {
-  "schema": 1,
+  "schema": 2,
   "bands": {
     "80": {
       "without": "80-without.json",
@@ -48,6 +48,15 @@
     "G5.6": "thumbs/G5.6.png",
     "G7.3": "thumbs/G7.3.png",
     "G3.1": "thumbs/G3.1.png",
-    "G6.4": "thumbs/G6.4.png"
+    "G6.4": "thumbs/G6.4.png",
+    "G3.3": "thumbs/G3.3.png",
+    "G4.1": "thumbs/G4.1.png",
+    "G5.2": "thumbs/G5.2.png",
+    "G6.3": "thumbs/G6.3.png",
+    "G6.1": "thumbs/G6.1.png",
+    "G6.2": "thumbs/G6.2.png",
+    "G7.1": "thumbs/G7.1.png",
+    "G7.2": "thumbs/G7.2.png",
+    "G7.4": "thumbs/G7.4.png"
   }
 }

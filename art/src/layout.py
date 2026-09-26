@@ -61,6 +61,17 @@ ROOMS = {
         (360, dict(kind="room", cols=12, rows=8,
                    back_l={2: "wall-back-l-window", 4: "wall-back-l-window"},
                    back_r_windows=(3, 7))),
+        # PH1-12: re-composed for eight primaries by 750 (see _floor2_610): a row
+        # deeper; the org chart (G3.3) takes the back wall's first window
+        (610, dict(kind="room", cols=12, rows=9,
+                   back_l={2: "wall-back-l-window", 4: "wall-back-l-window"},
+                   back_r_windows=(7,))),
+    ],
+    # PH1-12: the top floor appears with G7.2 (D-036: `top` only once it holds a primary)
+    "top": [
+        (750, dict(kind="room", cols=7, rows=5,
+                   back_l={1: "wall-back-l-window", 3: "wall-back-l-window"},
+                   back_r_windows=(1, 3))),
     ],
     # DIA-5: two plots, not one plate. HQ's block and the inset office's stood on one
     # pavement, so the inset read as HQ's annex, "part of the same room"; now each has
@@ -878,8 +889,417 @@ def _band490() -> list:
     return P + S
 
 
+# -- band 610: the auditor at the door (ground) --------------------------------------------
+
+# PH1-12. The front door stands in the ground floor's cut front-left edge, the one wall
+# of the room the camera sees both sides of, clear of the pit and of the cable's run: the
+# auditor waits outside it on a stoop, in full view, with the shut leaf between him and
+# the room. The pit worker nearest the door carries G4.1's second part — the deal
+# thinking about itself, and going grey.
+G41_DOOR = (8, 8)
+G41_PIT = G_PIT[3]                          # (8, 6): the pit's front-right desk
+
+
+def _ground610() -> list:
+    dc, dr = G41_DOOR
+    P = [
+        _t("stoop", dc, dr + 1, layer="base"),
+        _t("front-door", dc, dr, frame="shut", depth=dc + dr + 1.95, states=W,
+           gag="G4.1", part="door"),
+        _t("front-door", dc, dr, frame="open", depth=dc + dr + 1.95, states=B,
+           gag="G4.1", part="door"),
+        _f("auditor", dc + 0.55, dr + 1.55, frame="wait", depth=dc + dr + 2.5, states=W,
+           gag="G4.1", part="door"),
+        _f("auditor", dc + 0.55, dr + 1.55, frame="shake", depth=dc + dr + 2.5, states=B,
+           gag="G4.1", part="door"),
+        _f("infosec", dc + 0.5, dr + 0.8, depth=dc + dr + 2.2, states=B, gag="G4.1",
+           part="door"),
+        # the thought floats up-left of the thinker's head into the pit's central aisle,
+        # the one clear patch of floor among the four desks
+        _t("bubble-deal", *G41_PIT, frame="fade", dx=-12, dy=-31, layer="over",
+           states=W, gag="G4.1", part="deal"),
+        _t("bubble-deal", *G41_PIT, frame="gold", dx=-12, dy=-31, layer="over",
+           states=B, gag="G4.1", part="deal"),
+    ]
+    for p in P:
+        p.setdefault("band", 610)
+        p["since"] = 610
+        p["view"] = "ground"
+    return P
+
+
+# -- band 610: floor 2, re-composed ------------------------------------------------------
+
+# PH1-12. By 750 floor 2 holds eight primaries (D-036: G2.4 G3.3 G4.2 G4.3 G6.2 G7.3
+# G7.3a G7.4). The 360 room has no wall left for the org chart that the hats do not walk
+# in front of, and no floor for the renewal slope or the procedure chain, so from 610 it
+# is a row deeper and a few things move. Everything is re-placed from the earlier bands'
+# own placements, so each keeps its sprite, state, band and quiet rule; only its tile
+# changes:
+#   - the org chart (G3.3) on the back wall's first two tiles, where the CEO's desk was;
+#   - the CEO's desk and its box (G3.2) a tile off the wall under it, in place of a
+#     plain desk;
+#   - the finance desk and its line (G4.2) one tile along, so the chart and the hook
+#     are two objects, not one;
+#   - the whiteboard and its two (G7.3a) forward and right, off the finance corner's
+#     front, where the renewal slope lands at 750;
+#   - the five hats (G7.3, built) back along the corridor, leaving its front end for the
+#     procedure chain (G7.4) at 750.
+F2_MOVES = {
+    "G4.2": (1, 0),
+    "G7.3a": (0.9, 0.6),
+}
+F2_BOX = (2, 3)                    # G3.2's desk, and the plain desk it replaces
+F2_HATS_ROW0, F2_HATS_STEP = 1.4, 1.2
+
+
+def _moved(p: dict, dc: float, dr: float) -> dict:
+    q = dict(p)
+    if "tile" in q:
+        q["tile"] = [q["tile"][0] + dc, q["tile"][1] + dr]
+    if "floor" in q:
+        q["floor"] = [q["floor"][0] + dc, q["floor"][1] + dr]
+    if "depth" in q:
+        q["depth"] = q["depth"] + dc + dr
+    return q
+
+
+def _floor2_610(old: list) -> list:
+    """Floor 2 from 610: the earlier floor-2 placements (`old`), moved per F2_MOVES and
+    the notes above, plus G3.3's chart."""
+    P = []
+    for p in old:
+        if p.get("view") != "floor-2":
+            continue
+        q = dict(p)
+        q.pop("until", None)
+        g, spr = q.get("gag"), q.get("sprite")
+        if g in F2_MOVES:
+            q = _moved(q, *F2_MOVES[g])
+        elif g == "G3.2":
+            q = _moved(q, F2_BOX[0] - q["tile"][0], F2_BOX[1] - q["tile"][1])
+        elif g == "G7.3" and spr == "worker-onehat":
+            k = round((q["floor"][1] - 2.0) / 1.45)
+            q["floor"] = [q["floor"][0], F2_HATS_ROW0 + F2_HATS_STEP * k]
+        elif g is None and q.get("tile") == list(F2_BOX):
+            continue                    # the plain desk (and its sitter) the CEO's replaces
+        P.append(q)
+    F2 = "floor-2"
+    P += [
+        # G3.3: the org chart, pinned to the back wall above the CEO's desk
+        _f("poster-org", 2.35, 0.02, dy=1, frame="one-box", depth=0.4, states=W,
+           view=F2, band=610, gag="G3.3", part="chart"),
+        _f("poster-org", 2.35, 0.02, dy=1, frame="tree", depth=0.4, states=B,
+           view=F2, band=610, gag="G3.3", part="chart"),
+    ]
+    for q in P:
+        q["since"] = 610
+    return P
+
+
+# -- band 610: the street, re-composed ------------------------------------------------------
+
+# PH1-12. G5.2 happens in the inset office's "far wing", and there is no wing: from 610 the
+# inset office runs two tiles further back (r 1..7), and its back-left corner is the wing:
+# a filing cabinet in the corner, three desks, a window over them. The call screen
+# (G2.4's inset part) moves back and two tiles right with the back wall, so the raised
+# arms never cross it and the call reads exactly as before. G6.3's new building stands
+# on the open pavement at the front right, drawn the way the inset office is (walls cut to
+# stubs, so its empty inside shows), the moving truck beside it and the map of offices on
+# a post between the inset office and HQ.
+INSET3 = dict(c0=0, c1=4, r0=1, r1=7)
+TV3 = (2, 1)                                     # the call screen's tile (was (0, 3))
+WING_WINDOW = 1                                  # back wall column with the window
+WING_CAB = (0, 1)
+WING_DESKS = {"b": (1, 1), "a": (0, 2), "c": (1, 3)}
+G63_SHELL = (7, 5)                               # its back tile; it covers c 7..9, r 5..7
+G63_TRUCK = (10, 6)
+G63_MAP = (6.2, 2.2)                             # within one 120 px close-up of the shell
+INSET_SHELL = {"floor-office", "wall-corner", "wall-back-l", "wall-back-l-window",
+               "wall-back-l-end", "wall-back-r", "wall-back-r-window", "wall-back-r-end"}
+
+
+def _street610(old: list) -> list:
+    i = INSET3
+    P = []
+    for p in old:
+        if p.get("view") != "street":
+            continue
+        q = dict(p)
+        q.pop("until", None)
+        if q.get("sprite") in INSET_SHELL:
+            continue                        # the inset's floor and walls: re-drawn below
+        if q.get("tile") == [3, 3] and q.get("sprite") in ("desk", "worker-seated"):
+            continue                        # the old window desk: the wing has the window now
+        if q.get("gag") == "G2.4":
+            q = _moved(q, TV3[0] - INSET2["c0"], TV3[1] - INSET2["r0"])
+        P.append(q)
+    # the inset office's floor and back walls, two rows deeper
+    for row in range(i["r0"], i["r1"] + 1):
+        for col in range(i["c0"], i["c1"] + 1):
+            P.append(_t("floor-office", col, row, layer="base", band=150))
+    P.append(_t("wall-corner", i["c0"], i["r0"], layer="base", band=150))
+    for row in range(i["r0"], i["r1"] + 1):
+        name = "wall-back-l-end" if row == i["r1"] else (
+            "wall-back-l-window" if row == G56[1] - 2 else "wall-back-l")
+        P.append(_t(name, i["c0"], row, layer="base", band=150))
+    for col in range(i["c0"], i["c1"] + 1):
+        name = "wall-back-r-end" if col == i["c1"] else (
+            "wall-back-r-window" if col == WING_WINDOW else "wall-back-r")
+        P.append(_t(name, col, i["r0"], layer="base", band=150))
+    for row in range(i["r0"], INSET2["r0"]):
+        P.append(_t("partition-r", i["c1"], row, depth=i["c1"] + row + 1.95, band=150))
+    # G5.2, the far wing. Without: the one whose desk is under the window up on their
+    # chair with a phone at full stretch, the other two holding theirs up beside them, and
+    # a consumer router on the filing cabinet in the corner, blinking. Built: all three
+    # at their desks, an access point on each wall, the cabinet just a cabinet.
+    W52 = dict(band=610, gag="G5.2", part="wing")
+    for who, (dc, dr) in WING_DESKS.items():
+        P.append(_t("desk-drives" if who == "b" else "desk", dc, dr, **W52))
+        P.append(_t("worker-seated", dc, dr, frame=who, depth=dc + dr + 1.01, states=B,
+                    **W52))
+    bc, br = WING_DESKS["b"]
+    ac, ar = WING_DESKS["a"]
+    cc, cr = WING_DESKS["c"]
+    P += [
+        _t("chair-back", bc, br, states=B, **W52),
+        _t("cabinet-router", *WING_CAB, frame="router", states=W, **W52),
+        _t("cabinet-router", *WING_CAB, frame="bare", states=B, **W52),
+        # c's chair, dragged out, and c up on it: c is the frontmost of the three, so
+        # nothing stands in front of the chair (DIA-3 review: on b, at the back, a and c
+        # hid the chair and b hid the router)
+        _f("worker-phone-up", bc + 0.85, br + 1.1, frame="b", depth=bc + br + 2.0,
+           states=W, **W52),
+        _f("worker-phone-up", ac + 0.7, ar + 1.1, frame="a", depth=ac + ar + 2.0,
+           states=W, **W52),
+        _f("chair-stand", cc + 1.0, cr + 0.3, depth=cc + cr + 1.45, states=W, **W52),
+        _f("worker-phone-up", cc + 1.0, cr + 0.3, dy=-13, frame="c", depth=cc + cr + 1.5,
+           states=W, **W52),
+        _f("ap-disc", WING_WINDOW + 0.5, i["r0"] + 0.02, dy=-34, depth=0.3, states=B,
+           **W52),
+        _f("ap-disc", i["c0"] + 0.02, 5.5, dy=-34, depth=0.3, states=B, band=610),
+    ]
+    # G6.3: the shell (empty / fitted), its banner, the one in the doorway with a single
+    # cable / a ticked clipboard; the moving truck; the map with its six pins
+    sc, sr = G63_SHELL
+    P += [
+        _t("shell", sc, sr, frame="empty", depth=sc + sr + 0.5, states=W, band=610,
+           gag="G6.3", part="shell"),
+        _t("shell", sc, sr, frame="fitted", depth=sc + sr + 0.5, states=B, band=610,
+           gag="G6.3", part="shell"),
+        _f("worker-cable", sc + 0.9, sr + 2.9, frame="d-cable", depth=sc + sr + 6.0,
+           states=W, band=610, gag="G6.3", part="shell"),
+        _f("worker-cable", sc + 0.9, sr + 2.9, frame="d-ticks", depth=sc + sr + 6.0,
+           states=B, band=610, gag="G6.3", part="shell"),
+        _f("banner-sqft", sc + 2.2, sr + 3.02, dy=-1, depth=sc + sr + 6.1, band=610,
+           gag="G6.3", part="shell"),
+        _t("moving-truck", *G63_TRUCK, depth=G63_TRUCK[0] + G63_TRUCK[1] + 1.5, band=610,
+           gag="G6.3", part="shell"),
+        _f("map-pins", *G63_MAP, frame="pins", depth=G63_MAP[0] + G63_MAP[1], band=610,
+           gag="G6.3", part="map", primary=False),
+    ]
+    for q in P:
+        q["since"] = 610
+        q["view"] = "street"
+        q.setdefault("band", 610)
+    return P
+
+
+# -- band 750: SaaS balloons and the robot (ground) ----------------------------------------
+
+# PH1-12. By 750 the ground floor holds twelve primaries. The two new ones go where the
+# 44 px rule leaves room and where their gag lives: the robot on the open floor at the
+# pit's front corner (G7.1), and — without — the balloons that got away bunched against
+# the ceiling at the far end of the back wall, with one more over every working head in
+# the room (G6.1: "everywhere"; only the ceiling bunch is tappable, the rest are the
+# room). Built, the handful of shared balloons is tethered to a PORTFOLIO board on the
+# back wall.
+HEAD_BALLOONS = [                      # (tile or floor point, dx, dy, brand)
+    (("t", 6, 4), -7, -30, "red-dot"), (("t", 8, 4), -7, -30, "green-tri"),
+    (("t", 6, 6), -7, -30, "yellow-ring"), (("t", 8, 6), -3, -30, "orange-bar"),
+    (("t", 3, 0), -7, -30, "blue-plus"), (("t", 4, 0), -7, -30, "blue-plus2"),
+    (("t", 8, 0), -7, -30, "cyan-sq"), (("t", 11, 6), -7, -30, "grey-check"),
+    (("f", 8.95, 1.65), 0, -23, "pink-dot"),
+]
+G71 = (11.6, 3.8)                      # the robot's feet
+
+
+def _ground750() -> list:
+    P = []
+    for (kind, a, b), dx, dy, brand in HEAD_BALLOONS:
+        mk = _t if kind == "t" else _f
+        P.append(mk("balloon-head", a, b, frame=brand, dx=dx, dy=dy, layer="over",
+                    states=W))
+    P += [
+        _f("balloons-ceiling", 11.05, 0.05, dy=-10, frame="drift", depth=0.5, states=W,
+           gag="G6.1", part="balloons"),
+        _f("portfolio-board", 7.15, 0.02, dy=-10, depth=0.5, states=B, gag="G6.1",
+           part="balloons"),
+    ]
+    rc, rr = G71
+    P += [
+        _f("robot", rc, rr, frame="eat", states=W, gag="G7.1", part="robot"),
+        _f("robot", rc, rr, frame="approved", states=B, gag="G7.1", part="robot"),
+        _f("doc-gate", rc - 1.4, rr + 0.3, states=B, gag="G7.1", part="robot"),
+        # the one handing it things: the card (without, up into the robot's open hand) /
+        # a sheet into the gate (built). Out to the robot's left, a step back, so the
+        # robot's broad chest never hides them (DIA-3 review). Not tagged: the robot is
+        # the gag, and one hotspot over both would be mostly empty floor.
+        _f("worker-card", rc - 2.25, rr + 0.375, frame="a-card", states=W),
+        _f("worker-card", rc - 2.25, rr + 0.375, frame="a-doc", states=B),
+    ]
+    for p in P:
+        p.setdefault("band", 750)
+        p["since"] = 750
+        p["view"] = "ground"
+    return P
+
+
+# -- band 750: the renewal avalanche and the procedure (floor 2) ---------------------------
+
+# PH1-12. G6.2 buries the desk in front of the finance corner (the plain desk at (7, 4)
+# that has stood there since 220, in the gap the 610 re-composition left between the
+# finance desk, the CRM desks and the whiteboard). G7.4 runs along the front of the
+# corridor: the one with the page asks the next, who points at a third, who points at the
+# locked cabinet at the corridor's end, under the wiki's sign.
+G62_DESK = (7, 4)
+G74 = dict(cab=(0, 8), c=(1.5, 8.45), b=(3.0, 8.5), a=(4.5, 8.45), lib=(1, 7))
+
+
+def _floor2_750() -> list:
+    F2 = "floor-2"
+    dc, dr = G62_DESK
+    P = [
+        _t("finance-panel", dc, dr, depth=dc + dr + 0.9, id="fin-panel", gag="G6.2",
+           part="slope"),
+        _t("paper-slope", dc, dr, depth=dc + dr + 1.5, states=W, id="slope", gag="G6.2",
+           part="slope"),
+        dict(sprite="card-autorenewed", attach={"id": "slope", "point": "top"},
+             offset=None, states=W, layer="over", gag="G6.2", part="slope"),
+        dict(sprite="calendar-renewals", attach={"id": "fin-panel", "point": "cal",
+             "offset": None}, states=B, gag="G6.2", part="slope"),
+    ]
+    # attach by point, then nudge: the calendar left of centre, the receipt right
+    P[-1]["attach"] = {"id": "fin-panel", "point": "cal"}
+    P[2]["attach"] = {"id": "slope", "point": "top"}
+    for q in P:
+        q.pop("offset", None)
+    P += [dict(sprite="frame-receipt", attach={"id": "fin-panel", "point": "cal"},
+               states=B, gag="G6.2", part="slope", nudge=[14, -2])]
+    P[3]["nudge"] = [-10, 0]
+    g = G74
+    P += [
+        _t("cabinet-locked", *g["cab"], frame="locked", states=W, gag="G7.4", part="chain"),
+        _t("cabinet-locked", *g["cab"], frame="open", states=B, gag="G7.4", part="chain"),
+        _f("wiki-sign", 0.03, 7.35, dy=-29, frame="cobwebs", depth=0.3, states=W,
+           gag="G7.4", part="chain"),
+        _f("wiki-sign", 0.03, 7.35, dy=-29, frame="clean", depth=0.3, states=B,
+           gag="G7.4", part="chain"),
+        _f("worker-point", *g["c"], frame="e-point", states=W, gag="G7.4", part="chain"),
+        _f("worker-point", *g["b"], frame="c-point", states=W, gag="G7.4", part="chain"),
+        _f("worker-point", *g["b"], frame="c-idle", states=B, gag="G7.4", part="chain"),
+        _f("worker-card", *g["a"], frame="d-doc-left", id="asker", gag="G7.4",
+           part="chain"),
+        dict(sprite="card-howto", frame="confused", attach={"id": "asker",
+             "offset": [1, -24]}, states=W, layer="over", gag="G7.4", part="chain"),
+        dict(sprite="card-howto", frame="current", attach={"id": "asker",
+             "offset": [1, -24]}, states=B, layer="over", gag="G7.4", part="chain"),
+        # built: the librarian, at a desk with a sign on it
+        _t("desk", *g["lib"], states=B, id="lib-desk", gag="G7.4", part="chain"),
+        _t("worker-seated", *g["lib"], frame="e", depth=sum(g["lib"]) + 1.01, states=B,
+           gag="G7.4", part="chain"),
+        dict(sprite="sign-library", attach={"id": "lib-desk", "point": "card"}, states=B,
+             layer="over", gag="G7.4", part="chain"),
+    ]
+    for q in P:
+        q.setdefault("band", 750)
+        q["since"] = 750
+        q["view"] = F2
+    return P
+
+
+# -- band 750: the top floor (G7.2) --------------------------------------------------------
+
+# PH1-12. The top floor, all glass at the front, one boardroom table: two chairs on the
+# far side under the windows, three on the near side with their backs to us, and one at
+# the head. Five people. DIA-3 picture review: the empty chair is the head chair at the
+# whiteboard end — the seat facing NEXT 3 YEARS — pulled well out and turned to face us,
+# in a pool of light, and its TECHNOLOGY card stands on that chair's back (re-review: on
+# the table it read as the near row's name tag). Built, Josh is in that same chair under
+# the same card (D-007: the only place he appears).
+BOARD = (2, 2)                     # the table's tile: it runs c 2..5, near seats on row 2
+NEAR = ("c", "d", "a")             # near seats, backs to us
+FAR = {0: "b", 1: "e"}             # far seats facing us
+
+
+def _top750() -> list:
+    from .sprites.band750 import HEAD
+    T = "top"
+    rm = ROOMS["top"][0][1]
+    cols, rows = rm["cols"], rm["rows"]
+    tc, tr = BOARD
+    M = dict(gag="G7.2", part="meeting")
+    P = []
+    # the glass front: the room's two cut front edges are glass, not open
+    for col in range(cols):
+        name = {0: "glass-c-corner", cols - 1: "glass-c-end"}.get(col, "glass-c")
+        P.append(_t(name, col, rows - 1, depth=col + rows + 0.95))
+    for row in range(rows - 1):
+        P.append(_t("glass-r", cols - 1, row, depth=cols + row + 0.95))
+    P += [
+        _f("whiteboard-next", 5.6, 0.02, dy=-17, depth=0.4, **M),
+        _t("boardroom-far", tc, tr, depth=tc + tr - 0.5, **M),
+    ]
+    far_r = tr - 9.6 / 8
+    for k, look in FAR.items():
+        P.append(_f("worker-seated-front", tc + (2.5 + 8 * k) / 8, far_r, frame=look,
+                    depth=tc + tr - 0.2, **M))
+    P.append(_t("boardroom-table", tc, tr, depth=tc + tr + 0.9, **M))
+    # the head chair, clear of the table's end, and Josh on it (built)
+    P += [
+        _t("boardroom-chair-head", tc, tr, frame="empty", depth=tc + tr + 0.92, states=W,
+           **M),
+        _t("boardroom-chair-head", tc, tr, frame="taken", depth=tc + tr + 0.92, states=B,
+           **M),
+        _f("worker-seated-josh", tc + HEAD["c"] / 8, tr + (HEAD["r"] + 2.6) / 8,
+           depth=tc + tr + 0.94, states=B, **M),
+    ]
+    # the nameplate, a reserved card standing on the head chair's back, centred over it
+    # and well clear of the near row's last head (built: it stands over Josh)
+    P.append(_f("nameplate-tech", tc + 25.0 / 8, tr - 4.0 / 8, dx=14, dy=-11,
+                depth=tc + tr + 0.96, **M))
+    for k, look in enumerate(NEAR):
+        # a half tile along: the near seats sit between the far ones
+        P.append(_t("worker-seated", tc + k, tr, frame=look, dx=8, dy=4,
+                    depth=tc + k + tr + 1.5, **M))
+    for q in P:
+        q.setdefault("band", 750)
+        q["since"] = 750
+        q["view"] = T
+    return P
+
+
+def _until(group: list, view: str, band: int) -> list:
+    """Stop an earlier band's placements in `view` at `band` (the view is re-composed
+    there and re-places them)."""
+    for p in group:
+        if p.get("view", "ground") == view:
+            p.setdefault("until", band)
+    return group
+
+
 PLACEMENTS = {80: _band80(), 150: _band150(), 220: _band220(),
               360: _ground360() + _band360() + _street360(), 490: _band490()}
+_F2_OLD = [dict(p) for b in (150, 220, 360) for p in PLACEMENTS[b]
+           if p.get("view") == "floor-2"]
+for _b in (150, 220, 360):
+    _until(PLACEMENTS[_b], "floor-2", 610)
+_ST_OLD = [dict(p) for b in (360, 490) for p in PLACEMENTS[b]
+           if p.get("view") == "street" and p.get("until", 10 ** 6) > 610]
+for _b in (360, 490):
+    _until(PLACEMENTS[_b], "street", 610)
+PLACEMENTS[610] = _ground610() + _floor2_610(_F2_OLD) + _street610(_ST_OLD)
+PLACEMENTS[750] = _ground750() + _floor2_750() + _top750()
 
 # A later band's building replaces an earlier one's (HQ gains a storey): the earlier
 # sprite is superseded rather than drawn twice.

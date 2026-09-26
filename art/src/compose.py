@@ -87,6 +87,9 @@ def resolve(lib: Library, placements: list, origin) -> list:
                 x, y = t["x"] - ax + px, t["y"] - ay + py
             else:
                 x, y = t["x"] + a["offset"][0], t["y"] + a["offset"][1]
+            # PH1-12: a pixel nudge after the attachment (two billboards on one point)
+            x += p.get("nudge", [0, 0])[0]
+            y += p.get("nudge", [0, 0])[1]
             q.setdefault("depth", t["depth"] + 0.01)
         q["x"], q["y"] = x, y
         out.append(q)
