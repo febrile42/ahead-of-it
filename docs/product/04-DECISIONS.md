@@ -426,3 +426,13 @@ in Phase 2: history, the back button, sharing, OG tags and the share image stay 
 under R-10 as written. The parameter names are R-10's, so Phase 3 extends this rather than
 replacing it. Useful beyond Lighthouse too: QA and the hallway kit can land on a band
 directly. Built by PH2-04 as its own commit.
+
+**D-044 · 2026-09-26 · G6.3's "already" line follows the art that reads.**
+The 390px picture review (DIA-70, DIA-73) found the camera dome over the new shell's door
+unreadable on the pale frame. It came out (PR #36), as G6.4's did at 490 in the polish pass
+(DIA-37). This follows D-041's rule: a locked line describes what is drawn.
+`BANDS-AND-GAGS.md` now does. No receipt, date or figure changes: E-05 and E-11 are as they
+were, and the badge reader and camera bar are still drawn.
+1. **G6.3 Already:** "the new shell has cable trays, a badge reader, ~~a camera dome~~ and a
+   room with a camera bar; the worker in the doorway holds a clipboard with everything
+   ticked."

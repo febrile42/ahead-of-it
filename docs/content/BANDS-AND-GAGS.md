@@ -257,8 +257,8 @@ Austin, NYC and DC open in the same year on one playbook.
 - **Receipt:** E-02 (leadership layers introduced 2023; 11 staff), E-13.
 
 ### G6.3 · The moving truck
-- **Already:** the new shell has cable trays, a badge reader, a camera dome and a room with
-  a camera bar; the worker in the doorway holds a clipboard with everything ticked.
+- **Already:** the new shell has cable trays, a badge reader and a room with a camera bar;
+  the worker in the doorway holds a clipboard with everything ticked.
 - **Without:** outside, a moving truck at an empty building shell (`100,000 SQ FT` on a
   banner); one worker in the doorway holding a single ethernet cable, looking up.
 - **Where:** outside, new pin on the map.
