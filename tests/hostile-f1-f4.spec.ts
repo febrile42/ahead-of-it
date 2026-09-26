@@ -111,25 +111,38 @@ test.describe('F1 — an open panel survives a re-render that removes its subjec
     expect(H.focusIsLost(focus), `focus after a room switch was ${JSON.stringify(focus)}`).toBe(false);
   });
 
-  test('F1.3b room tab: an open panel intentionally survives a room switch, with return-focus repointed (D-042a)', async ({
+  test('F1.3b room tab: an open panel intentionally survives a room switch, with return-focus precisely repointed (D-042a)', async ({
     page,
   }) => {
     // Unlike a band change, a room switch leaves band/state — what the
     // panel describes — unchanged (main.ts's syncOpenPanel(viewOnly)), so
     // the panel deliberately stays open rather than closing; only its
     // return-focus target, which pointed at a hotspot that just got
-    // detached, must be repointed rather than left stale.
+    // detached, must be repointed. Review fix (DIA-46 item 5): "not lost"
+    // alone would also pass a regression that dumps focus on some other
+    // live control — Escape must land exactly where the brief says (item
+    // 7): the same gag's hotspot if the close-up now shown still has it,
+    // else the stepper's whole-floor control.
     await H.openApp(page);
     await H.setBand(page, 750);
-    await H.openFirstHotspot(page, 'mouse');
+    const gagId = await H.openFirstHotspot(page, 'mouse');
     const rooms = await H.roomIds(page);
     const current = await H.currentRoomId(page);
     await H.setRoom(page, rooms.find((r) => r !== current)!, 'mouse');
 
     expect(await H.panelIsOpen(page)).toBe(true);
+    const stillVisible = (await visibleGagIds(page)).includes(gagId);
     await H.pressEscape(page);
     const focus = await H.settledFocusInfo(page);
     expect(H.focusIsLost(focus), `focus after Escape was ${JSON.stringify(focus)}`).toBe(false);
+    if (stillVisible) {
+      expect(focus.gagId, `expected focus back on the hotspot for ${gagId}, got ${JSON.stringify(focus)}`).toBe(gagId);
+    } else {
+      expect(
+        focus.className,
+        `expected focus on the whole-floor control (the gag is not in the room switched to), got ${JSON.stringify(focus)}`
+      ).toContain('scene-stepper__floor');
+    }
   });
 
   test('F1.4 keyboard: Enter on a room tab must keep focus in the tab row (R-24)', async ({ page }) => {

@@ -214,6 +214,13 @@ h1 {
   image-rendering: -moz-crisp-edges;
   image-rendering: crisp-edges;
   display: block;
+  /* Review nit (DIA-46, non-blocking): centred by default so the static
+     shell's canvas (360x240, index.html) doesn't start flush left and then
+     jump when sizeAndPositionCanvas sets an explicit marginLeft on first
+     render — main.ts's own centred case computes the same position, so
+     this removes the load-time shift without changing the scrolled case
+     (which still sets marginLeft: 0px explicitly). */
+  margin: 0 auto;
 }
 
 .hotspots-layer {

@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import * as H from './interaction-helpers';
 import { interceptFixtureScenes } from './scene-source';
 
 // PH1-09/D-035: the default band (80) needs a real scene file to measure
@@ -63,6 +64,55 @@ test.describe('CLS under throttling (PH1-04 review S1)', () => {
 
     const cls = await page.evaluate(() => (window as unknown as { __clsValue: number }).__clsValue);
     expect(cls).toBeLessThan(0.1);
+  });
+});
+
+// Review fix (DIA-46 item 3): the test above only measures first load. The
+// brief's own acceptance line is "switching views and bands measures 0" —
+// sizeAndPositionCanvas keeps .scene-wrap's box, the tab row and the
+// stepper row at a constant height across every view/band/state (D-042a),
+// so this locks that in rather than leaving it merely true by inspection.
+test.describe('CLS across view and band switches stays 0 (DIA-46 item 3)', () => {
+  test('stepping, whole floor, a room tab, the toggle, and band 750<->80 all measure zero shift', async ({ page }) => {
+    await page.addInitScript(() => {
+      const w = window as unknown as { __clsValue: number };
+      w.__clsValue = 0;
+      const observer = new PerformanceObserver((list) => {
+        for (const entry of list.getEntries()) {
+          const shift = entry as unknown as { hadRecentInput: boolean; value: number };
+          if (!shift.hadRecentInput) w.__clsValue += shift.value;
+        }
+      });
+      observer.observe({ type: 'layout-shift', buffered: true });
+    });
+
+    await interceptFixtureScenes(page);
+    await page.setViewportSize(VIEWPORT);
+    await page.goto('/');
+    await page.waitForFunction(() => document.body.dataset.renderedToken !== undefined);
+    await page.waitForTimeout(300); // let the first-load shift (covered above) settle before measuring deltas
+
+    async function clsOf(action: () => Promise<unknown>, label: string): Promise<void> {
+      await page.evaluate(() => {
+        (window as unknown as { __clsValue: number }).__clsValue = 0;
+      });
+      await action();
+      await page.waitForTimeout(300);
+      const cls = await page.evaluate(() => (window as unknown as { __clsValue: number }).__clsValue);
+      expect(cls, `${label}: expected 0 layout shift, measured ${cls}`).toBe(0);
+    }
+
+    await H.setBand(page, 750);
+    await clsOf(() => H.step(page, 1), 'stepping to the next close-up');
+    await clsOf(() => H.toggleWholeFloor(page), 'entering the room view');
+    const rooms = await H.roomIds(page);
+    const current = await H.currentRoomId(page);
+    const otherRoom = rooms.find((r) => r !== current) ?? rooms[0];
+    await clsOf(() => H.setRoom(page, otherRoom), `switching to room tab ${otherRoom}`);
+    await clsOf(() => H.setState(page, 'without'), 'toggling to the without state');
+    await clsOf(() => H.setBand(page, 80), 'switching band 750 -> 80');
+    await clsOf(() => H.setBand(page, 750), 'switching band 80 -> 750');
+    await clsOf(() => H.setState(page, 'built'), 'toggling back to the built state');
   });
 });
 

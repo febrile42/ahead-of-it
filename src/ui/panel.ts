@@ -9,6 +9,7 @@
 import type { Gag, PanelFields } from '../content';
 import { getBeyond, getGags } from '../content';
 import type { SceneLayout, ZoomLayout } from '../scene/layout';
+import { resolveZoomOverlaps } from '../scene/layout';
 import { createContactLine } from './contact';
 import { ui } from './strings';
 
@@ -253,6 +254,10 @@ export function renderHotspots(
  * smaller than 44 css px). Same seam as `renderHotspots` — positioned from
  * the layout's native units, so the buttons cannot disagree with the
  * picture — and the visible caption is the close-up's own scene-file label.
+ * Review fix (DIA-46 item 4): two close-up rects may overlap a little
+ * on-screen (adjacent crops sharing a wall) — `resolveZoomOverlaps` splits
+ * the shared strip between them first, so every button keeps an unobscured
+ * hit area and no two ever cover the same point.
  */
 export function renderZoomTargets(
   container: HTMLElement,
@@ -262,7 +267,7 @@ export function renderZoomTargets(
   container.replaceChildren();
   container.dataset.bufferW = String(layout.bufferW);
   container.dataset.bufferH = String(layout.bufferH);
-  for (const target of layout.targets) {
+  for (const target of resolveZoomOverlaps(layout.targets)) {
     const button = document.createElement('button');
     button.type = 'button';
     button.className = 'hotspot hotspot--zoom';
