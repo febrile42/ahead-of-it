@@ -137,6 +137,15 @@ Rules
   180 × 120 close-up at s = 2 css px and a 360 × 240 room at s = 1 css px both fill the same
   box exactly, so switching view costs no layout shift. On a phone (≤ 430 css px) the box is
   the full viewport width; from 768 px it is capped at 720 css px wide.
+- **Motion gate (PH2-02, R-24/R-08/R-06a).** Anything that plays back sprite frames, times a
+  visual change, or drives a CSS animation/transition — a walker in the `depth` slot above,
+  the band-crossing moment, a nudge pulse, Phase 3's day/night — asks `src/motion.ts`'s
+  `motionGate().isReduced()` (or subscribes for a runtime flip) before it moves, never
+  deciding for itself. When it answers `true` the painter paints the rest pose: the exported
+  frame at t = 0, which is already all `loadEntryImage`/`loadSpriteFrame` (src/scene/
+  sprites.ts) ever resolve, so this rule needs no separate "still" asset. A caption that
+  accompanies a motion is never itself motion and keeps showing regardless. Animation stays
+  decorative (R-08): no requirement may come to depend on it running.
 - `art/checks/check_scenes.py` (needs the render pipeline and the PNGs; owned by the Art
   Director): determinism, manifest references and frame keys, R-03a coverage both states,
   `beyond` alias, per-view pixel parity against each room's own render, each close-up equal

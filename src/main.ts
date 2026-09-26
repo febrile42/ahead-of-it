@@ -31,6 +31,7 @@ import { ui } from './ui/strings';
 import type { SceneState } from './ui/toggle';
 import { createSlider } from './ui/slider';
 import { createToggle } from './ui/toggle';
+import { motionGate } from './motion';
 import './style.css';
 
 const sliderRoot = document.querySelector<HTMLDivElement>('#slider-root');
@@ -597,6 +598,16 @@ if (sliderRoot && toggleRoot && viewsRow && sceneWrap && stepper && canvas && ho
   window.addEventListener('resize', () => {
     clearTimeout(resizeDebounce);
     resizeDebounce = setTimeout(() => void render(), 150);
+  });
+
+  // PH2-02 (R-24): nothing on the page moves yet (Phase 2/3 add it), but the
+  // gate is wired in now so nothing new can bypass it — and its state is
+  // exposed on the body, alongside the render-token/band/view/room hooks
+  // above, so a runtime OS-preference flip is observable without a reload.
+  const motion = motionGate();
+  document.body.dataset.reducedMotion = String(motion.isReduced());
+  motion.subscribe((reduced) => {
+    document.body.dataset.reducedMotion = String(reduced);
   });
 
   // Sanity: every band this build knows about must exist in content.json

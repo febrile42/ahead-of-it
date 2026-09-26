@@ -168,6 +168,11 @@ async function gotoAtScale1(page: Page, c: ParityCase) {
   // below, which is the only place dpr can actually be pinned
   // (deviceScaleFactor is a context-creation option, not something a
   // live page can change).
+  // PH2-02/R-24: goldens are the rest pose (t = 0), so this suite must stay
+  // valid once PH2-01 adds animation — emulating reduced motion up front
+  // means a future animated entry paints its rest pose here exactly as it
+  // does today, with no change to this file when that lands.
+  await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.setViewportSize({ width: 300, height: Math.max(700, c.viewSize.h + 400) });
   await page.route('**/sprites/scenes/index.json', (route) =>
     route.fulfill({ contentType: 'application/json', body: c.indexBody })
