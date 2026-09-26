@@ -24,9 +24,11 @@
 //   F4  SPLIT — print and the contact links work and are now locked in; the
 //       "every load of bands 360-750 hits the fallback" premise is STALE.
 //   F5  NEW — the auto-opened Beyond panel survives sliding back down.
+import { readFileSync } from 'node:fs';
 import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
 import * as H from './interaction-helpers';
+import { sceneSourceDir } from './scene-source';
 
 /** The gag ids the currently-rendered view actually has hotspots for. The
  * oracle for "does the open panel describe something that is on screen". */
@@ -57,17 +59,16 @@ async function expectPanelAgreesWithScene(page: Page, openedGagId: string) {
 // ---------------------------------------------------------------------------
 
 test.describe('F1 — an open panel survives a re-render that removes its subject', () => {
-  test('F1.1 slider: a band-80 gag panel must not sit over the band-220 building', async ({ page }) => {
-    test.fail(); // live defect — delete this line with the fix (see file header)
+  test('F1.1 slider: a band-80 gag panel must not sit over the band-750 building', async ({ page }) => {
     await H.openApp(page); // 390px, mouse
     await H.setBand(page, 80);
     const gagId = await H.openFirstHotspot(page, 'mouse');
     const stripAtOpen = await H.panelStrip(page);
 
-    await H.setBand(page, 220, 'mouse');
+    await H.setBand(page, 750, 'mouse');
 
     // Evidence: the stale panel photographed over the band it does not belong to.
-    await page.screenshot({ path: 'tests/screenshots/f1-stale-panel-over-band-220.png' });
+    await page.screenshot({ path: 'tests/screenshots/f1-stale-panel-over-band-750.png' });
 
     // The strip is the panel's only band-identifying text (R-04a). If the
     // panel is still open it must not still be announcing the old band.
@@ -78,11 +79,10 @@ test.describe('F1 — an open panel survives a re-render that removes its subjec
   });
 
   test('F1.2 slider: Escape after a band change must not dump focus on <body> (B4/R-24)', async ({ page }) => {
-    test.fail(); // live defect — delete this line with the fix
     await H.openApp(page);
     await H.setBand(page, 80);
     await H.openFirstHotspot(page, 'keyboard');
-    await H.setBand(page, 220, 'mouse');
+    await H.setBand(page, 750, 'mouse');
 
     await H.pressEscape(page);
 
@@ -93,54 +93,76 @@ test.describe('F1 — an open panel survives a re-render that removes its subjec
     expect(H.focusIsLost(focus), `focus after Escape was ${JSON.stringify(focus)}`).toBe(false);
   });
 
-  test('F1.3 view tab: switching view must not strand focus on <body> (R-24)', async ({ page }) => {
-    test.fail(); // live defect — delete this line with the fix
+  test('F1.3 room tab: switching room must not strand focus on <body> (R-24)', async ({ page }) => {
+    // D-042a: band 750 has several rooms — a room tab click is the direct
+    // descendant of the old per-view tab this defect was found on.
     await H.openApp(page);
-    await H.setBand(page, 220);
-    const views = await H.viewIds(page);
-    const current = await H.currentView(page);
-    const other = views.find((v) => v !== current)!;
+    await H.setBand(page, 750);
+    const rooms = await H.roomIds(page);
+    const current = await H.currentRoomId(page);
+    const other = rooms.find((r) => r !== current)!;
 
-    // Mouse click on a tab focuses that tab; renderViewSwitcher then
-    // replaceChildren()s the row out from under it.
-    await H.setView(page, other, 'mouse');
+    // Mouse click on a tab focuses that tab; syncTabs then rebuilds the row
+    // out from under it if the room list itself changes — but even a
+    // same-band tab switch replaces the hotspot layer underneath it.
+    await H.setRoom(page, other, 'mouse');
 
     const focus = await H.settledFocusInfo(page);
-    expect(H.focusIsLost(focus), `focus after a view switch was ${JSON.stringify(focus)}`).toBe(false);
+    expect(H.focusIsLost(focus), `focus after a room switch was ${JSON.stringify(focus)}`).toBe(false);
   });
 
-  test('F1.3b view tab: an open panel must not survive a view it has no hotspot in', async ({ page }) => {
-    test.fail(); // live defect — delete this line with the fix
+  test('F1.3b room tab: an open panel intentionally survives a room switch, with return-focus precisely repointed (D-042a)', async ({
+    page,
+  }) => {
+    // Unlike a band change, a room switch leaves band/state — what the
+    // panel describes — unchanged (main.ts's syncOpenPanel(viewOnly)), so
+    // the panel deliberately stays open rather than closing; only its
+    // return-focus target, which pointed at a hotspot that just got
+    // detached, must be repointed. Review fix (DIA-46 item 5): "not lost"
+    // alone would also pass a regression that dumps focus on some other
+    // live control — Escape must land exactly where the brief says (item
+    // 7): the same gag's hotspot if the close-up now shown still has it,
+    // else the stepper's whole-floor control.
     await H.openApp(page);
-    await H.setBand(page, 220);
+    await H.setBand(page, 750);
     const gagId = await H.openFirstHotspot(page, 'mouse');
-    const views = await H.viewIds(page);
-    const current = await H.currentView(page);
-    await H.setView(page, views.find((v) => v !== current)!, 'mouse');
+    const rooms = await H.roomIds(page);
+    const current = await H.currentRoomId(page);
+    await H.setRoom(page, rooms.find((r) => r !== current)!, 'mouse');
 
-    await expectPanelAgreesWithScene(page, gagId);
+    expect(await H.panelIsOpen(page)).toBe(true);
+    const stillVisible = (await visibleGagIds(page)).includes(gagId);
+    await H.pressEscape(page);
+    const focus = await H.settledFocusInfo(page);
+    expect(H.focusIsLost(focus), `focus after Escape was ${JSON.stringify(focus)}`).toBe(false);
+    if (stillVisible) {
+      expect(focus.gagId, `expected focus back on the hotspot for ${gagId}, got ${JSON.stringify(focus)}`).toBe(gagId);
+    } else {
+      expect(
+        focus.className,
+        `expected focus on the whole-floor control (the gag is not in the room switched to), got ${JSON.stringify(focus)}`
+      ).toContain('scene-stepper__floor');
+    }
   });
 
-  test('F1.4 keyboard: Enter on a view tab must keep focus in the tab row (R-24)', async ({ page }) => {
-    test.fail(); // live defect — delete this line with the fix
-    // No panel involved. A keyboard visitor tabs to the view switcher and
+  test('F1.4 keyboard: Enter on a room tab must keep focus in the tab row (R-24)', async ({ page }) => {
+    // No panel involved. A keyboard visitor tabs to the room row and
     // presses Enter; Enter fires the tab's *click* handler, not the roving
     // arrow-key handler, and only the arrow-key handler restores focus.
     await H.openApp(page);
-    await H.setBand(page, 220);
-    const views = await H.viewIds(page);
-    const current = await H.currentView(page);
-    const target = views.find((v) => v !== current)!;
+    await H.setBand(page, 750);
+    const rooms = await H.roomIds(page);
+    const current = await H.currentRoomId(page);
+    const target = rooms.find((r) => r !== current)!;
 
-    await H.setView(page, target, 'keyboard');
+    await H.setRoom(page, target, 'keyboard');
 
     const focus = await H.settledFocusInfo(page);
-    expect(H.focusIsLost(focus), `focus after Enter on a view tab was ${JSON.stringify(focus)}`).toBe(false);
+    expect(H.focusIsLost(focus), `focus after Enter on a room tab was ${JSON.stringify(focus)}`).toBe(false);
     expect(focus.viewId).toBe(target);
   });
 
   test('F1.5 resize: Escape after a resize must not dump focus on <body> (B4/R-24)', async ({ page }) => {
-    test.fail(); // live defect — delete this line with the fix
     await H.openApp(page);
     await H.openFirstHotspot(page, 'keyboard');
 
@@ -161,7 +183,6 @@ test.describe('F1 — an open panel survives a re-render that removes its subjec
 
 test.describe('F2 — every resize re-renders, unthrottled', () => {
   test('F2.1 SEVERE: one resize must not blur a focused hotspot (R-24)', async ({ page }) => {
-    test.fail(); // live defect — delete this line with the fix
     // This is F2's real cost. No panel, no slider, no toggle: a keyboard
     // visitor has tabbed onto a hotspot and the page merely scrolled. On iOS
     // that collapses the address bar, which fires `resize`, which
@@ -192,6 +213,23 @@ test.describe('F2 — every resize re-renders, unthrottled', () => {
     expect(renders, `${EVENTS} resize events produced ${renders} committed renders`).toBeLessThan(EVENTS);
   });
 
+  /** Delays every scene fetch, still serving whatever `sceneSourceDir()`
+   * actually has (fixture now, the real export later — same source
+   * `interceptFixtureScenes` reads) so the race this simulates is real:
+   * `route.continue()` would let the request past interceptFixtureScenes'
+   * own (later-registered, thus higher-priority) route straight to the
+   * dev/preview server's public/sprites/scenes/, which is schema 1 for
+   * everything the fixtures don't cover yet. Passed as `beforeGoto` so it
+   * registers *after* interceptFixtureScenes and wins the race for it. */
+  async function slowSceneFetches(page: Page): Promise<void> {
+    await page.route('**/sprites/scenes/*.json', async (route) => {
+      await new Promise((resolve) => setTimeout(resolve, 120));
+      const fileName = new URL(route.request().url()).pathname.split('/').pop()!;
+      const body = readFileSync(`${sceneSourceDir()}${fileName}`, 'utf-8');
+      await route.fulfill({ contentType: 'application/json', body });
+    });
+  }
+
   test('F2.3 DISMISSED half: the render token does keep the final state consistent', async ({ page }) => {
     // The candidate said renderToken "drops stale paints but not the stale
     // work". True, and that is the waste F2.2 measures — but it does NOT
@@ -199,37 +237,31 @@ test.describe('F2 — every resize re-renders, unthrottled', () => {
     // renders are genuinely in flight at once, the committed result is the
     // last band requested, with exactly one selected tab and a hotspot layer
     // that matches it. Locking that in so a future throttle cannot regress it.
-    await page.route('**/sprites/scenes/*.json', async (route) => {
-      await new Promise((resolve) => setTimeout(resolve, 120));
-      await route.continue();
-    });
-    await H.openApp(page);
+    await H.openApp(page, { beforeGoto: slowSceneFetches });
 
     await page.locator('#headcount-slider').evaluate((el) => {
       const input = el as HTMLInputElement;
-      for (const value of [150, 220, 490, 610]) {
+      // 80 and 1000 (the 1,000+/"beyond" stop, which serves the 750 file) —
+      // the two bands the fixtures cover pre-exporter (D-042 item 1).
+      for (const value of [80, 1000, 80, 1000]) {
         input.value = String(value);
         input.dispatchEvent(new Event('input', { bubbles: true }));
       }
     });
-    await expect.poll(() => H.currentBand(page), { timeout: 10_000 }).toBe('610');
+    await expect.poll(() => H.currentBand(page), { timeout: 10_000 }).toBe('beyond');
     await page.waitForTimeout(400); // let any later stale render try to land
 
-    expect(await H.currentBand(page)).toBe('610');
+    expect(await H.currentBand(page)).toBe('beyond');
     await expect(page.locator('.scene-views__button[aria-selected="true"]')).toHaveCount(1);
     const selected = await page
       .locator('.scene-views__button[aria-selected="true"]')
       .getAttribute('data-view-id');
-    expect(selected).toBe(await H.currentView(page));
+    expect(selected).toBe(await H.currentRoomId(page));
     expect(await H.hotspots(page).count()).toBeGreaterThan(0);
   });
 
   test('F2.4 DISMISSED half: spamming the toggle still settles on the right state', async ({ page }) => {
-    await page.route('**/sprites/scenes/*.json', async (route) => {
-      await new Promise((resolve) => setTimeout(resolve, 120));
-      await route.continue();
-    });
-    await H.openApp(page);
+    await H.openApp(page, { beforeGoto: slowSceneFetches });
     await page.locator('.toggle__button').evaluate((el) => {
       for (let i = 0; i < 5; i += 1) (el as HTMLButtonElement).click();
     });
@@ -272,7 +304,6 @@ test.describe('F3 — the toggle and an open panel', () => {
   });
 
   test('F3.2 but the toggle DOES invalidate the panel\'s return-focus target (B4/R-24)', async ({ page }) => {
-    test.fail(); // live defect — same root cause as F1; delete with the fix
     // The part of the candidate that is real: the toggle re-renders the
     // hotspot layer too, so the invoking hotspot the panel promised to
     // return focus to (B4) no longer exists. Escape then lands wherever
@@ -350,13 +381,16 @@ test.describe('F4 — below-the-fold and off-the-happy-path surfaces', () => {
     expect(page.url()).toBe(before);
   });
 
-  test('F4.3 STALE PREMISE: every band 80-750 has a real scene file today', async ({ page }) => {
+  test('F4.3 STALE PREMISE: every drawn band has a real scene file today', async ({ page }) => {
     // The candidate said bands 360-750 hit renderMissingScene on every load.
-    // They did when it was written; public/sprites/scenes/ now has all
-    // fourteen band x state files, so the fallback is only reachable when a
-    // fetch *fails*. Asserted here so the claim is checked, not remembered.
+    // They did when it was written, and D-042's schema-2 painter (this
+    // brief) refuses schema 1 on purpose (the "not drawn yet" path rather
+    // than a half-drawn picture) — so until the exporter lands schema 2 for
+    // every band, the premise is stale only for the bands `testableBands()`
+    // actually covers. This is self-healing: once the real export lands for
+    // every band, this loop covers every band with no change here.
     await H.openApp(page);
-    for (const band of H.NUMERIC_BANDS) {
+    for (const band of H.testableBands()) {
       await H.setBand(page, band);
       expect(
         await H.canvasShowsMissingScene(page),
@@ -391,20 +425,23 @@ test.describe('F4 — below-the-fold and off-the-happy-path surfaces', () => {
     // is the only error logged — nothing else broke on the way down.
     expect(consoleErrors.length).toBeGreaterThan(0);
 
-    // Recovery: sliding on to a band that does load must render normally...
-    await H.setBand(page, 490);
+    // Recovery: sliding on to a band that does load must render normally
+    // (750 — one of the bands the D-042 fixtures cover) ...
+    await H.setBand(page, 750);
     expect(await H.canvasShowsMissingScene(page)).toBe(false);
     expect(await H.hotspots(page).count()).toBeGreaterThan(0);
-    // ...and sliding back must fall back again rather than show 490's picture.
+    // ...and sliding back must fall back again rather than show 750's picture.
     await H.setBand(page, 360);
     expect(await H.canvasShowsMissingScene(page)).toBe(true);
   });
 
   test('F4.5 a total scene-asset outage still leaves a usable, readable page (R-14)', async ({ page }) => {
     // Worst case: every scene request fails. The visitor must still get the
-    // whole argument in text, and the slider must still work.
-    await H.failSceneFetch(page, 'all');
-    await H.openApp(page);
+    // whole argument in text, and the slider must still work. Registered via
+    // beforeGoto (not before openApp) so it wins the route race against
+    // interceptFixtureScenes for band 80's own request — Playwright resolves
+    // the most-recently-registered matching route first.
+    await H.openApp(page, { beforeGoto: (p) => H.failSceneFetch(p, 'all') });
 
     await expect(page.locator('h1')).toHaveText('Ahead of It');
     expect(await H.canvasShowsMissingScene(page)).toBe(true);

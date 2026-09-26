@@ -30,6 +30,8 @@ interface ParityCase {
   band: number;
   state: 'built' | 'without';
   viewId: string;
+  viewKind: 'room' | 'closeup';
+  viewParent?: string;
   viewSize: { w: number; h: number };
   sceneFileName: string; // what the app fetches at /sprites/scenes/<sceneFileName>
   sceneBody: string;
@@ -38,47 +40,83 @@ interface ParityCase {
 }
 
 interface RawIndex {
+  schema?: number;
   bands: Record<string, { built: string; without: string }>;
   beyond: string;
 }
 
 interface RawSceneFile {
-  views: Array<{ id: string; size: { w: number; h: number } }>;
+  views: Array<{ id: string; kind: 'room' | 'closeup'; parent?: string; size: { w: number; h: number } }>;
+}
+
+/**
+ * D-042: a golden is named `<band>-<state>-<viewId>@1x.png` — one per room
+ * AND per close-up (fix round item 4's per-view naming, unchanged by this
+ * brief), matching art/preview/views/'s real convention so the fixture and
+ * real cases below share one golden-path scheme.
+ */
+function casesForScene(opts: {
+  band: number;
+  state: 'built' | 'without';
+  sceneFileName: string;
+  sceneBody: string;
+  indexBody: string;
+  goldenPath: (viewId: string) => string;
+}): ParityCase[] {
+  const scene = JSON.parse(opts.sceneBody) as RawSceneFile;
+  return scene.views.map((view) => ({
+    label: `band ${opts.band}/${opts.state} view "${view.id}"`,
+    band: opts.band,
+    state: opts.state,
+    viewId: view.id,
+    viewKind: view.kind,
+    viewParent: view.parent,
+    viewSize: view.size,
+    sceneFileName: opts.sceneFileName,
+    sceneBody: opts.sceneBody,
+    indexBody: opts.indexBody,
+    goldenPath: opts.goldenPath(view.id),
+  }));
 }
 
 function fixtureCases(): ParityCase[] {
   const indexBody = readFileSync(`${fixturesDir}index.json`, 'utf-8');
   const cases: ParityCase[] = [];
   for (const state of ['built', 'without'] as const) {
-    const sceneBody = readFileSync(`${fixturesDir}80-${state}.json`, 'utf-8');
-    const scene = JSON.parse(sceneBody) as RawSceneFile;
-    const view = scene.views[0];
-    cases.push({
-      label: `fixture band 80/${state} view "${view.id}"`,
-      band: 80,
-      state,
-      viewId: view.id,
-      viewSize: view.size,
-      sceneFileName: `80-${state}.json`,
-      sceneBody,
-      indexBody,
-      goldenPath: `${fixturesDir}80-${state}-golden.png`,
-    });
+    const sceneFileName = `80-${state}.json`;
+    const sceneBody = readFileSync(`${fixturesDir}${sceneFileName}`, 'utf-8');
+    cases.push(
+      ...casesForScene({
+        band: 80,
+        state,
+        sceneFileName,
+        sceneBody,
+        indexBody,
+        goldenPath: (viewId) => `${fixturesDir}80-${state}-${viewId}@1x.png`,
+      })
+    );
   }
   return cases;
 }
 
 /**
- * The real thing, once PH1-08b lands: every view of every band that has
- * at least one golden under art/preview/views/ is a "drawn" band and
- * gets a case per view x state — missing a specific view's golden is a
- * hard failure there, not a skip. Bands with zero goldens at all (still
- * placeholder-only) are reported as named skips instead.
+ * The real thing, once the D-042 exporter lands: every view (room and
+ * close-up alike) of every band that has at least one golden under
+ * art/preview/views/ is a "drawn" band and gets a case per view x state —
+ * missing a specific view's golden is a hard failure there, not a skip.
+ * Bands with zero goldens at all (still placeholder-only) are reported as
+ * named skips instead. Gated on schema 2 like scene-source.ts's
+ * `hasRealScenes()` — public/sprites/scenes/ is schema 1 until the exporter
+ * lands, and the painter refuses it ("not drawn yet"), so testing it here
+ * against a schema-2-shaped golden would fail on the wrong axis.
  */
 function realCases(): { cases: ParityCase[]; skips: string[] } {
   if (!existsSync(`${scenesDir}index.json`)) return { cases: [], skips: [] };
   const indexBody = readFileSync(`${scenesDir}index.json`, 'utf-8');
   const index = JSON.parse(indexBody) as RawIndex;
+  if (index.schema !== 2) {
+    return { cases: [], skips: ['public/sprites/scenes: still schema 1 — the D-042 exporter has not landed yet'] };
+  }
   const goldenFiles = existsSync(viewsGoldenDir) ? readdirSync(viewsGoldenDir) : [];
 
   const bands = Object.keys(index.bands)
@@ -99,20 +137,16 @@ function realCases(): { cases: ParityCase[]; skips: string[] } {
       const fileName = index.bands[String(band)]?.[state];
       if (!fileName) continue; // the contract test is what enforces full coverage; this suite just describes what it finds
       const sceneBody = readFileSync(`${scenesDir}${fileName}`, 'utf-8');
-      const scene = JSON.parse(sceneBody) as RawSceneFile;
-      for (const view of scene.views) {
-        cases.push({
-          label: `band ${band}/${state} view "${view.id}"`,
+      cases.push(
+        ...casesForScene({
           band,
           state,
-          viewId: view.id,
-          viewSize: view.size,
           sceneFileName: fileName,
           sceneBody,
           indexBody,
-          goldenPath: `${viewsGoldenDir}${band}-${state}-${view.id}@1x.png`,
-        });
-      }
+          goldenPath: (viewId) => `${viewsGoldenDir}${band}-${state}-${viewId}@1x.png`,
+        })
+      );
     }
   }
   return { cases, skips };
@@ -153,13 +187,47 @@ async function gotoAtScale1(page: Page, c: ParityCase) {
       await page.waitForFunction((prev) => document.body.dataset.renderedToken !== prev, prevToken);
     }
   }
-  // Switch to the requested view if it isn't already the default —
-  // src/main.ts's view switcher is a real tab row, one button per view.
-  const currentView = await page.evaluate(() => document.body.dataset.view);
-  if (currentView !== c.viewId) {
-    const prevToken = await page.evaluate(() => document.body.dataset.renderedToken);
-    await page.locator(`.scene-views__button[data-view-id="${c.viewId}"]`).click();
-    await page.waitForFunction((prev) => document.body.dataset.renderedToken !== prev, prevToken);
+  await gotoView(page, c);
+}
+
+/** Clicks `locator` and waits for the render it causes. */
+async function clickAndWaitForRender(page: Page, locator: ReturnType<Page['locator']>) {
+  const prevToken = await page.evaluate(() => document.body.dataset.renderedToken);
+  await locator.click();
+  await page.waitForFunction((prev) => document.body.dataset.renderedToken !== prev, prevToken);
+}
+
+/**
+ * Reaches `c.viewId` — a room (its own tab) or a close-up (reached through
+ * its room's tab, then either already the room's default or one more click
+ * on that room's "zoom in" button) — from wherever the app currently is.
+ * Mirrors src/main.ts's actual navigation (D-042a): there is no direct
+ * per-view tab any more, so a close-up not currently on screen is always
+ * one room-tab click plus at most one zoom-in click away.
+ */
+async function gotoView(page: Page, c: ParityCase) {
+  if ((await page.evaluate(() => document.body.dataset.view)) === c.viewId) return;
+  if (c.viewParent) {
+    const currentRoom = await page.evaluate(() => document.body.dataset.room);
+    if (currentRoom !== c.viewParent) {
+      await clickAndWaitForRender(page, page.locator(`.scene-views__button[data-view-id="${c.viewParent}"]`));
+    }
+    if ((await page.evaluate(() => document.body.dataset.view)) === c.viewId) return;
+    // Now on the room's default close-up (if this one is not it) or, if
+    // the room was already active, still wherever we started — either way
+    // "whole floor" reaches the room overview, and its zoom-in buttons
+    // reach any close-up in it by id.
+    await clickAndWaitForRender(page, page.locator('.scene-stepper__floor'));
+    await clickAndWaitForRender(page, page.locator(`.hotspot--zoom[data-view-id="${c.viewId}"]`));
+  } else {
+    // A room with no parent: reach it from its own default close-up via
+    // "whole floor" (there is no way to land on a room overview directly).
+    const currentRoom = await page.evaluate(() => document.body.dataset.room);
+    if (currentRoom !== c.viewId) {
+      await clickAndWaitForRender(page, page.locator(`.scene-views__button[data-view-id="${c.viewId}"]`));
+    }
+    if ((await page.evaluate(() => document.body.dataset.view)) === c.viewId) return;
+    await clickAndWaitForRender(page, page.locator('.scene-stepper__floor'));
   }
 }
 

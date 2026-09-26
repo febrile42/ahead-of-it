@@ -43,11 +43,24 @@ export interface SceneHotspot {
   placeholder?: boolean;
 }
 
-/** One view (D-036): ids in {ground, floor-2…floor-6, top, street}. `size`
- * is the view's native pixel dimensions (w <= 360, h <= 240). `focus` is
- * what `.scene-wrap` scrolls to if the view is wider than the viewport. */
+/** The only schema this painter draws (D-042a): a file of any other schema
+ * takes the "not drawn yet" path instead of half-rendering. */
+export const SCENE_SCHEMA = 2;
+
+/** One view (D-036, D-042): a `room` (id in {ground, floor-2…floor-6, top,
+ * street}, w <= 360, h <= 240, an establishing shot with no gag hotspots)
+ * or a `closeup` (id `<room>.<n>`, w <= 180, h <= 120, where gags are
+ * tapped). `size` is the view's native pixel dimensions and the only thing
+ * the painter reads to draw it; `rect` — a close-up's place inside its
+ * parent room, in the parent's coordinates — is read only to position the
+ * room's "zoom in" buttons. A close-up's entries, hotspots and `focus` are
+ * in its own coordinates, so no offset is ever applied. `focus` is what
+ * `.scene-wrap` scrolls to if the view is wider than the viewport. */
 export interface SceneView {
   id: string;
+  kind: 'room' | 'closeup';
+  parent?: string;
+  rect?: { x: number; y: number; w: number; h: number };
   label: string;
   size: { w: number; h: number };
   focus: { x: number; y: number; w: number; h: number };
@@ -105,15 +118,59 @@ export async function loadScene(band: BandId, state: 'built' | 'without'): Promi
   }
   let cached = sceneCache.get(fileName);
   if (!cached) {
-    cached = fetchJson<SceneFile>(`/sprites/scenes/${fileName}`);
+    cached = fetchJson<SceneFile>(`/sprites/scenes/${fileName}`).then((scene) => {
+      if (scene.schema !== SCENE_SCHEMA) {
+        throw new Error(`sprites/scenes/${fileName}: schema ${scene.schema}, this painter draws schema ${SCENE_SCHEMA}`);
+      }
+      return scene;
+    });
     sceneCache.set(fileName, cached);
   }
   return cached;
 }
 
-/** D-036 rule 6: default view = most primaries among the current band's gags, ties to the earlier view — already decided by the exporter and flagged `default: true`. Falls back to the first view defensively. */
+/** Rooms, in array order (establishing shots; no gag hotspots). */
+export function rooms(scene: SceneFile): SceneView[] {
+  return scene.views.filter((v) => v.kind === 'room');
+}
+
+/** Every close-up in array order — the navigation order, never re-sorted (D-042a). */
+export function closeups(scene: SceneFile): SceneView[] {
+  return scene.views.filter((v) => v.kind === 'closeup');
+}
+
+/** The close-ups whose parent is `roomId`, in array order. */
+export function closeupsOf(scene: SceneFile, roomId: string): SceneView[] {
+  return scene.views.filter((v) => v.kind === 'closeup' && v.parent === roomId);
+}
+
+/** The room a view belongs to: itself for a room, its `parent` for a close-up. */
+export function roomOf(scene: SceneFile, view: SceneView): SceneView | undefined {
+  return view.kind === 'room' ? view : scene.views.find((v) => v.kind === 'room' && v.id === view.parent);
+}
+
+/** Primary hotspots across `candidates` (a room's tab count: what there is to tap in it). */
+export function primaryCount(candidates: SceneView[]): number {
+  return candidates.reduce((n, v) => n + v.hotspots.filter((h) => h.primary).length, 0);
+}
+
+/** D-042 item 6: of `candidates`, the close-up holding the most primaries of the band's own gags (`ownGagIds`); ties go to the earlier one. Computed by the web from the file, so it does not depend on the file's `default` flag (which is only for a band's first paint). */
+export function mostOwnPrimaries(candidates: SceneView[], ownGagIds: ReadonlySet<string>): SceneView | undefined {
+  let best: SceneView | undefined;
+  let bestCount = -1;
+  for (const view of candidates) {
+    const count = view.hotspots.filter((h) => h.primary && ownGagIds.has(h.gagId)).length;
+    if (count > bestCount) {
+      best = view;
+      bestCount = count;
+    }
+  }
+  return best;
+}
+
+/** D-042 item 6: a band's first paint is the close-up with the most of its own primaries, which the exporter flags `default: true` (exactly one per file, always a close-up — the contract test proves it is the one the rule picks). Falls back to the first close-up defensively. */
 export function defaultView(scene: SceneFile): SceneView {
-  return scene.views.find((v) => v.default) ?? scene.views[0];
+  return scene.views.find((v) => v.default) ?? closeups(scene)[0] ?? scene.views[0];
 }
 
 /** Looks up a view by id within a scene file, for the switcher / arrow-key navigation. */

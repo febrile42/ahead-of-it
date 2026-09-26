@@ -46,7 +46,7 @@ async function dismissAutoBeyondPanel(page: Page) {
 // ---------------------------------------------------------------------------
 
 test.describe('band x state x panel — every panel identifies itself and returns focus', () => {
-  for (const band of H.BAND_ORDER) {
+  for (const band of H.testableBands()) {
     for (const state of STATES) {
       test(`band ${band} / ${state}: panel opens, identifies itself (R-04a) and Escape returns focus (B4)`, async ({
         page,
@@ -96,97 +96,99 @@ test.describe('band x state x panel — every panel identifies itself and return
 });
 
 // ---------------------------------------------------------------------------
-// TRIPLE: band x view x panel. A panel opened in a view belongs to that view.
+// TRIPLE: band x close-up x panel. A panel opened in a close-up belongs to it.
 // ---------------------------------------------------------------------------
 
-test.describe('band x view x panel — each view opens its own gags', () => {
-  for (const band of [150, 220, 360, 490, 610, 750] as const) {
-    test(`band ${band}: every view's hotspots open a panel for a gag in that view`, async ({ page }) => {
+test.describe('band x close-up x panel — each close-up opens its own gags', () => {
+  for (const band of H.numericTestableBands()) {
+    test(`band ${band}: every close-up's hotspots open a panel for a gag in it`, async ({ page }) => {
       const errors = failOnConsoleErrors(page);
       await H.openApp(page);
       await H.setBand(page, band);
-      const views = await H.viewIds(page);
-      expect(views.length, `band ${band} rendered no view tabs`).toBeGreaterThan(1);
+      let visited = 0;
 
-      for (const viewId of views) {
-        await H.setView(page, viewId, 'mouse');
-        expect(await H.currentView(page)).toBe(viewId);
-
+      await H.forEachCloseup(page, async (closeupId) => {
+        visited += 1;
         const gagIds = await H.hotspots(page).evaluateAll((els) =>
           els.map((el) => (el as HTMLElement).dataset.gagId ?? '')
         );
-        expect(gagIds.length, `view ${viewId} of band ${band} has no hotspots`).toBeGreaterThan(0);
+        expect(gagIds.length, `close-up ${closeupId} of band ${band} has no hotspots`).toBeGreaterThan(0);
 
         const opened = await H.openFirstHotspot(page, 'mouse');
-        expect(gagIds, `panel for ${opened} opened from view ${viewId} which does not contain it`).toContain(
-          opened
-        );
-        // D-036: exactly one tab is ever selected, and it is the rendered one.
+        expect(
+          gagIds,
+          `panel for ${opened} opened from close-up ${closeupId} which does not contain it`
+        ).toContain(opened);
+        // D-042a: exactly one room tab is ever selected, and it is this
+        // close-up's own room.
         await expect(page.locator('.scene-views__button[aria-selected="true"]')).toHaveCount(1);
         expect(
           await page.locator('.scene-views__button[aria-selected="true"]').getAttribute('data-view-id')
-        ).toBe(viewId);
+        ).toBe(await H.currentRoomId(page));
         await H.pressEscape(page);
-      }
+      });
+
+      expect(visited, `band ${band} rendered no close-ups`).toBeGreaterThan(1);
       expect(errors).toEqual([]);
     });
   }
 });
 
 // ---------------------------------------------------------------------------
-// PAIR: view x state. Flipping the toggle must not silently move the visitor
-// to a different floor — they flipped "without", not "take me elsewhere".
+// PAIR: close-up x state. Flipping the toggle must not silently move the
+// visitor to a different close-up — they flipped "without", not "take me
+// elsewhere".
 // ---------------------------------------------------------------------------
 
-test.describe('view x state — the selected view survives the toggle', () => {
-  for (const band of [220, 610, 750] as const) {
-    test(`band ${band}: every view stays selected across built <-> without`, async ({ page }) => {
+test.describe('close-up x state — the selected close-up survives the toggle', () => {
+  for (const band of H.numericTestableBands()) {
+    test(`band ${band}: every close-up stays selected across built <-> without`, async ({ page }) => {
       const errors = failOnConsoleErrors(page);
       await H.openApp(page);
       await H.setBand(page, band);
-      const views = await H.viewIds(page);
 
-      for (const viewId of views) {
-        await H.setView(page, viewId, 'mouse');
+      await H.forEachCloseup(page, async (closeupId) => {
         await H.setState(page, 'without');
-        expect(await H.currentView(page), `toggling to "without" moved the visitor off ${viewId}`).toBe(
-          viewId
-        );
+        expect(
+          await H.currentView(page),
+          `toggling to "without" moved the visitor off ${closeupId}`
+        ).toBe(closeupId);
         await H.setState(page, 'built');
-        expect(await H.currentView(page), `toggling back to "built" moved the visitor off ${viewId}`).toBe(
-          viewId
-        );
-      }
+        expect(
+          await H.currentView(page),
+          `toggling back to "built" moved the visitor off ${closeupId}`
+        ).toBe(closeupId);
+      });
       expect(errors).toEqual([]);
     });
   }
 });
 
 // ---------------------------------------------------------------------------
-// TRIPLE: band x view x viewport. Rotation and tablet/desktop must not lose
-// the visitor's place or shrink a tap target below R-20's floor.
+// TRIPLE: band x close-up x viewport. Rotation and tablet/desktop must not
+// lose the visitor's place or shrink a tap target below R-20's floor.
 // ---------------------------------------------------------------------------
 
-test.describe('band x view x viewport — resizing keeps the place and the tap targets', () => {
-  for (const band of [80, 360, 750] as const) {
-    test(`band ${band}: view survives phone -> tablet -> desktop -> phone, hotspots stay >=44px (R-20)`, async ({
+test.describe('band x close-up x viewport — resizing keeps the place and the tap targets', () => {
+  for (const band of H.numericTestableBands()) {
+    test(`band ${band}: close-up survives phone -> tablet -> desktop -> phone, hotspots stay >=44px (R-20)`, async ({
       page,
     }) => {
       const errors = failOnConsoleErrors(page);
       await H.openApp(page);
       await H.setBand(page, band);
-      const views = await H.viewIds(page);
-      // Deepest view rather than the default — the default is the one every
-      // other spec already lands on.
-      const target = views[views.length - 1];
-      await H.setView(page, target, 'mouse');
+      // Deepest close-up rather than the default — the default is the one
+      // every other spec already lands on. walkCloseupIds leaves the
+      // visitor on the last close-up it visits.
+      const closeups = await H.walkCloseupIds(page);
+      const target = closeups[closeups.length - 1];
       const countAtPhone = await H.hotspots(page).count();
 
       for (const viewport of [H.TABLET, H.DESKTOP, { width: 390, height: 500 }, H.PHONE]) {
         await H.resizeTo(page, viewport.width, viewport.height);
         expect(
           await H.currentView(page),
-          `resize to ${viewport.width}x${viewport.height} moved the visitor off view ${target}`
+          `resize to ${viewport.width}x${viewport.height} moved the visitor off close-up ${target}`
         ).toBe(target);
         expect(
           await H.hotspots(page).count(),
@@ -222,7 +224,7 @@ test.describe('input method x panel — touch, mouse and keyboard agree', () => 
       const target = context ? await context.newPage() : page;
       try {
         await H.openApp(target);
-        await H.setBand(target, 220);
+        await H.setBand(target, 80);
         const gagId = (await H.hotspots(target).first().getAttribute('data-gag-id')) ?? '';
 
         await H.openFirstHotspot(target, via);
@@ -318,40 +320,41 @@ test.describe('focus after a re-render — the cells that hold', () => {
     expect(focus.className).toContain('toggle__button');
   });
 
-  test('arrow keys on the view tab row move focus to the newly selected tab', async ({ page }) => {
+  test('arrow keys on the room tab row move focus to the newly selected tab', async ({ page }) => {
     // src/main.ts's roving-tabindex handler re-focuses the tab after the
     // render completes. This is the ONE re-render path that restores focus
     // correctly — F1.4 is the Enter-key path through the same row, which
-    // does not.
+    // does not. Band 750 has several rooms (D-042a); band 220 falls back to
+    // "not drawn yet" until the exporter lands (D-042 item 1's fixtures).
     await H.openApp(page);
-    await H.setBand(page, 220);
+    await H.setBand(page, 750);
     const tabs = page.locator('.scene-views__button');
     const selected = page.locator('.scene-views__button[aria-selected="true"]');
     await selected.focus();
-    const before = await H.currentView(page);
+    const before = await H.currentRoomId(page);
 
-    await H.pressViewArrow(page, 'ArrowRight');
+    await H.pressRoomArrow(page, 'ArrowRight');
 
     const focus = await H.settledFocusInfo(page);
     expect(H.focusIsLost(focus), `focus after ArrowRight was ${JSON.stringify(focus)}`).toBe(false);
-    expect(focus.viewId).toBe(await H.currentView(page));
-    expect(await H.currentView(page)).not.toBe(before);
+    expect(focus.viewId).toBe(await H.currentRoomId(page));
+    expect(await H.currentRoomId(page)).not.toBe(before);
     // D-036's roving tabindex: exactly one tab is in the tab order.
     expect(await tabs.evaluateAll((els) => els.filter((e) => (e as HTMLElement).tabIndex === 0).length)).toBe(1);
   });
 
-  test('arrow keys wrap around the tab row without losing focus', async ({ page }) => {
+  test('arrow keys wrap around the room tab row without losing focus', async ({ page }) => {
     await H.openApp(page);
     await H.setBand(page, 750);
-    const views = await H.viewIds(page);
+    const rooms = await H.roomIds(page);
     await page.locator('.scene-views__button[aria-selected="true"]').focus();
     // One full lap — the wrap at each end is the off-by-one most likely to
     // land focus on nothing.
-    for (let i = 0; i < views.length + 1; i += 1) {
-      await H.pressViewArrow(page, 'ArrowRight');
+    for (let i = 0; i < rooms.length + 1; i += 1) {
+      await H.pressRoomArrow(page, 'ArrowRight');
       const focus = await H.settledFocusInfo(page);
       expect(H.focusIsLost(focus), `lost focus on lap step ${i}: ${JSON.stringify(focus)}`).toBe(false);
-      expect(focus.viewId).toBe(await H.currentView(page));
+      expect(focus.viewId).toBe(await H.currentRoomId(page));
     }
   });
 });
@@ -420,7 +423,7 @@ test.describe('degenerate viewports and environments', () => {
     }) => {
       const errors = failOnConsoleErrors(page);
       await H.openApp(page, { viewport });
-      await H.setBand(page, 220);
+      await H.setBand(page, 80);
 
       expect(await H.canvasShowsMissingScene(page)).toBe(false);
       const spots = H.hotspots(page);
@@ -451,7 +454,7 @@ test.describe('degenerate viewports and environments', () => {
     // moment Phase 2 adds an animation that is not gated on the query, which
     // is exactly when someone would otherwise forget.
     await H.openApp(page, { reducedMotion: 'reduce' });
-    await H.setBand(page, 220);
+    await H.setBand(page, 80);
     expect(await H.hotspots(page).count()).toBeGreaterThan(0);
 
     const animating = await page.evaluate(() =>
@@ -500,10 +503,12 @@ test.describe('the first five seconds, end to end', () => {
       await H.openApp(page);
       await expect(page.locator('h1')).toHaveText('Ahead of It');
 
-      // R-06a: the nudge appears once, after the first slider move — not before.
+      // R-06a: the nudge appears once, after the first slider move — not
+      // before. The visitor lands on band 80 (src/main.ts's default), so the
+      // drag has to go somewhere else to actually fire a render.
       const nudge = page.locator('.toggle__nudge');
       expect(await nudge.evaluate((el) => el.classList.contains('toggle__nudge--visible'))).toBe(false);
-      await H.setBand(page, 220);
+      await H.setBand(page, 750);
       expect(await nudge.evaluate((el) => el.classList.contains('toggle__nudge--visible'))).toBe(true);
 
       // ...and goes away once they have done the thing it asked for (m2).
@@ -512,7 +517,7 @@ test.describe('the first five seconds, end to end', () => {
 
       const gagId = await H.openFirstHotspot(page, 'touch');
       expect((await H.panelTitle(page)).trim().length).toBeGreaterThan(0);
-      await page.screenshot({ path: 'tests/screenshots/first-five-seconds-band-220-without.png' });
+      await page.screenshot({ path: 'tests/screenshots/first-five-seconds-band-750-without.png' });
 
       // Closing by the button, which is what a thumb reaches for.
       await page.locator('.panel__close').tap();

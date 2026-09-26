@@ -134,20 +134,33 @@ h1 {
   visibility: visible;
 }
 
-/* --- Scene view switcher (D-036: a tab row, one per view) --- */
+/* --- Room tabs (D-042a): one line, scrolls sideways, never wraps --- */
 .scene-views {
+  position: relative; /* offsetLeft base for scroll-into-view */
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 0.4rem;
-  padding: 0 1rem 0.5rem;
-  /* S1-style CLS reservation: main.ts inserts this row synchronously
-     before the scene file has loaded (so it starts empty), one row of
-     44px buttons tall so filling it in doesn't grow the row further. */
-  min-height: 44px;
+  padding: 0 1rem;
+  /* CLS: a fixed height in every band, empty until the scene file names
+     the rooms. A wrapping row would grow with the band (750 has more rooms
+     than a phone is wide) and shift the page. No visible scrollbar: it
+     would change the row's height on desktop. */
+  height: calc(44px + 0.5rem);
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.scene-views::-webkit-scrollbar {
+  display: none;
 }
 
 .scene-views__button {
+  flex: 0 0 auto;
+  white-space: nowrap;
   min-height: 44px;
+  max-height: 44px;
   padding: 0.3rem 0.7rem;
   border: 1px solid var(--ink);
   border-radius: 999px;
@@ -170,7 +183,6 @@ h1 {
 .scene-wrap {
   position: relative;
   width: 100%;
-  max-width: 100%;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   /* CLS: reserves box space before the scene file has even been fetched.
@@ -183,7 +195,12 @@ h1 {
      sizeAndPositionCanvas) instead of the box itself changing size,
      which is what keeps this element's CLS contribution at ~0 after
      first paint. */
-  aspect-ratio: 360 / 240;
+  aspect-ratio: 3 / 2;
+  /* D-042a: full viewport width up to 430px (a padded box would give a
+     180x120 close-up 1.5 css px per art px at 360; unpadded, 2.0), capped
+     and centred from there. Same box for every view, so a switch is a cut. */
+  max-width: 720px;
+  margin: 0 auto;
   /* R-20: "pan/zoom is allowed, tiny hotspots are not" — a view wider
      than the viewport (SCENE-FORMAT's `focus` rect) scrolls horizontally
      to reach it rather than shrinking hotspots below 44px. canvas and
@@ -197,6 +214,13 @@ h1 {
   image-rendering: -moz-crisp-edges;
   image-rendering: crisp-edges;
   display: block;
+  /* Review nit (DIA-46, non-blocking): centred by default so the static
+     shell's canvas (360x240, index.html) doesn't start flush left and then
+     jump when sizeAndPositionCanvas sets an explicit marginLeft on first
+     render — main.ts's own centred case computes the same position, so
+     this removes the load-time shift without changing the scrolled case
+     (which still sets marginLeft: 0px explicitly). */
+  margin: 0 auto;
 }
 
 .hotspots-layer {
@@ -220,6 +244,93 @@ h1 {
 .hotspot:focus-visible {
   outline: 3px solid var(--accent);
   outline-offset: 2px;
+}
+
+/* A room's "zoom in" target (D-042a): covers the close-up's rect; the
+   caption is the close-up's own label. */
+.hotspot--zoom {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  border-style: solid;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.hotspot__caption {
+  margin: 2px;
+  padding: 1px 5px;
+  background: var(--ink);
+  color: #fff;
+  border-radius: 3px;
+  font: 600 0.7rem/1.2 system-ui, sans-serif;
+  text-align: left;
+}
+
+/* --- Stepper (D-042a): previous, "label · n of N", next, whole floor --- */
+.scene-stepper {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  height: 44px; /* CLS: fixed; the label wraps to two lines inside it */
+  margin: 0.5rem auto 0;
+  max-width: 720px;
+  padding: 0 1rem;
+  /* Below ~220px (200% zoom on a 390px phone) the four controls no longer
+     fit; contain the overflow here rather than widening the document, same
+     as .scene-views. */
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.scene-stepper__button,
+.scene-stepper__floor {
+  flex: 0 0 auto;
+  min-width: 44px;
+  min-height: 44px;
+  border: 1px solid var(--ink);
+  border-radius: 999px;
+  background: #fff;
+  font: inherit;
+  cursor: pointer;
+}
+
+.scene-stepper__button {
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+.scene-stepper__floor {
+  padding: 0 0.8rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.scene-stepper__floor[aria-pressed='true'] {
+  background: var(--ink);
+  color: #fff;
+}
+
+.scene-stepper [aria-disabled='true'] {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.scene-stepper button:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.scene-stepper__label {
+  flex: 1 1 0;
+  min-width: 0;
+  margin: 0;
+  font-size: 0.8rem;
+  line-height: 1.15;
+  text-align: center;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
 }
 
 /* A visible affordance (not just a scrollbar) that a view scrolls further
@@ -377,6 +488,8 @@ h1 {
   .slider,
   .toggle,
   .scene-wrap,
+  .scene-views,
+  .scene-stepper,
   .panel,
   .checklist__download {
     display: none !important;
