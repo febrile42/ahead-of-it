@@ -1114,10 +1114,13 @@ def _street610(old: list) -> list:
 # the room (G6.1: "everywhere"; only the ceiling bunch is tappable, the rest are the
 # room). Built, the handful of shared balloons is tethered to a PORTFOLIO board on the
 # back wall.
+# DIA-74: the near-twins ride over the two front pit desks, (6, 4) and (8, 4), side by
+# side in the foreground of the Back desks close-up (one sprite, G6_TWINS); every other
+# head gets its own colour.
+G6_TWINS = (6, 4)
 HEAD_BALLOONS = [                      # (tile or floor point, dx, dy, brand)
-    (("t", 6, 4), -7, -30, "red-dot"), (("t", 8, 4), -7, -30, "green-tri"),
     (("t", 6, 6), -7, -30, "yellow-ring"), (("t", 8, 6), -3, -30, "orange-bar"),
-    (("t", 3, 0), -7, -30, "blue-plus"), (("t", 4, 0), -7, -30, "blue-plus2"),
+    (("t", 3, 0), -7, -30, "blue-plus"), (("t", 4, 0), -7, -30, "green-tri"),
     (("t", 8, 0), -7, -30, "cyan-sq"), (("t", 11, 6), -7, -30, "grey-check"),
     (("f", 8.95, 1.65), 0, -23, "pink-dot"),
 ]
@@ -1130,6 +1133,7 @@ def _ground750() -> list:
         mk = _t if kind == "t" else _f
         P.append(mk("balloon-head", a, b, frame=brand, dx=dx, dy=dy, layer="over",
                     states=W))
+    P.append(_t("balloon-twins", *G6_TWINS, dx=-7, dy=-30, layer="over", states=W))
     P += [
         _f("balloons-ceiling", 11.05, 0.05, dy=-10, frame="drift", depth=0.5, states=W,
            gag="G6.1", part="balloons"),

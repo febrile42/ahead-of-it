@@ -81,12 +81,6 @@
           "file": "balloon-head-blue-plus.png"
         }
       ],
-      "blue-plus2": [
-        {
-          "duration": 0,
-          "file": "balloon-head-blue-plus2.png"
-        }
-      ],
       "cyan-sq": [
         {
           "duration": 0,
@@ -97,6 +91,12 @@
         {
           "duration": 0,
           "file": "balloon-head.png"
+        }
+      ],
+      "dkgreen-x": [
+        {
+          "duration": 0,
+          "file": "balloon-head-dkgreen-x.png"
         }
       ],
       "green-tri": [
@@ -123,10 +123,10 @@
           "file": "balloon-head-pink-dot.png"
         }
       ],
-      "red-dot": [
+      "slate-bars": [
         {
           "duration": 0,
-          "file": "balloon-head-red-dot.png"
+          "file": "balloon-head-slate-bars.png"
         }
       ],
       "yellow-ring": [
@@ -138,6 +138,22 @@
     },
     "h": 20,
     "w": 9
+  },
+  "balloon-twins": {
+    "anchor": [
+      2,
+      24
+    ],
+    "frames": {
+      "default": [
+        {
+          "duration": 0,
+          "file": "balloon-twins.png"
+        }
+      ]
+    },
+    "h": 41,
+    "w": 37
   },
   "balloon-welcome": {
     "anchor": [

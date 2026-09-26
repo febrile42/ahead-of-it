@@ -2,8 +2,10 @@
 
 Ground floor
   G6.1  balloon-head     one balloon on a string, a logo on it, over somebody's head.
-                         One frame per brand (`red-dot`, `blue-plus`, `blue-plus2` …);
-                         two blues are *almost* the same
+                         One frame per brand (`blue-plus`, `green-tri` …), each its own
+                         colour
+        balloon-twins    the two that are *almost* the same: two red balloons touching,
+                         one wedge mirrored, strings down to two neighbouring pit desks
         balloons-ceiling without: the ones that got away, bunched against the ceiling
                          (`drift`, 2 frames)
         portfolio-board  built: a small PORTFOLIO board on the wall, the handful of
@@ -30,20 +32,27 @@ from .poses import _place, _standing_right
 
 # -- G6.1: SaaS balloons --------------------------------------------------------------------
 
-# (fill, shade, logo) per brand. Logos are 3 x 3 marks in `paper`: nobody's real logo
-# (D-014), just enough that every balloon is a *different* product. `blue-plus` and
-# `blue-plus2` are the two that are almost the same: one colour, one mark, one pixel
-# apart.
+# (fill, shade, logo) per brand. Logos are marks in `paper`: nobody's real logo (D-014),
+# just enough that every balloon is a *different* product, each in its own colour.
+# DIA-74: the one exception is the pair that says "twice". `red-wedge` / `red-wedge2` are
+# the only red balloons in the building, same body, the same solid 5 x 5 wedge, one of
+# them mirrored: at 390px the eye finds the only matching colours in the room, then the flip.
+# (The first cut was two blues one 3 x 3 pixel apart, over the back row, beside a cyan;
+# the picture review couldn't find them.)
 BRANDS = {
-    "red-dot": ("badge-red", "shirt-3-dark", [".#.", "###", ".#."]),
+    "red-wedge": ("badge-red", "shirt-3-dark",
+                  ["#....", "###..", "#####", "###..", "#...."]),
+    "red-wedge2": ("badge-red", "shirt-3-dark",
+                   ["....#", "..###", "#####", "..###", "....#"]),
     "blue-plus": ("shirt-1", "shirt-1-dark", ["#.#", ".#.", "#.#"]),
-    "blue-plus2": ("shirt-1", "shirt-1-dark", ["#.#", ".#.", "#.."]),
     "green-tri": ("badge-green", "shirt-2-dark", ["...", ".#.", "###"]),
     "yellow-ring": ("sticky", "desk-wood", ["###", "#.#", "###"]),
     "orange-bar": ("desk-wood", "desk-wood-dark", ["...", "###", "..."]),
     "cyan-sq": ("glass", "glass-dark", ["##.", "##.", "..."]),
     "grey-check": ("badge-body", "chair-mid", ["..#", "#.#", ".#."]),
     "pink-dot": ("net", "shirt-3-dark", ["...", ".#.", "..."]),
+    "dkgreen-x": ("shirt-2-dark", "pants-1", ["#.#", "...", "#.#"]),
+    "slate-bars": ("pants-1", "outline", ["#.#", "#.#", "#.#"]),
 }
 BAL_W, BAL_H = 9, 20
 BAL_ANCHOR = (4, 20)            # the string's end, just over the head it belongs to
@@ -63,18 +72,26 @@ def _balloon(c: Canvas, x0: int, y0: int, brand: str, string: int = 0):
                 c.point(x0 + dx, y0 + dy, fill)
     for (dx, dy) in ((6, 4), (6, 5), (5, 6), (6, 3)):
         c.point(x0 + dx, y0 + dy, shade)
-    c.point(x0 + 2, y0 + 2, "paper")                     # the shine
+    big = len(logo) == 5                                 # the twins' 5 x 5 wedge
+    if not big:
+        c.point(x0 + 2, y0 + 2, "paper")                 # the shine (the wedge fills it)
+    lx, ly = (2, 1) if big else (3, 3)
     for dy, row in enumerate(logo):
         for dx, ch in enumerate(row):
             if ch == "#":
-                c.point(x0 + 3 + dx, y0 + 3 + dy, "paper")
+                c.point(x0 + lx + dx, y0 + ly + dy, "paper")
     for k in range(string):
         c.point(x0 + 4 + (1 if 3 <= k % 8 < 5 else 0), y0 + 10 + k, "outline")
+
+
+TWINS = ("red-wedge", "red-wedge2")
 
 
 def balloon_head() -> Sprite:
     frames = {}
     for brand in BRANDS:
+        if brand in TWINS:
+            continue
         c = Canvas(BAL_W, BAL_H)
         _balloon(c, 0, 0, brand, string=BAL_H - 10)
         frames[brand] = ([c], 0)
@@ -82,12 +99,37 @@ def balloon_head() -> Sprite:
     return Sprite(first, BAL_ANCHOR, anims=frames)
 
 
+# The pair is one sprite, not two heads' balloons: two desks apart on the iso diagonal the
+# reds read as two separate balloons, so they drift together to the same height between
+# the desks and touch, each string leaning back down to its own head. Anchor: the far
+# head's string end (tile (6, 4) in the layout); the near head is one pit desk on, +2
+# columns = (+32, +16) px.
+TWIN_HEAD = (32, 16)
+TWIN_TOP = -22                     # balloon tops over the far head's string end
+TWIN_X = (7, 16)                   # the two balloons' left edges, from the far head
+
+
+def twin_balloons() -> Sprite:
+    ax, ay = 2, 24                                          # the far head's string end
+    bx, by = ax + TWIN_HEAD[0], ay + TWIN_HEAD[1]
+    c = Canvas(bx + 3, by + 1)
+    for (x, head, brand, lift) in ((TWIN_X[0], (ax, ay), TWINS[0], 0),
+                                   (TWIN_X[1], (bx, by), TWINS[1], 1)):
+        x0, y0 = ax + x, ay + TWIN_TOP + lift
+        c.diag_line(x0 + 4, y0 + 10, head[0], head[1], "outline")
+        _balloon(c, x0, y0, brand, string=0)
+    return Sprite(c, (ax, ay))
+
+
 CEIL_W, CEIL_H = 44, 34
 CEIL_ANCHOR = (22, 34)
-# the ones that got away, bunched against the ceiling: (x, y, brand), back row first
+# the ones that got away, bunched against the ceiling: (x, y, brand), back row first.
+# Nine colours, none repeated and none red (DIA-74: red is the twins', and a pair in
+# here would muddy the pair over the desks). The pile says "too many"; the twins say
+# "twice".
 CEIL = [(2, 0, "cyan-sq"), (10, 1, "orange-bar"), (18, 0, "grey-check"),
-        (26, 1, "pink-dot"), (34, 0, "red-dot"),
-        (6, 6, "green-tri"), (14, 7, "blue-plus"), (22, 6, "blue-plus2"),
+        (26, 1, "pink-dot"), (34, 0, "slate-bars"),
+        (6, 6, "green-tri"), (14, 7, "blue-plus"), (22, 6, "dkgreen-x"),
         (30, 7, "yellow-ring")]
 
 
@@ -741,6 +783,7 @@ def build_all() -> dict:
     board = portfolio_board()
     return {
         "balloon-head": balloon_head(),
+        "balloon-twins": twin_balloons(),
         "balloons-ceiling": Sprite(ceil[0], CEIL_ANCHOR, anims={"drift": (ceil, 800)}),
         "portfolio-board": Sprite(board, (board.w // 2 - 6, board.h)),
         "robot": Sprite(rb["eat"][0], ROBOT_ANCHOR,

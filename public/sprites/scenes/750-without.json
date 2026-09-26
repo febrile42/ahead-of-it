@@ -1564,20 +1564,6 @@
         },
         {
           "sprite": "balloon-head",
-          "frame": "red-dot",
-          "x": 174,
-          "y": 111,
-          "depth": 11
-        },
-        {
-          "sprite": "balloon-head",
-          "frame": "green-tri",
-          "x": 206,
-          "y": 127,
-          "depth": 13
-        },
-        {
-          "sprite": "balloon-head",
           "frame": "yellow-ring",
           "x": 142,
           "y": 127,
@@ -1599,7 +1585,7 @@
         },
         {
           "sprite": "balloon-head",
-          "frame": "blue-plus2",
+          "frame": "green-tri",
           "x": 206,
           "y": 63,
           "depth": 5
@@ -1624,6 +1610,13 @@
           "x": 266,
           "y": 107,
           "depth": 10.6
+        },
+        {
+          "sprite": "balloon-twins",
+          "frame": "default",
+          "x": 174,
+          "y": 111,
+          "depth": 11
         }
       ],
       "hotspots": []
@@ -2362,20 +2355,6 @@
         },
         {
           "sprite": "balloon-head",
-          "frame": "red-dot",
-          "x": 141,
-          "y": 107,
-          "depth": 11
-        },
-        {
-          "sprite": "balloon-head",
-          "frame": "green-tri",
-          "x": 173,
-          "y": 123,
-          "depth": 13
-        },
-        {
-          "sprite": "balloon-head",
           "frame": "yellow-ring",
           "x": 109,
           "y": 123,
@@ -2397,10 +2376,17 @@
         },
         {
           "sprite": "balloon-head",
-          "frame": "blue-plus2",
+          "frame": "green-tri",
           "x": 173,
           "y": 59,
           "depth": 5
+        },
+        {
+          "sprite": "balloon-twins",
+          "frame": "default",
+          "x": 141,
+          "y": 107,
+          "depth": 11
         }
       ],
       "hotspots": [
@@ -3310,13 +3296,6 @@
         },
         {
           "sprite": "balloon-head",
-          "frame": "red-dot",
-          "x": 174,
-          "y": 54,
-          "depth": 11
-        },
-        {
-          "sprite": "balloon-head",
           "frame": "yellow-ring",
           "x": 142,
           "y": 70,
@@ -3328,6 +3307,13 @@
           "x": 178,
           "y": 86,
           "depth": 15
+        },
+        {
+          "sprite": "balloon-twins",
+          "frame": "default",
+          "x": 174,
+          "y": 54,
+          "depth": 11
         }
       ],
       "hotspots": [
@@ -4352,20 +4338,6 @@
         },
         {
           "sprite": "balloon-head",
-          "frame": "red-dot",
-          "x": 51,
-          "y": 21,
-          "depth": 11
-        },
-        {
-          "sprite": "balloon-head",
-          "frame": "green-tri",
-          "x": 83,
-          "y": 37,
-          "depth": 13
-        },
-        {
-          "sprite": "balloon-head",
           "frame": "yellow-ring",
           "x": 19,
           "y": 37,
@@ -4398,6 +4370,13 @@
           "x": 143,
           "y": 17,
           "depth": 10.6
+        },
+        {
+          "sprite": "balloon-twins",
+          "frame": "default",
+          "x": 51,
+          "y": 21,
+          "depth": 11
         }
       ],
       "hotspots": [
@@ -5220,20 +5199,6 @@
         },
         {
           "sprite": "balloon-head",
-          "frame": "red-dot",
-          "x": 59,
-          "y": 102,
-          "depth": 11
-        },
-        {
-          "sprite": "balloon-head",
-          "frame": "green-tri",
-          "x": 91,
-          "y": 118,
-          "depth": 13
-        },
-        {
-          "sprite": "balloon-head",
           "frame": "yellow-ring",
           "x": 27,
           "y": 118,
@@ -5255,7 +5220,7 @@
         },
         {
           "sprite": "balloon-head",
-          "frame": "blue-plus2",
+          "frame": "green-tri",
           "x": 91,
           "y": 54,
           "depth": 5
@@ -5273,6 +5238,13 @@
           "x": 151,
           "y": 98,
           "depth": 10.6
+        },
+        {
+          "sprite": "balloon-twins",
+          "frame": "default",
+          "x": 59,
+          "y": 102,
+          "depth": 11
         }
       ],
       "hotspots": [
@@ -5928,20 +5900,6 @@
         },
         {
           "sprite": "balloon-head",
-          "frame": "red-dot",
-          "x": 6,
-          "y": 86,
-          "depth": 11
-        },
-        {
-          "sprite": "balloon-head",
-          "frame": "green-tri",
-          "x": 38,
-          "y": 102,
-          "depth": 13
-        },
-        {
-          "sprite": "balloon-head",
           "frame": "orange-bar",
           "x": 10,
           "y": 118,
@@ -5956,7 +5914,7 @@
         },
         {
           "sprite": "balloon-head",
-          "frame": "blue-plus2",
+          "frame": "green-tri",
           "x": 38,
           "y": 38,
           "depth": 5
@@ -5974,6 +5932,13 @@
           "x": 98,
           "y": 82,
           "depth": 10.6
+        },
+        {
+          "sprite": "balloon-twins",
+          "frame": "default",
+          "x": 6,
+          "y": 86,
+          "depth": 11
         }
       ],
       "hotspots": [
@@ -6822,20 +6787,6 @@
         },
         {
           "sprite": "balloon-head",
-          "frame": "red-dot",
-          "x": 6,
-          "y": 29,
-          "depth": 11
-        },
-        {
-          "sprite": "balloon-head",
-          "frame": "green-tri",
-          "x": 38,
-          "y": 45,
-          "depth": 13
-        },
-        {
-          "sprite": "balloon-head",
           "frame": "orange-bar",
           "x": 10,
           "y": 61,
@@ -6861,6 +6812,13 @@
           "x": 98,
           "y": 25,
           "depth": 10.6
+        },
+        {
+          "sprite": "balloon-twins",
+          "frame": "default",
+          "x": 6,
+          "y": 29,
+          "depth": 11
         }
       ],
       "hotspots": [
