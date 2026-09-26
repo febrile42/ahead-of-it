@@ -113,12 +113,84 @@ jobs:
         run: npm run build
 
       - name: Upload version with staging alias (does not touch production)
+        id: upload
         uses: cloudflare/wrangler-action@v4.0.0
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           wranglerVersion: "4.138.0"
           command: versions upload --preview-alias staging
+
+      # DIA-105 review: wrangler-action (as of v4.1.3) does not expose the
+      # alias host as a dedicated output for `versions upload` — its
+      # `deployment-url` output is wrangler's preview_url, which is the
+      # per-version random-hash URL, not the stable "staging" alias; the
+      # action's own `deployment-alias-url` output is Pages-only. So the
+      # alias host is read from wrangler's own stdout banner ("Version
+      # Preview Alias URL: ...", printed since wrangler 3.78), captured in
+      # step `upload`'s command-output. `deployment-alias-url` is still
+      # checked first in case a future action version adds Workers support
+      # for it. The composed staging-${WORKER_NAME}.${WORKERS_DEV_SUBDOMAIN}
+      # form (same shape deploy-production falls back to) is used only if
+      # both of those come back empty, and this step fails only then and
+      # only if WORKERS_DEV_SUBDOMAIN is also unset.
+      - name: Resolve staging alias URL
+        env:
+          DEPLOYMENT_ALIAS_URL: ${{ steps.upload.outputs.deployment-alias-url }}
+          COMMAND_OUTPUT: ${{ steps.upload.outputs.command-output }}
+          WORKERS_DEV_SUBDOMAIN: ${{ vars.WORKERS_DEV_SUBDOMAIN }}
+        run: |
+          if [ -n "$DEPLOYMENT_ALIAS_URL" ]; then
+            echo "STAGING_URL=$DEPLOYMENT_ALIAS_URL" >> "$GITHUB_ENV"
+            echo "Resolved staging URL from wrangler-action's deployment-alias-url output: $DEPLOYMENT_ALIAS_URL"
+            exit 0
+          fi
+          PARSED=$(printf '%s' "$COMMAND_OUTPUT" | grep -oE 'Version Preview Alias URL: https?://[a-zA-Z0-9./-]+' | sed 's/^Version Preview Alias URL: //' | tail -1)
+          if [ -n "$PARSED" ]; then
+            echo "STAGING_URL=$PARSED" >> "$GITHUB_ENV"
+            echo "Resolved staging URL by parsing wrangler's command output: $PARSED"
+            exit 0
+          fi
+          echo "::warning::Could not read a staging alias URL from wrangler-action's outputs; falling back to wrangler.jsonc name + WORKERS_DEV_SUBDOMAIN."
+          if [ -z "$WORKERS_DEV_SUBDOMAIN" ]; then
+            echo "::error::No alias URL from wrangler, and the WORKERS_DEV_SUBDOMAIN repo variable is unset. Add it in GitHub repo Settings > Secrets and variables > Actions > Variables — the Cloudflare account's workers.dev subdomain (e.g. joshua-gister) — so this job can compose the staging host as a fallback." >&2
+            exit 1
+          fi
+          WORKER_NAME=$(node scripts/print-worker-name.mjs)
+          STAGING_URL="https://staging-${WORKER_NAME}.${WORKERS_DEV_SUBDOMAIN}.workers.dev"
+          echo "STAGING_URL=$STAGING_URL" >> "$GITHUB_ENV"
+          echo "Composed staging URL from wrangler.jsonc name '$WORKER_NAME' + WORKERS_DEV_SUBDOMAIN: $STAGING_URL"
+
+      # DIA-103: an upload that succeeds is not proof staging serves it —
+      # only dist/version.json's sha is. Polls for ~2 minutes: `versions
+      # upload` returns before the new version is necessarily live behind
+      # the alias.
+      - name: Verify staging serves this commit (version.json)
+        run: |
+          echo "Polling $STAGING_URL/version.json for sha $GITHUB_SHA ..."
+          seen_sha=""
+          for i in $(seq 1 24); do
+            body=$(curl -s --max-time 10 "$STAGING_URL/version.json" || true)
+            seen_sha=$(echo "$body" | node -e '
+              let d = "";
+              process.stdin.on("data", (c) => (d += c));
+              process.stdin.on("end", () => {
+                try {
+                  process.stdout.write(JSON.parse(d).sha || "");
+                } catch {
+                  process.stdout.write("");
+                }
+              });
+            ')
+            if [ "$seen_sha" = "$GITHUB_SHA" ]; then
+              echo "Staging is serving $seen_sha — matches this push."
+              exit 0
+            fi
+            echo "Attempt $i/24: staging serves '${seen_sha:-<none>}', want $GITHUB_SHA. Retrying in 5s..."
+            sleep 5
+          done
+          echo "::error::Staging never served this push's commit ($GITHUB_SHA) within ~2 minutes. Last seen sha: '${seen_sha:-<none>}' at $STAGING_URL/version.json." >&2
+          exit 1
 
   # ── main → production ────────────────────────────────────────────────────
   deploy-production:
