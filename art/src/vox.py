@@ -225,7 +225,8 @@ class Sprite:
         self.canvas = canvas
         self.anchor = tuple(anchor)
         self.points = dict(points or {})
-        # optional animations: {key: ([Canvas, ...], ms_per_frame)}, every frame the
+        # optional animations: {key: ([Canvas, ...], ms_per_frame | [ms, ...] per file)},
+        # every frame the
         # same size as `canvas` and sharing its anchor (PH1-07: router blink etc.)
         self.anims = dict(anims or {})
 

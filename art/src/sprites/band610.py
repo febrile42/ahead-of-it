@@ -10,7 +10,8 @@ Ground floor
         infosec          built: someone in the doorway, a binder under the arm, the
                          hand out to the auditor's
         bubble-deal      a thought bubble with a `$` over a pit worker. `fade`
-                         (without: gold to grey, 3 frames, the still is grey) / `gold`
+                         (without: grey, a brief gold that drains to grey, 4 frames,
+                         the still is grey) / `gold`
 """
 from __future__ import annotations
 
@@ -255,13 +256,19 @@ def _bubble(ink: str, ring: str, fill: str) -> Canvas:
 
 
 def bubble_frames() -> dict:
-    """Without: the deal thought going grey — gold (frame 1), fading (2), grey (0, the
-    still). The cloud greys with it, so the change is value as well as hue and reads
-    for a colour-blind visitor. Built: gold, on white."""
+    """Without: the deal thought going grey — grey (0, the still, held long), then a
+    brief gold (1) that tarnishes (2) and drains (3) back to grey. It dwells on dead
+    and only now and then remembers hope, so it reads as a fade, not a blinker (DIA-110).
+    The cloud greys with it, so the change is value as well as hue and reads for a
+    colour-blind visitor. Built: gold, on white."""
     gold = _bubble("sticky", "desk-wood-dark", "paper")
-    going = _bubble("wall-trim", "badge-body", "paper")
+    tarnish = _bubble("desk-wood", "desk-wood-dark", "paper")
+    going = _bubble("wall-trim", "badge-body", "wall")
     grey = _bubble("badge-body", "wall-shadow", "wall-shadow")
-    return {"fade": [grey, gold, going], "gold": [gold]}
+    return {"fade": [grey, gold, tarnish, going], "gold": [gold]}
+
+
+BUBBLE_MS = [3600, 500, 350, 350]      # grey hold, gold, tarnish, drain
 
 
 # -- G3.3: the org chart with one box ----------------------------------------------------
@@ -719,7 +726,7 @@ def build_all() -> dict:
                           anims={"wait": (aud["wait"], AUD_MS), "shake": (aud["shake"], 0)}),
         "infosec": Sprite(infosec_frame(), (15, 24)),
         "bubble-deal": Sprite(bub["fade"][0], BUBBLE_ANCHOR,
-                              anims={"fade": (bub["fade"], 700), "gold": (bub["gold"], 0)}),
+                              anims={"fade": (bub["fade"], BUBBLE_MS), "gold": (bub["gold"], 0)}),
         "cabinet-router": _union(router=make_anim(lambda iso, c, i: _cabinet(iso, c, i, True), 2,
                                                   ms=900),
                                  bare=make(lambda iso, c: _cabinet(iso, c, 0, False))),

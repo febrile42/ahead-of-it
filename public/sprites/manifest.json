@@ -169,11 +169,11 @@
       ],
       "deflate": [
         {
-          "duration": 900,
+          "duration": 1100,
           "file": "balloon-welcome-deflate-0.png"
         },
         {
-          "duration": 900,
+          "duration": 3400,
           "file": "balloon-welcome-deflate-1.png"
         }
       ]
@@ -345,16 +345,20 @@
       ],
       "fade": [
         {
-          "duration": 700,
+          "duration": 3600,
           "file": "bubble-deal-fade-0.png"
         },
         {
-          "duration": 700,
+          "duration": 500,
           "file": "bubble-deal-fade-1.png"
         },
         {
-          "duration": 700,
+          "duration": 350,
           "file": "bubble-deal-fade-2.png"
+        },
+        {
+          "duration": 350,
+          "file": "bubble-deal-fade-3.png"
         }
       ],
       "gold": [
@@ -585,7 +589,7 @@
       ],
       "flip": [
         {
-          "duration": 260,
+          "duration": 1000,
           "file": "calendar-flip-flip-0.png"
         },
         {

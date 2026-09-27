@@ -242,6 +242,8 @@ def coat_frame() -> Canvas:
 
 BALLOON_W, BALLOON_H = 21, 13
 BALLOON_ANCHOR = (1, 12)           # the desk corner the string is tied to, on its left
+BALLOON_MS = [1100, 3400]          # a short sag, a long lie flat: settling, not breathing
+CAL_MS = [1000, 260, 260]          # a beat on the page, then a tear: punctuate, not strobe
 
 
 def balloon_frames() -> list[Canvas]:
@@ -523,7 +525,7 @@ def build_all() -> dict:
     return {
         "desk-bare": bare,
         "desk-laptop": lap,
-        "calendar-flip": Sprite(cal[0], (9, 30), anims={"flip": (cal, 260)}),
+        "calendar-flip": Sprite(cal[0], (9, 30), anims={"flip": (cal, CAL_MS)}),
         "calendar-one": Sprite(one, (9, 30)),
         "inset-door-badge": red,
         "inset-door-propped": prop,

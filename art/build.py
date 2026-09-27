@@ -93,6 +93,9 @@ def save_entry(name, frames, w, h, anchor, points=None, durations=None):
             assert (cv.w, cv.h) == (w, h), (name, key, cv.w, cv.h, w, h)
             save_png(cv, os.path.join(SPRITES_DIR, fname))
             ms = (durations or {}).get(key, WALK_FRAME_MS if key in WALK_KEYS else 0)
+            if isinstance(ms, (list, tuple)):          # per-file: a hold, then a beat
+                assert len(ms) == len(canvases), (name, key, ms)
+                ms = ms[i]
             files.append({"file": fname, "duration": ms})
         fm[key] = files
     entry = {"w": w, "h": h, "anchor": list(anchor), "frames": fm}
@@ -246,7 +249,7 @@ def build_worker(manifest, registry):
     bf = {"default": bal[:1], "deflate": bal}
     manifest["balloon-welcome"] = save_entry("balloon-welcome", bf, band490.BALLOON_W,
                                              band490.BALLOON_H, band490.BALLOON_ANCHOR,
-                                             durations={"deflate": 900})
+                                             durations={"deflate": band490.BALLOON_MS})
     registry["balloon-welcome"] = Frames(bf, band490.BALLOON_ANCHOR)
     bdg = {}
     for look in looks:
