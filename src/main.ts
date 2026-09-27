@@ -49,8 +49,20 @@ let canvas = document.querySelector<HTMLCanvasElement>('#scene-canvas');
 const hotspotsLayer = document.querySelector<HTMLDivElement>('#hotspots-layer');
 const panelRoot = document.querySelector<HTMLDivElement>('#panel-root');
 const checklistRoot = document.querySelector<HTMLDivElement>('#checklist-root');
+const punchListButton = document.querySelector<HTMLButtonElement>('#punch-list-button');
 
-if (sliderRoot && toggleRoot && viewsRow && sceneWrap && stepper && canvas && hotspotsLayer && panelRoot && checklistRoot) {
+if (
+  sliderRoot &&
+  toggleRoot &&
+  viewsRow &&
+  sceneWrap &&
+  stepper &&
+  canvas &&
+  hotspotsLayer &&
+  panelRoot &&
+  checklistRoot &&
+  punchListButton
+) {
   // D-043: R-10's read side, pulled forward so a Lighthouse navigation can
   // land on any band (not just 80) — `?n=<headcount>&it=<none|built>`.
   // Nothing writes the URL; a missing/invalid value falls back per-param.
@@ -161,7 +173,14 @@ if (sliderRoot && toggleRoot && viewsRow && sceneWrap && stepper && canvas && ho
   const panel = createPanel();
   panelRoot.append(panel.root);
 
-  const checklist = createChecklist();
+  // DIA-131: the punch-list button's label span lives inside its own
+  // static-shell markup (index.html) — checklist.ts writes `Punch list (n)`
+  // into it on every render(), from the same count the sheet lists.
+  const punchListLabel = punchListButton.querySelector<HTMLSpanElement>('.punch-list-button__label');
+  if (!punchListLabel) {
+    throw new Error('index.html static shell is missing the punch list button label');
+  }
+  const checklist = createChecklist(punchListButton, punchListLabel);
   checklistRoot.append(checklist.root);
 
   // The "scroll for more" hint (SCENE-FORMAT: a view wider than the

@@ -318,6 +318,52 @@ h1 {
   outline-offset: 2px;
 }
 
+/* --- View-nav row (DIA-131): the punch-list button's own line, below the
+   room tabs and above the canvas — deliberately not sharing the tabs'
+   flex row (see index.html's comment: that row is already tight at the
+   750 band, and a second flex item there starved its scrollable width). */
+.view-nav {
+  display: flex;
+  padding: 0 1rem;
+  height: calc(44px + 0.5rem);
+}
+
+.punch-list-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  align-self: center;
+  min-width: 150px;
+  min-height: 44px;
+  max-height: 44px;
+  padding: 0.3rem 0.7rem;
+  border: 1px solid var(--ink);
+  border-radius: 999px;
+  background: #fff;
+  font: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.punch-list-button[aria-expanded='true'] {
+  background: var(--ink);
+  color: #fff;
+}
+
+.punch-list-button:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.punch-list-button__icon {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+}
+
 /* --- Scene (3a/3b, replaced by PH1-09 per D-035) --- */
 .scene-wrap {
   position: relative;
@@ -552,7 +598,14 @@ h1 {
   box-shadow: 0 -4px 16px var(--shadow);
 }
 
-.panel__close {
+/* DIA-135: `.checklist__close` shares this exact rule block (same look,
+   same 44px hit area, same "Close" glyph) rather than the checklist's close
+   button taking the `.panel__close` class itself — the two buttons close
+   two different, unrelated surfaces (the gag panel vs. the punch-list
+   sheet), and pre-existing specs locate `.panel__close` unscoped assuming
+   exactly one match on the page. */
+.panel__close,
+.checklist__close {
   min-width: 44px;
   min-height: 44px;
   border: 1px solid var(--ink);
@@ -631,9 +684,85 @@ h1 {
   }
 }
 
-/* --- Checklist (3f) --- */
+/* --- Checklist (3f, reworked DIA-131) --- */
 .checklist {
   padding: 1rem;
+}
+
+.checklist > .contact-line {
+  margin-top: 0;
+}
+
+.checklist__panel {
+  padding: 1rem;
+}
+
+/* D-048/R-24: visually hidden until opened, but never display:none and
+   never a closed <details> — a clip pattern (like .sr-only above), so the
+   panel stays in the DOM and the accessibility tree, just not sighted.
+   Deliberately no explicit width/height/overflow:hidden here (unlike
+   .sr-only): those would size this box to a fixed 1x1px, which — because
+   it has no positioned ancestor of its own, so its containing block is
+   the initial containing block — collapses the *whole page's* scrollable
+   height down to exactly the viewport once the (now off-flow) 26-row list
+   no longer contributes any scrollable overflow. A real Chromium run
+   showed a scrollbar disappearing that way changes hit-testing on an open
+   gag panel elsewhere on the page (DIA-131 review). `clip` alone hides
+   every pixel regardless of the box's real (large) size, so the list's
+   natural height still keeps contributing scrollable overflow same as it
+   did before this box was ever collapsed. */
+.checklist__panel--collapsed {
+  position: absolute;
+  clip: rect(0, 0, 0, 0);
+}
+
+.checklist__panel--open {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  max-height: 70vh;
+  overflow-y: auto;
+  background: #fff;
+  border-top: 2px solid var(--ink);
+  border-radius: 12px 12px 0 0;
+  padding: 1rem;
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.2);
+  z-index: 20;
+}
+
+@media (min-width: 768px) {
+  .checklist__panel--open {
+    left: auto;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 360px;
+    max-height: none;
+    border-top: none;
+    border-left: 2px solid var(--ink);
+    border-radius: 0;
+  }
+}
+
+/* DIA-135: the sheet's own header row — title left, close button right.
+   The close button (.checklist__close) shares .panel__close's exact rule
+   block above (same 44px hit area, same "Close" glyph) so the tap panel
+   and the punch-list sheet close the same way, without the two buttons
+   sharing a class name (see that rule's own comment for why). Flex items
+   ignore `float`, so the shared rule's `float: right` (needed in
+   panel.ts's non-flex layout) is a no-op here, not a conflict. */
+.checklist__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.checklist__header-title {
+  margin: 0;
+  font-size: 1rem;
 }
 
 .checklist__list {
@@ -645,6 +774,33 @@ h1 {
 .checklist__item {
   border-bottom: 1px solid var(--border-soft);
   padding: 0.75rem 0;
+}
+
+/* R-04-style without-state thumbnail — same frame as .panel__thumb (the
+   gag panel's own), decorative (aria-hidden), hidden on a 404 rather than
+   showing a broken-image icon (src/ui/checklist.ts's img.onerror). */
+.checklist__thumb {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 48px;
+  border: 2px dashed var(--ink);
+  margin: 0 0 0.4rem;
+  overflow: hidden;
+}
+
+.checklist__thumb[hidden] {
+  display: none;
+}
+
+.checklist__thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
 }
 
 .checklist__without,
@@ -677,9 +833,27 @@ h1 {
   .toggle,
   .scene-wrap,
   .scene-views,
+  .view-nav,
   .scene-stepper,
   .panel,
+  .checklist__header,
   .checklist__download {
     display: none !important;
+  }
+
+  /* Print (Cmd-P) always prints the full list, open or closed (D-048 item
+     5) — undo the collapsed clip and the opened sheet's fixed positioning
+     regardless of on-screen state. */
+  .checklist__panel--collapsed {
+    position: static;
+    clip: auto;
+  }
+
+  .checklist__panel--open {
+    position: static;
+    max-height: none;
+    overflow: visible;
+    border: 0;
+    box-shadow: none;
   }
 }

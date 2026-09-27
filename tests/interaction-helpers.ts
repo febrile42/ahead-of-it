@@ -501,6 +501,54 @@ export async function panelTitle(page: Page): Promise<string> {
 }
 
 // ---------------------------------------------------------------------------
+// punch list (DIA-131): the `Punch list (n)` disclosure button and its sheet
+// ---------------------------------------------------------------------------
+
+/** The nav button's own `aria-expanded`, not the sheet's clip class — the
+ * two are kept in sync by src/ui/checklist.ts's setOpen, so either is a
+ * valid oracle, but the button is the one a visitor's assistive tech
+ * actually announces. */
+export async function punchListIsOpen(page: Page): Promise<boolean> {
+  return (await page.locator('#punch-list-button').getAttribute('aria-expanded')) === 'true';
+}
+
+/** Opens the sheet via its one entry point if not already open.
+ *
+ * DIA-135 QA nit: `#checklist-panel` is never `display:none` even while
+ * collapsed (D-048/R-24 keeps it in the a11y tree — see the
+ * `.checklist__panel--collapsed` clip pattern in style.css), so
+ * Playwright's own `state: 'visible'` wait resolves against the collapsed
+ * panel too and can't tell the two states apart. `aria-expanded` (the same
+ * oracle `punchListIsOpen` reads) is the real signal. */
+export async function openPunchList(page: Page): Promise<void> {
+  if (await punchListIsOpen(page)) return;
+  await page.locator('#punch-list-button').click();
+  await page.locator("#punch-list-button[aria-expanded='true']").waitFor({ state: 'attached' });
+}
+
+/** Closes the sheet via its own header close button (DIA-135) if open.
+ *
+ * Before DIA-135, this re-clicked `trigger` to toggle it closed. DIA-135
+ * deliberately stopped keeping `trigger` painted above the open sheet (that
+ * was DIA-132's bug: it buried the sheet's own Download button on a phone),
+ * so on a phone `trigger` sits *under* the open sheet and is not reliably
+ * clickable from it any more — the header's own close button is now the
+ * one close path guaranteed reachable at every viewport. */
+export async function closePunchList(page: Page): Promise<void> {
+  if (!(await punchListIsOpen(page))) return;
+  await page.locator('.checklist__close').click();
+}
+
+/** The `n` the button's own label carries — parsed from its rendered text
+ * rather than duplicating checklist.ts's count, so a spec fails if the two
+ * ever drift apart. */
+export async function punchListButtonCount(page: Page): Promise<number> {
+  const text = (await page.locator('.punch-list-button__label').textContent()) ?? '';
+  const match = text.match(/\((\d+)\)/);
+  return match ? Number(match[1]) : NaN;
+}
+
+// ---------------------------------------------------------------------------
 // focus: the oracle nothing in the existing suite checks after a re-render
 // ---------------------------------------------------------------------------
 

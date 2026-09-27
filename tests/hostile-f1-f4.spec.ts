@@ -351,6 +351,9 @@ test.describe('F4 — below-the-fold and off-the-happy-path surfaces', () => {
         w.__printCalls += 1;
       };
     });
+    // DIA-131: Download lives inside the punch-list sheet, visually hidden
+    // (not display:none — R-24) until opened from its one entry point.
+    await H.openPunchList(page);
     const button = page.locator('.checklist__download');
     await expect(button).toBeVisible();
     await button.click();
@@ -360,7 +363,7 @@ test.describe('F4 — below-the-fold and off-the-happy-path surfaces', () => {
     // (D-019) — so the print media must still contain the checklist body.
     await page.emulateMedia({ media: 'print' });
     await expect(page.locator('.checklist__item').first()).toBeVisible();
-    await expect(page.locator('.checklist .contact-line')).toBeVisible(); // R-12
+    await expect(page.locator('.checklist > .contact-line')).toBeVisible(); // R-12
     await page.emulateMedia({ media: 'screen' });
   });
 
@@ -374,7 +377,10 @@ test.describe('F4 — below-the-fold and off-the-happy-path surfaces', () => {
       route.fulfill({ contentType: 'text/html', body: '<html><body>stub</body></html>' })
     );
     await H.openApp(page);
-    const links = page.locator('.checklist .contact-line a');
+    // DIA-131: `.checklist` now also wraps the sheet's own foot contact
+    // line, always in the DOM (R-24) — scope to the persistent one that's
+    // visible under the scene without opening anything (D-048 item 1).
+    const links = page.locator('.checklist > .contact-line a');
     await expect(links).toHaveCount(2);
 
     const linkedin = links.first();
@@ -432,8 +438,10 @@ test.describe('F4 — below-the-fold and off-the-happy-path surfaces', () => {
     // R-14: the accessible equivalent is generated from content.json, not
     // from the scene file, so it must be unaffected.
     expect(await page.locator('.checklist__item').count()).toBeGreaterThan(0);
-    await expect(page.locator('.checklist__download')).toBeVisible();
     await page.screenshot({ path: 'tests/screenshots/f4-missing-scene-band-360.png' });
+    // DIA-131: Download lives inside the punch-list sheet now (D-048).
+    await H.openPunchList(page);
+    await expect(page.locator('.checklist__download')).toBeVisible();
 
     // The failure is reported, not swallowed (src/main.ts logs it), and it
     // is the only error logged — nothing else broke on the way down.
@@ -466,7 +474,7 @@ test.describe('F4 — below-the-fold and off-the-happy-path surfaces', () => {
     expect(await H.currentBand(page)).toBe('220');
     // R-14: the checklist grows with the band even with no picture at all.
     expect(await page.locator('.checklist__item').count()).toBeGreaterThan(atBand80);
-    await expect(page.locator('.checklist .contact-line a')).toHaveCount(2); // R-12
+    await expect(page.locator('.checklist > .contact-line a')).toHaveCount(2); // R-12
     await page.screenshot({ path: 'tests/screenshots/f4-total-outage-band-220.png' });
   });
 });
