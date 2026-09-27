@@ -1,20 +1,26 @@
 /* PH1-04: phone-first (R-20), designed at 390px before the >=768px side
    panel kicks in. No UI framework (D-009) — plain CSS, one file. */
 
-/* D-046/PH2-05: every colour lives behind a custom property so
-   `@media (prefers-color-scheme: dark)` below can retheme the chrome by
-   changing values only, never selectors. Three groups, by what they sit on:
+/* D-046/PH2-05, point 3 amended by D-047 (DIA-151): every colour lives
+   behind a custom property so `@media (prefers-color-scheme: dark)` below
+   can retheme the chrome by changing values only, never selectors. Three
+   groups, by what they sit on:
    - chrome (`--ink`, `--ink-invert`, `--page-bg`, `--surface`, `--border`,
      `--border-soft`, `--text-muted`, `--shadow`, `--accent`): retheme in
      dark mode.
    - the scene overlay (`--scene-mat`, `--scene-ink`, `--scene-ink-invert`,
-     `--scene-ink-rgb`, `--scene-accent`): never retheme. Hotspots and their
-     captions sit on the canvas, which stays on a light mat in both schemes
-     (D-046 point 3) — nothing painted over it may change with the OS scheme.
-     `--scene-mat-dark` (DIA-149) is a separate token, not a retheme of
-     `--scene-mat` — it only replaces what `.scene-wrap`'s own background
-     paints in the dark block below, so the mat reads as a card against the
-     dark page. `--scene-mat` itself keeps its `:root` value unconditionally.
+     `--scene-ink-rgb`, `--scene-accent`): never retheme. `--scene-mat`
+     keeps its `:root` value unconditionally — it is not what paints
+     `.scene-wrap`'s own background. That background is `--scene-mat-dark`
+     (DIA-149), which D-047 now points at `var(--surface)`: a dark card,
+     not a light one, per the owner's request that dark mode leave no
+     white/near-white area. The rooms' opaque floors and fills carry the
+     silhouette regardless, and hotspots/captions painted over the canvas
+     still use the never-rethemed scene tokens above, so their own colours
+     don't shift with the OS scheme. D-047 does add one exception: `.hotspot`
+     gets a dark-only light halo (see the dark block) because its dashed
+     border, drawn in `--scene-ink-rgb`, would otherwise vanish against the
+     now-dark mat.
    - the toggle (`--toggle-fill`, `--toggle-fill-pressed`, `--toggle-text`,
      `--toggle-text-pressed`): never retheme (D-046 point 4, "the toggle
      keeps its fills"). Its border is chrome (`--ink`) and does retheme, so
@@ -60,13 +66,12 @@
     --text-muted: #b9b0a3;
     --shadow: rgba(0, 0, 0, 0.6);
     --accent: #8ab4f8;
-    /* DIA-149: warm off-white for `.scene-wrap`'s own background only
-       (below), so the mat reads as a card against the dark page instead of
-       a `#fff` hole. Same literal value as `--ink` above by coincidence of
-       both being "the warm off-white of this dark scheme" — declared as its
-       own token, not `var(--ink)`, so a future chrome-only change to `--ink`
-       can't silently retint the mat. */
-    --scene-mat-dark: #f2ece2;
+    /* D-047 (DIA-151, amends D-046 point 3): a dark surface for
+       `.scene-wrap`'s own background, not DIA-149's off-white `#f2ece2` —
+       the owner flagged that card as still reading as a big white box.
+       `var(--surface)` so this always tracks the chrome surface colour
+       instead of duplicating its literal value. */
+    --scene-mat-dark: var(--surface);
   }
 
   /* Two selectors here, both absent in light so light stays pixel-identical
@@ -77,22 +82,36 @@
     color: var(--toggle-text);
   }
 
-  /* D-046 point 3: a light mat behind the canvas, so a sprite's
-     transparent edge pixels never show the dark page. Dark only: in light
-     the page is already the mat colour, and an opaque background on this
-     overflow scroller changes Chromium's compositing enough to shift
-     anti-aliased pixels on the neighbouring pills.
-     DIA-149: off-white + rounded corners so the mat reads as a deliberate
-     card, not a hole cut in the page. `overflow-y: hidden` is dark-only and
-     y-axis-only so WebKit's corner-radius clip (unreliable on the painted
-     canvas layer under `overflow-x: auto`) can't leak square corners without
-     touching the horizontal pan this box depends on (D-042a). No padding/
-     margin/width change — those would shift the close-up's 2.0 css-px-per-
-     art-px scale, which must stay identical to light. */
+  /* D-046 point 3 (amended by D-047, DIA-151): a dark surface behind the
+     canvas in dark mode, still read as a lifted card via the rounded
+     corners, not a light mat. The rooms' opaque floors and fills carry the
+     silhouette; a sprite's transparent edge pixels lose their ink outline
+     against the dark surface here, and D-047 accepts that. Dark only: in
+     light the page is already the mat colour, and an opaque background on
+     this overflow scroller changes Chromium's compositing enough to shift
+     anti-aliased pixels on the neighbouring pills. `overflow-y: hidden` is
+     dark-only and y-axis-only so WebKit's corner-radius clip (unreliable on
+     the painted canvas layer under `overflow-x: auto`) can't leak square
+     corners without touching the horizontal pan this box depends on
+     (D-042a). No padding/margin/width change — those would shift the
+     close-up's 2.0 css-px-per-art-px scale, which must stay identical to
+     light. */
   .scene-wrap {
     background: var(--scene-mat-dark);
     border-radius: 12px;
     overflow-y: hidden;
+  }
+
+  /* D-047 (DIA-151): `.hotspot`'s dashed border is
+     `rgba(var(--scene-ink-rgb), .6)` — near-black — which now disappears
+     against the dark mat above. A light halo restores it there while still
+     reading on a room's beige floor. Excludes `.hotspot--zoom` (DIA-55's
+     chip has no border to rescue and none of this rule's problem).
+     `--scene-ink`, captions and the `--scene-accent` focus ring are
+     untouched: the focus ring alone is already >=3:1 against the new
+     #241f19 mat (measured ~3.46:1). */
+  .hotspot:not(.hotspot--zoom) {
+    box-shadow: 0 0 0 1px rgba(242, 236, 226, 0.55);
   }
 }
 
@@ -438,10 +457,9 @@ h1 {
 }
 
 .hotspot:focus-visible {
-  /* D-046: this ring is drawn over the canvas, which keeps its light mat
-     in both schemes — --scene-accent never retheme, unlike the chrome
-     buttons' --accent below, so the ring's contrast against the mat never
-     changes with the OS scheme. */
+  /* D-046: this ring is drawn over the canvas — --scene-accent never
+     retheme, unlike the chrome buttons' --accent below. D-047's dark mat
+     (#241f19) still gives it ~3.46:1, above the 3:1 floor. */
   outline: 3px solid var(--scene-accent);
   outline-offset: 2px;
 }

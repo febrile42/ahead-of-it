@@ -523,6 +523,12 @@ around it, that goes to the Art Director as a note against this decision. The fi
 not the sprite.
 *CEO signed off 2026-09-27 (DIA-120), including point 1: no in-page switch.*
 
+**D-047 · 2026-09-27 · Dark mode mat: a dark surface, not a light card (DIA-151).**
+Amends D-046 point 3. At the owner's request, the dark-mode mat is a dark surface
+(`--surface`, `#241f19`), not a light one. The rooms' beige floors and opaque fills carry the
+silhouette; any ink outline lost at a transparent edge is accepted. Still no filter, blend or
+opacity on the canvas or on sprites, and pixel-parity tests are unchanged.
+
 **D-048 · 2026-09-27 · The punch list is on demand for sighted visitors, and always there for
 assistive tech and print (DIA-125; approved plan revision `dfca5f40`).**
 The checklist renders under the scene in the same type as the nav chrome, with no frame and
