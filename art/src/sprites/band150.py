@@ -26,7 +26,7 @@ Built
 from __future__ import annotations
 
 from ..dsl import Canvas
-from ..vox import Iso, SwapIso, Sprite, make, make_anim
+from ..vox import Iso, SwapIso, Sprite, make, make_anim, make_keyed
 from .. import glyphs
 from . import desk as desk_mod
 from .band80 import _thick, _rows
@@ -295,11 +295,17 @@ def _fishing_line(iso: Iso, c: Canvas):
     return {"bait": (x - 2, y + 9)}
 
 
-def _fishing_shield(iso: Iso, c: Canvas):
+def _fishing_shield(iso: Iso, c: Canvas, key: str = "default"):
     """Built: the same line comes down and lands on a small shield over the monitor;
-    the hook is stopped on its rim, the envelope knocked askew, going nowhere."""
+    the hook is stopped on its rim, the envelope knocked askew, going nowhere.
+
+    PH2-03's band-crossing moment adds two states on the same canvas: `bare`, the shield
+    alone before the line arrives (the line itself is band 150's own `fishing-line`,
+    lowered in from above), and `strike`, the instant of the hit: the shield alone, its
+    face flashed white and a burst of ticks off its rim, with the lowered line resting on
+    it."""
     sx, sy = iso.pt(FISH_C, FISH_R, 25.0)      # shield centre, above the screen
-    x, y = _rod_and_line(iso, c, 32.0)
+    x, y = _rod_and_line(iso, c, 32.0) if key == "default" else (0, 0)
     rows = [
         "ooooooooo",
         "obbbbbbbo",
@@ -312,7 +318,18 @@ def _fishing_shield(iso: Iso, c: Canvas):
         "...obo...",
         "....o....",
     ]
-    _rows(c, rows, sx - 4, sy - 5, {"o": "outline", "b": "shirt-1", "w": "paper"})
+    flash = key == "strike"
+    _rows(c, rows, sx - 4, sy - 5, {"o": "outline", "b": "paper" if flash else "shirt-1",
+                                    "w": "shirt-1" if flash else "paper"})
+    if key == "bare":
+        return
+    if flash:
+        # the line itself is the moment's `fishing-line`, stopped on the rim: here only
+        # the shield's side of the hit, a burst of ticks fanning off the top corners
+        for dx, dy in ((-6, -6), (-7, -8), (-8, -5), (-9, -7), (6, -6), (7, -8), (8, -5),
+                       (9, -7), (-7, -2), (7, -2)):
+            c.point(sx + dx, sy + dy, "sticky")
+        return
     # the hook stopped on the rim, the envelope swung off to the side
     _hook(c, x, y - 9)
     _envelope(c, x + 4, y - 5, w=7, h=5)
@@ -542,7 +559,7 @@ def build_all() -> dict:
         "truck-c": make_anim(_truck_c, 2, key="drive", ms=TRUCK_MS),
         # built
         "laptop-shelf": make(_laptop_shelf),
-        "fishing-shield": make(_fishing_shield),
+        "fishing-shield": make_keyed(_fishing_shield, ("default", "bare", "strike")),
         # a button on the screen: anchored at its centre, placed on the desk's `net`
         # point (the middle of the screen)
         "card-report": Sprite(rep, (rep.w // 2, rep.h // 2)),

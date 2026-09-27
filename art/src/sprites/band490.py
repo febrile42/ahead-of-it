@@ -21,7 +21,7 @@ Built
 from __future__ import annotations
 
 from ..dsl import Canvas
-from ..vox import Iso, Sprite, make, make_anim
+from ..vox import Iso, Sprite, make, make_anim, make_keyed
 from .. import glyphs
 from . import desk as desk_mod
 from .band80 import _rows
@@ -55,7 +55,7 @@ LID = dict(r0=1.1, r1=1.6, h=7.0)
 GHOST_ON, GHOST_OFF, GHOST_GAP = 2, 2, "badge-red"
 
 
-def _laptop(iso: Iso, top: float):
+def _laptop(iso: Iso, top: float, on: bool = True):
     """Open, screen toward the chair. The lid is tall on purpose (DIA-75): at 390 px
     the lid is what says *laptop*, and its silhouette is what the without state traces."""
     lp, ld = LAPTOP, LID
@@ -63,7 +63,7 @@ def _laptop(iso: Iso, top: float):
             left="badge-body", right="chair-dark")
     lid = iso.box(lp["c0"], ld["r0"], top, lp["c1"], ld["r1"], top + ld["h"],
                   top="chair-dark", left="monitor-frame", right="outline")
-    iso.paint(lid, "L", ld["r1"], lambda cc, z: "monitor-screen"
+    iso.paint(lid, "L", ld["r1"], lambda cc, z: ("monitor-screen" if on else "outline")
               if lp["c0"] + 0.5 <= cc < lp["c1"] - 0.5 and top + 1.0 <= z < top + ld["h"] - 0.8
               else None)
 
@@ -102,7 +102,7 @@ def _absent_laptop(iso: Iso, c: Canvas, top: float):
         c.point(*p, "paper" if i % (GHOST_ON + GHOST_OFF) < GHOST_ON else GHOST_GAP)
 
 
-def _desk_bare(iso: Iso, c: Canvas, laptop=False):
+def _desk_bare(iso: Iso, c: Canvas, laptop=False, screen_on=True):
     d = desk_mod.DESK
     cal = _panel(iso)
     iso.floor_shadow(d["c0"], d["r0"] + 0.6, d["c1"], d["r1"], grow=1.0, grow_r=0.5)
@@ -115,7 +115,7 @@ def _desk_bare(iso: Iso, c: Canvas, laptop=False):
         _absent_laptop(iso, c, top)
     if laptop:
         # the laptop; a badge on its lanyard; a coffee
-        _laptop(iso, top)
+        _laptop(iso, top, screen_on)
         iso.box(1.0, 2.6, top, 2.8, 3.6, top + 0.3, top="paper", left="paper",
                 right="wall-shadow", outline="outline")          # the badge
         x0, y0 = iso.pt(1.0, 2.6, top + 0.3)
@@ -504,7 +504,9 @@ def badge_frames(look_name: str) -> dict:
 
 def build_all() -> dict:
     bare = make(lambda iso, c: _desk_bare(iso, c), size=96)
-    lap = make(lambda iso, c: _desk_bare(iso, c, laptop=True), size=96)
+    # PH2-03: `off`, the same desk with the laptop's screen dark until the new hire sits
+    lap = make_keyed(lambda iso, c, k: _desk_bare(iso, c, laptop=True, screen_on=k != "off"),
+                     ("default", "off"), size=96)
     cal = calendar_frames()
     one = calendar_one()
     red = make(lambda iso, c: _door_badge(iso, c, False))

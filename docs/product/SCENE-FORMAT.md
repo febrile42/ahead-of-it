@@ -270,3 +270,66 @@ integer-exact given `t`, so two painters at the same `t` paint the same pixels.
   entry's frame or position changed; stops when motion is off, the tab is hidden or the
   box is out of view, and resumes from the current `t` without replaying a backlog. A tick
   repaints the canvas only, never the DOM.
+
+## Band-crossing moment (PH2-03)
+
+Status: proposed by the Art Director on 2026-09-27 (DIA-101, step 2 of
+`docs/briefs/PH2-03-band-crossing.md`); needs the Web Engineer's sign-off in step 3 before
+anything plays it. When the moment plays (built only, rising, once per band per session,
+never on first load or `1,000+`, cut by any input, never under reduced motion) is the
+brief's rule, not the file's. The beats are `docs/content/MOMENTS.md` (D-045).
+
+**Additive and optional, like Motion.** A built file may carry one top-level `moment`; a
+painter that doesn't know it paints today's picture, and a file without it has no moment.
+Schema stays 2. Without files never carry one.
+
+```jsonc
+// <band>-built.json
+{ "schema": 2, "band": 610, "state": "built", "views": [ /* as ever */ ],
+  "moment": {
+    "gagId": "G4.1",          // the band's own gag whose Already line this plays
+    "view": "ground.3",       // always the file's default close-up; it plays nowhere else
+    "ms": 2000,               // 0 < ms <= 2500
+    "entries": [              // a complete paint list for that view, close-up coordinates
+      { "sprite": "front-door", "frame": "shut", "x": 89, "y": 99, "depth": 17.95,
+        "gagId": "G4.1", "part": "door",
+        "motion": { "start": 0,
+                    "walk": [ { "frame": "shut", "hold": 1400 },
+                              { "frame": "open", "hold": 600 } ] } },
+      { "sprite": "auditor", "frame": "walk", "x": 29, "y": 122, "depth": 18.5,
+        "gagId": "G4.1", "part": "door",
+        "motion": { "start": 0,
+                    "walk": [ { "frame": "walk", "to": [73, 100], "ms": 900 },
+                              { "frame": "wait", "hold": 500 },
+                              { "frame": "shake", "hold": 600 } ] } }
+      /* … every other entry of the view, still, no motion … */ ] } }
+```
+
+- **Playing it is the Motion arithmetic, nothing new.** Let `m` be ms since the moment
+  started. For `m < ms` the painter paints `moment.entries` instead of the view's
+  `entries`, resolving each exactly as a PH2-01 entry at `t = m` (`resolveEntryAt`). Its
+  walks run once: every entry's legs sum to exactly `ms` and `start` is present and 0
+  (required; an absent `start` fails the check), so `τ = m`. Legs may be holds only (a timed change of key in place: the door `shut` →
+  `open`), and a key may be `hidden`, a transparent file on the sprite's canvas, for an
+  entrance or an exit. At `m ≥ ms`, or on any cut, the painter discards the block and
+  paints the view as usual.
+- **The scene holds still underneath.** While a moment plays, the view's own motion clock
+  does not run: everything but the moment's actors is still, and `t = 0` starts when the
+  moment ends or is cut. So the handover is to the view at `t = 0`, which is the golden.
+- **It ends on the exported scene, pixel for pixel, and holds it.** For the last
+  `HOLD_MIN` = 250 ms of the moment, painting `moment.entries` equals painting the view's
+  `entries` at rest. Its first frame differs (something arrives).
+- **Paint order is fixed, as for walkers.** The array order is correct at every `m`; the
+  art proves it against its own depth-sorted render of the room.
+- **Who may move.** Any entry, including a gag's parts: this is the gag arriving. A moving
+  entry, off its end pose, never puts a pixel inside another gag's hotspot (outside the
+  moment gag's own, where the two overlap). Hotspots stay where the view says: the
+  moment changes no hotspot and no view.
+- **Same person (D-041).** A person who walks in and then sits is the same look in both
+  (`worker-e` walking, then `worker-seated` `e`); the art asserts it per beat.
+- **What `check_scenes.py` proves (check 11):** built only, and exactly the bands the art
+  lists; the four fields; `ms` in range; `view` is the default close-up and holds the
+  gag's primary; the gag is the band's own; real sprites and keys; only `walk`, legs
+  summing to `ms`; first frame differs; the last 250 ms equal the view at rest; every
+  10 ms the array-order paint equals the room's depth-sorted render cropped at `rect`;
+  the hotspot rule. The contract test can check all but the pixel ones from the JSON.

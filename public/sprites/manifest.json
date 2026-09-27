@@ -42,6 +42,24 @@
           "duration": 380,
           "file": "auditor-wait-1.png"
         }
+      ],
+      "walk": [
+        {
+          "duration": 120,
+          "file": "auditor-walk-0.png"
+        },
+        {
+          "duration": 120,
+          "file": "auditor-walk-1.png"
+        },
+        {
+          "duration": 120,
+          "file": "auditor-walk-2.png"
+        },
+        {
+          "duration": 120,
+          "file": "auditor-walk-3.png"
+        }
       ]
     },
     "h": 34,
@@ -724,6 +742,12 @@
           "duration": 0,
           "file": "card-report.png"
         }
+      ],
+      "hidden": [
+        {
+          "duration": 0,
+          "file": "card-report-hidden.png"
+        }
       ]
     },
     "h": 9,
@@ -1034,6 +1058,12 @@
           "duration": 0,
           "file": "desk-laptop.png"
         }
+      ],
+      "off": [
+        {
+          "duration": 0,
+          "file": "desk-laptop-off.png"
+        }
       ]
     },
     "h": 46,
@@ -1244,7 +1274,7 @@
   "doc-gate": {
     "anchor": [
       7,
-      25
+      28
     ],
     "frames": {
       "default": [
@@ -1252,9 +1282,15 @@
           "duration": 0,
           "file": "doc-gate.png"
         }
+      ],
+      "wait": [
+        {
+          "duration": 0,
+          "file": "doc-gate-wait.png"
+        }
       ]
     },
-    "h": 25,
+    "h": 28,
     "w": 14
   },
   "drives-final": {
@@ -1358,6 +1394,12 @@
           "duration": 0,
           "file": "fishing-line.png"
         }
+      ],
+      "hidden": [
+        {
+          "duration": 0,
+          "file": "fishing-line-hidden.png"
+        }
       ]
     },
     "h": 83,
@@ -1371,19 +1413,31 @@
   },
   "fishing-shield": {
     "anchor": [
-      3,
+      7,
       83
     ],
     "frames": {
+      "bare": [
+        {
+          "duration": 0,
+          "file": "fishing-shield-bare.png"
+        }
+      ],
       "default": [
         {
           "duration": 0,
           "file": "fishing-shield.png"
         }
+      ],
+      "strike": [
+        {
+          "duration": 0,
+          "file": "fishing-shield-strike.png"
+        }
       ]
     },
     "h": 83,
-    "w": 29
+    "w": 33
   },
   "floor": {
     "anchor": [
@@ -1915,6 +1969,12 @@
         {
           "duration": 0,
           "file": "infosec.png"
+        }
+      ],
+      "hidden": [
+        {
+          "duration": 0,
+          "file": "infosec-hidden.png"
         }
       ]
     },
@@ -2646,6 +2706,12 @@
           "duration": 300,
           "file": "robot-eat-1.png"
         }
+      ],
+      "pending": [
+        {
+          "duration": 0,
+          "file": "robot-pending.png"
+        }
       ]
     },
     "h": 46,
@@ -3072,6 +3138,12 @@
       46
     ],
     "frames": {
+      "dark": [
+        {
+          "duration": 0,
+          "file": "tv-live-dark.png"
+        }
+      ],
       "default": [
         {
           "duration": 0,
@@ -3086,6 +3158,12 @@
         {
           "duration": 180,
           "file": "tv-live-talk-1.png"
+        }
+      ],
+      "wave": [
+        {
+          "duration": 0,
+          "file": "tv-live-wave.png"
         }
       ]
     },
@@ -4636,6 +4714,12 @@
           "file": "worker-e-down-3.png"
         }
       ],
+      "hidden": [
+        {
+          "duration": 0,
+          "file": "worker-e-hidden.png"
+        }
+      ],
       "idle-down": [
         {
           "duration": 0,
@@ -6056,6 +6140,16 @@
           "file": "worker-seated-d-type-r.png"
         }
       ],
+      "d-wave": [
+        {
+          "duration": 280,
+          "file": "worker-seated-wave-d-0.png"
+        },
+        {
+          "duration": 280,
+          "file": "worker-seated-wave-d-1.png"
+        }
+      ],
       "e": [
         {
           "duration": 0,
@@ -6114,6 +6208,12 @@
         {
           "duration": 0,
           "file": "worker-seated-e-type-r.png"
+        }
+      ],
+      "hidden": [
+        {
+          "duration": 0,
+          "file": "worker-seated-hidden.png"
         }
       ]
     },

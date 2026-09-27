@@ -7213,5 +7213,707 @@
         }
       ]
     }
-  ]
+  ],
+  "moment": {
+    "gagId": "G4.2",
+    "view": "floor-2.1",
+    "ms": 2000,
+    "entries": [
+      {
+        "sprite": "slab-l-upper",
+        "frame": "default",
+        "x": 3,
+        "y": 105,
+        "depth": 9
+      },
+      {
+        "sprite": "slab-l-upper",
+        "frame": "default",
+        "x": 19,
+        "y": 113,
+        "depth": 10
+      },
+      {
+        "sprite": "slab-l-upper",
+        "frame": "default",
+        "x": 35,
+        "y": 121,
+        "depth": 11
+      },
+      {
+        "sprite": "slab-r-upper",
+        "frame": "default",
+        "x": 179,
+        "y": 97,
+        "depth": 8
+      },
+      {
+        "sprite": "slab-r-upper",
+        "frame": "default",
+        "x": 163,
+        "y": 105,
+        "depth": 9
+      },
+      {
+        "sprite": "slab-r-upper",
+        "frame": "default",
+        "x": 147,
+        "y": 113,
+        "depth": 10
+      },
+      {
+        "sprite": "slab-r-upper",
+        "frame": "default",
+        "x": 131,
+        "y": 121,
+        "depth": 11
+      },
+      {
+        "sprite": "floor-office",
+        "frame": "default",
+        "x": 67,
+        "y": 41,
+        "depth": 1
+      },
+      {
+        "sprite": "floor-office",
+        "frame": "default",
+        "x": 83,
+        "y": 49,
+        "depth": 2
+      },
+      {
+        "sprite": "floor-office",
+        "frame": "default",
+        "x": 99,
+        "y": 57,
+        "depth": 3
+      },
+      {
+        "sprite": "floor-office",
+        "frame": "default",
+        "x": 115,
+        "y": 65,
+        "depth": 4
+      },
+      {
+        "sprite": "floor-office",
+        "frame": "default",
+        "x": 131,
+        "y": 73,
+        "depth": 5
+      },
+      {
+        "sprite": "floor-office",
+        "frame": "default",
+        "x": 147,
+        "y": 81,
+        "depth": 6
+      },
+      {
+        "sprite": "floor-office",
+        "frame": "default",
+        "x": 163,
+        "y": 89,
+        "depth": 7
+      },
+      {
+        "sprite": "floor-office",
+        "frame": "default",
+        "x": 179,
+        "y": 97,
+        "depth": 8
+      },
+      {
+        "sprite": "floor-office",
+        "frame": "default",
+        "x": 51,
+        "y": 49,
+        "depth": 2
+      },
+      {
+        "sprite": "floor-office",
+        "frame": "default",
+        "x": 67,
+        "y": 57,
+        "depth": 3
+      },
+      {
+        "sprite": "floor-office",
+        "frame": "default",
+        "x": 83,
+        "y": 65,
+        "depth": 4
+      },
+      {
+        "sprite": "floor-office",
+        "frame": "default",
+        "x": 99,
+        "y": 73,
+        "depth": 5
+      },
+      {
+        "sprite": "floor-office",
+        "frame": "default",
+        "x": 115,
+        "y": 81,
+        "depth": 6
+      },
+      {
+        "sprite": "floor-office",
+        "frame": "default",
+        "x": 131,
+        "y": 89,
+        "depth": 7
+      },
+      {
+        "sprite": "floor-office",
+        "frame": "default",
+        "x": 147,
+        "y": 97,
+        "depth": 8
+      },
+      {
+        "sprite": "floor-office",
+        "frame": "default",
+        "x": 163,
+        "y": 105,
+        "depth": 9
+      },
+      {
+        "sprite": "floor-office",
+        "frame": "default",
+        "x": 35,
+        "y": 57,
+        "depth": 3
+      },
+      {
+        "sprite": "floor-office",
+        "frame": "default",
+        "x": 51,
+        "y": 65,
+        "depth": 4
+      },
+      {
+        "sprite": "floor-office",
+        "frame": "default",
+        "x": 67,
+        "y": 73,
+        "depth": 5
+      },
+      {
+        "sprite": "floor-office",
+        "frame": "default",
+        "x": 83,
+        "y": 81,
+        "depth": 6
+      },
+      {
+        "sprite": "floor-office",
+        "frame": "default",
+        "x": 99,
+        "y": 89,
+        "depth": 7
+      },
+      {
+        "sprite": "floor-office",
+        "frame": "default",
+        "x": 115,
+        "y": 97,
+        "depth": 8
+      },
+      {
+        "sprite": "floor-office",
+        "frame": "default",
+        "x": 131,
+        "y": 105,
+        "depth": 9
+      },
+      {
+        "sprite": "floor-office",
+        "frame": "default",
+        "x": 147,
+        "y": 113,
+        "depth": 10
+      },
+      {
+        "sprite": "floor-office",
+        "frame": "default",
+        "x": 19,
+        "y": 65,
+        "depth": 4
+      },
+      {
+        "sprite": "floor-office",
+        "frame": "default",
+        "x": 35,
+        "y": 73,
+        "depth": 5
+      },
+      {
+        "sprite": "floor-office",
+        "frame": "default",
+        "x": 51,
+        "y": 81,
+        "depth": 6
+      },
+      {
+        "sprite": "floor-office",
+        "frame": "default",
+        "x": 67,
+        "y": 89,
+        "depth": 7
+      },
+      {
+        "sprite": "floor-office",
+        "frame": "default",
+        "x": 83,
+        "y": 97,
+        "depth": 8
+      },
+      {
+        "sprite": "floor-office",
+        "frame": "default",
+        "x": 99,
+        "y": 105,
+        "depth": 9
+      },
+      {
+        "sprite": "floor-office",
+        "frame": "default",
+        "x": 115,
+        "y": 113,
+        "depth": 10
+      },
+      {
+        "sprite": "floor-office",
+        "frame": "default",
+        "x": 131,
+        "y": 121,
+        "depth": 11
+      },
+      {
+        "sprite": "floor-office",
+        "frame": "default",
+        "x": 3,
+        "y": 73,
+        "depth": 5
+      },
+      {
+        "sprite": "floor-office",
+        "frame": "default",
+        "x": 19,
+        "y": 81,
+        "depth": 6
+      },
+      {
+        "sprite": "floor-office",
+        "frame": "default",
+        "x": 35,
+        "y": 89,
+        "depth": 7
+      },
+      {
+        "sprite": "floor-office",
+        "frame": "default",
+        "x": 51,
+        "y": 97,
+        "depth": 8
+      },
+      {
+        "sprite": "floor-office",
+        "frame": "default",
+        "x": 67,
+        "y": 105,
+        "depth": 9
+      },
+      {
+        "sprite": "floor-office",
+        "frame": "default",
+        "x": 83,
+        "y": 113,
+        "depth": 10
+      },
+      {
+        "sprite": "floor-office",
+        "frame": "default",
+        "x": 99,
+        "y": 121,
+        "depth": 11
+      },
+      {
+        "sprite": "floor-office",
+        "frame": "default",
+        "x": 115,
+        "y": 129,
+        "depth": 12
+      },
+      {
+        "sprite": "floor-office",
+        "frame": "default",
+        "x": -13,
+        "y": 81,
+        "depth": 6
+      },
+      {
+        "sprite": "floor-office",
+        "frame": "default",
+        "x": 3,
+        "y": 89,
+        "depth": 7
+      },
+      {
+        "sprite": "floor-office",
+        "frame": "default",
+        "x": 19,
+        "y": 97,
+        "depth": 8
+      },
+      {
+        "sprite": "floor-office",
+        "frame": "default",
+        "x": 35,
+        "y": 105,
+        "depth": 9
+      },
+      {
+        "sprite": "floor-office",
+        "frame": "default",
+        "x": 51,
+        "y": 113,
+        "depth": 10
+      },
+      {
+        "sprite": "floor-office",
+        "frame": "default",
+        "x": 67,
+        "y": 121,
+        "depth": 11
+      },
+      {
+        "sprite": "floor-office",
+        "frame": "default",
+        "x": 83,
+        "y": 129,
+        "depth": 12
+      },
+      {
+        "sprite": "floor-office",
+        "frame": "default",
+        "x": -13,
+        "y": 97,
+        "depth": 8
+      },
+      {
+        "sprite": "floor-office",
+        "frame": "default",
+        "x": 3,
+        "y": 105,
+        "depth": 9
+      },
+      {
+        "sprite": "floor-office",
+        "frame": "default",
+        "x": 19,
+        "y": 113,
+        "depth": 10
+      },
+      {
+        "sprite": "floor-office",
+        "frame": "default",
+        "x": 35,
+        "y": 121,
+        "depth": 11
+      },
+      {
+        "sprite": "floor-office",
+        "frame": "default",
+        "x": 51,
+        "y": 129,
+        "depth": 12
+      },
+      {
+        "sprite": "wall-corner",
+        "frame": "default",
+        "x": 67,
+        "y": 41,
+        "depth": 1
+      },
+      {
+        "sprite": "wall-back-l",
+        "frame": "default",
+        "x": 67,
+        "y": 41,
+        "depth": 1
+      },
+      {
+        "sprite": "wall-back-l",
+        "frame": "default",
+        "x": 51,
+        "y": 49,
+        "depth": 2
+      },
+      {
+        "sprite": "wall-back-l-window",
+        "frame": "default",
+        "x": 35,
+        "y": 57,
+        "depth": 3
+      },
+      {
+        "sprite": "wall-back-l",
+        "frame": "default",
+        "x": 19,
+        "y": 65,
+        "depth": 4
+      },
+      {
+        "sprite": "wall-back-l-window",
+        "frame": "default",
+        "x": 3,
+        "y": 73,
+        "depth": 5
+      },
+      {
+        "sprite": "wall-back-r",
+        "frame": "default",
+        "x": 67,
+        "y": 41,
+        "depth": 1
+      },
+      {
+        "sprite": "wall-back-r",
+        "frame": "default",
+        "x": 83,
+        "y": 49,
+        "depth": 2
+      },
+      {
+        "sprite": "wall-back-r",
+        "frame": "default",
+        "x": 99,
+        "y": 57,
+        "depth": 3
+      },
+      {
+        "sprite": "wall-back-r-window",
+        "frame": "default",
+        "x": 115,
+        "y": 65,
+        "depth": 4
+      },
+      {
+        "sprite": "wall-back-r",
+        "frame": "default",
+        "x": 131,
+        "y": 73,
+        "depth": 5
+      },
+      {
+        "sprite": "wall-back-r",
+        "frame": "default",
+        "x": 147,
+        "y": 81,
+        "depth": 6
+      },
+      {
+        "sprite": "wall-back-r",
+        "frame": "default",
+        "x": 163,
+        "y": 89,
+        "depth": 7
+      },
+      {
+        "sprite": "wall-back-r-end",
+        "frame": "default",
+        "x": 179,
+        "y": 97,
+        "depth": 8
+      },
+      {
+        "sprite": "desk",
+        "frame": "default",
+        "x": 83,
+        "y": 49,
+        "depth": 2,
+        "gagId": "G3.2",
+        "part": "box"
+      },
+      {
+        "sprite": "desk",
+        "frame": "default",
+        "x": 51,
+        "y": 81,
+        "depth": 6
+      },
+      {
+        "sprite": "worker-seated",
+        "frame": "c",
+        "x": 51,
+        "y": 81,
+        "depth": 6.01
+      },
+      {
+        "sprite": "desk",
+        "frame": "default",
+        "x": 131,
+        "y": 89,
+        "depth": 7,
+        "gagId": "G4.2",
+        "part": "desk"
+      },
+      {
+        "sprite": "fishing-shield",
+        "frame": "bare",
+        "x": 131,
+        "y": 89,
+        "depth": 7.005,
+        "gagId": "G4.2",
+        "part": "desk",
+        "motion": {
+          "start": 0,
+          "walk": [
+            {
+              "frame": "bare",
+              "hold": 800
+            },
+            {
+              "frame": "strike",
+              "hold": 250
+            },
+            {
+              "frame": "default",
+              "hold": 950
+            }
+          ]
+        }
+      },
+      {
+        "sprite": "fishing-line",
+        "frame": "default",
+        "x": 131,
+        "y": 45,
+        "depth": 7.005,
+        "motion": {
+          "start": 0,
+          "walk": [
+            {
+              "frame": "default",
+              "to": [
+                131,
+                79
+              ],
+              "ms": 800
+            },
+            {
+              "frame": "default",
+              "hold": 250
+            },
+            {
+              "frame": "hidden",
+              "hold": 950
+            }
+          ]
+        }
+      },
+      {
+        "sprite": "worker-seated",
+        "frame": "a",
+        "x": 131,
+        "y": 89,
+        "depth": 7.01,
+        "gagId": "G4.2",
+        "part": "desk"
+      },
+      {
+        "sprite": "desk",
+        "frame": "default",
+        "x": 19,
+        "y": 97,
+        "depth": 8
+      },
+      {
+        "sprite": "worker-seated",
+        "frame": "b",
+        "x": 19,
+        "y": 97,
+        "depth": 8.01
+      },
+      {
+        "sprite": "desk",
+        "frame": "default",
+        "x": 83,
+        "y": 113,
+        "depth": 10,
+        "gagId": "G4.3",
+        "part": "desks"
+      },
+      {
+        "sprite": "desk-turned",
+        "frame": "default",
+        "x": 51,
+        "y": 113,
+        "depth": 10,
+        "gagId": "G4.3",
+        "part": "desks"
+      },
+      {
+        "sprite": "worker-seated",
+        "frame": "e",
+        "x": 83,
+        "y": 113,
+        "depth": 10.01,
+        "gagId": "G4.3",
+        "part": "desks"
+      },
+      {
+        "sprite": "worker-seated-turned",
+        "frame": "c",
+        "x": 51,
+        "y": 113,
+        "depth": 10.01,
+        "gagId": "G4.3",
+        "part": "desks"
+      },
+      {
+        "sprite": "sign-pipeline",
+        "frame": "default",
+        "x": 67,
+        "y": 115,
+        "depth": 11.24,
+        "gagId": "G4.3",
+        "part": "desks"
+      },
+      {
+        "sprite": "card-report",
+        "frame": "hidden",
+        "x": 138,
+        "y": 65,
+        "depth": 7.01,
+        "gagId": "G4.2",
+        "part": "desk",
+        "motion": {
+          "start": 0,
+          "walk": [
+            {
+              "frame": "hidden",
+              "hold": 1050
+            },
+            {
+              "frame": "default",
+              "hold": 120
+            },
+            {
+              "frame": "hidden",
+              "hold": 100
+            },
+            {
+              "frame": "default",
+              "hold": 730
+            }
+          ]
+        }
+      }
+    ]
+  }
 }

@@ -92,9 +92,16 @@ def _face_fn(u, z, frozen: bool, mouth_open: bool, t: dict, who=HQ_PERSON,
 
 
 def _tv(iso: Iso, c: Canvas, frame: int, frozen: bool, t: dict, who=HQ_PERSON,
-        wave=False):
+        wave=False, dark=False):
     f = _tv_body(iso, t)
-    mouth = True if frozen else (frame == 1)
+    mouth = True if frozen else (frame == 1 or wave)
+    if dark:
+        # PH2-03: the screen before the call connects: the glass off, the bezel as ever
+        W, H = t["c1"] - t["c0"], t["z1"] - t["z0"]
+        iso.paint(f, "L", t["r1"], lambda cc, z: "outline"
+                  if 0.8 <= cc - t["c0"] < W - 0.8 and 0.8 <= z - t["z0"] < H - 0.8
+                  else "monitor-frame")
+        return
     iso.paint(f, "L", t["r1"], lambda cc, z: _face_fn(cc - t["c0"], z, frozen, mouth, t,
                                                      who, wave) or "monitor-frame")
     if frozen:
@@ -123,8 +130,10 @@ def _tv_frozen(t, who=HQ_PERSON, wave=False):
 
 
 def _tv_live(t, who=HQ_PERSON):
+    """Frames 0-1 `talk`; PH2-03 adds 2, the screen dark, and 3, the same face sharp
+    and waving, mouth open ("hi!"): the call connecting at the band crossing."""
     def draw(iso, c, frame):
-        _tv(iso, c, frame, False, t, who)
+        _tv(iso, c, frame % 2, False, t, who, wave=frame == 3, dark=frame == 2)
         return {"screen": iso.left_px(t["r1"], (t["c0"] + t["c1"]) / 2, t["z0"])}
     return draw
 
@@ -276,6 +285,15 @@ def _whiteboard(owned: bool) -> Canvas:
     return c
 
 
+def _tv_live_moment() -> Sprite:
+    """`tv-live` with its `talk` loop, plus PH2-03's `dark` and `wave` stills, on one
+    canvas (the TV body bounds every frame, so `default` does not move)."""
+    sp = make_anim(_tv_live(TV, INSET_PERSON), 4, key="all", ms=180)
+    fr = sp.anims["all"][0]
+    return Sprite(fr[0], sp.anchor, sp.points,
+                  {"talk": (fr[:2], 180), "dark": ([fr[2]], 0), "wave": ([fr[3]], 0)})
+
+
 def build_all() -> dict:
     wb0, wb1 = _whiteboard(False), _whiteboard(True)
     return {
@@ -286,7 +304,7 @@ def build_all() -> dict:
         "conf-huddle": make(_conf_huddle),
         "whiteboard-requests": Sprite(wb0, (wb0.w // 2, wb0.h)),
         # built
-        "tv-live": make_anim(_tv_live(TV, INSET_PERSON), 2, key="talk", ms=180),
+        "tv-live": _tv_live_moment(),
         "camera-bar": make(_camera_bar(TV)),
         "tv-live-inset": make_anim(_tv_live(TV, HQ_PERSON), 2, key="talk", ms=180),
         "conf-table": make(_conf_table),

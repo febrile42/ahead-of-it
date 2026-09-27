@@ -291,3 +291,15 @@ def make_anim(draw, n: int, size: int = 192, key: str = "blink", ms: int = 400,
     return Sprite(frames[default], (anchor[0] - x0, anchor[1] - y0),
                   {k: (v[0] - x0, v[1] - y0) for k, v in pts.items()},
                   {key: (frames, ms)})
+
+
+def make_keyed(draw, keys: tuple, size: int = 192) -> Sprite:
+    """Like `make`, for a prop with named still states on one canvas and one anchor:
+    `draw(iso, canvas, key)` is called once per key. `keys[0]` is the still (`default`,
+    drawn exactly as `make` would place it); the rest become single-frame keys. PH2-03:
+    the band-crossing moments add states to props that already ship, and the default's
+    pixels, anchor-relative, never move."""
+    sp = make_anim(lambda iso, c, i: draw(iso, c, keys[i]), len(keys), size=size, key="_")
+    frames = sp.anims["_"][0]
+    return Sprite(frames[0], sp.anchor, sp.points,
+                  {k: ([f], 0) for k, f in zip(keys[1:], frames[1:])})

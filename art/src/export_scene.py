@@ -28,7 +28,7 @@ import os
 from PIL import Image
 
 from .dsl import Canvas, save_png
-from . import closeups, compose, layout, motion
+from . import closeups, compose, layout, moments, motion
 from .closeups import CLOSEUP_W, CLOSEUP_H
 from .vox import dotted
 
@@ -235,6 +235,8 @@ def _entries_for_view(lib: compose.Library, placements: list, lines: list, band:
             entry["part"] = q.get("part", "main")
         if "alpha" in q:
             entry["alpha"] = q["alpha"]
+        if "_actor" in q:                       # moments.export's tag, popped there
+            entry["_actor"] = q["_actor"]
         layer = q.get("layer", "main")
         if layer == "base":
             base.append(entry)
@@ -460,8 +462,10 @@ def _build_views(lib: compose.Library, band: int, model: dict, own_gags: set) ->
     return out
 
 
-def _write_doc(band: int, state: str, vlist: list) -> str:
+def _write_doc(band: int, state: str, vlist: list, moment=None) -> str:
     doc = {"schema": 2, "band": band, "state": state, "views": vlist}
+    if moment is not None:
+        doc["moment"] = moment                  # PH2-03: built files only
     fname = f"{band}-{state}.json"
     with open(os.path.join(SCENES_DIR, fname), "w") as f:
         json.dump(doc, f, indent=2, sort_keys=False)
@@ -487,7 +491,9 @@ def _mark_default(vlist: list, own_gags: set):
 
 def _write_band(lib: compose.Library, band: int, model: dict, own_gags: set) -> dict:
     views = _build_views(lib, band, model, own_gags)
-    return {state: _write_doc(band, state, views[state]) for state in STATES}
+    moment = moments.export(lib, band, views["built"])
+    return {state: _write_doc(band, state, views[state], moment if state == "built" else None)
+            for state in STATES}
 
 
 def export_band(lib: compose.Library, band: int, band_new_gags: set) -> dict:

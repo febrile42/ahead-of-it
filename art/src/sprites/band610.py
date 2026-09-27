@@ -19,7 +19,8 @@ from ..dsl import Canvas
 from ..vox import Iso, Sprite, make, make_anim
 from .. import glyphs
 from .room import PART_H, PART_T
-from .worker import Fig, LOOKS, R, _shadow, _leg_side, _torso_side, _head_side, _arm_side
+from .worker import (Fig, LOOKS, R, _shadow, _leg_side, _torso_side, _head_side, _arm_side,
+                     SIDE_BEATS)
 from .poses import _place
 from .band490 import _office_chair, CHAIR_CX, CHAIR_CR
 
@@ -190,7 +191,37 @@ def auditor_frames() -> dict:
             _clipboard(cv, 3, 17)
             frames.append(cv)
         out[key] = frames
+    out["walk"] = auditor_walk_frames()
     return out
+
+
+AUD_WALK_MS = 120                   # the walkers' step (build.WALK_FRAME_MS)
+
+
+def auditor_walk_frames() -> list:
+    """PH2-03: the band-crossing moment walks him up to the door. The worker's four side
+    beats (legs and bob), his suit, collar and tie, and the clipboard held up in front
+    exactly as in `wait` and `shake`, riding the bob: it is still the one thing that
+    must be read, so it never leaves his chest."""
+    frames = []
+    for near, far, arm, b in SIDE_BEATS:
+        f = Fig(AUD_W, AUD_H)
+        body = Fig()
+        _shadow(body, cx=9)
+        _leg_side(body, far, b)
+        _torso_side(body, b)
+        _leg_side(body, near, b)
+        _head_side(body, AUDITOR_LOOK["style"], b)
+        body.put(9, 9 + b, "V")
+        body.put(10, 9 + b, "V")
+        for y in range(10 + b, 14 + b):
+            body.put(10, y, "X")
+        _arm_side(body, arm, b)
+        _place(f, body, 1, 10)
+        cv = f.to_canvas(AUDITOR_LOOK)
+        _clipboard(cv, 3, 17 + b)
+        frames.append(cv)
+    return frames
 
 
 # The InfoSec lead: the building's own person, so a staff look (`b`), and a thick blue
@@ -723,7 +754,8 @@ def build_all() -> dict:
         "front-door": _union(shut=shut, open=open_),
         "stoop": make(_stoop),
         "auditor": Sprite(aud["wait"][0], AUD_ANCHOR,
-                          anims={"wait": (aud["wait"], AUD_MS), "shake": (aud["shake"], 0)}),
+                          anims={"wait": (aud["wait"], AUD_MS), "shake": (aud["shake"], 0),
+                                 "walk": (aud["walk"], AUD_WALK_MS)}),
         "infosec": Sprite(infosec_frame(), (15, 24)),
         "bubble-deal": Sprite(bub["fade"][0], BUBBLE_ANCHOR,
                               anims={"fade": (bub["fade"], BUBBLE_MS), "gold": (bub["gold"], 0)}),

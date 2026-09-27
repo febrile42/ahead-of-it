@@ -22,7 +22,7 @@ from art.src.dsl import Canvas, save_png, scale_nn
 from art.src import iso
 from art.src.sprites import floor, wall, desk, worker, badge_reader, room, band80, poses
 from art.src.sprites import band150, band220, street, band360, band490, band610, band750
-from art.src import compose, layout, export_scene, motion
+from art.src import compose, layout, export_scene, moments, motion
 from art.src.vox import Sprite
 
 SPRITES_DIR = os.path.join(_REPO_ROOT, "public", "sprites")
@@ -315,6 +315,9 @@ def build_manifest():
 
     # PH2-01: loop keys threaded from files that already exist (SCENE-FORMAT "Motion")
     motion.add_loop_keys(manifest)
+    # PH2-03: the states only a band-crossing moment uses (SCENE-FORMAT "Band-crossing
+    # moment")
+    moments.add_keys(manifest, SPRITES_DIR)
 
     manifest_path = os.path.join(SPRITES_DIR, "manifest.json")
     with open(manifest_path, "w") as f:

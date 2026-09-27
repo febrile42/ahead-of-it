@@ -45,6 +45,18 @@ the last bullets of SCENE-FORMAT.md "Views: rooms and close-ups"):
                          at every sampled t (100 ms steps over each loop) equals its room
                          painted at t cropped at `rect`; and a walker's fixed paint order
                          matches the pipeline's depth-sorted render at every sample.
+  11. moment (PH2-03)   — SCENE-FORMAT.md "Band-crossing moment": only in built files,
+                         exactly the bands `moments.BEATS` lists; fields gagId/view/ms/
+                         entries; 0 < ms <= 2500; `view` is the file's default close-up
+                         and holds the gag's primary; the gag is the band's own; entries
+                         name real sprites/keys, carry only `walk` legs summing to `ms`;
+                         the first frame differs from the scene and the last HOLD_MIN ms
+                         equal the view painted at t = 0 (it ends on the exported scene,
+                         pixel for pixel); at every 10 ms the moment painted in array
+                         order equals the pipeline's depth-sorted render of the room at
+                         that m (`moments.room_at`) cropped at `rect`; and no moving
+                         entry, off its end pose, puts a pixel in another gag's hotspot
+                         (outside the moment gag's own, where the two overlap).
 
 Usage: python3 art/checks/check_scenes.py
 Exit 0 if every check passes (warnings still print); exit 1 and print every failure
@@ -62,7 +74,7 @@ _HERE = os.path.dirname(os.path.abspath(__file__))
 _REPO_ROOT = os.path.dirname(os.path.dirname(_HERE))
 sys.path.insert(0, _REPO_ROOT)
 
-from art.src import compose, export_scene, layout, motion  # noqa: E402
+from art.src import compose, export_scene, layout, moments, motion  # noqa: E402
 
 SPRITES_DIR = os.path.join(_REPO_ROOT, "public", "sprites")
 SCENES_DIR = os.path.join(SPRITES_DIR, "scenes")
@@ -295,6 +307,129 @@ def _check_walker_order(lib, band, state, rid, room, at, img, t, fname):
              f"depth-sorted render (re-route the walk)")
 
 
+MOMENT_KEYS = {"gagId", "view", "ms", "entries"}
+
+
+def check_moments(manifest: dict, gag_band: dict):
+    """Check 11 (PH2-03): the `moment` block, JSON rules then pixel rules."""
+    lib = compose.Library(SPRITES_DIR)
+    found = set()
+    for band in export_scene.DRAWN_BANDS:
+        for state in export_scene.STATES:
+            fname = f"{band}-{state}.json"
+            doc = load_json(os.path.join(SCENES_DIR, fname))
+            mo = doc.get("moment")
+            if mo is None:
+                continue
+            found.add(band)
+            where = f"{fname}:moment"
+            if state != "built":
+                fail(f"{where} — a moment in a without file (built only)")
+                continue
+            if set(mo) != MOMENT_KEYS:
+                fail(f"{where} — fields {sorted(mo)}, want {sorted(MOMENT_KEYS)}")
+                continue
+            ms = mo["ms"]
+            if not isinstance(ms, int) or not 0 < ms <= moments.MS_MAX:
+                fail(f"{where} — ms {ms!r}, want an int in 1..{moments.MS_MAX}")
+                continue
+            views = {v["id"]: v for v in doc["views"]}
+            v = views.get(mo["view"])
+            if v is None or not v.get("default"):
+                fail(f"{where} — view {mo['view']!r} is not the default close-up")
+                continue
+            gag = mo["gagId"]
+            if gag_band.get(gag) != band:
+                fail(f"{where} — {gag} is not one of band {band}'s own gags")
+            if not any(h_["gagId"] == gag and h_.get("primary") for h_ in v["hotspots"]):
+                fail(f"{where} — {gag}'s primary is not in the default close-up {v['id']}")
+            bad = False
+            for i, e in enumerate(mo["entries"]):
+                spr = e.get("sprite")
+                keys = manifest.get(spr, {}).get("frames", {})
+                if e.get("frame") not in keys:
+                    fail(f"{where}[{i}] — {spr!r}/{e.get('frame')!r} is not a manifest key")
+                    bad = True
+                    continue
+                mot = e.get("motion")
+                if mot is None:
+                    continue
+                if set(mot) != {"start", "walk"} or mot["start"] != 0:
+                    fail(f"{where}[{i}] {spr} — motion {mot.get('start', 'no start')!r} "
+                         f"{sorted(mot)}, want exactly start: 0 and walk")
+                    bad = True
+                    continue
+                total = 0
+                for leg in mot["walk"]:
+                    if leg.get("frame") not in keys:
+                        fail(f"{where}[{i}] {spr} — leg frame {leg.get('frame')!r} not a key")
+                        bad = True
+                    d = leg.get("ms") if "to" in leg else leg.get("hold")
+                    if not isinstance(d, int) or d <= 0:
+                        fail(f"{where}[{i}] {spr} — leg {leg} has no positive duration")
+                        bad = True
+                        d = 0
+                    total += d
+                if total != ms:
+                    fail(f"{where}[{i}] {spr} — legs sum to {total} ms, not ms = {ms}")
+                    bad = True
+            if bad:
+                continue
+            w, h = v["size"]["w"], v["size"]["h"]
+            golden = export_scene.paint_entries(lib, v["entries"], w, h).tobytes()
+            if motion.paint_at(lib, mo["entries"], w, h, 0).tobytes() == golden:
+                fail(f"{where} — its first frame is the scene: nothing arrives")
+            for m in range(ms - moments.HOLD_MIN, ms, 10):
+                if motion.paint_at(lib, mo["entries"], w, h, m).tobytes() != golden:
+                    fail(f"{where} — at m = {m} ms it is not the exported scene (it must "
+                         f"end on it and hold it {moments.HOLD_MIN} ms)")
+                    break
+            r = v["rect"]
+            others = [h_ for h_ in v["hotspots"] if h_["gagId"] != gag]
+            own = [h_ for h_ in v["hotspots"] if h_["gagId"] == gag]
+
+            def owned(px, py):
+                # where hotspots overlap, the moment's own gag already claims the pixel
+                return any(o["x"] <= px < o["x"] + o["w"] and o["y"] <= py < o["y"] + o["h"]
+                           for o in own)
+            movers = [e for e in mo["entries"] if any("to" in leg for leg in
+                                                       e.get("motion", {}).get("walk", []))]
+            seen = set()
+            for m in range(0, ms, 10):
+                at = motion.entries_at(lib.manifest, mo["entries"], m)
+                sig = tuple((q["x"], q["y"], q["frame"], q["index"]) for q in at)
+                if sig in seen:
+                    continue
+                seen.add(sig)
+                got = export_scene.paint_entries(lib, at, w, h)
+                want = moments.room_at(lib, band, v["parent"], m).crop(
+                    (r["x"], r["y"], r["x"] + r["w"], r["y"] + r["h"]))
+                if got.tobytes() != want.tobytes():
+                    fail(f"{where} — at m = {m} ms the moment painted in array order is "
+                         f"not the depth-sorted render of the room (re-route or re-slot)")
+                for e in movers:
+                    x, y, fr, idx = motion.pose_at(lib.manifest, e, m)
+                    end = motion.pose_at(lib.manifest, e, ms - 1)
+                    if (x, y) == end[:2] or fr == "hidden":
+                        continue
+                    img = lib.image(e["sprite"], fr, idx)
+                    ax, ay = lib.anchor(e["sprite"])
+                    a = img.getchannel("A").load()
+                    for h_ in others:
+                        hit = any(a[px - (x - ax), py - (y - ay)]
+                                  for px in range(h_["x"], h_["x"] + h_["w"])
+                                  for py in range(h_["y"], h_["y"] + h_["h"])
+                                  if 0 <= px - (x - ax) < img.width
+                                  and 0 <= py - (y - ay) < img.height
+                                  and not owned(px, py))
+                        if hit:
+                            fail(f"{where} — at m = {m} ms {e['sprite']} crosses "
+                                 f"{h_['gagId']}/{h_['part']}'s hotspot")
+    want = set(moments.BEATS)
+    if found != want:
+        fail(f"moments — exported for bands {sorted(found)}, BEATS lists {sorted(want)}")
+
+
 def check_determinism():
     import glob
     import hashlib
@@ -514,6 +649,7 @@ def main():
 
     check_pixel_parity()
     check_motion(manifest)
+    check_moments(manifest, gag_band)
     check_determinism()
 
     if warnings:
@@ -529,7 +665,7 @@ def main():
         sys.exit(1)
     print("PASS — scene export checks (schema 2): rooms + close-ups, skeleton, default, "
           "manifest refs, coverage, bounds, spacing, beyond alias, pixel parity "
-          "(rooms and close-up crops), motion (PH2-01), determinism.")
+          "(rooms and close-up crops), motion (PH2-01), moments (PH2-03), determinism.")
 
 
 if __name__ == "__main__":

@@ -22,7 +22,7 @@ Ground floor
 from __future__ import annotations
 
 from ..dsl import Canvas
-from ..vox import Iso, Sprite, make
+from ..vox import Iso, Sprite, make, make_keyed
 from .. import glyphs
 from .band80 import _rows
 from .band610 import _union, _per_look
@@ -284,7 +284,7 @@ def robot_frames() -> dict:
     cx = _RCX
     hy0, hy1 = _HEAD
     by0, by1 = _BODY
-    for key, n in (("eat", 2), ("approved", 1)):
+    for key, n in (("eat", 2), ("approved", 1), ("pending", 1)):
         frames = []
         for i in range(n):
             c = Canvas(ROBOT_W, ROBOT_H)
@@ -305,6 +305,17 @@ def robot_frames() -> dict:
                 c.rect(cx - 1, hy0 + 8, cx + 10, hy0 + 10, "outline")
                 c.rect(cx, hy0 + 9, cx + 9, hy0 + 9, "paper")
                 _stack(c, cx + 9, hy1 - 6)
+            elif key == "pending":
+                # PH2-03, the band-crossing moment: the same robot arriving, before the
+                # gate has passed anything: light off, the badge plate blank, arms at its
+                # sides, no policy page yet. Never UNVETTED (that is the without joke).
+                _robot_body(c, "chair-mid")
+                _chest(c, "", "badge-body")
+                for (dx, dy) in ((-3, 0), (-2, 1), (-1, 1), (0, 1), (1, 1), (2, 1), (3, 0)):
+                    c.point(cx + dx, hy0 + 8 + dy, "monitor-screen")
+                for side in (-1, 1):
+                    sx = cx + side * (_CHEST + 1) - (1 if side < 0 else 0)
+                    _arm(c, [(sx, by0 + 3), (sx, by1 - 5)], (sx - 1 + side, by1 - 4))
             else:
                 _robot_body(c, "badge-green")
                 _chest(c, "APPROVED", "shirt-2-dark")
@@ -356,15 +367,19 @@ def card_frames(look_name: str) -> dict:
     return out
 
 
-def _gate(iso: Iso, c: Canvas):
+def _gate(iso: Iso, c: Canvas, key: str = "default"):
     """Built: the gate — a small grey box on a stand with a slot on top and a green
-    light; a sheet half through it."""
+    light; a sheet half through it. PH2-03 adds `wait`: the sheet whole, held above the
+    slot, and the light dark — the moment before it passes."""
+    wait = key == "wait"
     iso.floor_shadow(2.0, 2.5, 6.0, 5.5, grow=0.6, grow_r=0.3)
     iso.box(3.4, 3.4, 0, 4.6, 4.6, 6.0, top="chair-mid", left="badge-body", right="chair-dark")
     f = iso.box(2.0, 2.5, 6.0, 6.0, 5.5, 11.0, top="chair-mid", left="badge-body",
                 right="chair-dark")
-    iso.paint(f, "L", 5.5, lambda cc, z: "badge-green" if 4.8 <= cc < 5.6 and 8.6 <= z < 9.6 else None)
-    iso.box(2.8, 3.6, 11.0, 5.2, 4.0, 15.0, top="paper", left="paper", right="wall-shadow")
+    light = "outline" if wait else "badge-green"
+    iso.paint(f, "L", 5.5, lambda cc, z: light if 4.8 <= cc < 5.6 and 8.6 <= z < 9.6 else None)
+    z0 = 14.0 if wait else 11.0
+    iso.box(2.8, 3.6, z0, 5.2, 4.0, z0 + 4.0, top="paper", left="paper", right="wall-shadow")
 
 
 # -- floor 2, G6.2: the renewal avalanche ------------------------------------------------------
@@ -809,9 +824,10 @@ def build_all() -> dict:
         "balloons-ceiling": Sprite(ceil[0], CEIL_ANCHOR, anims={"drift": (ceil, 800)}),
         "portfolio-board": Sprite(board, (board.w // 2 - 6, board.h)),
         "robot": Sprite(rb["eat"][0], ROBOT_ANCHOR,
-                        anims={"eat": (rb["eat"], ROBOT_MS), "approved": (rb["approved"], 0)}),
+                        anims={"eat": (rb["eat"], ROBOT_MS), "approved": (rb["approved"], 0),
+                               "pending": (rb["pending"], 0)}),
         "worker-card": _per_look(card_frames, CARD_ANCHOR, 0),
-        "doc-gate": make(_gate),
+        "doc-gate": make_keyed(_gate, ("default", "wait")),
         # floor 2
         "paper-slope": paper_slope(),
         "card-autorenewed": Sprite(card_autorenewed(), (card_autorenewed().w // 2, 14)),
