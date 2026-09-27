@@ -11,6 +11,10 @@
      `--scene-ink-rgb`, `--scene-accent`): never retheme. Hotspots and their
      captions sit on the canvas, which stays on a light mat in both schemes
      (D-046 point 3) — nothing painted over it may change with the OS scheme.
+     `--scene-mat-dark` (DIA-149) is a separate token, not a retheme of
+     `--scene-mat` — it only replaces what `.scene-wrap`'s own background
+     paints in the dark block below, so the mat reads as a card against the
+     dark page. `--scene-mat` itself keeps its `:root` value unconditionally.
    - the toggle (`--toggle-fill`, `--toggle-fill-pressed`, `--toggle-text`,
      `--toggle-text-pressed`): never retheme (D-046 point 4, "the toggle
      keeps its fills"). Its border is chrome (`--ink`) and does retheme, so
@@ -56,6 +60,13 @@
     --text-muted: #b9b0a3;
     --shadow: rgba(0, 0, 0, 0.6);
     --accent: #8ab4f8;
+    /* DIA-149: warm off-white for `.scene-wrap`'s own background only
+       (below), so the mat reads as a card against the dark page instead of
+       a `#fff` hole. Same literal value as `--ink` above by coincidence of
+       both being "the warm off-white of this dark scheme" — declared as its
+       own token, not `var(--ink)`, so a future chrome-only change to `--ink`
+       can't silently retint the mat. */
+    --scene-mat-dark: #f2ece2;
   }
 
   /* Two selectors here, both absent in light so light stays pixel-identical
@@ -70,9 +81,18 @@
      transparent edge pixels never show the dark page. Dark only: in light
      the page is already the mat colour, and an opaque background on this
      overflow scroller changes Chromium's compositing enough to shift
-     anti-aliased pixels on the neighbouring pills. */
+     anti-aliased pixels on the neighbouring pills.
+     DIA-149: off-white + rounded corners so the mat reads as a deliberate
+     card, not a hole cut in the page. `overflow-y: hidden` is dark-only and
+     y-axis-only so WebKit's corner-radius clip (unreliable on the painted
+     canvas layer under `overflow-x: auto`) can't leak square corners without
+     touching the horizontal pan this box depends on (D-042a). No padding/
+     margin/width change — those would shift the close-up's 2.0 css-px-per-
+     art-px scale, which must stay identical to light. */
   .scene-wrap {
-    background: var(--scene-mat);
+    background: var(--scene-mat-dark);
+    border-radius: 12px;
+    overflow-y: hidden;
   }
 }
 
