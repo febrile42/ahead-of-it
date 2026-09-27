@@ -3,30 +3,74 @@ name: Checks and Deploy
 # PH1-05: the non-negotiables (R-16, R-21, R-23, R-26, R-33) as CI gates,
 # plus deploy. One workflow so deploy can `needs: check` — a separate
 # deploy.yml triggered on the same push would run independently and could
-# deploy a red build. `check` runs on every PR into develop and on every
-# push to develop/main; `preview` and `deploy-production` are gated on
+# deploy a red build. `check` runs on every non-draft PR into develop and on
+# every push to develop/main; `preview` and `deploy-production` are gated on
 # `check` passing and keep their original push-only conditions (never on a
-# pull_request — there is nothing to deploy for a PR).
+# pull_request — there is nothing to deploy for a PR). `preview` and
+# `deploy-production` reuse the `dist/` artifact `check` already built and
+# tested instead of rebuilding (DIA-143) — GITHUB_SHA is the same commit for
+# every job in a run, so dist/version.json (DIA-103) still carries the
+# pushed SHA either way.
 #
 # workflow_dispatch lets `preview` be re-run against `develop` on demand
 # (e.g. after adding secrets, with no new commit to push) — a manual
 # dispatch still sets `github.ref` to the chosen branch, so `preview`'s
 # `github.ref == 'refs/heads/develop'` condition needs no change to work
-# under it.
+# under it. workflow_dispatch has no `paths` filter (GitHub does not support
+# one for it), so a manual run always executes `check`.
+#
+# `concurrency` (DIA-143) groups runs per workflow + ref and cancels
+# in-progress runs only for pull_request events — a superseding push to
+# develop/main must never cancel a `preview`/`deploy-production` job that is
+# mid-deploy, so pushes queue instead of cancelling.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 on:
   workflow_dispatch: {}
   pull_request:
     branches:
       - develop
+    types: [opened, synchronize, reopened, ready_for_review]
+    # Doc-only PRs skip CI (DIA-143) — but the build reads docs/content/**
+    # (content.json is generated from it) and docs/product/SCENE-FORMAT.md
+    # (the scene contract), so those two paths still trigger a run even
+    # though they live under docs/. There are no required status checks
+    # today, so a skipped run never blocks a merge.
+    paths:
+      - "**"
+      - "!docs/**"
+      - "!**/*.md"
+      - "docs/content/**"
+      - "docs/product/SCENE-FORMAT.md"
   push:
     branches:
       - develop
       - main
+    paths:
+      - "**"
+      - "!docs/**"
+      - "!**/*.md"
+      - "docs/content/**"
+      - "docs/product/SCENE-FORMAT.md"
 
 jobs:
   check:
     name: build, test, serving, lighthouse
     runs-on: ubuntu-latest
+    # DIA-143 run 36307641570 (2026-09-27) was killed by a 20-minute budget
+    # mid-`Test` step: the e2e suite now includes the webkit-iphone project
+    # (DIA-15) and the Test step alone ran ~19m before cancellation, on top
+    # of Build/Lighthouse — consistent with the documented pre-PR baseline of
+    # 23m46s for the whole job (run 36294069657). 20 was too tight for a real
+    # run; 35 gives headroom above that baseline while still catching a
+    # genuine hang well short of an hour.
+    timeout-minutes: 35
+    # Draft PRs skip `check` (DIA-143) — ready_for_review re-triggers it via
+    # the `types` list above. Pushes and workflow_dispatch have no
+    # `pull_request` context, so this only ever excludes drafts.
+    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
     steps:
       - uses: actions/checkout@v5.0.1
 
@@ -43,8 +87,31 @@ jobs:
       # agrees on. WebKit runs the DIA-15 `webkit-iphone` project — the
       # closest engine-level proxy for iOS Safari, the site's primary
       # real-world target (R-20), available on a Linux runner.
+      #
+      # DIA-143: the browser binaries are cached on the @playwright/test
+      # version pinned in package-lock.json. On a cache hit, only the OS
+      # package dependencies are installed (`install-deps`, no re-download);
+      # on a miss, the full `install --with-deps` runs and primes the cache
+      # for next time.
+      - name: Read pinned Playwright version
+        id: playwright-version
+        run: |
+          echo "version=$(node -p "require('./package-lock.json').packages['node_modules/@playwright/test'].version")" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Playwright browsers
+        id: playwright-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-browsers-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}
+
       - name: Install Playwright browsers (Chromium, WebKit)
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
         run: npx playwright install --with-deps chromium webkit
+
+      - name: Install Playwright OS dependencies (cache hit, browsers already present)
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium webkit
 
       - name: Resolve CHROME_PATH from the Playwright cache
         run: |
@@ -57,6 +124,18 @@ jobs:
       # R-33 / D-014: check:employer runs inside `npm run build` already.
       - name: Build
         run: npm run build
+
+      # DIA-143: preview/deploy-production download this instead of
+      # rebuilding. dist/version.json (DIA-103) was stamped from GITHUB_SHA
+      # during this Build step, and GITHUB_SHA is identical for every job in
+      # this workflow run, so the artifact still carries the pushed commit
+      # when those jobs pick it up.
+      - name: Upload dist for deploy jobs
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist
+          retention-days: 1
 
       # R-21/R-16/R-26 smoke + unit tests (tests/**, src/**/*.test.ts).
       # e2e runs on both `chromium` and `webkit-iphone` projects (DIA-15) —
@@ -98,6 +177,7 @@ jobs:
     name: Upload Preview
     needs: check
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     if: github.ref == 'refs/heads/develop'
     steps:
       - uses: actions/checkout@v5.0.1
@@ -106,11 +186,15 @@ jobs:
         with:
           node-version: 22
 
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build
-        run: npm run build
+      # DIA-143: reuse `check`'s already-built, already-tested dist/ instead
+      # of running `npm ci` + `npm run build` again. scripts/print-worker-name.mjs
+      # (used below on the fallback path) only reads wrangler.jsonc with
+      # Node built-ins, so it needs no `npm ci`.
+      - name: Download dist from check
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
 
       - name: Upload version with staging alias (does not touch production)
         id: upload
@@ -197,6 +281,7 @@ jobs:
     name: Deploy to Production
     needs: check
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     if: github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v5.0.1
@@ -205,11 +290,13 @@ jobs:
         with:
           node-version: 22
 
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build
-        run: npm run build
+      # DIA-143: reuse `check`'s dist/ (see the `preview` job's matching
+      # step for why this still carries the pushed SHA in version.json).
+      - name: Download dist from check
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
 
       # Checked before the deploy, not after: wrangler's own deployment-url
       # output is the common-case source of truth for BASE_URL below and
