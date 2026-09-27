@@ -413,6 +413,18 @@ h1 {
      the full scrollable canvas, not just the visible viewport slice of it. */
 }
 
+/* DIA-122: main.ts's updatePanAffordance toggles --pannable whenever the
+   current view overflows either axis, and setupScenePan toggles --panning
+   for the duration of an actual drag — never on a plain hover/tap, so a
+   view that fits keeps the default cursor (acceptance criterion 2). */
+.scene-wrap--pannable {
+  cursor: grab;
+}
+
+.scene-wrap--pannable.scene-wrap--panning {
+  cursor: grabbing;
+}
+
 .scene-wrap canvas {
   image-rendering: pixelated;
   image-rendering: -moz-crisp-edges;

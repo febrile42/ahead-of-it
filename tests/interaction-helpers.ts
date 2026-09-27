@@ -679,6 +679,65 @@ export async function failSceneFetch(page: Page, band: number | 'all'): Promise<
   await page.route(pattern, (route) => route.abort('failed'));
 }
 
+// ---------------------------------------------------------------------------
+// drag-to-pan (DIA-122)
+// ---------------------------------------------------------------------------
+
+/**
+ * Dispatches a Pointer Events drag sequence (down -> N moves -> up) from
+ * `from` to `to`, against whatever real element sits at each point along
+ * the way. src/main.ts's setupScenePan listens for exactly these events, so
+ * this exercises the app's own pan controller rather than a browser's
+ * native scroll gesture — deliberately, and the only reliable way to do it:
+ * Playwright's `page.touchscreen` is tap-only (no drag primitive), and
+ * WebKit (the `webkit-iphone` project's engine, this repo's iOS Safari
+ * proxy) has no CDP touch-input path the way Chromium does, so neither
+ * project has a native "swipe" this could drive instead. A dispatched
+ * PointerEvent reaches a real `addEventListener` exactly like a trusted
+ * one — only a browser's *own* default action (native scroll-gesture
+ * recognition) requires a trusted event, and the app under test
+ * deliberately does not rely on that (see setupScenePan's own doc
+ * comment), so this exercises the real code path a device would use, not
+ * a bypass of it.
+ */
+export async function pointerDrag(
+  page: Page,
+  from: { x: number; y: number },
+  to: { x: number; y: number },
+  options: { pointerType?: 'touch' | 'mouse'; steps?: number } = {}
+): Promise<void> {
+  const { pointerType = 'touch', steps = 10 } = options;
+  await page.evaluate(
+    ({ from, to, pointerType, steps }) => {
+      const pointerId = pointerType === 'touch' ? 2 : 1;
+      function fire(type: string, x: number, y: number, buttons: number) {
+        const el = document.elementFromPoint(x, y);
+        el?.dispatchEvent(
+          new PointerEvent(type, {
+            pointerId,
+            pointerType,
+            clientX: x,
+            clientY: y,
+            button: 0,
+            buttons,
+            bubbles: true,
+            cancelable: true,
+            isPrimary: true,
+          })
+        );
+      }
+      fire('pointerdown', from.x, from.y, 1);
+      for (let i = 1; i <= steps; i += 1) {
+        const x = from.x + ((to.x - from.x) * i) / steps;
+        const y = from.y + ((to.y - from.y) * i) / steps;
+        fire('pointermove', x, y, 1);
+      }
+      fire('pointerup', to.x, to.y, 0);
+    },
+    { from, to, pointerType, steps }
+  );
+}
+
 /** The "not drawn yet" box src/main.ts paints when no scene file loads. */
 export async function canvasShowsMissingScene(page: Page): Promise<boolean> {
   // renderMissingScene() empties both the tab row and the hotspot layer and

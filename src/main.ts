@@ -193,6 +193,153 @@ if (
   scrollHint.textContent = 'Scroll to see the rest →';
   stepper.after(scrollHint);
 
+  // DIA-122: (re)computed once a paint's real DOM is settled — after the
+  // hotspot/zoom-chip layer, not just sizeAndPositionCanvas's own canvas
+  // math. A chip is a >=44px button centred on its rect's point (R-20),
+  // so one anchored near a small view's edge can itself extend past the
+  // canvas's own box (renderZoomTargets's placeChips already has to hunt
+  // it a free spot for exactly this reason) — `#scene-wrap`'s *actual*
+  // scrollable extent then includes that overhang, which the canvas's
+  // cssW/cssH alone would not have accounted for. Reading scrollWidth/
+  // Height here instead keeps this in lockstep with what maxScroll()
+  // below actually scrolls.
+  function updatePanAffordance() {
+    const overflowsX = sceneWrap!.scrollWidth > sceneWrap!.clientWidth + 0.5;
+    const overflowsY = sceneWrap!.scrollHeight > sceneWrap!.clientHeight + 0.5;
+    sceneWrap!.classList.toggle('scene-wrap--pannable', overflowsX || overflowsY);
+    // Hands whichever axis does *not* overflow back to the browser's own
+    // default (page scroll on Y in the common X-only case) instead of
+    // letting our own pointer handling race a native gesture recogniser
+    // that isn't going to do anything on that axis anyway — D-042a's "no
+    // swipe gesture" rule (panning never changes view) holds regardless,
+    // since setupScenePan() below only ever writes scrollLeft/scrollTop.
+    sceneWrap!.style.touchAction = overflowsX && overflowsY ? 'none' : overflowsX ? 'pan-y' : overflowsY ? 'pan-x' : '';
+  }
+
+  // DIA-122: one-finger touch drag and mouse click-hold-drag pan an
+  // overflowing view (updatePanAffordance's overflowsX/overflowsY above —
+  // R-20's "pan/zoom is allowed"). Neither input had this natively: a real
+  // mouse has no native drag-to-pan on `overflow: auto` at all (only its
+  // own, often-invisible-on-this-layout scrollbar drag), and Playwright's
+  // `webkit-iphone` project (playwright.config.ts) — the closest available
+  // proxy for the iOS Safari this site actually targets — has no CDP
+  // touch-input path the way Chromium does, and a JS-dispatched synthetic
+  // `TouchEvent` never reaches WebKit's own native scroll-gesture
+  // recogniser (untrusted events don't feed it), so a close-up's overflow
+  // could never be exercised by this repo's e2e suite by relying on the
+  // browser's own touch scrolling. Pointer Events unify both real inputs
+  // under one implementation instead, with the tap-vs-pan threshold
+  // acceptance criterion 3 needs either way. `sceneWrap` itself (unlike
+  // `canvas`) is never replaced or moved by a render (DIA-65), so these
+  // listeners are attached once, here, and outlive every re-render.
+  function setupScenePan() {
+    const PAN_THRESHOLD_PX = 6;
+    let activePointerId: number | null = null;
+    let startX = 0;
+    let startY = 0;
+    let startScrollLeft = 0;
+    let startScrollTop = 0;
+    let panned = false;
+    let suppressNextClick = false;
+
+    function maxScroll() {
+      return {
+        x: Math.max(0, sceneWrap!.scrollWidth - sceneWrap!.clientWidth),
+        y: Math.max(0, sceneWrap!.scrollHeight - sceneWrap!.clientHeight),
+      };
+    }
+
+    sceneWrap!.addEventListener('pointerdown', (event) => {
+      // 0 is touch/pen contact as well as a mouse's primary button — a
+      // right/middle mouse button (1/2) is left to its own native menu/
+      // behaviour, not hijacked into a pan.
+      if (event.button !== 0 || activePointerId !== null) return;
+      const { x: maxX, y: maxY } = maxScroll();
+      if (maxX <= 0 && maxY <= 0) return;
+      activePointerId = event.pointerId;
+      startX = event.clientX;
+      startY = event.clientY;
+      startScrollLeft = sceneWrap!.scrollLeft;
+      startScrollTop = sceneWrap!.scrollTop;
+      panned = false;
+      // Deliberately NOT captured here yet — a real browser retargets the
+      // eventual `click` to whatever element holds capture at the time,
+      // not just pointermove/pointerup, so capturing on every pointerdown
+      // (most of them a tap, never a pan) would misdirect the tap-with-
+      // no-movement click acceptance criterion 3 requires, away from the
+      // hotspot button and into this handler's own suppression check —
+      // which would then let it through unsuppressed, but at the wrong
+      // target, so it would never reach the button's own listener either.
+      // Capture is set below, lazily, only once pointermove confirms an
+      // actual pan.
+    });
+
+    sceneWrap!.addEventListener('pointermove', (event) => {
+      if (event.pointerId !== activePointerId) return;
+      const dx = event.clientX - startX;
+      const dy = event.clientY - startY;
+      if (!panned) {
+        if (Math.abs(dx) < PAN_THRESHOLD_PX && Math.abs(dy) < PAN_THRESHOLD_PX) return;
+        const { x: maxX, y: maxY } = maxScroll();
+        const wantsHorizontal = Math.abs(dx) >= Math.abs(dy);
+        const engage = (maxX > 0 && maxY > 0) || (wantsHorizontal ? maxX > 0 : maxY > 0);
+        if (!engage) {
+          // Criterion 4 / D-042a: the dominant drag direction has no room
+          // to pan on this element (a vertical drag when only X
+          // overflows, or vice versa) — bow out (never captured, so the
+          // browser's own default, which touch-action already allows on
+          // the other axis, simply proceeds).
+          activePointerId = null;
+          return;
+        }
+        panned = true;
+        sceneWrap!.classList.add('scene-wrap--panning');
+        // Captured only now that this is confirmed to be a real pan, not
+        // a tap — a mouse drag that leaves the box, or a finger that
+        // leaves the viewport's slice of an overflowing view, keeps
+        // delivering pointermove/pointerup here regardless.
+        sceneWrap!.setPointerCapture(event.pointerId);
+      }
+      // Assigning scrollLeft/scrollTop past either end already clamps in
+      // every browser; the explicit Math.min/max here is acceptance
+      // criterion 7 stated in code, not a second clamp doing real work.
+      const { x: maxX, y: maxY } = maxScroll();
+      if (maxX > 0) sceneWrap!.scrollLeft = Math.min(maxX, Math.max(0, startScrollLeft - dx));
+      if (maxY > 0) sceneWrap!.scrollTop = Math.min(maxY, Math.max(0, startScrollTop - dy));
+      event.preventDefault();
+    });
+
+    function endPan(event: PointerEvent) {
+      if (event.pointerId !== activePointerId) return;
+      // A real pan's own pointerup still fires a `click` right after on
+      // whatever it ends on — the one thing acceptance criterion 3
+      // forbids (a moved drag must never also open the hotspot/zoom
+      // button it happened to end over).
+      if (panned) suppressNextClick = true;
+      activePointerId = null;
+      panned = false;
+      sceneWrap!.classList.remove('scene-wrap--panning');
+    }
+    sceneWrap!.addEventListener('pointerup', endPan);
+    sceneWrap!.addEventListener('pointercancel', endPan);
+
+    // Capture phase: runs before a hotspot/zoom button's own bubble-phase
+    // click listener (src/ui/panel.ts's renderHotspots/renderZoomTargets),
+    // so a real pan can veto the button's click before its own handler
+    // (openPanel / zoomInto) ever sees it.
+    sceneWrap!.addEventListener(
+      'click',
+      (event) => {
+        if (!suppressNextClick) return;
+        suppressNextClick = false;
+        event.stopPropagation();
+        event.preventDefault();
+      },
+      true
+    );
+  }
+  setupScenePan();
+
   const prevButton = stepper.querySelector<HTMLButtonElement>('.scene-stepper__prev');
   const nextButton = stepper.querySelector<HTMLButtonElement>('.scene-stepper__next');
   const stepperLabel = stepper.querySelector<HTMLParagraphElement>('.scene-stepper__label');
@@ -596,6 +743,7 @@ if (
     currentScene = null;
     stepperLabel!.textContent = '';
     for (const button of [prevButton!, nextButton!, floorButton!]) button.setAttribute('aria-disabled', 'true');
+    updatePanAffordance();
   }
 
   async function render() {
@@ -708,6 +856,7 @@ if (
     } else {
       renderHotspots(hotspotsLayer!, toSceneLayout(view), canvasBox, openPanel);
     }
+    updatePanAffordance();
     restoreFocus(focusCapture);
     const paintKey = `${band}/${state}`;
     syncOpenPanel(paintKey === lastPaintKey);
