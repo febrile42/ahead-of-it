@@ -24,6 +24,7 @@ import {
   rooms,
 } from './scene/scene';
 import type { SceneFile, SceneView } from './scene/scene';
+import { bandIndex } from './scene/bands';
 import { createChecklist } from './ui/checklist';
 import type { CanvasBox } from './ui/panel';
 import { beyondPanelFields, createPanel, panelFieldsFor, renderHotspots, renderZoomTargets } from './ui/panel';
@@ -93,6 +94,9 @@ if (sliderRoot && toggleRoot && viewsRow && sceneWrap && stepper && canvas && ho
   // toggle/slider actually reset t to 0 for the new scene, without reaching
   // into a closure Playwright can't see.
   document.body.dataset.sceneStartTime = String(sceneStartTime);
+  // Test hook (tests/band-crossing-moment.spec.ts): whether a band-crossing
+  // moment is currently playing.
+  document.body.dataset.momentPlaying = 'false';
   // True for the span of an in-flight render() (including its awaits) — the
   // ticker skips a tick's canvas repaint while this holds, so a tick and a
   // full render() (which also paints the canvas, mid-DOM-rebuild) can never
@@ -112,6 +116,42 @@ if (sliderRoot && toggleRoot && viewsRow && sceneWrap && stepper && canvas && ho
   // Reset whenever a full render() commits, since that already repainted
   // the (possibly new) current view at its own `t`.
   let previousResolved: (ResolvedFrame | null)[] | null = null;
+
+  // PH2-03 (DIA-113, docs/briefs/PH2-03-band-crossing.md): the band the last
+  // *committed* render actually painted — distinct from `band` (this
+  // render's target, which during a fast drag can race ahead of what has
+  // actually finished painting, S5). Comparing against this, not `band`'s
+  // previous value, is what makes "starts after the slider settles" true:
+  // only the one render that survives the stale-token check as a real
+  // commit ever reaches the crossing check below. `null` until the first
+  // commit, so first load is never a crossing.
+  let lastCommittedBand: BandId | null = null;
+  interface ActiveMoment {
+    momentView: SceneView;
+    ms: number;
+    committedAt: number;
+  }
+  // The band-crossing moment currently playing, if any (SCENE-FORMAT § Band-
+  // crossing moment). The ticker paints `momentView.entries` instead of the
+  // real view's for `ms` real milliseconds from `committedAt`, then hands
+  // back to the view at its own t = 0 (sceneStartTime reset, below).
+  let activeMoment: ActiveMoment | null = null;
+  // Bands whose moment has already played this session — D-045: once per
+  // band per session, in memory only, never written to storage or the URL.
+  const playedMomentBands = new Set<string>();
+
+  /** Any input cancels a playing moment "at once, with a cut and no queued
+   * remainder" (the brief's rule) — called synchronously from the slider,
+   * toggle and panel handlers, and from selectView, before render() (or,
+   * for the panel, before anything) runs. Clearing `previousResolved` too
+   * means the very next tick treats whatever it paints next as a fresh
+   * baseline rather than comparing it against the moment's last frame. */
+  function cancelActiveMoment() {
+    if (!activeMoment) return;
+    activeMoment = null;
+    previousResolved = null;
+    document.body.dataset.momentPlaying = 'false';
+  }
 
   // S1: slider and toggle markup already lives in index.html's static
   // shell (CLS) — these fill it in rather than creating/appending it.
@@ -198,6 +238,13 @@ if (sliderRoot && toggleRoot && viewsRow && sceneWrap && stepper && canvas && ho
     if (viewId === currentViewId || !currentScene) return;
     const view = findView(currentScene, viewId);
     if (!view) return;
+    // PH2-03: a moment plays only in the view the visitor landed on — leaving
+    // it (a tab, the stepper, "whole floor", a zoom-in) cancels it, both
+    // because the brief says any navigation input does and because the
+    // canvas is about to be resized/replaced for a different view's own
+    // dimensions (sizeAndPositionCanvas), which the moment's paint list is
+    // not sized for.
+    cancelActiveMoment();
     currentViewId = view.id;
     pendingFocus = intent.focus ?? null;
     pendingAnnounce = announceView(currentScene, view);
@@ -386,6 +433,7 @@ if (sliderRoot && toggleRoot && viewsRow && sceneWrap && stepper && canvas && ho
   function openPanel(gagId: string, source: HTMLElement) {
     const fields = panelFieldsFor(gagId);
     if (!fields) return;
+    cancelActiveMoment(); // PH2-03: opening a panel cancels a playing moment at once.
     openPanelGagId = gagId;
     // R-04: the prevented-beat thumbnail is always the without-state
     // scene. B4: closing returns focus to the hotspot that opened it.
@@ -454,7 +502,20 @@ if (sliderRoot && toggleRoot && viewsRow && sceneWrap && stepper && canvas && ho
       captured.kind === 'hotspot'
         ? `[data-hotspot-id="${CSS.escape(captured.hotspotId)}"]`
         : `[data-view-id="${CSS.escape(captured.viewId)}"]`;
-    hotspotsLayer!.querySelector<HTMLButtonElement>(selector)?.focus();
+    const target = hotspotsLayer!.querySelector<HTMLButtonElement>(selector);
+    if (target) {
+      target.focus();
+    } else if (captured.kind === 'hotspot') {
+      // PH2-03 (DIA-113): fires whenever the just-rebuilt hotspot layer no
+      // longer has a button for the captured id — most commonly a band
+      // crossing, which brings a completely different gag set (unlike an
+      // in-band view change, where an open panel already has its own
+      // return-focus fallback via syncOpenPanel), but not exclusive to it.
+      // Falling back to the slider, the same as the 'tab' case above, keeps
+      // a keyboard visitor from being silently dumped on <body> (R-24) by
+      // whatever input deleted their focused hotspot out from under them.
+      slider.input.focus();
+    }
   }
 
   /** F1.1/F1.3b/F3.2: an open panel is only valid while its gag still has a
@@ -553,12 +614,38 @@ if (sliderRoot && toggleRoot && viewsRow && sceneWrap && stepper && canvas && ho
     syncTabs(scene, roomOf(scene, view)?.id);
     syncStepper(scene, view);
     const canvasBox = sizeAndPositionCanvas(view);
+    // PH2-03 (DIA-113, CEO review on PR #56): decided *before* the paint
+    // below, not after. Deciding it afterward painted the real view first —
+    // for a built-state close-up that already shows the "after" pose (the
+    // sign lit, the door open) — and only handed off to the moment on the
+    // ticker's next tick, which flashed that golden end frame on screen for
+    // a rAF or two and gave the punchline away before the beat. Every
+    // condition here only reads state already settled by this point in the
+    // function; the mutations that follow (`playedMomentBands.add`,
+    // `activeMoment = ...`) still wait for the stale-render check below,
+    // same as before.
+    const crossingMoment =
+      lastCommittedBand !== null &&
+      band !== lastCommittedBand &&
+      state === 'built' &&
+      band !== 'beyond' && // D-029: 1,000+ is an alias of 750, never a crossing of its own
+      bandIndex(band) > bandIndex(lastCommittedBand) &&
+      !motion.isReduced() && // the brief's rule: reduced motion plays no moment at all
+      !playedMomentBands.has(String(band)) &&
+      scene.moment &&
+      scene.moment.view === view.id // always the default close-up; the art check proves it
+        ? scene.moment
+        : null;
     // SCENE-FORMAT § Motion "rest pose = today's export": motion off
     // (reduced-motion, or the tab currently hidden) paints the rest pose,
     // same as a painter with no motion support — every pixel-parity golden
     // stays valid. Otherwise this paints the *current* moment, not t = 0, so
-    // a tab/stepper/resize render never jumps the animation backwards.
+    // a tab/stepper/resize render never jumps the animation backwards. A
+    // moment about to start is the one exception: this commit paints its
+    // own t = 0 directly, never the real view's rest pose.
     const activeT = motion.isReduced() || document.hidden ? undefined : performance.now() - sceneStartTime;
+    const paintView: SceneView = crossingMoment ? { ...view, entries: crossingMoment.entries } : view;
+    const paintT = crossingMoment ? 0 : activeT;
     const myGeneration = (paintGeneration += 1);
     // N1: an unknown-frame throw from renderScene (a bad scene/manifest
     // reference) must still clear renderInFlight, or the ticker skips every
@@ -568,7 +655,7 @@ if (sliderRoot && toggleRoot && viewsRow && sceneWrap && stepper && canvas && ho
     // actual throw takes this path.
     let threw = true;
     try {
-      await renderScene(canvas!, view, state, activeT, () => paintGeneration !== myGeneration);
+      await renderScene(canvas!, paintView, state, paintT, () => paintGeneration !== myGeneration);
       threw = false;
     } finally {
       if (threw) renderInFlight = false;
@@ -580,6 +667,21 @@ if (sliderRoot && toggleRoot && viewsRow && sceneWrap && stepper && canvas && ho
     // identical to what's already on screen.
     previousResolved = null;
     renderInFlight = false;
+
+    // PH2-03 (DIA-113): a genuine rising crossing into a new band, in the
+    // built state, lands here — the one place a fast drag's stale renders
+    // never reach (S5's token check above already returned for them), which
+    // is what "starts after the slider settles" means in practice.
+    if (crossingMoment) {
+      playedMomentBands.add(String(band));
+      activeMoment = {
+        momentView: paintView, // already painted at t = 0 by the commit above
+        ms: crossingMoment.ms,
+        committedAt: performance.now(),
+      };
+      document.body.dataset.momentPlaying = 'true';
+    }
+    lastCommittedBand = band;
     if (view.kind === 'room') {
       renderZoomTargets(hotspotsLayer!, toZoomLayout(scene, view), canvasBox, (viewId) =>
         selectView(viewId, { focus: { kind: 'floor' } })
@@ -623,6 +725,7 @@ if (sliderRoot && toggleRoot && viewsRow && sceneWrap && stepper && canvas && ho
   }
 
   slider.onChange((newBand) => {
+    cancelActiveMoment(); // PH2-03: moving the slider cancels a playing moment at once.
     const wasBeyond = band === 'beyond';
     band = newBand;
     currentViewId = null; // a new band picks its own default view
@@ -664,6 +767,7 @@ if (sliderRoot && toggleRoot && viewsRow && sceneWrap && stepper && canvas && ho
   });
 
   toggle.onChange((newState) => {
+    cancelActiveMoment(); // PH2-03: flipping the toggle cancels a playing moment at once.
     state = newState;
     nudgeSpent = true; // DIA-17: latch on the first toggle, shown or not (R-06a: once per session).
     toggle.hideNudge(); // m2: the nudge's only job was getting them to toggle once.
@@ -683,7 +787,15 @@ if (sliderRoot && toggleRoot && viewsRow && sceneWrap && stepper && canvas && ho
   let resizeDebounce: ReturnType<typeof setTimeout> | undefined;
   window.addEventListener('resize', () => {
     clearTimeout(resizeDebounce);
-    resizeDebounce = setTimeout(() => void render(), 150);
+    // PH2-03 (DIA-113, CEO review): a resize renders the *real* current
+    // view at its own size — cut a playing moment first, the same as every
+    // other input, or the next tick would resume painting the moment's
+    // paint list (sized for the pre-resize canvas) on top of the freshly
+    // resized one, a one-frame flash of the wrong picture.
+    resizeDebounce = setTimeout(() => {
+      cancelActiveMoment();
+      void render();
+    }, 150);
   });
 
   // PH2-02 (R-24): the one gate every moving thing on the page reads before
@@ -742,47 +854,68 @@ if (sliderRoot && toggleRoot && viewsRow && sceneWrap && stepper && canvas && ho
     }
   }
 
+  /** Repaints `viewLike` at `t` if the tick throttle allows it and something
+   * visible actually changed since the last repaint — the shared body both
+   * a normal tick and a playing moment's tick use, so the two only differ in
+   * which paint list and which clock they hand it (below). */
+  function paintTick(now: number, viewLike: SceneView, t: number) {
+    if (renderInFlight || tickRepaintInFlight || !manifestCache || now - lastRepaintAt < MIN_REPAINT_INTERVAL_MS) return;
+    const resolved = resolveViewAt(viewLike, manifestCache, t);
+    if (!motionChanged(resolved, previousResolved)) return;
+    previousResolved = resolved;
+    lastRepaintAt = now;
+    tickRepaintCount += 1;
+    // Test hook (tests/motion-playback.spec.ts): a repaint the ticker
+    // itself made, distinct from render()'s own renderedToken stamp.
+    document.body.dataset.repaintCount = String(tickRepaintCount);
+    tickRepaintInFlight = true;
+    const myGeneration = paintGeneration;
+    void renderScene(canvas!, viewLike, state, t, () => paintGeneration !== myGeneration)
+      .then((painted) => {
+        // N3: a render() or the reduced-motion rest pose started (and
+        // painted) while this tick's images were still resolving —
+        // renderScene dropped this tick's paint as stale, so the
+        // baseline above is for a frame that never actually landed on
+        // screen. Clear it so the *next* tick compares against
+        // whatever really is on screen (previousResolved === null
+        // always repaints, per motionChanged) instead of concluding
+        // "nothing changed" against a resolution nobody drew.
+        if (!painted) previousResolved = null;
+      })
+      .finally(() => {
+        tickRepaintInFlight = false;
+      });
+  }
+
   function tick(now: number) {
     rafHandle = null;
     if (!tickerActive()) return; // a hard-stop condition fired; whoever clears it calls ensureTickerRunning() again
-    if (
-      !renderInFlight &&
-      !tickRepaintInFlight &&
-      manifestCache &&
-      currentScene &&
-      currentViewId &&
-      now - lastRepaintAt >= MIN_REPAINT_INTERVAL_MS
-    ) {
-      const view = findView(currentScene, currentViewId);
-      if (view) {
-        const t = now - sceneStartTime;
-        const resolved = resolveViewAt(view, manifestCache, t);
-        if (motionChanged(resolved, previousResolved)) {
-          previousResolved = resolved;
-          lastRepaintAt = now;
-          tickRepaintCount += 1;
-          // Test hook (tests/motion-playback.spec.ts): a repaint the ticker
-          // itself made, distinct from render()'s own renderedToken stamp.
-          document.body.dataset.repaintCount = String(tickRepaintCount);
-          tickRepaintInFlight = true;
-          const myGeneration = paintGeneration;
-          void renderScene(canvas!, view, state, t, () => paintGeneration !== myGeneration)
-            .then((painted) => {
-              // N3: a render() or the reduced-motion rest pose started (and
-              // painted) while this tick's images were still resolving —
-              // renderScene dropped this tick's paint as stale, so the
-              // baseline above is for a frame that never actually landed on
-              // screen. Clear it so the *next* tick compares against
-              // whatever really is on screen (previousResolved === null
-              // always repaints, per motionChanged) instead of concluding
-              // "nothing changed" against a resolution nobody drew.
-              if (!painted) previousResolved = null;
-            })
-            .finally(() => {
-              tickRepaintInFlight = false;
-            });
-        }
+
+    if (activeMoment) {
+      const m = now - activeMoment.committedAt;
+      if (m >= activeMoment.ms) {
+        // SCENE-FORMAT § Band-crossing moment: "at m >= ms ... the painter
+        // discards the block and paints the view as usual", and "the
+        // handover is to the view at t = 0" — reset sceneStartTime (the
+        // same reset the toggle/slider already do for a new scene) so
+        // ambient motion resumes fresh instead of jumping to whatever real
+        // time has elapsed since the scene loaded.
+        activeMoment = null;
+        document.body.dataset.momentPlaying = 'false';
+        sceneStartTime = now;
+        document.body.dataset.sceneStartTime = String(sceneStartTime);
+        previousResolved = null;
+        // Falls through to the normal tick below, which now sees t = 0.
+      } else {
+        paintTick(now, activeMoment.momentView, m);
+        rafHandle = requestAnimationFrame(tick);
+        return;
       }
+    }
+
+    if (currentScene && currentViewId) {
+      const view = findView(currentScene, currentViewId);
+      if (view) paintTick(now, view, now - sceneStartTime);
     }
     rafHandle = requestAnimationFrame(tick);
   }
@@ -807,7 +940,13 @@ if (sliderRoot && toggleRoot && viewsRow && sceneWrap && stepper && canvas && ho
     document.body.dataset.reducedMotion = String(reduced);
     if (reduced) {
       stopTicker();
-      previousResolved = null;
+      // PH2-03 (DIA-113, CEO review): the brief's rule is that reduced
+      // motion plays no moment at all — flipping it on mid-moment must stop
+      // one already playing, not just stop the ticker that was painting it.
+      // cancelActiveMoment() also clears `data-moment-playing`, which
+      // otherwise stayed 'true' forever (the ticker that would have flipped
+      // it false on hand-off never runs again while reduced motion holds).
+      cancelActiveMoment(); // also resets previousResolved (see its own doc comment)
       // SCENE-FORMAT § Motion: "motion off" must show the rest pose
       // immediately, not whatever frame the ticker last painted — a canvas
       // repaint only (never render()), so this never touches focus/DOM.

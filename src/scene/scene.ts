@@ -89,11 +89,24 @@ export interface SceneView {
   hotspots: SceneHotspot[];
 }
 
+/** SCENE-FORMAT "Band-crossing moment" (PH2-03, DIA-101/DIA-113): a complete
+ * paint list for `view` (always the file's default close-up), played once
+ * from `start: 0` for `ms` when the visitor crosses up into this band in the
+ * built state. Additive and optional, like Motion — a file without one has
+ * no moment, and only a `built` file ever carries one. */
+export interface SceneMoment {
+  gagId: string;
+  view: string;
+  ms: number;
+  entries: SceneEntry[];
+}
+
 export interface SceneFile {
   schema: number;
   band: number;
   state: 'built' | 'without';
   views: SceneView[];
+  moment?: SceneMoment;
 }
 
 export interface SceneIndex {

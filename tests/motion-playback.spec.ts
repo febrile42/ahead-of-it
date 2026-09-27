@@ -39,6 +39,16 @@ test.describe('motion plays: canvas changes, hotspot layer inert, focus and pane
         expect(animatedViewId, `${band}/${state}: no close-up in this scene has any visible motion`).toBeDefined();
         await H.gotoCloseupView(page, animatedViewId!);
 
+        // PH2-03 (DIA-113): setBand's very first band change is a genuine
+        // rising crossing, and a moment-bearing band's crossing owns the
+        // canvas for up to 2.5s before its own ambient motion's `t = 0`
+        // even starts (SCENE-FORMAT § Band-crossing moment: "the view's own
+        // motion clock does not run" while one plays). This test is about
+        // *ambient* motion never going still, which tests/band-crossing-
+        // moment.spec.ts already covers on its own — let any one-off moment
+        // finish first so it isn't mistaken for the thing under test here.
+        await page.waitForFunction(() => document.body.dataset.momentPlaying !== 'true');
+
         const first = H.hotspots(page).first();
         const gagId = await first.getAttribute('data-gag-id');
         await first.focus();
