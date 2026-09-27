@@ -5,6 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <!-- R-16 / D-018: unlisted until the Phase 4 publicity gate opens. -->
     <meta name="robots" content="noindex, nofollow" />
+    <!-- D-046/PH2-05: matches src/style.css's `color-scheme: light dark` —
+         a native form control (the slider) or scrollbar painted before the
+         stylesheet loads still follows the OS scheme. theme-color values
+         mirror style.css's light/dark `--page-bg`. -->
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#fff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#171310" media="(prefers-color-scheme: dark)" />
     <title>Ahead of It — Josh Gister's résumé</title>
     <!-- DIA-66: self-hosted so Chromium's automatic /favicon.ico request
          (issued regardless of this tag) resolves instead of 404ing —

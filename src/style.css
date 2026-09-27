@@ -1,12 +1,97 @@
 /* PH1-04: phone-first (R-20), designed at 390px before the >=768px side
    panel kicks in. No UI framework (D-009) — plain CSS, one file. */
 
+/* D-046/PH2-05: every colour lives behind a custom property so
+   `@media (prefers-color-scheme: dark)` below can retheme the chrome by
+   changing values only, never selectors. Three groups, by what they sit on:
+   - chrome (`--ink`, `--ink-invert`, `--page-bg`, `--surface`, `--border`,
+     `--border-soft`, `--text-muted`, `--shadow`, `--accent`): retheme in
+     dark mode.
+   - the scene overlay (`--scene-mat`, `--scene-ink`, `--scene-ink-invert`,
+     `--scene-ink-rgb`, `--scene-accent`): never retheme. Hotspots and their
+     captions sit on the canvas, which stays on a light mat in both schemes
+     (D-046 point 3) — nothing painted over it may change with the OS scheme.
+   - the toggle (`--toggle-fill`, `--toggle-fill-pressed`, `--toggle-text`,
+     `--toggle-text-pressed`): never retheme (D-046 point 4, "the toggle
+     keeps its fills"). Its border is chrome (`--ink`) and does retheme, so
+     the pill's edge still shows against a dark page. */
 :root {
-  color-scheme: light;
+  color-scheme: light dark;
   --ink: #1a1410;
-  --paper: #eafbff;
+  --ink-invert: #fff;
+  --page-bg: #fff;
+  --surface: #fff;
+  --border: #ccc;
+  --border-soft: #ddd;
+  --text-muted: #555;
+  --shadow: rgba(0, 0, 0, 0.2);
   --accent: #4472c4;
+  /* Painted only in dark (see .scene-wrap in the dark block): the colour
+     light mode has always shown behind the canvas, i.e. the page's #fff —
+     not the old `--paper` #eafbff, which was declared but never painted. */
+  --scene-mat: #fff;
+  --scene-ink: #1a1410;
+  --scene-ink-rgb: 26, 20, 16;
+  --scene-ink-invert: #fff;
+  --scene-accent: #4472c4;
+  --toggle-fill: #ffd23f;
+  --toggle-fill-pressed: #ff3dae;
+  /* Dark scheme only (see the rule in the dark block below). In light the
+     unpressed label keeps the UA's `buttontext` as it always has — #000 in
+     Chromium, rgba(0,0,0,.8) in WebKit — so no single value here could be
+     pixel-identical in both engines. */
+  --toggle-text: #000;
+  --toggle-text-pressed: #fff;
   font-family: system-ui, sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ink: #f2ece2;
+    --ink-invert: #171310;
+    --page-bg: #171310;
+    --surface: #241f19;
+    --border: #575046;
+    --border-soft: #3f3930;
+    --text-muted: #b9b0a3;
+    --shadow: rgba(0, 0, 0, 0.6);
+    --accent: #8ab4f8;
+  }
+
+  /* Two selectors here, both absent in light so light stays pixel-identical
+     to pre-D-046. This one: `color-scheme: dark` flips the UA's
+     `buttontext` to white, which would put white text on the yellow fill.
+     The pressed rule below is more specific and still wins. */
+  .toggle__button {
+    color: var(--toggle-text);
+  }
+
+  /* D-046 point 3: a light mat behind the canvas, so a sprite's
+     transparent edge pixels never show the dark page. Dark only: in light
+     the page is already the mat colour, and an opaque background on this
+     overflow scroller changes Chromium's compositing enough to shift
+     anti-aliased pixels on the neighbouring pills. */
+  .scene-wrap {
+    background: var(--scene-mat);
+  }
+}
+
+/* D-046 point 5: the print checklist stays light regardless of the OS
+   scheme. After the dark override above, so it wins when both media
+   conditions are true at once. Scene/toggle variables are never themed, so
+   they need no reset here. */
+@media print {
+  :root {
+    --ink: #1a1410;
+    --ink-invert: #fff;
+    --page-bg: #fff;
+    --surface: #fff;
+    --border: #ccc;
+    --border-soft: #ddd;
+    --text-muted: #555;
+    --shadow: rgba(0, 0, 0, 0.2);
+    --accent: #4472c4;
+  }
 }
 
 * {
@@ -17,7 +102,7 @@ body {
   margin: 0;
   padding: 0 0 2rem;
   color: var(--ink);
-  background: #fff;
+  background: var(--page-bg);
 }
 
 h1 {
@@ -111,13 +196,13 @@ h1 {
   min-height: 44px;
   border-radius: 999px;
   border: 2px solid var(--ink);
-  background: #ffd23f;
+  background: var(--toggle-fill);
   cursor: pointer;
 }
 
 .toggle__button[aria-pressed='true'] {
-  background: #ff3dae;
-  color: #fff;
+  background: var(--toggle-fill-pressed);
+  color: var(--toggle-text-pressed);
 }
 
 .toggle__subtitle {
@@ -198,14 +283,14 @@ h1 {
   padding: 0.3rem 0.7rem;
   border: 1px solid var(--ink);
   border-radius: 999px;
-  background: #fff;
+  background: var(--surface);
   cursor: pointer;
   font: inherit;
 }
 
 .scene-views__button[aria-selected='true'] {
   background: var(--ink);
-  color: #fff;
+  color: var(--ink-invert);
 }
 
 .scene-views__button:focus-visible {
@@ -276,7 +361,7 @@ h1 {
 
 .hotspot {
   background: transparent;
-  border: 2px dashed rgba(26, 20, 16, 0.6);
+  border: 2px dashed rgba(var(--scene-ink-rgb), 0.6);
   border-radius: 4px;
   cursor: pointer;
   padding: 0;
@@ -287,7 +372,11 @@ h1 {
 }
 
 .hotspot:focus-visible {
-  outline: 3px solid var(--accent);
+  /* D-046: this ring is drawn over the canvas, which keeps its light mat
+     in both schemes — --scene-accent never retheme, unlike the chrome
+     buttons' --accent below, so the ring's contrast against the mat never
+     changes with the OS scheme. */
+  outline: 3px solid var(--scene-accent);
   outline-offset: 2px;
 }
 
@@ -311,8 +400,10 @@ h1 {
 
 .hotspot__caption {
   padding: 4px 8px;
-  background: var(--ink);
-  color: #fff;
+  /* D-046: painted over the scene, same as .hotspot above — --scene-ink
+     never retheme. */
+  background: var(--scene-ink);
+  color: var(--scene-ink-invert);
   border-radius: 999px;
   font: 600 0.7rem/1.2 system-ui, sans-serif;
   text-align: center;
@@ -342,7 +433,7 @@ h1 {
   min-height: 44px;
   border: 1px solid var(--ink);
   border-radius: 999px;
-  background: #fff;
+  background: var(--surface);
   font: inherit;
   cursor: pointer;
 }
@@ -372,7 +463,7 @@ h1 {
 
 .scene-stepper__floor[aria-pressed='true'] {
   background: var(--ink);
-  color: #fff;
+  color: var(--ink-invert);
 }
 
 .scene-stepper [aria-disabled='true'] {
@@ -434,18 +525,18 @@ h1 {
   bottom: 0;
   max-height: 70vh;
   overflow-y: auto;
-  background: #fff;
+  background: var(--surface);
   border-top: 2px solid var(--ink);
   border-radius: 12px 12px 0 0;
   padding: 1rem;
-  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 -4px 16px var(--shadow);
 }
 
 .panel__close {
   min-width: 44px;
   min-height: 44px;
   border: 1px solid var(--ink);
-  background: #fff;
+  background: var(--surface);
   border-radius: 4px;
   float: right;
   cursor: pointer;
@@ -495,7 +586,7 @@ h1 {
 }
 
 .contact-line {
-  border-top: 1px solid #ccc;
+  border-top: 1px solid var(--border);
   margin-top: 1rem;
   padding-top: 0.5rem;
 }
@@ -532,13 +623,13 @@ h1 {
 }
 
 .checklist__item {
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid var(--border-soft);
   padding: 0.75rem 0;
 }
 
 .checklist__without,
 .checklist__worth {
-  color: #555;
+  color: var(--text-muted);
   font-size: 0.9rem;
 }
 
@@ -555,7 +646,7 @@ h1 {
 
 .checklist__translation th,
 .checklist__translation td {
-  border: 1px solid #ccc;
+  border: 1px solid var(--border);
   padding: 0.4rem;
   text-align: left;
   font-size: 0.85rem;
