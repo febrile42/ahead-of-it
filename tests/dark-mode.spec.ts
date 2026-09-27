@@ -4,7 +4,7 @@
 // instead (D-046 point 1). PHONE (interaction-helpers.ts) is the 390px
 // viewport CLAUDE.md designs every feature against first.
 import { expect, test } from '@playwright/test';
-import { PHONE, openApp, openFirstHotspot, setBand, setState } from './interaction-helpers';
+import { PHONE, openApp, openFirstHotspot, openPunchList, setBand, setState } from './interaction-helpers';
 import { contrastRatio } from './contrast';
 
 test.describe('dark mode screenshots (D-046 acceptance)', () => {
@@ -20,6 +20,23 @@ test.describe('dark mode screenshots (D-046 acceptance)', () => {
       });
     }
   }
+
+  // DIA-159: the default first paint, no interaction yet — the state a
+  // visitor's very first frame is in, before the punch-list/panel work below.
+  test('screenshot: landing', async ({ page }) => {
+    await openApp(page, { viewport: PHONE });
+    await page.screenshot({ path: 'tests/screenshots/dark/landing.png' });
+  });
+
+  // DIA-159: the punch-list sheet was the fix's own regression target
+  // (DIA-118 reopen) — a white sheet on a dark page is the bug this whole
+  // issue exists to catch.
+  test('screenshot: punch list open', async ({ page }) => {
+    await openApp(page, { viewport: PHONE });
+    await setBand(page, 80);
+    await openPunchList(page);
+    await page.screenshot({ path: 'tests/screenshots/dark/punch-list-open.png' });
+  });
 
   test('screenshot: an open panel', async ({ page }) => {
     await openApp(page, { viewport: PHONE });

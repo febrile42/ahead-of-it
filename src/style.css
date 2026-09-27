@@ -358,7 +358,8 @@ h1 {
   padding: 0.3rem 0.7rem;
   border: 1px solid var(--ink);
   border-radius: 999px;
-  background: #fff;
+  background: var(--surface);
+  color: var(--ink);
   font: inherit;
   cursor: pointer;
   white-space: nowrap;
@@ -366,7 +367,7 @@ h1 {
 
 .punch-list-button[aria-expanded='true'] {
   background: var(--ink);
-  color: #fff;
+  color: var(--ink-invert);
 }
 
 .punch-list-button:focus-visible {
@@ -698,6 +699,7 @@ h1 {
   min-height: 44px;
   display: inline-flex;
   align-items: center;
+  color: var(--accent);
 }
 
 @media (min-width: 768px) {
@@ -753,11 +755,12 @@ h1 {
   bottom: 0;
   max-height: 70vh;
   overflow-y: auto;
-  background: #fff;
+  background: var(--surface);
+  color: var(--ink);
   border-top: 2px solid var(--ink);
   border-radius: 12px 12px 0 0;
   padding: 1rem;
-  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 -4px 16px var(--shadow);
   z-index: 20;
 }
 
@@ -842,6 +845,13 @@ h1 {
 .checklist__download {
   min-height: 44px;
   margin-bottom: 1rem;
+  padding: 0.3rem 0.7rem;
+  border: 1px solid var(--ink);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  cursor: pointer;
 }
 
 .checklist__translation {
