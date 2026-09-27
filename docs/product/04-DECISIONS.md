@@ -569,3 +569,43 @@ Open, not in scope:
   CEO (DIA-125).
 - Visitors without JavaScript, and crawlers, get no list, because it is rendered by JS. A
   build-time `<noscript>` list would fix that for share previews. Its own ticket if wanted.
+
+**D-051 · 2026-09-27 · The page opens on the whole floor, under a two-line introduction
+(DIA-161; the owner's direction; Product & Content Lead, for CEO sign-off).**
+Today's first paint is the band's `default` close-up (D-042 item 6). At 80 that is "Sales
+pit · 3 of 4": a crop of a room, under a heading that doesn't say what the page is. A cold
+visitor has to work out that the picture is part of a building and that "Whole floor" is the
+way out. The owner flagged it on DIA-161: introduce the page, open zoomed out, let the
+visitor tap in. Amends D-042 item 6 and D-042a navigation item 1.
+1. **First paint is the room view** of the room that holds the band's `default` close-up,
+   with "Whole floor" pressed. The room's close-ups are the zoom-in tiles D-042a item 3
+   already draws. This holds on every load, including `?n=` (D-043). `default` stays in
+   the scene format unchanged, so no exporter or scene file changes. The web opens on its
+   `parent`.
+2. **Room tabs land on the room view**, not the default close-up. The reason D-042a gave
+   ("a tap never leaves the visitor on a picture with nothing to tap") no longer holds,
+   because a room view is now full of tiles to tap. It also gives one mental model: tabs are
+   floors, tiles are areas. The stepper and a tile still land on a close-up, and the stepper
+   alone still reaches every gag.
+3. **Slider and toggle keep the visitor's place**, as today (D-042a counter 3). Toggling on
+   the whole floor shows the whole floor without.
+4. **Introduction:** one lede paragraph between the `h1` and the slider, and in the room
+   view a hint in the stepper row's visible text. Copy: `TONE.md` §Landing copy. Neither
+   line adds a date, headcount or figure, and neither names an employer. Its height is
+   reserved in the static shell (CLS stays 0, as S1 requires).
+5. **The risk, and the fallback.** In a room view the art is at 1 css px per art px, so a
+   "without" gag is a change you can see in the floor, not a joke you can read. The toggle
+   is the product (D-022). The hallway kit (D-040) therefore captures the landing (room
+   view, both states) as well as the close-ups, and the test asks whether a cold visitor
+   still toggles and then taps in. If the whole-floor "without" doesn't register, the
+   fallback is that the first toggle to "without" also cuts to the default close-up. It is
+   not built now.
+No panel copy, receipt, date or figure changes.
+
+Rejected:
+- **An intro overlay or modal.** It puts a gate in front of the toy and spends the first
+  five seconds on reading. It also needs a focus trap.
+- **Keeping the close-up and adding a "zoom out" coach mark.** That explains the UI instead
+  of fixing it.
+- **An animated zoom-out on load.** Transitions belong to the Phase 2 animation pass
+  (D-042a). A later zoom-in from `rect` stays possible.

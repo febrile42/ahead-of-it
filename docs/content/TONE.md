@@ -81,6 +81,18 @@ Two registers, kept strictly apart.
 - **OG description / tagline (F-4, D-027):** *Build it, then make sure it doesn't need you.*
   Also the subtitle under the "What he'd already built" toggle state.
 
+## Landing copy (D-051)
+
+The page's own introduction (DIA-161). It is plain and says what the page is and what to do
+first. It adds no date, headcount or figure and names no employer (D-014). The toggle sits
+directly under the slider and keeps its own words, so the lede does not repeat "without
+him". These are served as `content.json` `ui.<key>` once the pipeline knows the keys.
+
+| key | copy | where |
+|---|---|---|
+| `intro` | `Josh Gister's résumé, as a building. Slide to your company's headcount: everything you can tap was already in place by the time his company was that size.` | Lede paragraph under the `h1`, above the slider. Height is reserved in the static shell. |
+| `roomHint` | `Tap an area to zoom in` | Visible stepper text in the room view, replacing the `{room}: whole floor` text there. The room is already named on the active tab. `announceRoom` is unchanged. |
+
 ## Navigation copy (D-042a)
 
 The close-up navigation's strings (brief D042-W item 8). Plain, short, functional: these
