@@ -22,6 +22,18 @@ export interface SceneHotspot {
   placeholder?: boolean;
 }
 
+/** PH2-01 Part B (SCENE-FORMAT § Motion): just enough of an entry for specs
+ * to tell whether it can actually be seen — `x`/`y` are in the *view's own*
+ * coordinates (never offset for a close-up), so an entry the room shares
+ * with a close-up but that falls outside that close-up's crop is present in
+ * the exported array but paints nothing there (the canvas clips it, same as
+ * any other out-of-bounds draw). */
+export interface SceneEntry {
+  x: number;
+  y: number;
+  motion?: unknown;
+}
+
 export interface SceneView {
   id: string;
   kind: 'room' | 'closeup';
@@ -30,6 +42,7 @@ export interface SceneView {
   size: { w: number; h: number };
   rect?: { x: number; y: number; w: number; h: number };
   default?: boolean;
+  entries: SceneEntry[];
   hotspots: SceneHotspot[];
 }
 
@@ -140,6 +153,32 @@ export function findGagView(
 ): SceneView | undefined {
   const scene = readBandSceneFile(band, state);
   return scene?.views.find((v) => v.hotspots.some((h) => h.gagId === gagId));
+}
+
+/** True if `view` has at least one `motion` entry positioned inside its own
+ * bounds — an entry the exporter carried into a close-up for depth/z-order
+ * reasons but that falls outside its crop still has `motion`, but never
+ * paints there, so a spec asserting "this view visibly animates" needs this
+ * check, not just "has a motion entry" (PH2-01 Part B, DIA-100). */
+function hasVisibleMotion(view: SceneView): boolean {
+  return view.entries.some((e) => e.motion && e.x >= 0 && e.x < view.size.w && e.y >= 0 && e.y < view.size.h);
+}
+
+/**
+ * The close-up a spec should actually animate against for `band`/`state`:
+ * the band's default view if it visibly animates, else the first close-up
+ * (in stepper order) that does. `undefined` if no close-up in this scene has
+ * any visible motion at all (not expected for real content — every band's
+ * default view does today — but a spec should fail loudly on that rather
+ * than silently asserting against a still picture).
+ */
+export function firstVisiblyAnimatedCloseup(band: number | 'beyond', state: 'built' | 'without'): string | undefined {
+  const scene = readBandSceneFile(band, state);
+  if (!scene) return undefined;
+  const closeupViews = scene.views.filter((v) => v.kind === 'closeup');
+  const def = pickDefaultView(scene);
+  if (def && hasVisibleMotion(def)) return def.id;
+  return closeupViews.find(hasVisibleMotion)?.id;
 }
 
 /** Every band this index.json actually has a scene file for (both states) — used to scope per-view pixel parity to bands that are actually drawn. */

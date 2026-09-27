@@ -15,6 +15,25 @@ import type { BandId } from '../content';
  * manifest keys frames by name — `worker-queue` has `a-left`/`b-left`/…,
  * not `0`/`1`/`2`. `loadEntryImage` now throws on a frame key that isn't
  * one of that sprite's own frame keys — no `default`/first-key fallback. */
+/** SCENE-FORMAT "Motion" (PH2-01, DIA-81/DIA-86): a leg of a walker's closed
+ * loop path, starting from the entry's own `(x, y)`. A *move* leg carries
+ * `to`/`ms`; a *hold* leg carries `hold` and no `to` (position unchanged). */
+export interface WalkLeg {
+  frame: string;
+  to?: [number, number];
+  ms?: number;
+  hold?: number;
+}
+
+/** SCENE-FORMAT "Motion": additive and optional on every entry — absent
+ * means still, forever (today's behaviour, unchanged). `walk` present makes
+ * the entry a walker; absent, an in-place loop over its own `frame` key. */
+export interface MotionSpec {
+  start: number;
+  rate?: 0.5 | 1 | 1.5 | 2;
+  walk?: WalkLeg[];
+}
+
 export interface SceneEntry {
   sprite: string;
   frame: string;
@@ -24,6 +43,7 @@ export interface SceneEntry {
   gagId?: string;
   part?: string;
   alpha?: number;
+  motion?: MotionSpec;
 }
 
 /** An explicit, art-authored hotspot rect (SCENE-FORMAT A1 — never derived

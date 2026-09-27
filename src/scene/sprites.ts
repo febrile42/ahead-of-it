@@ -82,3 +82,26 @@ export async function loadEntryImage(
   const image = await loadImage(frames[0].file);
   return { image, entry };
 }
+
+/**
+ * PH2-01 Part B: like `loadEntryImage`, but resolves a specific file within
+ * `frame`'s array — `src/scene/motion-playback.ts` picks which one plays at
+ * a given time. Falls back to file 0 for an out-of-range index rather than
+ * throwing, since that index only ever comes from this module's own
+ * resolution math (never the scene file directly).
+ */
+export async function loadFrameFile(
+  manifest: SpriteManifest,
+  sprite: string,
+  frame: string,
+  fileIndex: number
+): Promise<{ image: HTMLImageElement; entry: SpriteManifestEntry }> {
+  const entry = manifest[sprite];
+  if (!entry) throw new Error(`unknown sprite "${sprite}" in manifest (scene file references it)`);
+  const frames = entry.frames[frame];
+  if (!frames) {
+    throw new Error(`sprite "${sprite}" has no frame "${frame}" in manifest.json`);
+  }
+  const image = await loadImage((frames[fileIndex] ?? frames[0]).file);
+  return { image, entry };
+}

@@ -32,6 +32,10 @@ import type { SceneState } from './ui/toggle';
 import { createSlider } from './ui/slider';
 import { createToggle } from './ui/toggle';
 import { motionGate } from './motion';
+import { motionChanged, resolveViewAt } from './scene/motion-playback';
+import type { ResolvedFrame } from './scene/motion-playback';
+import { loadManifest } from './scene/sprites';
+import type { SpriteManifest } from './scene/sprites';
 import './style.css';
 
 const sliderRoot = document.querySelector<HTMLDivElement>('#slider-root');
@@ -72,6 +76,37 @@ if (sliderRoot && toggleRoot && viewsRow && sceneWrap && stepper && canvas && ho
   // `${band}/${state}` of the last committed paint: a render with the same
   // key only changed the view (or the size), so an open panel still holds.
   let lastPaintKey: string | null = null;
+
+  // PH2-01 Part B (SCENE-FORMAT § Motion): `t` is ms since the current scene
+  // file was first painted — real elapsed time, so pausing/resuming the
+  // ticker (below) never needs to "catch up" a backlog, it just resumes
+  // computing from `performance.now() - sceneStartTime`. Reset only by the
+  // toggle and the slider (a new scene file); a view-only render (tab,
+  // stepper, resize) leaves it running, so zooming in shows the same moment.
+  let sceneStartTime = performance.now();
+  // Test hook (tests/motion-playback.spec.ts): lets a spec confirm the
+  // toggle/slider actually reset t to 0 for the new scene, without reaching
+  // into a closure Playwright can't see.
+  document.body.dataset.sceneStartTime = String(sceneStartTime);
+  // True for the span of an in-flight render() (including its awaits) — the
+  // ticker skips a tick's canvas repaint while this holds, so a tick and a
+  // full render() (which also paints the canvas, mid-DOM-rebuild) can never
+  // write to the same canvas concurrently.
+  let renderInFlight = false;
+  // Review fix R2 (DIA-100 PR #48): bumped every time render() or the
+  // reduced-motion rest pose is about to paint the canvas — either one
+  // supersedes any older canvas paint still resolving its images (a tick's,
+  // or another of these). renderScene checks this (via the `isStale`
+  // closure each caller below builds) *after* its images resolve and
+  // *before* it draws, so a paint that started before a newer authoritative
+  // one can never land after it and stomp it — `tickRepaintInFlight`
+  // (below) only serialises ticks against each other, not against these.
+  let paintGeneration = 0;
+  // The last resolution the ticker actually repainted for, so it can tell
+  // "nothing visible changed" apart from "something did" (motionChanged).
+  // Reset whenever a full render() commits, since that already repainted
+  // the (possibly new) current view at its own `t`.
+  let previousResolved: (ResolvedFrame | null)[] | null = null;
 
   // S1: slider and toggle markup already lives in index.html's static
   // shell (CLS) — these fill it in rather than creating/appending it.
@@ -479,6 +514,7 @@ if (sliderRoot && toggleRoot && viewsRow && sceneWrap && stepper && canvas && ho
   }
 
   async function render() {
+    renderInFlight = true;
     const token = (renderToken += 1);
     // DIA-13: captured before anything below touches the DOM — the layers
     // that are about to be rebuilt are exactly the ones that can hold focus.
@@ -490,7 +526,7 @@ if (sliderRoot && toggleRoot && viewsRow && sceneWrap && stepper && canvas && ho
       // eslint-disable-next-line no-console
       console.error(`no scene file for band ${band}/${state} yet`, err);
     }
-    if (token !== renderToken) return; // superseded — drop this stale scene fetch too
+    if (token !== renderToken) return; // superseded — drop this stale scene fetch too; the newer render owns renderInFlight now
 
     if (!scene) {
       renderMissingScene();
@@ -499,6 +535,7 @@ if (sliderRoot && toggleRoot && viewsRow && sceneWrap && stepper && canvas && ho
       document.body.dataset.band = String(band);
       document.body.dataset.view = '';
       document.body.dataset.room = '';
+      renderInFlight = false;
       return;
     }
 
@@ -511,8 +548,33 @@ if (sliderRoot && toggleRoot && viewsRow && sceneWrap && stepper && canvas && ho
     syncTabs(scene, roomOf(scene, view)?.id);
     syncStepper(scene, view);
     const canvasBox = sizeAndPositionCanvas(view);
-    await renderScene(canvas!, view, state);
-    if (token !== renderToken) return; // superseded by a newer render — drop this stale paint
+    // SCENE-FORMAT § Motion "rest pose = today's export": motion off
+    // (reduced-motion, or the tab currently hidden) paints the rest pose,
+    // same as a painter with no motion support — every pixel-parity golden
+    // stays valid. Otherwise this paints the *current* moment, not t = 0, so
+    // a tab/stepper/resize render never jumps the animation backwards.
+    const activeT = motion.isReduced() || document.hidden ? undefined : performance.now() - sceneStartTime;
+    const myGeneration = (paintGeneration += 1);
+    // N1: an unknown-frame throw from renderScene (a bad scene/manifest
+    // reference) must still clear renderInFlight, or the ticker skips every
+    // repaint for the rest of the session. try/finally, not a plain catch,
+    // so the stale-render early-returns below (which deliberately leave
+    // renderInFlight for the newer render to own) are unaffected — only an
+    // actual throw takes this path.
+    let threw = true;
+    try {
+      await renderScene(canvas!, view, state, activeT, () => paintGeneration !== myGeneration);
+      threw = false;
+    } finally {
+      if (threw) renderInFlight = false;
+    }
+    if (token !== renderToken) return; // superseded by a newer render — drop this stale paint; the newer render owns renderInFlight now
+    // A fresh baseline for the ticker, matching whatever view/t this commit
+    // just painted — otherwise the next tick would compare against a
+    // previous view's resolutions (wrong indices) or repaint a frame
+    // identical to what's already on screen.
+    previousResolved = null;
+    renderInFlight = false;
     if (view.kind === 'room') {
       renderZoomTargets(hotspotsLayer!, toZoomLayout(scene, view), canvasBox, (viewId) =>
         selectView(viewId, { focus: { kind: 'floor' } })
@@ -548,6 +610,11 @@ if (sliderRoot && toggleRoot && viewsRow && sceneWrap && stepper && canvas && ho
     document.body.dataset.band = String(band);
     document.body.dataset.view = view.id;
     document.body.dataset.room = roomOf(scene, view)?.id ?? '';
+    // A committed paint is the only thing that can make the ticker's
+    // "should it run" answer change (a new scene loaded, or a still-missing
+    // one) — pick that back up here rather than duplicating the condition
+    // at every call site that triggers a render.
+    ensureTickerRunning();
   }
 
   slider.onChange((newBand) => {
@@ -557,6 +624,16 @@ if (sliderRoot && toggleRoot && viewsRow && sceneWrap && stepper && canvas && ho
     roomFromId = null;
     pendingFocus = null;
     pendingAnnounce = null;
+    // PH2-01 Part B: the slider picks a new scene file — reset t to 0 for it
+    // (SCENE-FORMAT § Motion). Done here, synchronously with the change,
+    // not inside the async render() that follows. N2 (review, PR #48): the
+    // spec's "since first painted" is technically a few ms later than this
+    // (render()'s scene fetch + image loads haven't happened yet) — harmless
+    // at today's fetch latency, since every entry's own `motion.start` is
+    // already staggered well past it, but noted in case that ever changes.
+    sceneStartTime = performance.now();
+    document.body.dataset.sceneStartTime = String(sceneStartTime);
+    previousResolved = null;
     if (!hasMovedSlider) {
       hasMovedSlider = true;
       if (!nudgeSpent) {
@@ -585,6 +662,10 @@ if (sliderRoot && toggleRoot && viewsRow && sceneWrap && stepper && canvas && ho
     state = newState;
     nudgeSpent = true; // DIA-17: latch on the first toggle, shown or not (R-06a: once per session).
     toggle.hideNudge(); // m2: the nudge's only job was getting them to toggle once.
+    // PH2-01 Part B: the toggle picks a new scene file — reset t to 0 for it.
+    sceneStartTime = performance.now();
+    document.body.dataset.sceneStartTime = String(sceneStartTime);
+    previousResolved = null;
     void render();
   });
 
@@ -600,14 +681,146 @@ if (sliderRoot && toggleRoot && viewsRow && sceneWrap && stepper && canvas && ho
     resizeDebounce = setTimeout(() => void render(), 150);
   });
 
-  // PH2-02 (R-24): nothing on the page moves yet (Phase 2/3 add it), but the
-  // gate is wired in now so nothing new can bypass it — and its state is
-  // exposed on the body, alongside the render-token/band/view/room hooks
-  // above, so a runtime OS-preference flip is observable without a reload.
+  // PH2-02 (R-24): the one gate every moving thing on the page reads before
+  // it moves — its state is exposed on the body, alongside the
+  // render-token/band/view/room hooks above, so a runtime OS-preference
+  // flip is observable without a reload.
   const motion = motionGate();
   document.body.dataset.reducedMotion = String(motion.isReduced());
+
+  // PH2-01 Part B: one rAF ticker for the whole page (SCENE-FORMAT § Motion
+  // "what the painter owns"). It repaints the canvas only, via renderScene —
+  // never render() — so a tick can never touch the hotspot layer, the tab
+  // row or the panel (the DIA-13 root cause this exists to keep from coming
+  // back). Capped at 12 repaints/s, and only when some visible entry's
+  // resolved frame or position actually changed.
+  const MIN_REPAINT_INTERVAL_MS = 1000 / 12;
+  let manifestCache: SpriteManifest | null = null;
+  void loadManifest().then((loaded) => {
+    manifestCache = loaded;
+  });
+  // Starts false: the IntersectionObserver below always fires once on
+  // `observe()` with the real initial state, so the ticker never assumes
+  // it's in view before that callback lands.
+  let sceneInView = false;
+  let rafHandle: number | null = null;
+  let lastRepaintAt = 0;
+  let tickRepaintCount = 0;
+  // A tick's repaint is async (renderScene awaits loadManifest/image
+  // decodes — the first time a given file plays, that's a real, uncached
+  // decode). Without this guard two ticks' renderScene calls can overlap
+  // and settle out of order, leaving an *earlier* t's frame painted last —
+  // the canvas looks frozen even though repaintCount keeps climbing. This
+  // serialises tick repaints the same way `renderInFlight` already
+  // serialises against a full render().
+  let tickRepaintInFlight = false;
+
+  /** Whether the ticker should keep scheduling itself at all — the three
+   * hard-stop conditions the brief names (motion off, tab hidden, scene box
+   * out of the viewport), plus "no scene loaded yet". Anything else that can
+   * momentarily block a repaint (an in-flight render(), the 12/s throttle)
+   * is handled inside `tick` itself so the loop keeps running through it. */
+  function tickerActive(): boolean {
+    return !motion.isReduced() && !document.hidden && sceneInView && currentScene !== null;
+  }
+
+  function stopTicker() {
+    if (rafHandle !== null) {
+      cancelAnimationFrame(rafHandle);
+      rafHandle = null;
+    }
+  }
+
+  function ensureTickerRunning() {
+    if (rafHandle === null && tickerActive()) {
+      rafHandle = requestAnimationFrame(tick);
+    }
+  }
+
+  function tick(now: number) {
+    rafHandle = null;
+    if (!tickerActive()) return; // a hard-stop condition fired; whoever clears it calls ensureTickerRunning() again
+    if (
+      !renderInFlight &&
+      !tickRepaintInFlight &&
+      manifestCache &&
+      currentScene &&
+      currentViewId &&
+      now - lastRepaintAt >= MIN_REPAINT_INTERVAL_MS
+    ) {
+      const view = findView(currentScene, currentViewId);
+      if (view) {
+        const t = now - sceneStartTime;
+        const resolved = resolveViewAt(view, manifestCache, t);
+        if (motionChanged(resolved, previousResolved)) {
+          previousResolved = resolved;
+          lastRepaintAt = now;
+          tickRepaintCount += 1;
+          // Test hook (tests/motion-playback.spec.ts): a repaint the ticker
+          // itself made, distinct from render()'s own renderedToken stamp.
+          document.body.dataset.repaintCount = String(tickRepaintCount);
+          tickRepaintInFlight = true;
+          const myGeneration = paintGeneration;
+          void renderScene(canvas!, view, state, t, () => paintGeneration !== myGeneration)
+            .then((painted) => {
+              // N3: a render() or the reduced-motion rest pose started (and
+              // painted) while this tick's images were still resolving —
+              // renderScene dropped this tick's paint as stale, so the
+              // baseline above is for a frame that never actually landed on
+              // screen. Clear it so the *next* tick compares against
+              // whatever really is on screen (previousResolved === null
+              // always repaints, per motionChanged) instead of concluding
+              // "nothing changed" against a resolution nobody drew.
+              if (!painted) previousResolved = null;
+            })
+            .finally(() => {
+              tickRepaintInFlight = false;
+            });
+        }
+      }
+    }
+    rafHandle = requestAnimationFrame(tick);
+  }
+
+  // The scene box's own viewport intersection — `.scene-wrap` (never
+  // replaced, unlike #scene-canvas, so it's a stable node to observe).
+  new IntersectionObserver(
+    (observed) => {
+      sceneInView = observed[observed.length - 1]?.isIntersecting ?? false;
+      if (sceneInView) ensureTickerRunning();
+      else stopTicker();
+    },
+    { threshold: 0 }
+  ).observe(sceneWrap);
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) stopTicker();
+    else ensureTickerRunning();
+  });
+
   motion.subscribe((reduced) => {
     document.body.dataset.reducedMotion = String(reduced);
+    if (reduced) {
+      stopTicker();
+      previousResolved = null;
+      // SCENE-FORMAT § Motion: "motion off" must show the rest pose
+      // immediately, not whatever frame the ticker last painted — a canvas
+      // repaint only (never render()), so this never touches focus/DOM.
+      // Review fix R2: bump paintGeneration *before* calling renderScene so
+      // a tick's paint that was already resolving its images when reduced
+      // motion fired can't land after this rest pose and undo it —
+      // stopTicker() only stops scheduling the *next* tick, it doesn't
+      // cancel one already in flight.
+      if (currentScene && currentViewId) {
+        const view = findView(currentScene, currentViewId);
+        if (view) {
+          const myGeneration = (paintGeneration += 1);
+          void renderScene(canvas!, view, state, undefined, () => paintGeneration !== myGeneration);
+        }
+      }
+    } else {
+      ensureTickerRunning();
+    }
   });
 
   // Sanity: every band this build knows about must exist in content.json

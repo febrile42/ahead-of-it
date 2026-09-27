@@ -460,6 +460,29 @@ export async function showGag(page: Page, gagId: string): Promise<void> {
   throw new Error(`showGag: walked every close-up but never reached view "${target.id}" for gag "${gagId}"`);
 }
 
+/**
+ * Brings close-up `viewId` on screen, then leaves the visitor there — the
+ * same walk `showGag` does, but keyed on a view id already known to the
+ * caller instead of resolved from a gagId (PH2-01 Part B, DIA-100: a spec
+ * that needs a specific *view*, not a specific gag's view, e.g. to land on
+ * whichever close-up actually animates for a band).
+ */
+export async function gotoCloseupView(page: Page, viewId: string): Promise<void> {
+  if ((await currentView(page)) === viewId) return;
+  if ((await currentView(page)) === (await currentRoomId(page))) {
+    await toggleWholeFloor(page);
+  }
+  while (!(await stepperInfo(page)).prevDisabled) {
+    await step(page, -1);
+  }
+  for (;;) {
+    if ((await currentView(page)) === viewId) return;
+    const moved = await step(page, 1);
+    if (!moved) break;
+  }
+  throw new Error(`gotoCloseupView: walked every close-up but never reached view "${viewId}"`);
+}
+
 export async function panelIsOpen(page: Page): Promise<boolean> {
   return page.locator('.panel').evaluate((el) => !(el as HTMLElement).hidden);
 }
