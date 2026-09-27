@@ -337,6 +337,20 @@ if (
       },
       true
     );
+
+    // R-14 (DIA-165): a keyboard visitor tabbing to a hotspot/zoom chip
+    // that overflows this box needs it scrolled into view. Chromium's and
+    // WebKit's own "scroll the newly focused element into view" step only
+    // fires when the element has *zero* pixels already inside the
+    // scrollport — a chip that's merely clipped at an edge (the realistic
+    // case; a chip this close to a room's default view is rarely fully
+    // off-screen) never triggers either engine's native behaviour, so it
+    // silently never scrolls. `{ block: 'nearest', inline: 'nearest' }`
+    // scrolls only the axis actually clipped, by only as much as needed,
+    // and is a no-op once the target is already fully visible.
+    sceneWrap!.addEventListener('focusin', (event) => {
+      (event.target as HTMLElement).scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    });
   }
   setupScenePan();
 

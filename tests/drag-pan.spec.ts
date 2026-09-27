@@ -72,15 +72,33 @@ test.describe('drag-to-pan an overflowing view (DIA-122)', () => {
     expect(await wrap.evaluate((el) => getComputedStyle(el).cursor)).toBe('grab');
 
     // criterion 7: dragging well past the edge clamps to it rather than
-    // overscrolling into empty space — 150px is more than enough headroom
-    // over this room's ~28x7px max scroll range, but still lands on-screen
-    // (unlike an extreme synthetic offset, which Chromium silently drops
-    // mid-gesture instead of delivering the intermediate pointermoves).
-    await page.mouse.move(cx, cy);
-    await page.mouse.down();
-    await page.mouse.move(cx + 150, cy + 150, { steps: 10 });
-    await page.mouse.up();
-    const clamped = await wrap.evaluate((el) => ({ scrollLeft: el.scrollLeft, scrollTop: el.scrollTop }));
+    // overscrolling into empty space. DIA-165 (first attempt): derived a
+    // single overshoot from the room's measured scroll range, then clamped
+    // the *target coordinate* to stay inside the viewport so Chromium
+    // wouldn't drop an out-of-viewport synthetic move. That target clamp is
+    // exactly the bug: one gesture's delivered dx can never exceed
+    // `viewport edge - cx`, a property of the viewport with no relationship
+    // to the room's actual scroll range — on a room/viewport combination
+    // where the range exceeds that reachable dx, the drag lands short and
+    // the scroll position never reaches 0 (observed in CI: `Received: 21`,
+    // i.e. still short of the clamp). Repeating the same viewport-safe drag
+    // — each one a fresh gesture, so each delivers up to `viewport edge -
+    // cx` more — removes the dependency on the room's size entirely:
+    // however large the remaining distance is, enough repeats of a fixed,
+    // safely-on-screen step closes it, and the loop's own bound still fails
+    // the test loudly (rather than hanging) if it somehow can't.
+    const viewport = page.viewportSize()!;
+    const targetX = viewport.width - 10;
+    const targetY = viewport.height - 10;
+    let clamped = { scrollLeft: -1, scrollTop: -1 };
+    for (let i = 0; i < 8; i++) {
+      await page.mouse.move(cx, cy);
+      await page.mouse.down();
+      await page.mouse.move(targetX, targetY, { steps: 10 });
+      await page.mouse.up();
+      clamped = await wrap.evaluate((el) => ({ scrollLeft: el.scrollLeft, scrollTop: el.scrollTop }));
+      if (clamped.scrollLeft === 0 && clamped.scrollTop === 0) break;
+    }
     expect(clamped.scrollLeft).toBe(0);
     expect(clamped.scrollTop).toBe(0);
   });
@@ -173,12 +191,38 @@ test.describe('drag-to-pan an overflowing view (DIA-122)', () => {
     await H.openApp(page, { viewport: BOTH_OVERFLOW_VIEWPORT });
     await H.setBand(page, BAND);
     await H.toggleWholeFloor(page);
-    const last = page.locator('.hotspot--zoom').last();
-    await last.focus();
-    const inView = await last.evaluate((el) => {
+
+    // DIA-165: `.hotspot--zoom.last()` (DOM order, from placeChips's own
+    // layout pass) was assumed to always be the chip this room's overflow
+    // pushes past the fold — true only by coincidence of this room's exact
+    // geometry. Measured directly, only *one* of its six chips actually
+    // sits past `.scene-wrap`'s right edge, by single-digit px, and it is
+    // not the last one in DOM order — a scale/placement rounding difference
+    // as small as those few px (a different machine's Chromium, not a
+    // different browser, per the develop-CI failures this replaced) moves
+    // which chip that is, or removes the overflow for that chip entirely,
+    // either of which makes `.last()` assert on a chip already fully
+    // visible and pass vacuously, or land back here failing on a *different*
+    // chip than the one it printed. Finding whichever chip the *current*
+    // render actually pushed off-screen — rather than betting on DOM order —
+    // keeps this test meaningful (and still failing loudly, per this file's
+    // header, if a content regen ever makes none of them overflow) without
+    // depending on exactly how many px of overflow this room/viewport/scale
+    // combination happens to produce on whatever machine runs it.
+    const wrapBox = (await page.locator('#scene-wrap').boundingBox())!;
+    const chips = page.locator('.hotspot--zoom');
+    const rects = await chips.evaluateAll((els) => els.map((el) => el.getBoundingClientRect().toJSON()));
+    const offScreenIndex = rects.findIndex(
+      (r) => r.left < wrapBox.x - 1 || r.right > wrapBox.x + wrapBox.width + 1
+    );
+    expect(offScreenIndex, 'expected at least one zoom chip to overflow .scene-wrap at this viewport').not.toBe(-1);
+
+    const target = chips.nth(offScreenIndex);
+    await target.focus();
+    const inView = await target.evaluate((el) => {
       const r = el.getBoundingClientRect();
-      const wrap = document.querySelector('#scene-wrap')!.getBoundingClientRect();
-      return r.left >= wrap.left - 1 && r.right <= wrap.right + 1;
+      const wrapRect = document.querySelector('#scene-wrap')!.getBoundingClientRect();
+      return r.left >= wrapRect.left - 1 && r.right <= wrapRect.right + 1;
     });
     expect(inView, 'focused hotspot should have scrolled into .scene-wrap').toBe(true);
   });
