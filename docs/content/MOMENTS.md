@@ -21,7 +21,7 @@ Checked against the files on `develop` at `3882972`:
 | 80 | n/a | n/a | **none** (landing on 80 is never a crossing) | n/a |
 | 150 | `floor-2.1` Finance corner | G4.2 desk, G4.3 desks | **G4.2** | yes, `desk` |
 | 220 | `floor-2.2` Conference room | G2.4 room, G7.3a board | **G2.4** (beat replaced) | yes, `room` |
-| 360 | `ground.1` Closet | G1.1 closet, G3.2 trolley, G5.3 server | **G5.3** | yes, `server` |
+| 360 | `ground.1` Closet | G1.1 closet, G3.2 trolley, G5.3 server | **none** (G5.3 dropped in step 2, below) | n/a |
 | 490 | `ground.5` Helpdesk | G2.1 helpdesk, G3.1 desk | **G3.1** | yes, `desk` |
 | 610 | `ground.3` Sales pit | G1.2 pit, G2.2 cable, G4.1 door | **G4.1** | yes, `door` |
 | 750 | `ground.3` Sales pit | G1.2 pit, G4.1 door, G7.1 robot | **G7.1** | yes, `robot` |
@@ -46,6 +46,11 @@ in the building fails. The end frame is the exported built scene.
 | 490 | G3.1 · E-03 | The new hire walks in with a bag and sits at the desk that is already set. The laptop screen comes on as they sit. | the G3.1 desk (laptop, badge, coffee, one-page calendar), a walking worker | Without a cue it's "someone sits down". The screen coming on at the instant they sit is the beat: day one, already working. The walker is the seated worker in the end frame, so the same person is in both. The path must not cross G2.1's `helpdesk` hotspot or the queue. No number of any kind (D-012). |
 | 610 | G4.1 · E-04 | The auditor walks up to the shut front door. It opens, and the `infosec` worker in the doorway shakes hands. In the pit, the `$` bubble stays gold. | `auditor` (walk, `wait`, `shake`), `front-door` (`shut`, `open`), `infosec` | This is Q-20's own example and the strongest beat. Hold the shut door a beat (≥ 300 ms) with the auditor waiting, so the open reads as an answer. The `$` bubble doesn't animate: the point is that it doesn't fade. The built scene's end frame already has `auditor` in `shake`, `front-door` `open` and `infosec` in the doorway, so the beat only has to walk up to it. The InfoSec person is the answer, not a new walker. |
 | 750 | G7.1 · E-12 | The robot rolls in and stops at the small document gate. A document passes through the gate, and the badge turns to `APPROVED`. | `robot` (walk, `approved`), `doc-gate` | The order (gate first, then the badge) is the whole point of E-12: the tool and the policy arrived together. The robot must not eat, reach for or hold a document at any point, so the without joke never leaks into the built state. It enters from the right edge and doesn't cross G4.1's `door` or G1.2's `pit`. |
+
+**360 was dropped in step 2 (PR #51, DIA-101).** No walker can reach the rack or the
+`VIRTUALISED` badge without crossing G3.2's `trolley` or G1.1's `closet` hotspot, so the beat
+can't be staged within the rules. Per this file's fallback, 360 ships with no moment and no
+caption. Five beats ship: 150, 220, 490, 610, 750.
 
 ## Why no captions
 
