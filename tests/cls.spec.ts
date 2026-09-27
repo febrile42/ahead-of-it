@@ -161,6 +161,34 @@ test.describe('CLS under throttling (PH1-04 review S1)', () => {
   });
 });
 
+// DIA-83 review round 2: the throttled test above asserts <0.1, a threshold
+// wide enough to hide the real, unthrottled, non-simulated shift Lighthouse's
+// raised `cumulative-layout-shift <= 0` gate caught (0.01145 on #scene-wrap,
+// every gated URL, CI's own Chromium — a font-fallback-driven wrap, not a
+// timing race, so no throttling is needed to reproduce it: the offending
+// text either wraps to an extra line on the page's actual font or it
+// doesn't). This asserts exactly 0 at normal speed, on the exact three URLs
+// Lighthouse gates (`lighthouserc.cjs`'s `collect.url`) via D-043's URL read
+// — so a future regression here fails a fast unthrottled Playwright run
+// instead of only a 3-run Lighthouse CI step ~15 minutes later.
+test.describe('CLS is exactly 0 on first load, unthrottled (DIA-83 review round 2)', () => {
+  for (const [label, path] of [
+    ['band 80 (default)', '/'],
+    ['band 750, built', '/?n=750&it=built'],
+    ['band 750, without', '/?n=750&it=none'],
+  ] as const) {
+    test(`${label}: first paint through settle measures 0 layout shift`, async ({ page }) => {
+      await installClsObserver(page);
+      await interceptFixtureScenes(page);
+      await page.setViewportSize(VIEWPORT);
+      await page.goto(path);
+      await page.waitForFunction(() => document.body.dataset.renderedToken !== undefined);
+      const cls = await settleCls(page);
+      expect(cls, `first load (${label}): expected 0 layout shift, measured ${cls}${await clsSources(page)}`).toBe(0);
+    });
+  }
+});
+
 // Review fix (DIA-46 item 3): the test above only measures first load. The
 // brief's own acceptance line is "switching views and bands measures 0" —
 // sizeAndPositionCanvas keeps .scene-wrap's box, the tab row and the

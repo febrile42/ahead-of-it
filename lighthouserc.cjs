@@ -24,15 +24,25 @@ const PORT = Number(process.env.PREVIEW_PORT ?? 4173);
 module.exports = {
   ci: {
     collect: {
-      url: [`http://localhost:${PORT}/`],
+      // D-043 (PH2-04 step 2): the URL read lets a navigation land on band
+      // 750 too, not just the default band 80 at `/`. LHCI applies the same
+      // assertions to every collected URL, so both bands are budget-checked.
+      // DIA-91: use PREVIEW_PORT here too so this doesn't collide with a
+      // preview server already listening on 4173 in another worktree/CI job.
+      url: [
+        `http://localhost:${PORT}/`,
+        `http://localhost:${PORT}/?n=750&it=built`,
+        `http://localhost:${PORT}/?n=750&it=none`,
+      ],
       startServerCommand: 'npm run preview',
       // Match the host, not "Local:": vite colours its banner, and the reset code
       // lands between "Local" and ":", so /Local:/ never matched and every run
       // burned the full ready timeout with a WARNING (DIA-4).
       startServerReadyPattern: 'localhost',
       startServerReadyTimeout: 30000,
-      // 3 runs, LHCI asserts on the median — shared CI runners are noisy
-      // enough that a single run flakes on performance score/timing.
+      // 3 runs; `assert.aggregationMethod` below makes LHCI assert on the
+      // median instead of its 'optimistic' default — shared CI runners are
+      // noisy enough that a single run flakes on performance score/timing.
       numberOfRuns: 3,
       settings: {
         chromePath: process.env.CHROME_PATH,
@@ -54,14 +64,25 @@ module.exports = {
       },
     },
     assert: {
+      // Median across the 3 runs, not LHCI's 'optimistic' (best-run)
+      // default — the stricter choice, so this is not a weakening.
+      aggregationMethod: 'median-run',
       assertions: {
-        // R-23: performance >= 80 on a mobile-emulated run.
-        'categories:performance': ['error', { minScore: 0.8 }],
+        // PH2-04 step 2 (Phase 2 exit criteria): performance >= 90 on a
+        // mobile-emulated run, band 80 and band 750 alike.
+        'categories:performance': ['error', { minScore: 0.9 }],
         // R-23: total transfer for the first band < 600 KB. Mirrors
         // budgets.json's "total" resourceSizes budget (600 KB); asserted
         // directly here too because Lighthouse's own budget audit is
         // informative (no pass/fail score) and LHCI can't assert on it.
         'resource-summary:total:size': ['error', { maxNumericValue: 600 * 1024 }],
+        // R-23's "first meaningful render < 1.5s on a mid-range phone over
+        // 4G" doesn't map to one Lighthouse audit directly; LCP is the
+        // closest standard proxy for when the scene is visibly painted.
+        'largest-contentful-paint': ['error', { maxNumericValue: 1500 }],
+        // Phase 2 adds motion (PH2-01..03); it must not cost layout
+        // stability. CLS 0 on every measured band.
+        'cumulative-layout-shift': ['error', { maxNumericValue: 0 }],
       },
     },
     upload: {

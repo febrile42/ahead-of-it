@@ -50,13 +50,20 @@ h1 {
   /* S1: reserves a line of height before content.json's copy fills the
      text in, so the label doesn't collapse to 0 height on first paint
      (an empty element has no line box to size from) and then grow once
-     JS runs. */
+     JS runs. line-height is explicit (DIA-83), not the browser's "normal"
+     default — "normal" resolves from system-ui's own font metrics, which
+     measured a hair taller than 1.2em once real text rendered, growing
+     this box by a few px after first paint (same failure mode already
+     fixed once for .scene-stepper__label, DIA-65) and cascading into a
+     real (non-simulated) 0.0066 shift on #scene-wrap below it. */
+  line-height: 1.2;
   min-height: 1.2em;
 }
 
 .slider__readout {
   font-variant-numeric: tabular-nums;
   margin: 0 0 0.5rem;
+  line-height: 1.2; /* DIA-83, see .slider__label */
   min-height: 1.2em; /* S1, see .slider__label */
 }
 
@@ -116,7 +123,20 @@ h1 {
 .toggle__subtitle {
   margin: 0.5rem 0 0;
   font-style: italic;
-  min-height: 1.2em; /* S1, see .slider__label */
+  line-height: 1.2;
+  /* DIA-83 review round 2: 1.2em (one line) wasn't enough — CI's
+     Chromium resolves "system-ui, sans-serif" to a wider fallback than
+     whatever font measured this locally, so copy.ogDescription genuinely
+     wraps to 2 lines there while fitting 1 on other machines (confirmed:
+     CI's Lighthouse layout-shifts audit blamed #scene-wrap for a real,
+     deterministic 0.01145 shift, same across all 9 runs — not noise, and
+     not fixed by adding line-height alone). Same failure mode, and same
+     fix, DIA-65 already applied once to .scene-stepper__label below:
+     reserve the worst-case line count with min-height (never height —
+     unitless line-height rounds to a sub-pixel value that can differ by
+     a hair from what real text takes), so growing from 0/1 real line to
+     2 can never shift anything, on any font. */
+  min-height: calc(1.2em * 2);
   /* DIA-51: visibility, not the `hidden` attribute — the subtitle's two
      lines stay reserved in the layout in both states, same trick as
      .toggle__nudge below, so the without-state toggle never shifts
@@ -131,7 +151,12 @@ h1 {
 .toggle__nudge {
   margin: 0.5rem 0 0;
   font-weight: 600;
-  min-height: 1.2em; /* S1, see .slider__label */
+  line-height: 1.2;
+  /* DIA-83 review round 2, see .toggle__subtitle above — copy.nudge is
+     long enough (and bold, which renders wider per character than the
+     subtitle's italic) to wrap to 2 lines on CI's font fallback too, so
+     it gets the same worst-case-2-lines reservation. */
+  min-height: calc(1.2em * 2);
   /* S1c/m2: visibility, not `hidden` — the nudge's line stays reserved in
      the layout at all times so showing or hiding it (once, after the
      first slider move; then again once the visitor toggles) never shifts
@@ -331,6 +356,18 @@ h1 {
   padding: 0 0.8rem;
   font-size: 0.85rem;
   font-weight: 600;
+  /* CLS (DIA-83): index.html ships this button empty (its label is JS-set
+     content, not hard-coded markup — main.ts's syncStepper() writes it in
+     from content.json's `ui.wholeFloor` after the scene file resolves), so
+     without this it renders at the shared 44px min-width and then grows
+     once the label lands. Same "reserve the space" trick as
+     .slider__label/.toggle__subtitle, just width instead of height.
+     Review round 2: 100px wasn't enough — CI's Chromium (a different
+     "system-ui, sans-serif" fallback than whatever measured ~94px
+     locally) actually rendered "Whole floor" at 116px, still a real
+     shift against the 100px reservation. 150px is real CI-measured
+     headroom (~29% over 116px), not a guess. */
+  min-width: 150px;
 }
 
 .scene-stepper__floor[aria-pressed='true'] {

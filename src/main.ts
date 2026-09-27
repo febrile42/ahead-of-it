@@ -32,6 +32,7 @@ import type { SceneState } from './ui/toggle';
 import { createSlider } from './ui/slider';
 import { createToggle } from './ui/toggle';
 import { motionGate } from './motion';
+import { parseInitialSceneState } from './url-state';
 import { motionChanged, resolveViewAt } from './scene/motion-playback';
 import type { ResolvedFrame } from './scene/motion-playback';
 import { loadManifest } from './scene/sprites';
@@ -49,8 +50,12 @@ const panelRoot = document.querySelector<HTMLDivElement>('#panel-root');
 const checklistRoot = document.querySelector<HTMLDivElement>('#checklist-root');
 
 if (sliderRoot && toggleRoot && viewsRow && sceneWrap && stepper && canvas && hotspotsLayer && panelRoot && checklistRoot) {
-  let band: BandId = 80;
-  let state: SceneState = 'built';
+  // D-043: R-10's read side, pulled forward so a Lighthouse navigation can
+  // land on any band (not just 80) — `?n=<headcount>&it=<none|built>`.
+  // Nothing writes the URL; a missing/invalid value falls back per-param.
+  const initial = parseInitialSceneState(window.location.search);
+  let band: BandId = initial.band;
+  let state: SceneState = initial.state;
   let hasMovedSlider = false;
   // R-06a/m2: the nudge's only job is getting the visitor to toggle once —
   // once they have (in either direction), it is spent for the session,
