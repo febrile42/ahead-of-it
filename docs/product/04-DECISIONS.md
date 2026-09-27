@@ -489,3 +489,36 @@ No receipt, date or figure is added. Every beat plays a locked Already line forw
 checked against `develop`. Two notes for step 2: 490's "screen comes on" needs a screen-off
 laptop frame, which the table doesn't list; and 360's fan is the threat arriving and leaving,
 so it is not the dongle problem, but it must never be set down in the built room.
+
+**D-046 · 2026-09-27 · Dark mode: the page goes dark, the building doesn't (DIA-118; Product &
+Content Lead, for CEO sign-off).**
+The owner asked for dark mode that reuses the artwork, and only redraws what it has to. The
+answer is to redraw nothing.
+1. **It follows the OS, with no switch on the page.** `prefers-color-scheme: dark` drives it.
+   The page already has one toggle, and that toggle is the product (D-022). A second
+   pill-shaped switch near it competes for the same thumb and blurs what "the toggle" means
+   in every screenshot. A visitor who wants light on a dark phone has the OS switch.
+2. **The chrome is the only thing that changes.** That means page background, text, rules,
+   buttons, tabs, stepper, slider track, panel, sheet, checklist and the `not drawn yet`
+   placeholder. It is done with CSS custom properties in `src/style.css`, and every
+   hard-coded colour there moves behind a variable. The 404 page follows too.
+3. **The building sits on a light mat.** The rooms are opaque, but the sprites are outlined
+   in ink `#1a1410`, and anything transparent at a scene's edge would lose its outline against
+   a dark page. So `.scene-wrap` keeps a light mat colour in both schemes: the art's own
+   pale frame, not the page background. The picture reads as a lit diorama on a dark desk.
+   **No CSS filter, blend mode or opacity goes on the canvas or on any sprite.** The painter's
+   pixel-parity tests must stay byte-identical, and a dimmed gag reads worse at 390px.
+4. **The toggle keeps its colours.** Yellow "without" and pink "built" are the one thing a
+   visitor has to find in both schemes (D-022's toggle-to-"without" rate). They get a light
+   outline on dark, and their fills don't change.
+5. **Served images don't change.** The share image and OG image stay light. They are viewed
+   in someone else's app, whatever their scheme. The print checklist stays light
+   (`@media print` wins). Panel thumbnails are opaque art and keep their fills.
+6. **Contrast is a gate.** Body text and button labels meet WCAG AA (4.5:1) against the dark
+   page. Focus rings and control borders meet 3:1, so `--accent` gets a lighter dark-scheme
+   value. The R-14 punch list is text and inherits it.
+No art is redrawn and no copy changes. `PANELS.md`, `content.json` and every sprite are
+untouched. If the 390px dark screenshots show a gag that stops reading because of the page
+around it, that goes to the Art Director as a note against this decision. The fix is the mat,
+not the sprite.
+*CEO signed off 2026-09-27 (DIA-120), including point 1: no in-page switch.*
