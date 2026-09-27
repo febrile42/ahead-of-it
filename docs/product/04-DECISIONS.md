@@ -522,3 +522,44 @@ untouched. If the 390px dark screenshots show a gag that stops reading because o
 around it, that goes to the Art Director as a note against this decision. The fix is the mat,
 not the sprite.
 *CEO signed off 2026-09-27 (DIA-120), including point 1: no in-page switch.*
+
+**D-048 · 2026-09-27 · The punch list is on demand for sighted visitors, and always there for
+assistive tech and print (DIA-125; approved plan revision `dfca5f40`).**
+The checklist renders under the scene in the same type as the nav chrome, with no frame and
+no art. To a sighted visitor it reads as a wall of text or page overflow, and it competes
+with the toggle, which is the product (D-022). R-14 is amended to match (below).
+1. **Nothing sits under the scene** except the contact line.
+2. **One entry point:** a `Punch list (n)` button in the view-nav row, with a 16×16 pixel
+   clipboard icon in the building's palette. *n* is the number of gags up to this band. It
+   is a 44 px button outside the canvas, so no hotspot rule changes.
+3. **Opened, it is a sheet in the tap panel's style** (same border, paper and type).
+   Download (the existing print stylesheet) at the top. Each row is the gag's existing
+   *without* thumbnail, then `year · headcount — title` and the text the list has today. At
+   `1,000+` the R-14a translation table follows. The contact line (R-12) is at the foot.
+4. **Assistive tech:** the list is always in the DOM and the accessibility tree, right after
+   the scene. It is visually hidden, not `display:none` and not a closed `<details>`, so a
+   screen-reader user reads it with no control to find (R-24). While it is collapsed, its
+   links are out of the tab order. It is generated from the same data by the same
+   `checklist.ts`.
+5. **Print** always prints the full list, open or closed.
+No panel copy, receipt, date or figure changes, and nothing in the scene or its formats. The
+button and sheet need new `ui` strings (label, accessible name, close); they go in `TONE.md`
+§Navigation copy like D-042a's, and ship through `content.json` `ui`.
+
+Rejected:
+- **An in-scene object** (a clipboard or plaque in reception). It needs a new hotspot kind
+  across 14 scene files, reads as décor at 390 px, and still needs the DOM path.
+- **A native `<details>` element.** A closed one drops out of the screen-reader tree.
+- **A separate `/list` route.** A second render path to keep in sync.
+- **Download only.** Breaks R-14 and R-24.
+- **Expandable rows** (Already / Without / Worth later behind a tap). Deferred, not
+  rejected outright. Collapsed rows would hide text from screen readers, and the tap panel
+  already does this job.
+
+Open, not in scope:
+- The Beyond panel's locked **Worth it later** line says "the checklist **below** maps each
+  receipt…" (`PANELS.md` §Beyond). After this decision the list is not below. It is spatial
+  copy, not a receipt, but it is locked, so rewording it needs the owner's say through the
+  CEO (DIA-125).
+- Visitors without JavaScript, and crawlers, get no list, because it is rendered by JS. A
+  build-time `<noscript>` list would fix that for share previews. Its own ticket if wanted.
