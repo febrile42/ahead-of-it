@@ -19,6 +19,7 @@ import {
   findView,
   loadScene,
   mostOwnPrimaries,
+  openingView,
   primaryCount,
   roomOf,
   rooms,
@@ -40,6 +41,7 @@ import { loadManifest } from './scene/sprites';
 import type { SpriteManifest } from './scene/sprites';
 import './style.css';
 
+const introEl = document.querySelector<HTMLParagraphElement>('#app-intro');
 const sliderRoot = document.querySelector<HTMLDivElement>('#slider-root');
 const toggleRoot = document.querySelector<HTMLDivElement>('#toggle-root');
 const viewsRow = document.querySelector<HTMLDivElement>('#scene-views');
@@ -52,6 +54,7 @@ const checklistRoot = document.querySelector<HTMLDivElement>('#checklist-root');
 const punchListButton = document.querySelector<HTMLButtonElement>('#punch-list-button');
 
 if (
+  introEl &&
   sliderRoot &&
   toggleRoot &&
   viewsRow &&
@@ -164,6 +167,12 @@ if (
     previousResolved = null;
     document.body.dataset.momentPlaying = 'false';
   }
+
+  // D-051: the lede is static across the whole session (no band/state of
+  // its own to react to), so it is filled once, here, rather than on every
+  // render() — synchronously, before the first paint, same S1 reasoning as
+  // the slider/toggle shell below.
+  introEl.textContent = ui('intro');
 
   // S1: slider and toggle markup already lives in index.html's static
   // shell (CLS) — these fill it in rather than creating/appending it.
@@ -431,10 +440,12 @@ if (
     void render();
   }
 
+  /** D-051 item 2: a room tab lands on the room view itself, not (as
+   * D-042a originally had it) the close-up with the most primaries — a
+   * room view is now full of "zoom in" tiles to tap, so a tap no longer
+   * strands the visitor on a picture with nothing to tap. */
   function selectRoom(roomId: string) {
-    if (!currentScene) return;
-    const target = roomDefault(currentScene, roomId);
-    if (target) selectView(target.id);
+    selectView(roomId);
   }
 
   /** Steps over every close-up in array order, crossing rooms (D-042a). At either end it does nothing but say so: `aria-disabled`, never `disabled`, so focus is not lost. */
@@ -534,8 +545,11 @@ if (
     nextButton!.setAttribute('aria-label', ui('next'));
     prevButton!.setAttribute('aria-disabled', String(index <= 0));
     nextButton!.setAttribute('aria-disabled', String(index === -1 || index === all.length - 1));
+    // D-051 item 4: the room view's *visible* stepper text is the landing
+    // hint, not the live-region announcement — announceView (below) still
+    // writes ui('announceRoom', ...) to the live region on every view change.
     stepperLabel!.textContent =
-      view.kind === 'room' ? ui('announceRoom', { room: view.label }) : ui('position', { label: view.label, n: index + 1, total: all.length });
+      view.kind === 'room' ? ui('roomHint') : ui('position', { label: view.label, n: index + 1, total: all.length });
     floorButton!.textContent = ui('wholeFloor');
     floorButton!.setAttribute('aria-pressed', String(view.kind === 'room'));
     floorButton!.setAttribute('aria-disabled', 'false');
@@ -788,8 +802,15 @@ if (
 
     // Toggle and re-render keep the current view id (both states share the
     // skeleton, D-042a); a slider change reset it to null; a missing id
-    // falls back to the band's default close-up.
-    const view = (currentViewId && findView(scene, currentViewId)) || defaultView(scene);
+    // falls back to the band's default close-up — except before this
+    // session's first commit (`lastCommittedBand === null`: a fresh load,
+    // or a `?n=` deep link, D-043), where D-051 item 1 opens on that
+    // close-up's room instead, "Whole floor" pressed. A later slider/toggle
+    // reset keeps today's close-up fallback (D-051 item 3, "as today"),
+    // which the band-crossing moment check below depends on.
+    const view =
+      (currentViewId && findView(scene, currentViewId)) ||
+      (lastCommittedBand === null ? openingView(scene) : defaultView(scene));
     currentViewId = view.id;
     currentScene = scene;
     syncTabs(scene, roomOf(scene, view)?.id);

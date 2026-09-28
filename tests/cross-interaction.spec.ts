@@ -56,6 +56,7 @@ test.describe('band x state x panel — every panel identifies itself and return
         await H.setBand(page, band);
         await H.setState(page, state);
         await dismissAutoBeyondPanel(page);
+        await H.ensureCloseup(page); // D-051: band 80's fresh load can land on a room
 
         // Opened *after* every re-render in this test, so the invoking
         // hotspot is a live node — this is the clean baseline that F1's
@@ -225,6 +226,7 @@ test.describe('input method x panel — touch, mouse and keyboard agree', () => 
       try {
         await H.openApp(target);
         await H.setBand(target, 80);
+        await H.ensureCloseup(target); // D-051: band 80's fresh load can land on a room
         const gagId = (await H.hotspots(target).first().getAttribute('data-gag-id')) ?? '';
 
         await H.openFirstHotspot(target, via);

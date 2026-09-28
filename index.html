@@ -30,6 +30,11 @@
   <body>
     <div id="app">
       <h1>Ahead of It</h1>
+      <!-- D-051: the page's own introduction — a lede paragraph between
+           the h1 and the slider, filled from content.json's ui.intro
+           (TONE.md §"Landing copy"). Height is reserved here (S1, CLS 0),
+           same trick as the slider/toggle shell just below. -->
+      <p class="app__intro" id="app-intro"></p>
       <!-- S1: a static shell for the slider and toggle, reserving their
            layout space before src/main.ts runs, so a slow connection
            doesn't paint an empty page and then jump when the bundle

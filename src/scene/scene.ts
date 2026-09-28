@@ -209,6 +209,18 @@ export function defaultView(scene: SceneFile): SceneView {
   return scene.views.find((v) => v.default) ?? closeups(scene)[0] ?? scene.views[0];
 }
 
+/** D-051 item 1: this session's opening view (a fresh load, or a `?n=`
+ * deep link, D-043) is the room that holds the band's `default` close-up,
+ * not the close-up itself — "Whole floor" pressed. `default` stays a
+ * close-up in the scene format unchanged; the web opens on its `parent`.
+ * Only this session's first commit uses this — a later slider/toggle reset
+ * still falls back to `defaultView` (D-051 item 3, "as today"), which is
+ * also what the band-crossing moment gate (SCENE-FORMAT § Band-crossing
+ * moment) depends on staying the close-up. */
+export function openingView(scene: SceneFile): SceneView {
+  return roomOf(scene, defaultView(scene)) ?? rooms(scene)[0] ?? scene.views[0];
+}
+
 /** Looks up a view by id within a scene file, for the switcher / arrow-key navigation. */
 export function findView(scene: SceneFile, id: string): SceneView | undefined {
   return scene.views.find((v) => v.id === id);

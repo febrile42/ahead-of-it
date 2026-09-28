@@ -660,6 +660,8 @@
     }
   },
   "ui": {
+    "intro": "Josh Gister's résumé, as a building. Slide to your company's headcount: everything you can tap was already in place by the time his company was that size.",
+    "roomHint": "Tap an area to zoom in",
     "wholeFloor": "Whole floor",
     "previous": "Previous close-up",
     "next": "Next close-up",

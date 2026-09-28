@@ -1,51 +1,13 @@
 // D-042a navigation coverage the DIA-46 review found missing from the rest
 // of the suite (review items 1, 2, 4, 6 — 5 is in tests/hostile-f1-f4.spec.ts,
 // 3 is in tests/cls.spec.ts).
-//
-// Reachability and the per-room default are re-derived here from the scene
-// file itself (mostOwnPrimaries's own rule, duplicated rather than imported
-// — see tests/scene.spec.ts's header comment on why Playwright's own Node
-// ESM loader can't import src/scene/scene.ts's sibling modules that pull in
-// content.json), so this fails loudly the moment the fixture or the rule
-// disagree with what actually renders, instead of hard-coding an id.
-import { readFileSync } from 'node:fs';
 import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
 import * as H from './interaction-helpers';
 import { interceptFixtureScenes, readIndex, readSceneFile } from './scene-source';
-import type { SceneView } from './scene-source';
-
-type BandId = 80 | 150 | 220 | 360 | 490 | 610 | 750 | 'beyond';
-
-const content = JSON.parse(readFileSync(new URL('../src/content/content.json', import.meta.url), 'utf-8')) as {
-  gags: Array<{ id: string; band: BandId }>;
-};
 
 const BAND = 750;
 const VIEWPORT = { width: 390, height: 900 };
-
-function ownGagIds(band: number): Set<string> {
-  return new Set(content.gags.filter((g) => (g.band === 'beyond' ? 750 : g.band) === band).map((g) => g.id));
-}
-
-function closeupsOf(views: SceneView[], roomId: string): SceneView[] {
-  return views.filter((v) => v.kind === 'closeup' && v.parent === roomId);
-}
-
-/** Mirrors src/scene/scene.ts's mostOwnPrimaries: of `candidates`, the one
- * with the most primary hotspots whose gagId is in `own`; ties go earlier. */
-function mostOwnPrimaries(candidates: SceneView[], own: ReadonlySet<string>): SceneView | undefined {
-  let best: SceneView | undefined;
-  let bestCount = -1;
-  for (const view of candidates) {
-    const count = view.hotspots.filter((h) => h.primary && own.has(h.gagId)).length;
-    if (count > bestCount) {
-      best = view;
-      bestCount = count;
-    }
-  }
-  return best;
-}
 
 function loadBandScene(band: number, state: 'built' | 'without') {
   const index = readIndex();
@@ -119,18 +81,19 @@ test.describe('close-up reachability (DIA-46 item 1)', () => {
     expect(visited).toEqual(expected);
   });
 
-  test('band 750: every room tab lands on that room\'s most-own-primaries close-up', async ({ page }) => {
+  test('band 750: every room tab lands on that room\'s own room view (D-051 item 2)', async ({ page }) => {
+    // Amends D-042a's original navigation item 1 ("a tab lands on the
+    // room's default close-up, so a tap never strands the visitor on a
+    // picture with nothing to tap") — a room view is now full of "zoom in"
+    // tiles to tap, so the reason no longer holds (D-051).
     await H.openApp(page);
     await H.setBand(page, BAND);
     const scene = loadBandScene(BAND, 'built');
-    const own = ownGagIds(BAND);
     const rooms = scene.views.filter((v) => v.kind === 'room');
 
     for (const room of rooms) {
-      const expected = mostOwnPrimaries(closeupsOf(scene.views, room.id), own);
-      expect(expected, `room ${room.id} has no close-ups in the fixture`).toBeDefined();
       await H.setRoom(page, room.id, 'mouse');
-      expect(await H.currentView(page), `room tab ${room.id}`).toBe(expected!.id);
+      expect(await H.currentView(page), `room tab ${room.id}`).toBe(room.id);
     }
   });
 });

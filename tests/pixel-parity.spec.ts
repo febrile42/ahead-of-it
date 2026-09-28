@@ -213,11 +213,12 @@ async function clickAndWaitForRender(page: Page, locator: ReturnType<Page['locat
 
 /**
  * Reaches `c.viewId` — a room (its own tab) or a close-up (reached through
- * its room's tab, then either already the room's default or one more click
- * on that room's "zoom in" button) — from wherever the app currently is.
- * Mirrors src/main.ts's actual navigation (D-042a): there is no direct
- * per-view tab any more, so a close-up not currently on screen is always
- * one room-tab click plus at most one zoom-in click away.
+ * its room's tab, then a click on that room's "zoom in" button) — from
+ * wherever the app currently is. Mirrors src/main.ts's actual navigation
+ * (D-042a, amended by D-051 item 2): there is no direct per-view tab any
+ * more, so a close-up not currently on screen is always one room-tab click
+ * (which lands on the room overview itself, D-051) plus at most one
+ * zoom-in click away.
  */
 async function gotoView(page: Page, c: ParityCase) {
   if ((await page.evaluate(() => document.body.dataset.view)) === c.viewId) return;
@@ -227,11 +228,12 @@ async function gotoView(page: Page, c: ParityCase) {
       await clickAndWaitForRender(page, page.locator(`.scene-views__button[data-view-id="${c.viewParent}"]`));
     }
     if ((await page.evaluate(() => document.body.dataset.view)) === c.viewId) return;
-    // Now on the room's default close-up (if this one is not it) or, if
-    // the room was already active, still wherever we started — either way
-    // "whole floor" reaches the room overview, and its zoom-in buttons
-    // reach any close-up in it by id.
-    await clickAndWaitForRender(page, page.locator('.scene-stepper__floor'));
+    // D-051: the room tab click above already lands on the room overview
+    // itself (item 2, was the room's default close-up) — "whole floor" is
+    // only needed here if we somehow aren't on it yet.
+    if ((await page.evaluate(() => document.body.dataset.view !== document.body.dataset.room))) {
+      await clickAndWaitForRender(page, page.locator('.scene-stepper__floor'));
+    }
     await clickAndWaitForRender(page, page.locator(`.hotspot--zoom[data-view-id="${c.viewId}"]`));
   } else {
     // A room with no parent: reach it from its own default close-up via

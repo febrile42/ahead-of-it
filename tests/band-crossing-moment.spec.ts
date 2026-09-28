@@ -50,6 +50,11 @@ async function openAppAt(page: Page, band: number | 'beyond', state: H.SceneStat
 async function goldenSnapshot(page: Page, band: number | 'beyond'): Promise<string> {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await openAppAt(page, band, 'built');
+  // D-051: a fresh load now opens on the room, not the close-up — but a
+  // moment always plays (and hands off) on the default close-up
+  // (scene.moment.view, SCENE-FORMAT), so the golden this compares against
+  // must be that close-up's rest pose, not the room's.
+  await H.ensureCloseup(page);
   const snapshot = await canvasSnapshot(page);
   await page.emulateMedia({ reducedMotion: 'no-preference' });
   return snapshot;
@@ -128,6 +133,7 @@ test.describe('band-crossing moment: a genuine rising crossing in the built stat
     // (src/main.ts's restoreFocus fallback, R-24), not literally the same
     // button.
     await openAppAt(page, 80, 'built');
+    await H.ensureCloseup(page); // D-051: a fresh load can land on a room, which has no gag hotspots
     const hotspot = H.hotspots(page).first();
     await hotspot.focus();
     expect((await H.focusInfo(page)).gagId).not.toBeNull(); // precondition

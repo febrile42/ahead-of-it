@@ -68,6 +68,20 @@ async function setState(page: Page, state: 'built' | 'without') {
   }
 }
 
+/** D-051: a fresh load (band 80, built) can land on a room view — no gag
+ * hotspots, only "zoom in" tiles, which share the `.hotspot` class
+ * (src/ui/panel.ts). Lands on that room's default close-up via "Whole
+ * floor" so a spec after this only ever sees gag hotspots. No-op once
+ * already on a close-up. */
+async function ensureCloseup(page: Page) {
+  const [view, room] = await page.evaluate(() => [document.body.dataset.view, document.body.dataset.room]);
+  if (view === room) {
+    const prev = await currentRenderToken(page);
+    await page.locator('.scene-stepper__floor').click();
+    await waitForNextRender(page, prev);
+  }
+}
+
 test.describe('no third-party requests (R-21)', () => {
   test('loading the app makes no off-origin requests', async ({ page }) => {
     const offOrigin: string[] = [];
@@ -95,6 +109,7 @@ test.describe('every band x both states (PH1-09 acceptance)', () => {
         await page.waitForFunction(() => document.body.dataset.renderedToken !== undefined);
         await setBand(page, band);
         await setState(page, state);
+        await ensureCloseup(page);
 
         // A missing/undefined view label is an export bug (found by
         // reading the combined-tree screenshots: the tab row rendered
@@ -182,6 +197,7 @@ test.describe('email is never a joined string in the page', () => {
     await page.goto('/');
     await page.waitForFunction(() => document.body.dataset.renderedToken !== undefined);
     await setBand(page, 80);
+    await ensureCloseup(page); // D-051: band 80's fresh load can land on a room
     await page.locator('.hotspot').first().click();
     await page.waitForTimeout(150); // the panel opening has no render token of its own — it's a DOM show, not a scene render
     const href = await page.locator('.contact-line a').nth(1).getAttribute('href');

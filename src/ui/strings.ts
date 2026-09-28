@@ -1,7 +1,8 @@
 // D-042a: the close-up navigation's visitor-read strings. They live in
 // docs/content/TONE.md §"Navigation copy" and reach the page as
 // content.json's `ui` block (brief D042-W item 8) — nothing here is
-// written in the source.
+// written in the source. D-051 (brief D051-W) adds the landing copy
+// (`intro`, `roomHint`) from TONE.md §"Landing copy" the same way.
 //
 // Until the Product & Content Lead's `ui` block is merged (DIA-42), each
 // key falls back to a `TODO-UI:<key>` placeholder so the controls are
@@ -10,6 +11,8 @@
 import contentJson from '../content/content.json';
 
 export const UI_KEYS = [
+  'intro',
+  'roomHint',
   'wholeFloor',
   'previous',
   'next',

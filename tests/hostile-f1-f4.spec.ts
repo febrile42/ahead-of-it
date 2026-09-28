@@ -203,6 +203,7 @@ test.describe('F2 — every resize re-renders, unthrottled', () => {
     // replaceChildren()s the hotspot layer and blurs them to <body> — they
     // are silently returned to the top of the document mid-read.
     await H.openApp(page);
+    await H.ensureCloseup(page); // D-051: a fresh load can land on a room, which has no gag hotspots
     const hotspot = H.hotspots(page).first();
     await hotspot.focus();
     const gagId = (await hotspot.getAttribute('data-gag-id')) ?? '';
@@ -324,6 +325,7 @@ test.describe('F3 — the toggle and an open panel', () => {
     // focus happened to be, not on the invoker — silently, because
     // .focus() on a detached node neither throws nor logs.
     await H.openApp(page);
+    await H.ensureCloseup(page); // D-051: a fresh load can land on a room, which has no gag hotspots
     const hotspot = H.hotspots(page).first();
     const gagId = (await hotspot.getAttribute('data-gag-id')) ?? '';
     await H.openFirstHotspot(page, 'mouse');

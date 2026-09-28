@@ -39,6 +39,19 @@ test.describe('close-up scale (D-042 acceptance): >= 1.9 css px per art px', () 
         await page.goto('/');
         await page.waitForFunction(() => document.body.dataset.renderedToken !== undefined);
 
+        // D-051: a fresh load now opens on the room, not the close-up —
+        // "Whole floor" toggles into it (main.ts's toggleWholeFloor falls
+        // back to the same close-up defaultView(scene) picks, the exact one
+        // this test measures, when there is no prior close-up to return to).
+        if (await page.evaluate(() => document.body.dataset.view === document.body.dataset.room)) {
+          const prevToken = await page.evaluate(() => document.body.dataset.renderedToken);
+          await page.locator('.scene-stepper__floor').click();
+          await page.waitForFunction(
+            (prev) => document.body.dataset.renderedToken !== prev,
+            prevToken
+          );
+        }
+
         // Band 80's default view is a 180x120 close-up (tests/fixtures/
         // 80-built.json's "ground.2") — asserted so this test fails loudly,
         // not silently on the wrong view, the moment that stops being true.

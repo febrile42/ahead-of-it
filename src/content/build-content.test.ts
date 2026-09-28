@@ -109,6 +109,13 @@ const VALID_TONE_MD = `# Tone — fixture
   client-side, never a plain \`mailto:\` in the source. LinkedIn: \`https://www.linkedin.com/in/fixture/\`.
 - **OG description / tagline (fixture):** *Fixture tagline text.*
 
+## Landing copy (D-051) (fixture)
+
+| key | copy | where |
+|---|---|---|
+| \`intro\` | \`Fixture intro lede.\` | fixture. |
+| \`roomHint\` | \`Fixture room hint.\` | fixture. |
+
 ## Navigation copy (D-042a) (fixture)
 
 | key | copy | where |
@@ -127,6 +134,8 @@ const VALID_TONE_MD = `# Tone — fixture
 `;
 
 const VALID_UI = {
+  intro: 'Fixture intro lede.',
+  roomHint: 'Fixture room hint.',
   wholeFloor: 'Whole floor',
   previous: 'Previous close-up',
   next: 'Next close-up',
@@ -237,6 +246,9 @@ describe('parsing evidence ids, employer names and toggle/share copy', () => {
 describe('parsing ui (D-042a)', () => {
   it('reads the real docs/content/TONE.md navigation strings', () => {
     expect(parseUi(REAL_TONE_MD)).toEqual({
+      intro:
+        "Josh Gister's résumé, as a building. Slide to your company's headcount: everything you can tap was already in place by the time his company was that size.",
+      roomHint: 'Tap an area to zoom in',
       wholeFloor: 'Whole floor',
       previous: 'Previous close-up',
       next: 'Next close-up',
@@ -274,6 +286,33 @@ describe('parsing ui (D-042a)', () => {
       '| `position` | `{label} · {n}` | fixture. |',
     );
     expect(() => parseUi(wrongPlaceholders)).toThrow(/ui\.position has placeholders \{label,n\}, expected \{label,n,total\}/);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// TONE.md §"Landing copy (D-051)" -> ui.intro / ui.roomHint
+// ---------------------------------------------------------------------------
+
+describe('parsing landing copy (D-051)', () => {
+  it('fails when a key is missing from the table', () => {
+    const missingKey = VALID_TONE_MD.replace('| `roomHint` | `Fixture room hint.` | fixture. |\n', '');
+    expect(() => parseUi(missingKey)).toThrow(/ui\.roomHint is missing from §"## Landing copy \(D-051\)"/);
+  });
+
+  it('fails on an unknown key in the table', () => {
+    const unknownKey = VALID_TONE_MD.replace(
+      '| `roomHint` | `Fixture room hint.` | fixture. |',
+      '| `roomHint` | `Fixture room hint.` | fixture. |\n| `bogusKey` | `Bogus` | fixture. |',
+    );
+    expect(() => parseUi(unknownKey)).toThrow(/unknown ui key "bogusKey" in §"## Landing copy \(D-051\)"/);
+  });
+
+  it('a §"Navigation copy" key is unknown inside §"Landing copy", and vice versa', () => {
+    const wholeFloorInLanding = VALID_TONE_MD.replace(
+      '| `roomHint` | `Fixture room hint.` | fixture. |',
+      '| `roomHint` | `Fixture room hint.` | fixture. |\n| `wholeFloor` | `Whole floor` | fixture. |',
+    );
+    expect(() => parseUi(wholeFloorInLanding)).toThrow(/unknown ui key "wholeFloor" in §"## Landing copy \(D-051\)"/);
   });
 });
 

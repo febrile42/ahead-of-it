@@ -129,9 +129,12 @@ export interface Ambient {
 }
 
 // D-042a close-up navigation strings (docs/content/TONE.md §"Navigation
-// copy"). Signposts only, filled with {placeholders} by the web at
-// render time — see parseUi below for which placeholders each key takes.
+// copy"), plus D-051's landing copy (§"Landing copy"). Signposts only,
+// filled with {placeholders} by the web at render time — see parseUi below
+// for which placeholders each key takes.
 export interface Ui {
+  intro: string;
+  roomHint: string;
   wholeFloor: string;
   previous: string;
   next: string;
@@ -602,13 +605,15 @@ export function parseCopy(toneMd: string): Copy {
 }
 
 // ---------------------------------------------------------------------------
-// TONE.md -> ui{} (D-042a close-up navigation strings)
+// TONE.md -> ui{} (D-042a close-up navigation strings, D-051 landing copy)
 // ---------------------------------------------------------------------------
 
 // Each key's expected {placeholder} set, alphabetised to match
 // placeholdersOf's output below — the web fills these in at render time
-// (docs/content/TONE.md §"Navigation copy").
+// (docs/content/TONE.md §"Navigation copy" / §"Landing copy").
 const UI_PLACEHOLDERS: Record<keyof Ui, string[]> = {
+  intro: [],
+  roomHint: [],
   wholeFloor: [],
   previous: [],
   next: [],
@@ -621,17 +626,36 @@ const UI_PLACEHOLDERS: Record<keyof Ui, string[]> = {
   announce: ['label', 'n', 'room', 'total'],
   announceRoom: ['room'],
 };
-const UI_KEYS = Object.keys(UI_PLACEHOLDERS) as (keyof Ui)[];
+
+// D-051's own section carries `intro`/`roomHint`; every other key still
+// comes from D-042a's. Split so an unknown/duplicate/missing key error
+// names the section it was actually found (or missing) in.
+const LANDING_UI_KEYS = ['intro', 'roomHint'] as const;
+const NAVIGATION_UI_KEYS = [
+  'wholeFloor',
+  'previous',
+  'next',
+  'position',
+  'zoomIn',
+  'atStart',
+  'atEnd',
+  'roomTab',
+  'roomTabName',
+  'announce',
+  'announceRoom',
+] as const;
 
 function placeholdersOf(copy: string): string[] {
   return [...new Set([...copy.matchAll(/\{(\w+)\}/g)].map((m) => m[1]))].sort();
 }
 
-/** The `| \`key\` | \`copy\` | where |` table rows of §"Navigation copy (D-042a)". */
-export function parseUi(toneMd: string): Ui {
-  const startIdx = toneMd.indexOf('## Navigation copy (D-042a)');
+/** The `| \`key\` | \`copy\` | where |` table rows of TONE.md's `## <heading>`
+ * section, checked against exactly `keys` — same strictness for both call
+ * sites below: unknown, duplicate, empty or missing key fails the build. */
+function parseUiSection(toneMd: string, heading: string, keys: readonly (keyof Ui)[]): Partial<Ui> {
+  const startIdx = toneMd.indexOf(heading);
   if (startIdx === -1) {
-    throw new ContentPipelineError(['docs/content/TONE.md: no "## Navigation copy (D-042a)" section found']);
+    throw new ContentPipelineError([`docs/content/TONE.md: no "${heading}" section found`]);
   }
   const nextHeadingIdx = toneMd.indexOf('\n## ', startIdx + 1);
   const section = toneMd.slice(startIdx, nextHeadingIdx === -1 ? undefined : nextHeadingIdx);
@@ -642,16 +666,16 @@ export function parseUi(toneMd: string): Ui {
   for (const m of section.matchAll(rowRe)) {
     const [, key, value] = m;
     if (found.has(key)) {
-      errors.push(`docs/content/TONE.md: ui.${key} is duplicated in §"Navigation copy (D-042a)"`);
+      errors.push(`docs/content/TONE.md: ui.${key} is duplicated in §"${heading}"`);
       continue;
     }
     found.set(key, value);
-    if (!UI_KEYS.includes(key as keyof Ui)) {
-      errors.push(`docs/content/TONE.md: unknown ui key "${key}" in §"Navigation copy (D-042a)"`);
+    if (!keys.includes(key as keyof Ui)) {
+      errors.push(`docs/content/TONE.md: unknown ui key "${key}" in §"${heading}"`);
       continue;
     }
     if (value.trim() === '') {
-      errors.push(`docs/content/TONE.md: ui.${key} has empty copy in §"Navigation copy (D-042a)"`);
+      errors.push(`docs/content/TONE.md: ui.${key} has empty copy in §"${heading}"`);
       continue;
     }
     const expected = UI_PLACEHOLDERS[key as keyof Ui];
@@ -662,9 +686,9 @@ export function parseUi(toneMd: string): Ui {
       );
     }
   }
-  for (const key of UI_KEYS) {
+  for (const key of keys) {
     if (!found.has(key)) {
-      errors.push(`docs/content/TONE.md: ui.${key} is missing from §"Navigation copy (D-042a)"`);
+      errors.push(`docs/content/TONE.md: ui.${key} is missing from §"${heading}"`);
     }
   }
 
@@ -672,9 +696,17 @@ export function parseUi(toneMd: string): Ui {
     throw new ContentPipelineError(errors);
   }
 
-  const ui = {} as Ui;
-  for (const key of UI_KEYS) ui[key] = found.get(key)!;
-  return ui;
+  const result: Partial<Ui> = {};
+  for (const key of keys) result[key] = found.get(key)!;
+  return result;
+}
+
+/** TONE.md's §"Landing copy (D-051)" and §"Navigation copy (D-042a)" tables, merged. */
+export function parseUi(toneMd: string): Ui {
+  return {
+    ...parseUiSection(toneMd, '## Landing copy (D-051)', LANDING_UI_KEYS),
+    ...parseUiSection(toneMd, '## Navigation copy (D-042a)', NAVIGATION_UI_KEYS),
+  } as Ui;
 }
 
 // ---------------------------------------------------------------------------

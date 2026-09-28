@@ -79,6 +79,8 @@
       "type": "object",
       "additionalProperties": false,
       "required": [
+        "intro",
+        "roomHint",
         "wholeFloor",
         "previous",
         "next",
@@ -92,6 +94,8 @@
         "announceRoom"
       ],
       "properties": {
+        "intro": { "type": "string", "minLength": 1 },
+        "roomHint": { "type": "string", "minLength": 1 },
         "wholeFloor": { "type": "string", "minLength": 1 },
         "previous": { "type": "string", "minLength": 1 },
         "next": { "type": "string", "minLength": 1 },

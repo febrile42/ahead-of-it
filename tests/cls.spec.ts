@@ -273,6 +273,11 @@ test.describe('CLS is exactly 0 across every band/view switch (DIA-65)', () => {
 
     for (const band of H.numericTestableBands()) {
       await clsOf(() => H.setBand(page, band), `band ${band}: switching to it`);
+      // D-051: band 80's own fresh load can land on the room view (every
+      // other band already lands on its close-up via setBand's fallback) —
+      // normalise to a close-up first so the labelled sequence below is
+      // accurate for every band, not just measured as net-zero by accident.
+      await H.ensureCloseup(page);
       await clsOf(() => H.toggleWholeFloor(page), `band ${band}: close-up -> room`);
       await clsOf(() => H.toggleWholeFloor(page), `band ${band}: room -> close-up`);
       const rooms = await H.roomIds(page);

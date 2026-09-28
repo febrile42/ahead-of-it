@@ -235,13 +235,17 @@ export async function roomIds(page: Page): Promise<string[]> {
   );
 }
 
-/** Switches to `roomId` through the tab row — lands on that room's default
- * close-up (D-042 item 6), not the room's own establishing shot. `keyboard`
- * presses Enter on the focused tab (the tab's *click* handler, not the
- * roving-tabindex keydown handler) — the two are different code paths in
+/** Switches to `roomId` through the tab row — lands on that room's own
+ * establishing shot (D-051 item 2; was the room's default close-up, D-042
+ * item 6, before D-051 amended it). `keyboard` presses Enter on the focused
+ * tab (the tab's *click* handler, not the roving-tabindex keydown handler)
+ * — the two are different code paths in
  * src/main.ts and only one of them restores focus. */
 export async function setRoom(page: Page, roomId: string, via: InputMethod = 'mouse'): Promise<boolean> {
-  if ((await currentRoomId(page)) === roomId) return false;
+  // Not currentRoomId(page) === roomId — that's also true from one of the
+  // room's own close-ups (D-051: no-op there would skip a real transition
+  // to the room's own establishing shot, which a tab click always causes).
+  if ((await currentView(page)) === roomId) return false;
   const tab = page.locator(`.scene-views__button[data-view-id="${roomId}"]`);
   if ((await tab.count()) === 0) return false;
   const prev = await currentRenderToken(page);
@@ -354,9 +358,7 @@ export async function forEachCloseup(
 ): Promise<void> {
   // A room view has no "previous"/"next" (main.ts's step() no-ops there) —
   // land on one of its close-ups first via "whole floor".
-  if ((await currentView(page)) === (await currentRoomId(page))) {
-    await toggleWholeFloor(page);
-  }
+  await ensureCloseup(page);
   while (!(await stepperInfo(page)).prevDisabled) {
     await step(page, -1);
   }
@@ -384,10 +386,25 @@ export function hotspots(page: Page): Locator {
   return page.locator('.hotspot');
 }
 
+/** If the current view is its own room's establishing shot — no gag
+ * hotspots, only "zoom in" tiles (D-051) — zooms into that room's default
+ * close-up via "Whole floor", same fallback main.ts's own toggleWholeFloor
+ * already uses. A no-op once already on a close-up. D-051 item 1 means a
+ * fresh load can land on a room now, so any spec that wants a gag hotspot
+ * (rather than a zoom-in tile, which is also `.hotspot` in the DOM — see
+ * src/ui/panel.ts) must call this first instead of assuming one is on
+ * screen. */
+export async function ensureCloseup(page: Page): Promise<void> {
+  if ((await currentView(page)) === (await currentRoomId(page))) {
+    await toggleWholeFloor(page);
+  }
+}
+
 /** Opens the panel from the first hotspot of the current view via `via`, and
  * returns the gag id it opened (so a spec can assert the panel's own strip
  * still belongs to it after the picture changes underneath). */
 export async function openFirstHotspot(page: Page, via: InputMethod = 'mouse'): Promise<string> {
+  await ensureCloseup(page);
   const first = hotspots(page).first();
   const gagId = (await first.getAttribute('data-gag-id')) ?? '';
   if (via === 'keyboard') {
@@ -446,9 +463,7 @@ export async function showGag(page: Page, gagId: string): Promise<void> {
     throw new Error(`showGag: no hotspot for gag "${gagId}" in the current band (${band}) / ${state} scene`);
   }
 
-  if ((await currentView(page)) === (await currentRoomId(page))) {
-    await toggleWholeFloor(page);
-  }
+  await ensureCloseup(page);
   while (!(await stepperInfo(page)).prevDisabled) {
     await step(page, -1);
   }
@@ -469,9 +484,7 @@ export async function showGag(page: Page, gagId: string): Promise<void> {
  */
 export async function gotoCloseupView(page: Page, viewId: string): Promise<void> {
   if ((await currentView(page)) === viewId) return;
-  if ((await currentView(page)) === (await currentRoomId(page))) {
-    await toggleWholeFloor(page);
-  }
+  await ensureCloseup(page);
   while (!(await stepperInfo(page)).prevDisabled) {
     await step(page, -1);
   }
