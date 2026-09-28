@@ -11,10 +11,10 @@ Panels are opened in arbitrary order, so every panel is somebody's first; the st
 each one self-identifying without spending words. Descriptors (D-014): current company =
 *a clean-energy company, now $3B+*; previous = *a $200M company, nine-building campus*.
 
-No `[JOSH:]` marks remain: every one was answered 2026-09-24 and folded in. The answers
+No open fact questions remain: every one was answered 2026-09-24 and folded in. The answers
 are in `EVIDENCE.md` (E-01…E-30) and `TIMELINE.md`.
 
-**Review disposition** (`PANELS-REVIEW.md`, 2026-09-16): 10 blockers → 8 fixed, 2 pushed
+**Review disposition** (panel review, 2026-09-16): 10 blockers → 8 fixed, 2 pushed
 back (see end). Both doc-wide rules (descriptor in every panel; second-person prevention
 beat) applied. Protected sentences untouched.
 

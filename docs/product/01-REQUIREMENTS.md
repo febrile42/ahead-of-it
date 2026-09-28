@@ -26,7 +26,7 @@ Change any of these by writing a `04-DECISIONS.md` entry first.
 | R-13 | A **day/night cycle** with the 3:47am on-call window as an ambient gag. | 3 (optional) |
 | R-16 | **`noindex`** meta + no sitemap at launch; not linked from joshgister.com until the Phase 4 publicity gate opens (D-018). | 1 |
 | R-17 | **First-party analytics** via the `/u/*` Umami proxy with exactly the D-016 event set; no values that identify the visitor or record their headcount. | 3 |
-| R-14 | A **text checklist** below the fold for the current band: *what was already in place at this size* (the fixes, each with its panel content), with the "without" description under each. It is the accessible equivalent of the scene and MUST stay in sync with it (generated from the same data). Downloadable as a single page. | 1 |
+| R-14 | A **text checklist** for the current band, visually hidden until opened from a single labelled entry point, always exposed to assistive technology (D-048): *what was already in place at this size* (the fixes, each with its panel content), with the "without" description under each. It is the accessible equivalent of the scene and MUST stay in sync with it (generated from the same data). Downloadable as a single page. | 1 |
 | R-14a | At the `1,000+` stop the checklist gains a **translation column**: each receipt → its large-org equivalent (content in `PANELS.md` §Beyond). | 1 |
 | R-15 | A **"what do you already have?"** refinement (checkboxes: SSO · security lead · ERP · real network · MDM) that marks those items as done in the checklist and dims their hotspots. | 3 |
 

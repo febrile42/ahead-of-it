@@ -5,3 +5,19 @@ dist/
 *.log
 .DS_Store
 .claude/worktrees/
+
+# scripts/run-build-content.mjs's transpile-and-run scratch file
+scripts/.build-content.generated.mjs
+
+# Vite / Playwright
+*.local
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+
+# tools/hallway-test/build-kit.mjs default output (the kit itself is kept privately)
+hallway-kit/
+
+# Lighthouse CI (PH1-05, R-23) — generated reports, filesystem upload target
+.lighthouseci/

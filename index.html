@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- R-16 / D-018: unlisted until the Phase 4 publicity gate opens. -->
+    <meta name="robots" content="noindex, nofollow" />
+    <!-- D-046/PH2-05: matches src/style.css's `color-scheme: light dark` —
+         a native form control (the slider) or scrollbar painted before the
+         stylesheet loads still follows the OS scheme. theme-color values
+         mirror style.css's light/dark `--page-bg`. -->
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#fff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#171310" media="(prefers-color-scheme: dark)" />
+    <title>Ahead of It — Josh Gister's résumé</title>
+    <!-- DIA-66: self-hosted so Chromium's automatic /favicon.ico request
+         (issued regardless of this tag) resolves instead of 404ing —
+         no third-party request either way (R-21). -->
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <!-- OG title/description mirror src/content/content.json's copy.ogTitle /
+         copy.ogDescription (TONE.md "Toggle and share copy", D-010/D-027).
+         Authored by hand here because index.html has no templating step —
+         keep these in sync with TONE.md if that copy ever changes. -->
+    <meta name="description" content="Build it, then make sure it doesn't need you." />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Ahead of It — Josh Gister's résumé" />
+    <meta property="og:description" content="Build it, then make sure it doesn't need you." />
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <div id="app">
+      <h1>Ahead of It</h1>
+      <!-- D-051: the page's own introduction — a lede paragraph between
+           the h1 and the slider, filled from content.json's ui.intro
+           (TONE.md §"Landing copy"). Height is reserved here (S1, CLS 0),
+           same trick as the slider/toggle shell just below. -->
+      <p class="app__intro" id="app-intro"></p>
+      <!-- S1: a static shell for the slider and toggle, reserving their
+           layout space before src/main.ts runs, so a slow connection
+           doesn't paint an empty page and then jump when the bundle
+           finally loads (measured CLS 0.2147 without this). Every piece
+           of *text* below is still filled in by src/ui/slider.ts and
+           src/ui/toggle.ts from content.json's copy — nothing is
+           hard-coded here beyond structure and the input's numeric
+           bounds (mirrors src/scene/bands.ts's SLIDER_MIN/SLIDER_MAX,
+           checked against drift by src/scene/bands.test.ts). -->
+      <div class="slider" id="slider-root">
+        <label class="slider__label" for="headcount-slider"></label>
+        <p class="slider__readout" aria-hidden="true"></p>
+        <input type="range" id="headcount-slider" min="25" max="1000" step="1" value="80" />
+        <div class="slider__ticks" aria-hidden="true"></div>
+        <p class="slider__live sr-only" aria-live="polite" role="status"></p>
+      </div>
+      <div class="toggle" id="toggle-root">
+        <button type="button" class="toggle__button"></button>
+        <!-- DIA-176 review round 2: subtitle and nudge never render at the
+             same time (see src/ui/toggle.ts), so they share one reserved
+             slot instead of each reserving its own worst-case-2-lines box
+             stacked on top of the other's. -->
+        <div class="toggle__message">
+          <p class="toggle__subtitle"></p>
+          <p class="toggle__nudge"></p>
+        </div>
+      </div>
+      <!-- D-042a: the room tab row above the scene and the stepper row
+           below it are static shell too, each a fixed height, so a band
+           or view change never moves the page (CLS 0). src/main.ts fills
+           the tabs in from the scene file and the labels from
+           content.json's `ui` block; nothing visitor-read is written here.
+           Both prev/next start aria-disabled (never `disabled`, so focus
+           is not lost at either end). -->
+      <div class="scene-views" id="scene-views" role="tablist" aria-label="Building view"></div>
+      <!-- DIA-131 (D-048/R-14): the view-nav row — the punch-list
+           disclosure button, outside the canvas, on its own line so it
+           never competes with the room tabs' own scrollable width (that
+           row already has more rooms than a 390px phone fits at the 750
+           band — cramming a second control into the same flex row starved
+           it down to ~200px, a real regression independent of this
+           button). The icon is the DIA-130 clipboard sprite (structure
+           only, not visitor-read copy); the label span is filled in by
+           src/ui/checklist.ts from the same gag count the sheet itself
+           renders, so the number can never drift from the list beneath
+           it. `aria-controls` points at the sheet checklist.ts builds
+           (id="checklist-panel"). -->
+      <div class="view-nav" id="view-nav">
+        <button
+          type="button"
+          class="punch-list-button"
+          id="punch-list-button"
+          aria-expanded="false"
+          aria-controls="checklist-panel"
+        >
+          <img
+            class="punch-list-button__icon"
+            src="/sprites/ui/clipboard.png"
+            srcset="/sprites/ui/clipboard.png 1x, /sprites/ui/clipboard@2x.png 2x, /sprites/ui/clipboard@3x.png 3x"
+            width="16"
+            height="16"
+            alt=""
+          />
+          <span class="punch-list-button__label"></span>
+        </button>
+      </div>
+      <!-- S1: width/height reserve the scene's final box (3:2, D-042a:
+           full viewport width up to 430px, so a 180x120 close-up paints at
+           >= 1.9 css px per art px on a 360px phone) so the canvas doesn't
+           grow from the browser's 300x150 default once main.ts sizes it. -->
+      <div class="scene-wrap" id="scene-wrap">
+        <canvas id="scene-canvas" width="360" height="240"></canvas>
+        <div class="hotspots-layer" id="hotspots-layer"></div>
+      </div>
+      <div class="scene-stepper" id="scene-stepper">
+        <button type="button" class="scene-stepper__button scene-stepper__prev" aria-disabled="true">&#8249;</button>
+        <p class="scene-stepper__label"></p>
+        <button type="button" class="scene-stepper__button scene-stepper__next" aria-disabled="true">&#8250;</button>
+        <button type="button" class="scene-stepper__floor" aria-pressed="false" aria-disabled="true"></button>
+      </div>
+      <div id="panel-root"></div>
+      <div id="checklist-root"></div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

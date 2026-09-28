@@ -6,7 +6,7 @@ marked, never deleted.
 ---
 
 **D-001 · 2026-09-16 · The concept is Occupancy.**
-Chosen over twelve alternatives (`docs/brainstorm/IDEAS-2026-09-15.md`) because it is the
+Chosen over twelve brainstormed alternatives because it is the
 only format that could not be built from a typical IT leader's resume: it requires having
 provisioned real buildings *and* run the abstract layers, twice, long enough to have receipts.
 Consequence: the building is the spine; every other idea survives only as a gag inside it.
@@ -40,8 +40,8 @@ pre-empts the "cute undercuts gravitas" risk. Consequence: R-07.
 
 **D-008 · 2026-09-16 · Mastermind/worker split is mandatory.**
 Session agent owns judgment and review; implementation is delegated by brief to sonnet,
-mechanical work to haiku; content voice never below opus. Consequence: `CLAUDE.md`
-"You are the mastermind" section and the routing table in 03.
+mechanical work to haiku; content voice never below opus. Consequence: the agent
+instructions and the model-routing table.
 
 **D-009 · (pending) · Rendering: vanilla canvas vs PixiJS.**
 Proposed: vanilla canvas; switch only on measured failure at Phase 2. Decide at Phase 1 start.
@@ -59,22 +59,22 @@ No before/after time-to-provision measure exists (E-21) and none will be implied
 panel describes the automation function's scope (E-03) and stops there. Consequence of R-30.
 
 **D-013 · 2026-09-16 · The +33% capacity and the campus fiber are separate claims.**
-the previous employer' +33% was WAN capacity (E-11); the nine buildings were linked by private
+The campus company's +33% was WAN capacity (E-11); the nine buildings were linked by private
 fiber (E-23). G5.1 uses E-23 only. Never attach the percentage to the fiber.
 
-**D-014 · 2026-09-16 · The current employer is never named on the site.**
-Josh: don't name the current employer; it's findable on LinkedIn by anyone curious. Served content uses
+**D-014 · 2026-09-16 · The clean-energy company is never named on the site.**
+Josh: don't name [the clean-energy company]; it's findable on LinkedIn by anyone curious. Served content uses
 one fixed descriptor — **"a $3B+ clean-energy company"** on first mention in a panel,
 "the company" after — and never the name, the logo, or the domain. City names and years
 may stay: Josh accepts that the combination is identifying; the rule is about not
-*saying* it. the previous employer is named (assumption A-1, reversible). A build-time check
-fails CI if the string appears in the output (R-33). Internal docs may use the name freely.
+*saying* it. The campus company is named (assumption A-1, reversible). A build-time check
+fails CI if the string appears in the output (R-33). Internal notes may use the name; this repository does not.
 
 **D-015 · 2026-09-16 · Many offices only. No campus topology.**
 Josh: "the analogy for a campus is close enough to self-evident to avoid the double work.
 If we have to choose, many offices is always preferred." R-09 is removed; R-10 drops the
 `topo` parameter; band 5 becomes *The second office* with an inset in another city. G5.1
-is reframed (Q-17). the previous employer receipts still apply — the problems are the same,
+is reframed (Q-17). The campus company's receipts still apply — the problems are the same,
 the building count isn't.
 
 **D-016 · 2026-09-16 · First-party Umami with a modest event set.**
@@ -111,7 +111,7 @@ worse first impression: it means nothing to a recruiter until explained. Awaitin
 confirmation (Q-15). Not applied to any served string yet.
 
 **D-014 (amended) · 2026-09-16 · Neither employer is named.**
-Josh: "Drop the previous employer — keep the companies generic. The details live in my real
+Josh: "Drop [the campus company] — keep the companies generic. The details live in my real
 resume or LinkedIn." Assumption A-1 reversed. Descriptors in `TONE.md`; the CI check greps
 for both names.
 
@@ -145,7 +145,7 @@ Supersedes D-002's round-number bands (still seven).
 
 **D-024 · 2026-09-16 · Art is generated in-house first.**
 Josh: "Let's try to generate all the assets ourselves. I will purchase stock or commission
-only if we have trouble doing it ourselves." Reverses 03-RESOURCING's "don't generate final
+only if we have trouble doing it ourselves." Reverses the resourcing plan's "don't generate final
 art with image models" and D-020's stock-first plan. Mitigation for the known failure mode
 (inconsistency across a tileset): one fixed palette, one tile size, one style-reference
 sheet generated first and every later asset generated *against* it, hand-cleaned in a
@@ -203,3 +203,461 @@ segmented from 2018; Boston cabled before move-in; rooms standardised by functio
 2014–17; 40%/33% by 2014; facilities 2015–17; SVP reporting since H2 2022; Librarian role
 since 2020, under IT 2026; email security = Exchange ATP + Area 1 via MSSP; badge removal
 a manual offboarding step. All folded into PANELS.md v4.
+
+**D-032 · 2026-09-24 · GitHub remote: `febrile42/ahead-of-it`, private.**
+Josh's explicit yes via AskUserQuestion. Private because internal docs name both employers
+and carry the headcount timeline. `develop` is the default branch (PRs target it); `main`
+is promoted with merge commits. The Cloudflare secrets for CI are not yet set — that is a
+Phase 4 step alongside the custom domain.
+
+**D-033 · 2026-09-24 · Phase 1 started.** Briefs PH1-01…05 written. PH1-01 and
+PH1-02 running in parallel worktrees; 03 after 01; 04 after 01–03; 05 after 04.
+
+**D-034 · 2026-09-24 · In-house art confirmed; sprite work routes to Opus 5.5.**
+The PH1-02 spike passed (deterministic, palette-locked, coherent). Josh: "Continue in-house.
+Ensure you are using Opus 5.5 for art style and animation as it is superior." So: the
+pipeline stays (`art/`), and every sprite-drawing or animation brief is executed by `opus`,
+not sonnet. Known weaknesses to fix first: desk/chair silhouette, front-view stride, no
+ground shadows. Stock/commission fallbacks remain on paper only.
+
+**D-035 · 2026-09-24 · The art pipeline exports scene files; the web is a dumb painter.**
+PH1-04's scene was a flat elevation of floor strips, not the isometric room the art pass
+draws (R-02). Rather than port composition to TypeScript, the art side exports per
+band × state a placement list with explicit hotspot rects, depth, manifest-keyed
+sprite/frame references, baked overlay sprites for procedural marks, and `views[]` from
+day one; the art paints its own previews from that export, so the web canvas must match
+pixel-for-pixel (a test). Contract: `docs/product/SCENE-FORMAT.md`. Cumulative composition
+(R-03a) is the art side's job. Split: PH1-08a spike (opus), PH1-08b export (sonnet, after
+PH1-07), PH1-09 painter (sonnet, after PH1-04 fixes). PH1-04's interaction plumbing merges
+with fixes; its `slots/layout/assembler` are replaced.
+
+**D-036 · 2026-09-24 · Views: option A, one view per gag-carrying floor, ≤ 360 px wide.**
+Decided on the PH1-08a mocks (`art/spike/A-750.png` vs `B-750.png`
+and the floor-convention research). Rule, enforced by `check_scenes.py`:
+1. View ids ∈ {ground, floor-2 … floor-6, top, street}, unique, in that order.
+2. `ground` always exists; any other view only if it holds ≥ 1 primary hotspot.
+3. `w ≤ 360`, `h ≤ 240` native px (not 390: at 390 a worker shrinks to 8–12 CSS px on
+   360/375-wide phones); `focus` = the full view.
+4. Each gag has exactly one primary hotspot, in its home view: ground G1.1 G1.2 G2.1 G2.2
+   G2.3 G3.1 G3.2 G4.1 G5.3 G5.4 G6.1 G7.1 · floor-2 G2.4 G3.3 G4.2 G4.3 G6.2 G7.3 G7.3a
+   G7.4 · top G7.2 · street G5.1 G5.2 G5.6 G6.3 G6.4.
+5. Inset office and map live only in `street`; map pins are non-primary G6.3 entries.
+6. Default view = the one with the most primaries among the current band's own gags; ties
+   to the earlier view.
+7. Primary hotspot centres ≥ 44 native px apart within a view.
+The web switcher is a tab row with per-view gag counts (as mocked); B's exterior stacked
+building is optional Phase 2 polish for that switcher. Consequence: PH1-07's 430/494 px
+rooms for 150/220 must be re-cut into views by PH1-08b (street takes the inset).
+
+**D-037 · 2026-09-24 · Scene contract rulings from the PH1-08b/09 integration.**
+Found by merging the export and the painter in a scratch tree and running both sides'
+checks against real data. They amend D-035/D-036 where noted; `SCENE-FORMAT.md` carries
+the detail.
+1. `frame` is the manifest frame-*name* string, never an index, with no fallback (the
+   contract's own example used integers; the manifest never did).
+2. Parity goldens are per view (`art/preview/views/<band>-<state>-<view>@1x.png`), painted
+   from the export and proven equal to the full-plate render's crop. Whole-plate previews
+   stay art-review images. Amends D-035's "match `art/preview/<band>-<state>@1x.png`".
+3. D-036 rule 3's "`focus` = the full view" is loosened to "`focus` inside the view", so
+   a view wider than a phone can scroll to its point of interest.
+4. D-036 rule 4 counts per file: one primary per gag in its home view, at most one per
+   view. Other parts may sit in other views (G3.2's box on `floor-2`).
+5. Two-part is per state, per `BANDS-AND-GAGS.md`: G5.1 is two-part only in `without`.
+   All-placeholder gags are exempt.
+6. Painter scale uses both axes (`min` of width and height scales), so no view overflows
+   the fixed 360:240 scene box. Amends D-035's width-only formula.
+7. Rule failures that need art are **listed debt**, not tolerated silently and not faked
+   by moving hotspots: `knownSpacingDebt` (5 band-80 pairs under rule 7) and
+   `TWO_PART_ART_DEBT` (G2.4's inset part). Each list fails the build once stale.
+   PH1-10 clears both.
+8. Views must be whole rooms, not crops of one plate (the gap PH1-08b reported). Until
+   PH1-10 lands, staging shows cropped rooms.
+
+**D-038 · 2026-09-24 · Views are composed rooms; scene rules have no exceptions.**
+PH1-10 replaced one wide plate per band, sliced into views by hand-placed crops, with one
+composed room per D-036 view: `ground`, a separate room per upper storey, and `street` as
+HQ's exterior with the road and the inset office. Amends D-037 items 2, 7 and 8:
+1. The per-view parity reference is each room's own native render, not a crop of a plate.
+2. Band 80 has `ground` only: none of its gags lives in the street (D-036 rule 2).
+3. The spacing and two-part debt lists are cleared, and the mechanism goes with them: rule 7
+   and the two-part rule have no exemptions on either side. A future exception needs a
+   decision first.
+4. HQ's storey count in `street` follows the floors `BANDS-AND-GAGS.md` narrates (3 at 150,
+   4 at 220). That is scenery, not a receipt.
+5. G2.4's second part is staged as one call: the inset office's screen shows the HQ worker
+   frozen mid-wave, with an inset worker beside it waving back. That is the drawable reading
+   of "a worker on each side waving".
+
+**D-039 · 2026-09-25 · A band may re-compose a room, not only add to it.**
+Recorded after the fact: PH1-11 (`5be5870`, merged as DIA-29) introduced the mechanism, and
+the D-038 rule that a view is a *composed room* had no answer for a room that stops fitting.
+At 360 the ground floor could not seat nine primary hotspots 44 px apart (D-036 rule 7, no
+exceptions per D-038) by adding to the 220 room, so the room itself was re-laid.
+1. **Mechanism (`art/src/layout.py`).** A placement may carry `since` and `until`, in
+   headcount-band units: it is on screen only when `since <= band < until`. `scene()` applies
+   the window before the quiet rules, so it is a filter on *which room*, not on how loud.
+   Band 80's ground floor and 150/220's ground and street placements end at `until=360`; the
+   360 ground and street are placed with `since=360`; HQ is `hq-5` for `360 <= band < 490`
+   and `hq-6` from 490.
+2. **What stays true.** R-03a: band N still holds every gag with band <= N in the matching
+   state; a re-composed gag is re-placed, never dropped. Quiet rules still key on the
+   placement's own `band`, so a band-80 gag re-placed in the 360 room is quieted like any
+   earlier-band gag. D-038's "no exceptions" is untouched: every re-composed room passes the
+   44 px and two-part rules on its own (closest ground pair at 360: G1.1/G5.3, 47 px).
+3. **Consequence for content and evidence.** The same gag can sit somewhere else in a later
+   band, and a view's size can change (ground 282 x 188 at 220, 346 x 220 at 360; HQ's
+   footprint goes from 7 x 3 tiles at 150/220, `hq-3`/`hq-4`, to 4 x 3, `hq-5`/`hq-6`, from
+   360). That is scenery, not a receipt (D-038 item 4). `BANDS-AND-GAGS.md` "Where" is the
+   *home view* (D-036), not a coordinate; where the two differ, the home view wins.
+4. **Consequence for the exporter.** `since`/`until` are art-side only. They are resolved
+   when the scene is built and are **not written to the scene files**. The exporter emits a
+   plain, complete `entries` list per band x state x view.
+5. **Consequence for the painter: none, deliberately.** The web reads scene files and never
+   sees a window (D-035). It must not learn to compare bands, cache a room across bands, or
+   assume a gag's hotspot is where it was at the previous band. Each band's file is
+   self-contained. Hotspots are derived from the file being painted, so buttons follow the
+   re-composed room automatically.
+6. **Guardrail.** Any use of `since`/`until` to hide an art-rule failure rather than to fit a
+   larger room is an exception under D-038 item 3 and needs its own decision.
+
+**D-040 · 2026-09-25 · The hallway test is deferred, not dropped; the kit ships now.**
+The Phase 1 exit criterion stands as written in `02-PHASES.md`: a stranger names what each
+gag is from the without-state picture (≥ 4/5 per gag, or that gag is redrawn), and ≥ 4/5
+find and flip the toggle within 20 seconds unprompted (R-06a). **Josh has deferred running
+it.** Two reasons, both on the record: running it needs real strangers and his time
+(status notes, "Needs Josh"), and on `develop` today 15 of the 26 gags are still placeholder
+boxes, so a run now could not close the criterion for them whatever it found.
+Consequences:
+1. **Phase 1 closes marked *conditionally met, pending hallway test*, said out loud** in
+   the status notes and `02-PHASES.md` — never quietly ticked. The criterion is not amended and
+   not waived; it is unrun.
+2. The kit is built and parked (README, protocol, generated scoring
+   sheet, results template, 390 px without-state screenshots) plus
+   `tools/hallway-test/build-kit.mjs`, which regenerates the sheet, the manifest and every
+   screenshot from the repo. Running the test later is prep-free: refresh, print, run.
+3. **Re-running the capture is how bands arrive.** Gags whose primary hotspot is still a
+   placeholder are skipped and listed in `manifest.json`'s `pendingArt`; when the art lands
+   they appear with no change to the kit. A results write-up must state which gags a run
+   did not cover.
+4. **A gag that later fails is redrawn, not renegotiated.** The art pipeline is in-house
+   (`art/`, Opus-drawn), so a redraw against a concrete note is hours of one agent's work,
+   not a re-commission — which is what makes deferring this gate cheap rather than risky.
+   The note is the participants' verbatim answers: what the picture read *as*.
+5. The kit operationalises the two thresholds so the sheet and the protocol cannot drift:
+   "a couple of seconds" for a gag = **5 s**, the toggle = **20 s**, five participants,
+   pass at four. Those numbers live in one place, `build-kit.mjs`, and are printed on the
+   sheet. Changing them needs a decision.
+6. The toggle half feeds Phase 2's nudge work. If the test runs *after* that polish ships, a
+   weak result means reworking it rather than discovering the problem, and the write-up must
+   say which of the two it is.
+
+**D-041 · 2026-09-25 · Three 360/490 "without" lines follow the art that reads.**
+Three rounds of picture review at 390px (DIA-9, DIA-21, DIA-28) showed that three locked
+"without" lines could not be drawn legibly as written. `BANDS-AND-GAGS.md` now describes
+what is drawn. (D-039 is held for the room re-composition rule and D-040 for the
+hallway-test kit, both still on open branches.) No receipt, date or figure changes.
+1. **G3.1:** the coat and the `WELCOME!` balloon are removed. A worn coat changes the hire's
+   torso colour between states, which breaks the rule that a person must not change across
+   the toggle. With the coat off the hire, nowhere in that corner reads. The absence is
+   carried by an outline where the laptop should be.
+2. **G5.4:** the bill on the wall carries **no figure**. `−33%` is E-10, the saving VoIP
+   delivered. It belongs only to the "already" state, and E-10 never gives a base figure to
+   print instead. What carries the gag is the roll: a bill that will not stop.
+3. **G5.3:** "everyone freezes" is replaced by the drawn beat, one figure backing away with
+   their hands up.
+Deferred to the Phase 1 polish list, not rated weak: the G6.4 camera dome, the §5 closet
+density, `DAVE?` on the trolley body, and the G5.1 truck reading as a crate.
+
+**D-042 · 2026-09-25 · Phone-scale close-up views; rooms become establishing shots.**
+Josh flagged on DIA-36 that the art is too small on phones, and the Art Director measured
+it: inside the 360:240 box a 390 px phone paints current rooms at 1.0–1.33 css px per art
+px, so a 24 px person is about 4 mm tall. Reviews had been judging 4× plates. Gags per room
+grow with the band (750: 12 on ground), and at 1× a 12-gag room cannot "read cold at 390 in
+under 2 s". Proposal: DIA-36 document `proposal`. Accepted with one change (item 1: 180 × 120,
+not 195 × 130). Amends D-036 rules 2, 4, 6 and 7 and D-038 item 1:
+1. **Close-ups.** A close-up view is at most **180 × 120 native px** and holds **1–3
+   primary hotspots**. 195 × 130 lands on exactly 2 css px per art px only from 390 px up;
+   at 360/375 px it drops to 1.5. 180 × 120 lands on 1.9–2.33 on every phone 360–430 px
+   wide at dpr 2, 2.625 and 3. That is the size the art is judged at.
+2. **Rooms stay.** Each D-036 room (`ground`, `floor-2`…, `top`, `street`) is kept as the
+   establishing view for its close-ups. A room exists only if it has at least one
+   close-up. Rooms carry **no gag hotspots**, because at 1× they would be tap targets
+   millimetres apart. How a visitor gets from a room to its close-ups is the web's call
+   (item 7).
+3. **Sprites unchanged.** A close-up is a rectangle cut from its parent room's own
+   native render, not a new drawing. Its parity golden is that crop, and `check_scenes.py`
+   proves it equals the room render at `rect`. This is D-038's "each room's own render", not
+   the plate cropping D-038 retired.
+4. **Primaries.** Each gag has exactly one primary per file. It sits in a close-up whose
+   parent is the gag's home room (D-036 rule 4's table now names home *rooms*).
+   Non-primary parts may sit in other close-ups.
+5. **Spacing.** The rule is **44 css px** between primary centres on a 360–430 px phone.
+   In a close-up (≥ 1.9 css px per art px) that is **≥ 24 native px**, and `check_scenes.py`
+   and the contract test both enforce it with no exceptions (D-038 item 3 stands).
+6. **Default view.** The close-up holding the most of the current band's own primaries,
+   ties to the earlier one. First paint must be readable at true size. The room is one
+   step away.
+7. **Web's call, within limits.** Navigation (tabs grouped by room, tapping a room to
+   enter, or both), transitions and the scene box size belong to the Web Engineer. The
+   limits: a 180 × 120 close-up paints at ≥ 1.9 css px per art px at 360 and 390 px, dpr 2
+   and 3 (a Playwright assertion); about 10 close-ups at 750 stay reachable at 390 px by
+   touch and keyboard; the R-14 text list stays in sync. The contract fields
+   (`SCENE-FORMAT.md`: `kind`, `parent`, `rect`, id scheme) are proposed here, and the Web
+   Engineer can counter before the exporter merges.
+8. **Review at true size.** Every picture review (the "reads cold" test, legibility passes,
+   the hallway test) uses 390 px mocks at the real painted scale, never 4× plates.
+9. **Consequences.** The DIA-3 hold is lifted: 610/750 rooms are composed so that their
+   gags fall into clusters of ≤ 3 that each fit 180 × 120 at 24 px spacing. 80–490 are
+   re-exported, not redrawn. The exporter and `check_scenes.py` belong to the Art Director.
+   The painter, navigation and contract test belong to the Web Engineer. Both are merged
+   together in a scratch worktree before either lands on `develop` (the team's
+   integration rule).
+
+**D-042a · 2026-09-25 · Web sign-off on the close-up contract, and the navigation ruling
+(DIA-39; Web Engineer, within D-042 item 7).**
+Contract: `kind`, `parent`, `rect` and the `<room>.<n>` ids are accepted as proposed.
+Counters, all written into `SCENE-FORMAT.md`: (1) `schema` becomes 2, and the painter
+refuses any other value; (2) a close-up's entries, hotspots and `focus` are in the
+close-up's own coordinates and the painter applies no offset, so the painter stays dumb;
+(3) both states of a band share their view skeleton (ids, kinds, parents, labels, order)
+so the toggle keeps the visitor's place; (4) every view has a label of at most 24
+characters, reviewed once by the Product & Content Lead; (5) exactly one `default`, on a
+close-up. The contract test and `check_scenes.py` are split by who can see what: the test
+owns everything readable from the JSON, the script owns everything that needs a PNG;
+spacing and one-primary are checked by both, on purpose.
+Navigation, all three of D-042's options in layers, none of them hidden behind another:
+1. **Room tabs**, one line, horizontally scrollable, never wrapping (a wrapping row grew
+   with the band and would shift the page). Choosing a room lands on that room's default
+   close-up, not on the establishing shot, so a tap never leaves the visitor on a picture
+   with nothing to tap.
+2. **A stepper under the scene**: previous, "label · n of N", next, over all close-ups in
+   array order, crossing room boundaries. It alone reaches every gag; the tabs are
+   shortcuts. At either end it is `aria-disabled`, not `disabled`, so focus is not lost.
+3. **Whole floor**: a persistent control that shows the room's establishing shot. There
+   each of its close-ups is a "zoom in" button over the picture, drawn from the same array
+   (never a second list), so the picture and the buttons cannot disagree.
+Transition: a straight cut, no animation; a zoom from `rect` is possible later because a
+close-up is a crop of its room, but that belongs to the Phase 2 animation pass. No swipe
+gesture (it fights page scroll). The scene box does not shrink: it is 3:2 at every view,
+because a 180 × 120 close-up at 2 css px and a 360 × 240 room at 1 css px fill it exactly,
+which also holds CLS at zero. It is the full viewport width up to 430 px (this is what makes
+1.9 css px per art px true at 360 px: a padded 328 px box would give 1.5) and capped at
+720 px from 768 px. The R-14 checklist is by band and by gag, not by view, so it stays in
+sync by construction; the contract test's "every due gag has one primary in a close-up"
+is what keeps every gag on the list also reachable in the picture.
+
+**D-043 · 2026-09-26 · R-10's read side moves to Phase 2, so band 750 can be measured
+(DIA-72; CEO, on the PH2-04 brief).**
+Lighthouse scores only a navigation, and every load lands on band 80, so the Phase 2 exit
+criterion "Lighthouse ≥ 90 on band 1 and band 7" could not be measured as worded. Rather
+than amend the criterion to a timespan without a score, the page now *reads* R-10's own
+parameters on load: `?n=<headcount>&it=<none|built>` sets the initial band and state. A
+missing or invalid value falls back to band 80, built, silently. Nothing *writes* the URL
+in Phase 2: history, the back button, sharing, OG tags and the share image stay in Phase 3
+under R-10 as written. The parameter names are R-10's, so Phase 3 extends this rather than
+replacing it. Useful beyond Lighthouse too: QA and the hallway kit can land on a band
+directly. Built by PH2-04 as its own commit.
+
+**D-044 · 2026-09-26 · G6.3's "already" line follows the art that reads.**
+The 390px picture review (DIA-70, DIA-73) found the camera dome over the new shell's door
+unreadable on the pale frame. It came out (PR #36), as G6.4's did at 490 in the polish pass
+(DIA-37). This follows D-041's rule: a locked line describes what is drawn.
+`BANDS-AND-GAGS.md` now does. No receipt, date or figure changes: E-05 and E-11 are as they
+were, and the badge reader and camera bar are still drawn.
+1. **G6.3 Already:** "the new shell has cable trays, a badge reader, ~~a camera dome~~ and a
+   room with a camera bar; the worker in the doorway holds a clipboard with everything
+   ticked."
+
+**D-045 · 2026-09-26 · Band-crossing moments: six beats, no captions (PH2-03 step 1, DIA-82;
+Product & Content Lead, for CEO sign-off).**
+The beat table is `docs/content/MOMENTS.md`. Each chosen gag's primary is in its band's
+default close-up (checked against the `"default": true` view in each `<band>-built.json`).
+1. **150 G4.2, 360 G5.3, 490 G3.1, 610 G4.1, 750 G7.1:** the brief's proposed gags stand,
+   with art notes. 360 is rated at risk. If it doesn't read, the band ships with no moment.
+2. **220 G2.4: the beat is replaced, the gag is kept.** The dongle walker is dropped. A
+   dongle is too small to read at 2 css px, "sees the camera bar" can't be drawn, and it
+   would carry a without-state prop into the built state. The new beat is the Already
+   line's own "the remote face moving, the wave returned": the screen lights, the face
+   waves, and a seated worker waves back.
+3. **No captions in any band.** Where the picture already has a word (`REPORT`,
+   `AUDITOR`, `APPROVED`), a caption repeats it. Where it doesn't, a caption would be
+   explaining the joke. Any caption we can source restates what the panel says one tap
+   away. So no served copy changes, `PANELS.md` and `content.json` are untouched, and step
+   3 reserves no caption line. A moment that reads only with words is cut, not captioned.
+No receipt, date or figure is added. Every beat plays a locked Already line forward.
+**Signed off by the CEO, 2026-09-26 (DIA-89).** Every close-up, primary and reused sprite
+checked against `develop`. Two notes for step 2: 490's "screen comes on" needs a screen-off
+laptop frame, which the table doesn't list; and 360's fan is the threat arriving and leaving,
+so it is not the dongle problem, but it must never be set down in the built room.
+
+**D-046 · 2026-09-27 · Dark mode: the page goes dark, the building doesn't (DIA-118; Product &
+Content Lead, for CEO sign-off).**
+The owner asked for dark mode that reuses the artwork, and only redraws what it has to. The
+answer is to redraw nothing.
+1. **It follows the OS, with no switch on the page.** `prefers-color-scheme: dark` drives it.
+   The page already has one toggle, and that toggle is the product (D-022). A second
+   pill-shaped switch near it competes for the same thumb and blurs what "the toggle" means
+   in every screenshot. A visitor who wants light on a dark phone has the OS switch.
+2. **The chrome is the only thing that changes.** That means page background, text, rules,
+   buttons, tabs, stepper, slider track, panel, sheet, checklist and the `not drawn yet`
+   placeholder. It is done with CSS custom properties in `src/style.css`, and every
+   hard-coded colour there moves behind a variable. The 404 page follows too.
+3. **The building sits on a light mat.** The rooms are opaque, but the sprites are outlined
+   in ink `#1a1410`, and anything transparent at a scene's edge would lose its outline against
+   a dark page. So `.scene-wrap` keeps a light mat colour in both schemes: the art's own
+   pale frame, not the page background. The picture reads as a lit diorama on a dark desk.
+   **No CSS filter, blend mode or opacity goes on the canvas or on any sprite.** The painter's
+   pixel-parity tests must stay byte-identical, and a dimmed gag reads worse at 390px.
+4. **The toggle keeps its colours.** Yellow "without" and pink "built" are the one thing a
+   visitor has to find in both schemes (D-022's toggle-to-"without" rate). They get a light
+   outline on dark, and their fills don't change.
+5. **Served images don't change.** The share image and OG image stay light. They are viewed
+   in someone else's app, whatever their scheme. The print checklist stays light
+   (`@media print` wins). Panel thumbnails are opaque art and keep their fills.
+6. **Contrast is a gate.** Body text and button labels meet WCAG AA (4.5:1) against the dark
+   page. Focus rings and control borders meet 3:1, so `--accent` gets a lighter dark-scheme
+   value. The R-14 punch list is text and inherits it.
+No art is redrawn and no copy changes. `PANELS.md`, `content.json` and every sprite are
+untouched. If the 390px dark screenshots show a gag that stops reading because of the page
+around it, that goes to the Art Director as a note against this decision. The fix is the mat,
+not the sprite.
+*CEO signed off 2026-09-27 (DIA-120), including point 1: no in-page switch.*
+
+**D-047 · 2026-09-27 · Dark mode mat: a dark surface, not a light card (DIA-151).**
+Amends D-046 point 3. At the owner's request, the dark-mode mat is a dark surface
+(`--surface`, `#241f19`), not a light one. The rooms' beige floors and opaque fills carry the
+silhouette; any ink outline lost at a transparent edge is accepted. Still no filter, blend or
+opacity on the canvas or on sprites, and pixel-parity tests are unchanged.
+
+**D-048 · 2026-09-27 · The punch list is on demand for sighted visitors, and always there for
+assistive tech and print (DIA-125; approved plan revision `dfca5f40`).**
+The checklist renders under the scene in the same type as the nav chrome, with no frame and
+no art. To a sighted visitor it reads as a wall of text or page overflow, and it competes
+with the toggle, which is the product (D-022). R-14 is amended to match (below).
+1. **Nothing sits under the scene** except the contact line.
+2. **One entry point:** a `Punch list (n)` button in the view-nav row, with a 16×16 pixel
+   clipboard icon in the building's palette. *n* is the number of gags up to this band. It
+   is a 44 px button outside the canvas, so no hotspot rule changes.
+3. **Opened, it is a sheet in the tap panel's style** (same border, paper and type).
+   Download (the existing print stylesheet) at the top. Each row is the gag's existing
+   *without* thumbnail, then `year · headcount — title` and the text the list has today. At
+   `1,000+` the R-14a translation table follows. The contact line (R-12) is at the foot.
+4. **Assistive tech:** the list is always in the DOM and the accessibility tree, right after
+   the scene. It is visually hidden, not `display:none` and not a closed `<details>`, so a
+   screen-reader user reads it with no control to find (R-24). While it is collapsed, its
+   links are out of the tab order. It is generated from the same data by the same
+   `checklist.ts`.
+5. **Print** always prints the full list, open or closed.
+No panel copy, receipt, date or figure changes, and nothing in the scene or its formats. The
+button and sheet need new `ui` strings (label, accessible name, close); they go in `TONE.md`
+§Navigation copy like D-042a's, and ship through `content.json` `ui`.
+
+Rejected:
+- **An in-scene object** (a clipboard or plaque in reception). It needs a new hotspot kind
+  across 14 scene files, reads as décor at 390 px, and still needs the DOM path.
+- **A native `<details>` element.** A closed one drops out of the screen-reader tree.
+- **A separate `/list` route.** A second render path to keep in sync.
+- **Download only.** Breaks R-14 and R-24.
+- **Expandable rows** (Already / Without / Worth later behind a tap). Deferred, not
+  rejected outright. Collapsed rows would hide text from screen readers, and the tap panel
+  already does this job.
+
+Open, not in scope:
+- The Beyond panel's locked **Worth it later** line says "the checklist **below** maps each
+  receipt…" (`PANELS.md` §Beyond). After this decision the list is not below. It is spatial
+  copy, not a receipt, but it is locked, so rewording it needs the owner's say through the
+  CEO (DIA-125).
+- Visitors without JavaScript, and crawlers, get no list, because it is rendered by JS. A
+  build-time `<noscript>` list would fix that for share previews. Its own ticket if wanted.
+
+**D-049 · 2026-09-27 · Hotspots may carry a `marker` point, separate from their rect
+(DIA-133; Art Director, Product & Content Lead, CEO).**
+The DIA-124 reticle is centred on the hotspot rect, and on 97 hotspots that put a tick through
+sign lettering (AUDITOR, UNVETTED, CAUTION and more). Moving the rect is not the fix, because
+the rect does three jobs: it is the object's extent, it sizes the reticle (`--obj-w/h`), and
+walkers and moments keep out of it. So a close-up hotspot may carry an optional
+`marker: {x, y}`:
+1. **Where it is.** It uses close-up coordinates, like the rect. Values are on the half-pixel
+   grid (a multiple of 0.5), because a rect's centre often is. It must lie **inside its own
+   hotspot's rect**, so the marker always sits on the object it opens (R-20).
+2. **What it moves.** The web centres the 44 × 44 button and the reticle on `marker` when it
+   is present, and on the rect's centre when it is not. It changes nothing else. The reticle
+   is still sized from the rect, the hit area is still 44 × 44, walker and moment exclusion
+   still use the rect, and zoom targets and `focus` are unaffected.
+3. **Who sets it.** The exporter sets it, never a hand edit to a scene file. It emits one only
+   where the rect centre would put a tick on lettering at a phone scale (1.5–2.0 css px per
+   art px). The rule it serves: **a tick never touches sign lettering.** Touching a sign's
+   plate is allowed. Desktop scales are reported, not enforced.
+4. **One accepted exception.** On 360–375 px phones, one tick touches one letter pixel of
+   INFRA on G7.3 (hat stack) at 750 without. The Product Lead accepted this (DIA-133): the stack
+   reads from its shape, and re-composing the back aisle is not worth one pixel.
+   `check_lettering.py` names this exception, and it fails on anything beyond it.
+This is additive: `schema` stays **2**, and a painter that ignores `marker` still works, only
+with the old centring. Rejected: a per-hotspot CSS offset, because a second source of
+position would drift from the art on every re-composition.
+*CEO signed off 2026-09-27 (DIA-133). The Web Engineer confirms the contract in DIA-134
+before PR #57 leaves draft.*
+
+**D-050 · 2026-09-27 · The repository names neither employer; internal notes are private (DIA-144).**
+The repository names neither employer. `check:employer` reads the names from the
+`EMPLOYER_DENYLIST` secret and scans the whole tree as well as `dist/`. Internal notes live
+in the private `ahead-of-it-notes` repository.
+*CEO ruled 2026-09-27 on PR #65.*
+
+**D-051 · 2026-09-27 · The page opens on the whole floor, under a two-line introduction
+(DIA-161; the owner's direction; Product & Content Lead, for CEO sign-off).**
+Today's first paint is the band's `default` close-up (D-042 item 6). At 80 that is "Sales
+pit · 3 of 4": a crop of a room, under a heading that doesn't say what the page is. A cold
+visitor has to work out that the picture is part of a building and that "Whole floor" is the
+way out. The owner flagged it on DIA-161: introduce the page, open zoomed out, let the
+visitor tap in. Amends D-042 item 6 and D-042a navigation item 1.
+1. **First paint is the room view** of the room that holds the band's `default` close-up,
+   with "Whole floor" pressed. The room's close-ups are the zoom-in tiles D-042a item 3
+   already draws. This holds on every load, including `?n=` (D-043). `default` stays in
+   the scene format unchanged, so no exporter or scene file changes. The web opens on its
+   `parent`.
+2. **Room tabs land on the room view**, not the default close-up. The reason D-042a gave
+   ("a tap never leaves the visitor on a picture with nothing to tap") no longer holds,
+   because a room view is now full of tiles to tap. It also gives one mental model: tabs are
+   floors, tiles are areas. The stepper and a tile still land on a close-up, and the stepper
+   alone still reaches every gag.
+3. **Slider and toggle keep the visitor's place**, as today (D-042a counter 3). Toggling on
+   the whole floor shows the whole floor without.
+4. **Introduction:** one lede paragraph between the `h1` and the slider, and in the room
+   view a hint in the stepper row's visible text. Copy: `TONE.md` §Landing copy. Neither
+   line adds a date, headcount or figure, and neither names an employer. Its height is
+   reserved in the static shell (CLS stays 0, as S1 requires).
+5. **The risk, and the fallback.** In a room view the art is at 1 css px per art px, so a
+   "without" gag is a change you can see in the floor, not a joke you can read. The toggle
+   is the product (D-022). The hallway kit (D-040) therefore captures the landing (room
+   view, both states) as well as the close-ups, and the test asks whether a cold visitor
+   still toggles and then taps in. If the whole-floor "without" doesn't register, the
+   fallback is that the first toggle to "without" also cuts to the default close-up. It is
+   not built now.
+No panel copy, receipt, date or figure changes.
+
+Rejected:
+- **An intro overlay or modal.** It puts a gate in front of the toy and spends the first
+  five seconds on reading. It also needs a focus trap.
+- **Keeping the close-up and adding a "zoom out" coach mark.** That explains the UI instead
+  of fixing it.
+- **An animated zoom-out on load.** Transitions belong to the Phase 2 animation pass
+  (D-042a). A later zoom-in from `rect` stays possible.
+
+**D-052 · 2026-09-27 · The pressed toggle's label goes black; the pink stays (DIA-163).**
+Amends D-046 point 4. The pressed toggle ("What he'd already built") set white text
+(`--toggle-text-pressed: #fff`) on pink (`--toggle-fill-pressed: #ff3dae`). That is 3.22:1.
+The label is 16 px / 700, under the 18.66 px bold large-text threshold, so D-046 point 6's
+4.5:1 gate applies. It fails in both schemes, because the toggle never rethemes.
+1. **`--toggle-text-pressed` becomes `#000`.** Black on `#ff3dae` is 6.53:1. The fill does not
+   change, so what D-046 point 4 protects still holds: yellow "without" and pink "built" read
+   the same in both schemes. The pressed label now matches the unpressed one (black on yellow).
+2. **Still never rethemed.** The token keeps one value for light and dark, like every other
+   toggle token.
+No art, copy or served image changes. The toggle screenshots are regenerated.
+
+Rejected:
+- **A darker pink (≈`#d4007f`) for white text.** It changes the gag state's colour identity,
+  which D-046 point 4 exists to keep.
+- **A larger label (≥18.66 px bold) under the 3:1 rule.** It passes at 3.22:1 with no margin,
+  and it makes the toggle bigger on a 390 px phone, next to the thing it must not crowd.

@@ -1,0 +1,368 @@
+name: Checks and Deploy
+
+# PH1-05: the non-negotiables (R-16, R-21, R-23, R-26, R-33) as CI gates,
+# plus deploy. One workflow so deploy can `needs: check` — a separate
+# deploy.yml triggered on the same push would run independently and could
+# deploy a red build. `check` runs on every non-draft PR into develop and on
+# every push to develop/main; `preview` and `deploy-production` are gated on
+# `check` passing and keep their original push-only conditions (never on a
+# pull_request — there is nothing to deploy for a PR). `preview` and
+# `deploy-production` reuse the `dist/` artifact `check` already built and
+# tested instead of rebuilding (DIA-143) — GITHUB_SHA is the same commit for
+# every job in a run, so dist/version.json (DIA-103) still carries the
+# pushed SHA either way.
+#
+# workflow_dispatch lets `preview` be re-run against `develop` on demand
+# (e.g. after adding secrets, with no new commit to push) — a manual
+# dispatch still sets `github.ref` to the chosen branch, so `preview`'s
+# `github.ref == 'refs/heads/develop'` condition needs no change to work
+# under it. workflow_dispatch has no `paths` filter (GitHub does not support
+# one for it), so a manual run always executes `check`.
+#
+# `concurrency` (DIA-143) groups runs per workflow + ref and cancels
+# in-progress runs only for pull_request events — a superseding push to
+# develop/main must never cancel a `preview`/`deploy-production` job that is
+# mid-deploy, so pushes queue instead of cancelling.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+on:
+  workflow_dispatch: {}
+  pull_request:
+    branches:
+      - develop
+    types: [opened, synchronize, reopened, ready_for_review]
+    # Doc-only PRs skip CI (DIA-143) — but the build reads docs/content/**
+    # (content.json is generated from it) and docs/product/SCENE-FORMAT.md
+    # (the scene contract), so those two paths still trigger a run even
+    # though they live under docs/. There are no required status checks
+    # today, so a skipped run never blocks a merge.
+    paths:
+      - "**"
+      - "!docs/**"
+      - "!**/*.md"
+      - "docs/content/**"
+      - "docs/product/SCENE-FORMAT.md"
+  push:
+    branches:
+      - develop
+      - main
+    paths:
+      - "**"
+      - "!docs/**"
+      - "!**/*.md"
+      - "docs/content/**"
+      - "docs/product/SCENE-FORMAT.md"
+
+# R-33 / D-014: scripts/check-employer.sh reads the employer names from this
+# secret so they never appear in the repo; every `npm run build` runs it, and
+# it fails when the list is empty in CI. Fork PRs don't get secrets, so they
+# fail this check by design.
+env:
+  EMPLOYER_DENYLIST: ${{ secrets.EMPLOYER_DENYLIST }}
+
+jobs:
+  check:
+    name: build, test, serving, lighthouse
+    runs-on: ubuntu-latest
+    # DIA-143 run 36307641570 (2026-09-27) was killed by a 20-minute budget
+    # mid-`Test` step: the e2e suite now includes the webkit-iphone project
+    # (DIA-15) and the Test step alone ran ~19m before cancellation, on top
+    # of Build/Lighthouse — consistent with the documented pre-PR baseline of
+    # 23m46s for the whole job (run 36294069657). 20 was too tight for a real
+    # run; 35 gives headroom above that baseline while still catching a
+    # genuine hang well short of an hour.
+    timeout-minutes: 35
+    # Draft PRs skip `check` (DIA-143) — ready_for_review re-triggers it via
+    # the `types` list above. Pushes and workflow_dispatch have no
+    # `pull_request` context, so this only ever excludes drafts.
+    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
+    steps:
+      - uses: actions/checkout@v5.0.1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Playwright's own Chromium is reused for both the e2e smoke tests
+      # and Lighthouse CI (via CHROME_PATH below), so there's exactly one
+      # browser download per run and one binary the whole check suite
+      # agrees on. WebKit runs the DIA-15 `webkit-iphone` project — the
+      # closest engine-level proxy for iOS Safari, the site's primary
+      # real-world target (R-20), available on a Linux runner.
+      #
+      # DIA-143: the browser binaries are cached on the @playwright/test
+      # version pinned in package-lock.json. On a cache hit, only the OS
+      # package dependencies are installed (`install-deps`, no re-download);
+      # on a miss, the full `install --with-deps` runs and primes the cache
+      # for next time.
+      - name: Read pinned Playwright version
+        id: playwright-version
+        run: |
+          echo "version=$(node -p "require('./package-lock.json').packages['node_modules/@playwright/test'].version")" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Playwright browsers
+        id: playwright-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-browsers-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}
+
+      - name: Install Playwright browsers (Chromium, WebKit)
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps chromium webkit
+
+      - name: Install Playwright OS dependencies (cache hit, browsers already present)
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium webkit
+
+      - name: Resolve CHROME_PATH from the Playwright cache
+        run: |
+          CHROME_DIR=$(find "$HOME/.cache/ms-playwright" -maxdepth 1 -type d -name 'chromium-*' | sort | tail -1)
+          echo "CHROME_PATH=$CHROME_DIR/chrome-linux64/chrome" >> "$GITHUB_ENV"
+
+      - name: Verify Chrome binary
+        run: test -x "$CHROME_PATH"
+
+      # R-33 / D-014: check:employer runs inside `npm run build` already.
+      - name: Build
+        run: npm run build
+
+      # DIA-143: preview/deploy-production download this instead of
+      # rebuilding. dist/version.json (DIA-103) was stamped from GITHUB_SHA
+      # during this Build step, and GITHUB_SHA is identical for every job in
+      # this workflow run, so the artifact still carries the pushed commit
+      # when those jobs pick it up.
+      - name: Upload dist for deploy jobs
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist
+          retention-days: 1
+
+      # R-21/R-16/R-26 smoke + unit tests (tests/**, src/**/*.test.ts).
+      # e2e runs on both `chromium` and `webkit-iphone` projects (DIA-15) —
+      # every PR into develop, not just pushes, since iOS Safari is the
+      # primary target and a merged regression there is worse than the
+      # extra CI minutes.
+      - name: Test
+        run: npm run test
+
+      # R-26: dist/ must carry nothing but the served site.
+      - name: Serving hygiene
+        run: npm run check:serving
+
+      # R-23: performance >= 80, first-band transfer < 600 KB.
+      - name: Lighthouse
+        id: lighthouse
+        run: npm run check:lighthouse
+
+      # Skipped (not warned) when an earlier step failed and Lighthouse never ran;
+      # if it ran, the reports must exist, so an empty upload is an error.
+      - name: Upload Lighthouse report
+        if: ${{ always() && steps.lighthouse.conclusion != 'skipped' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-report
+          path: .lighthouseci
+          # upload-artifact@v4.4+ skips dot-directories by default, which made
+          # this step warn "No files were found" on every run while LHCI had
+          # in fact written its reports (DIA-4).
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 14
+
+  # ── develop → preview URL (staging-ahead-of-it.<subdomain>.workers.dev) ──
+  # Needs the CLOUDFLARE_API_TOKEN / CLOUDFLARE_ACCOUNT_ID secrets.
+  preview:
+    name: Upload Preview
+    needs: check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: github.ref == 'refs/heads/develop'
+    steps:
+      - uses: actions/checkout@v5.0.1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # DIA-143: reuse `check`'s already-built, already-tested dist/ instead
+      # of running `npm ci` + `npm run build` again. scripts/print-worker-name.mjs
+      # (used below on the fallback path) only reads wrangler.jsonc with
+      # Node built-ins, so it needs no `npm ci`.
+      - name: Download dist from check
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+
+      - name: Upload version with staging alias (does not touch production)
+        id: upload
+        uses: cloudflare/wrangler-action@v4.0.0
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          wranglerVersion: "4.138.0"
+          command: versions upload --preview-alias staging
+
+      # DIA-105 review: wrangler-action (as of v4.1.3) does not expose the
+      # alias host as a dedicated output for `versions upload` — its
+      # `deployment-url` output is wrangler's preview_url, which is the
+      # per-version random-hash URL, not the stable "staging" alias; the
+      # action's own `deployment-alias-url` output is Pages-only. So the
+      # alias host is read from wrangler's own stdout banner ("Version
+      # Preview Alias URL: ...", printed since wrangler 3.78), captured in
+      # step `upload`'s command-output. `deployment-alias-url` is still
+      # checked first in case a future action version adds Workers support
+      # for it. The composed staging-${WORKER_NAME}.${WORKERS_DEV_SUBDOMAIN}
+      # form (same shape deploy-production falls back to) is used only if
+      # both of those come back empty, and this step fails only then and
+      # only if WORKERS_DEV_SUBDOMAIN is also unset.
+      - name: Resolve staging alias URL
+        env:
+          DEPLOYMENT_ALIAS_URL: ${{ steps.upload.outputs.deployment-alias-url }}
+          COMMAND_OUTPUT: ${{ steps.upload.outputs.command-output }}
+          WORKERS_DEV_SUBDOMAIN: ${{ vars.WORKERS_DEV_SUBDOMAIN }}
+        run: |
+          if [ -n "$DEPLOYMENT_ALIAS_URL" ]; then
+            echo "STAGING_URL=$DEPLOYMENT_ALIAS_URL" >> "$GITHUB_ENV"
+            echo "Resolved staging URL from wrangler-action's deployment-alias-url output: $DEPLOYMENT_ALIAS_URL"
+            exit 0
+          fi
+          PARSED=$(printf '%s' "$COMMAND_OUTPUT" | grep -oE 'Version Preview Alias URL: https?://[a-zA-Z0-9./-]+' | sed 's/^Version Preview Alias URL: //' | tail -1)
+          if [ -n "$PARSED" ]; then
+            echo "STAGING_URL=$PARSED" >> "$GITHUB_ENV"
+            echo "Resolved staging URL by parsing wrangler's command output: $PARSED"
+            exit 0
+          fi
+          echo "::warning::Could not read a staging alias URL from wrangler-action's outputs; falling back to wrangler.jsonc name + WORKERS_DEV_SUBDOMAIN."
+          if [ -z "$WORKERS_DEV_SUBDOMAIN" ]; then
+            echo "::error::No alias URL from wrangler, and the WORKERS_DEV_SUBDOMAIN repo variable is unset. Add it in GitHub repo Settings > Secrets and variables > Actions > Variables — the Cloudflare account's workers.dev subdomain (e.g. joshua-gister) — so this job can compose the staging host as a fallback." >&2
+            exit 1
+          fi
+          WORKER_NAME=$(node scripts/print-worker-name.mjs)
+          STAGING_URL="https://staging-${WORKER_NAME}.${WORKERS_DEV_SUBDOMAIN}.workers.dev"
+          echo "STAGING_URL=$STAGING_URL" >> "$GITHUB_ENV"
+          echo "Composed staging URL from wrangler.jsonc name '$WORKER_NAME' + WORKERS_DEV_SUBDOMAIN: $STAGING_URL"
+
+      # DIA-103: an upload that succeeds is not proof staging serves it —
+      # only dist/version.json's sha is. Polls for ~2 minutes: `versions
+      # upload` returns before the new version is necessarily live behind
+      # the alias.
+      - name: Verify staging serves this commit (version.json)
+        run: |
+          echo "Polling $STAGING_URL/version.json for sha $GITHUB_SHA ..."
+          seen_sha=""
+          for i in $(seq 1 24); do
+            body=$(curl -s --max-time 10 "$STAGING_URL/version.json" || true)
+            seen_sha=$(echo "$body" | node -e '
+              let d = "";
+              process.stdin.on("data", (c) => (d += c));
+              process.stdin.on("end", () => {
+                try {
+                  process.stdout.write(JSON.parse(d).sha || "");
+                } catch {
+                  process.stdout.write("");
+                }
+              });
+            ')
+            if [ "$seen_sha" = "$GITHUB_SHA" ]; then
+              echo "Staging is serving $seen_sha — matches this push."
+              exit 0
+            fi
+            echo "Attempt $i/24: staging serves '${seen_sha:-<none>}', want $GITHUB_SHA. Retrying in 5s..."
+            sleep 5
+          done
+          echo "::error::Staging never served this push's commit ($GITHUB_SHA) within ~2 minutes. Last seen sha: '${seen_sha:-<none>}' at $STAGING_URL/version.json." >&2
+          exit 1
+
+  # ── main → production ────────────────────────────────────────────────────
+  deploy-production:
+    name: Deploy to Production
+    needs: check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v5.0.1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # DIA-143: reuse `check`'s dist/ (see the `preview` job's matching
+      # step for why this still carries the pushed SHA in version.json).
+      - name: Download dist from check
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+
+      # Checked before the deploy, not after: wrangler's own deployment-url
+      # output is the common-case source of truth for BASE_URL below and
+      # this variable is only a fallback for it — but an unset fallback must
+      # never be discovered *after* a real production deploy has already
+      # happened. Fail here instead.
+      - name: Require WORKERS_DEV_SUBDOMAIN
+        env:
+          WORKERS_DEV_SUBDOMAIN: ${{ vars.WORKERS_DEV_SUBDOMAIN }}
+        run: |
+          if [ -z "$WORKERS_DEV_SUBDOMAIN" ]; then
+            echo "::error::WORKERS_DEV_SUBDOMAIN repo variable is unset. Add it in GitHub repo Settings > Secrets and variables > Actions > Variables — the Cloudflare account's workers.dev subdomain (e.g. joshua-gister) — before deploying to production, so the smoke test has a host to fall back to if wrangler emits no deployment-url." >&2
+            exit 1
+          fi
+
+      - name: Deploy Worker
+        id: deploy
+        uses: cloudflare/wrangler-action@v4.0.0
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          wranglerVersion: "4.138.0"
+          command: deploy
+
+      # No custom domain yet (Phase 4, D-005/D-018) — workers.dev for now.
+      # The host is never hardcoded: wrangler's own `deployment-url` output is
+      # the truth, so renaming the Worker in wrangler.jsonc can't leave this
+      # pointed at a stale host. The composed fallback exists only for a
+      # wrangler-action version that stops emitting that output; it reads the
+      # Worker name from wrangler.jsonc rather than repeating it here, so
+      # there is exactly one place (wrangler.jsonc + this one subdomain
+      # variable) that can go stale, not two.
+      - name: Resolve deployed URL
+        env:
+          DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
+          WORKERS_DEV_SUBDOMAIN: ${{ vars.WORKERS_DEV_SUBDOMAIN }}
+        run: |
+          if [ -n "$DEPLOYMENT_URL" ]; then
+            echo "BASE_URL=$DEPLOYMENT_URL" >> "$GITHUB_ENV"
+            echo "Resolved BASE_URL from the wrangler deploy step: $DEPLOYMENT_URL"
+            exit 0
+          fi
+          echo "::warning::wrangler deploy emitted no deployment-url output; falling back to wrangler.jsonc name + WORKERS_DEV_SUBDOMAIN."
+          if [ -z "$WORKERS_DEV_SUBDOMAIN" ]; then
+            echo "::error::No deployment-url from wrangler, and the WORKERS_DEV_SUBDOMAIN repo variable is unset. Add it in GitHub repo Settings > Secrets and variables > Actions > Variables — the Cloudflare account's workers.dev subdomain (e.g. joshua-gister), so the smoke test host can be composed." >&2
+            exit 1
+          fi
+          WORKER_NAME=$(node scripts/print-worker-name.mjs)
+          BASE_URL="https://${WORKER_NAME}.${WORKERS_DEV_SUBDOMAIN}.workers.dev"
+          echo "BASE_URL=$BASE_URL" >> "$GITHUB_ENV"
+          echo "Composed BASE_URL from wrangler.jsonc name '$WORKER_NAME' + WORKERS_DEV_SUBDOMAIN: $BASE_URL"
+
+      - name: Smoke test — pages serve, .git does not
+        run: |
+          check() {
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" --retry 5 --retry-delay 3 "$1")
+            if [ "$STATUS" != "$2" ]; then
+              echo "Smoke test failed: $1 returned HTTP $STATUS, expected $2"
+              exit 1
+            fi
+            echo "Smoke test passed: $1 → HTTP $STATUS"
+          }
+          check "$BASE_URL/"             200
+          check "$BASE_URL/.git/config"  404

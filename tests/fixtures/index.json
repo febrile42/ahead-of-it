@@ -1,0 +1,21 @@
+{
+  "schema": 2,
+  "bands": {
+    "80": {
+      "built": "80-built.json",
+      "without": "80-without.json"
+    },
+    "750": {
+      "built": "750-built.json",
+      "without": "750-without.json"
+    }
+  },
+  "beyond": "750",
+  "thumbs": {
+    "G1.1": "thumbs/G1.1.png",
+    "G1.2": "thumbs/G1.2.png",
+    "G2.1": "thumbs/G2.1.png",
+    "G2.2": "thumbs/G2.2.png",
+    "G2.3": "thumbs/G2.3.png"
+  }
+}

@@ -1,0 +1,1018 @@
+/* PH1-04: phone-first (R-20), designed at 390px before the >=768px side
+   panel kicks in. No UI framework (D-009) — plain CSS, one file. */
+
+/* D-046/PH2-05, point 3 amended by D-047 (DIA-151): every colour lives
+   behind a custom property so `@media (prefers-color-scheme: dark)` below
+   can retheme the chrome by changing values only, never selectors. Three
+   groups, by what they sit on:
+   - chrome (`--ink`, `--ink-invert`, `--page-bg`, `--surface`, `--border`,
+     `--border-soft`, `--text-muted`, `--shadow`, `--accent`): retheme in
+     dark mode.
+   - the scene overlay (`--scene-mat`, `--scene-ink`, `--scene-ink-invert`,
+     `--scene-ink-rgb`, `--scene-accent`): never retheme. `--scene-mat`
+     keeps its `:root` value unconditionally — it is not what paints
+     `.scene-wrap`'s own background. That background is `--scene-mat-dark`
+     (DIA-149), which D-047 now points at `var(--surface)`: a dark card,
+     not a light one, per the owner's request that dark mode leave no
+     white/near-white area. The rooms' opaque floors and fills carry the
+     silhouette regardless, and hotspots/captions painted over the canvas
+     still use the never-rethemed scene tokens above, so their own colours
+     don't shift with the OS scheme. D-047 does add one exception: `.hotspot`
+     gets a dark-only light halo (see the dark block) because its dashed
+     border, drawn in `--scene-ink-rgb`, would otherwise vanish against the
+     now-dark mat.
+   - the toggle (`--toggle-fill`, `--toggle-fill-pressed`, `--toggle-text`,
+     `--toggle-text-pressed`): never retheme (D-046 point 4, "the toggle
+     keeps its fills"). Its border is chrome (`--ink`) and does retheme, so
+     the pill's edge still shows against a dark page. `--toggle-text-pressed`
+     is black, not white (D-052, DIA-163): white on `--toggle-fill-pressed`
+     was 3.22:1, under the 4.5:1 gate D-046 point 6 sets for 16px/700 text. */
+:root {
+  color-scheme: light dark;
+  --ink: #1a1410;
+  --ink-invert: #fff;
+  --page-bg: #fff;
+  --surface: #fff;
+  --border: #ccc;
+  --border-soft: #ddd;
+  --text-muted: #555;
+  --shadow: rgba(0, 0, 0, 0.2);
+  --accent: #4472c4;
+  /* Painted only in dark (see .scene-wrap in the dark block): the colour
+     light mode has always shown behind the canvas, i.e. the page's #fff —
+     not the old `--paper` #eafbff, which was declared but never painted. */
+  --scene-mat: #fff;
+  --scene-ink: #1a1410;
+  --scene-ink-rgb: 26, 20, 16;
+  --scene-ink-invert: #fff;
+  --scene-accent: #4472c4;
+  --toggle-fill: #ffd23f;
+  --toggle-fill-pressed: #ff3dae;
+  /* Dark scheme only (see the rule in the dark block below). In light the
+     unpressed label keeps the UA's `buttontext` as it always has — #000 in
+     Chromium, rgba(0,0,0,.8) in WebKit — so no single value here could be
+     pixel-identical in both engines. */
+  --toggle-text: #000;
+  --toggle-text-pressed: #000;
+  font-family: system-ui, sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ink: #f2ece2;
+    --ink-invert: #171310;
+    --page-bg: #171310;
+    --surface: #241f19;
+    --border: #575046;
+    --border-soft: #3f3930;
+    --text-muted: #b9b0a3;
+    --shadow: rgba(0, 0, 0, 0.6);
+    --accent: #8ab4f8;
+    /* D-047 (DIA-151, amends D-046 point 3): a dark surface for
+       `.scene-wrap`'s own background, not DIA-149's off-white `#f2ece2` —
+       the owner flagged that card as still reading as a big white box.
+       `var(--surface)` so this always tracks the chrome surface colour
+       instead of duplicating its literal value. */
+    --scene-mat-dark: var(--surface);
+  }
+
+  /* Two selectors here, both absent in light so light stays pixel-identical
+     to pre-D-046. This one: `color-scheme: dark` flips the UA's
+     `buttontext` to white, which would put white text on the yellow fill.
+     The pressed rule below is more specific and still wins. */
+  .toggle__button {
+    color: var(--toggle-text);
+  }
+
+  /* D-046 point 3 (amended by D-047, DIA-151): a dark surface behind the
+     canvas in dark mode, still read as a lifted card via the rounded
+     corners, not a light mat. The rooms' opaque floors and fills carry the
+     silhouette; a sprite's transparent edge pixels lose their ink outline
+     against the dark surface here, and D-047 accepts that. Dark only: in
+     light the page is already the mat colour, and an opaque background on
+     this overflow scroller changes Chromium's compositing enough to shift
+     anti-aliased pixels on the neighbouring pills. `overflow-y: hidden` is
+     dark-only and y-axis-only so WebKit's corner-radius clip (unreliable on
+     the painted canvas layer under `overflow-x: auto`) can't leak square
+     corners without touching the horizontal pan this box depends on
+     (D-042a). No padding/margin/width change — those would shift the
+     close-up's 2.0 css-px-per-art-px scale, which must stay identical to
+     light. */
+  .scene-wrap {
+    background: var(--scene-mat-dark);
+    border-radius: 12px;
+    overflow-y: hidden;
+  }
+
+  /* D-047 (DIA-151): `.hotspot`'s dashed border is
+     `rgba(var(--scene-ink-rgb), .6)` — near-black — which now disappears
+     against the dark mat above. A light halo restores it there while still
+     reading on a room's beige floor. Excludes `.hotspot--zoom` (DIA-55's
+     chip has no border to rescue and none of this rule's problem).
+     `--scene-ink`, captions and the `--scene-accent` focus ring are
+     untouched: the focus ring alone is already >=3:1 against the new
+     #241f19 mat (measured ~3.46:1). */
+  .hotspot:not(.hotspot--zoom) {
+    box-shadow: 0 0 0 1px rgba(242, 236, 226, 0.55);
+  }
+}
+
+/* D-046 point 5: the print checklist stays light regardless of the OS
+   scheme. After the dark override above, so it wins when both media
+   conditions are true at once. Scene/toggle variables are never themed, so
+   they need no reset here. */
+@media print {
+  :root {
+    --ink: #1a1410;
+    --ink-invert: #fff;
+    --page-bg: #fff;
+    --surface: #fff;
+    --border: #ccc;
+    --border-soft: #ddd;
+    --text-muted: #555;
+    --shadow: rgba(0, 0, 0, 0.2);
+    --accent: #4472c4;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0 0 2rem;
+  color: var(--ink);
+  background: var(--page-bg);
+}
+
+h1 {
+  font-size: 1.4rem;
+  padding: 1rem 1rem 0;
+  margin: 0;
+}
+
+/* D-051: the page's own introduction. min-height reserves its worst-case
+   line count (S1, CLS 0) — see .toggle__subtitle above for why min-height,
+   never height, and why line-height is explicit rather than the UA
+   "normal" default (DIA-83: a hair taller once real text renders). */
+.app__intro {
+  margin: 0.5rem 1rem 0;
+  line-height: 1.3;
+  min-height: calc(1.3em * 4);
+}
+
+/* DIA-175: the 4-line reserve above only covers >=324px. At the narrowest
+   phone-first target (320px, e.g. iPhone SE) content.json's actual intro
+   copy wraps to a 5th line, so the reserve is short by one line and the
+   real text growing in causes a small shift the 390px CLS gate never
+   measures. Widening the base reserve to 5 lines for every width would
+   also work but leaves needless empty space above 324px; scoping it to
+   the one width band that actually wraps further keeps both properties. */
+@media (max-width: 320px) {
+  .app__intro {
+    min-height: calc(1.3em * 5);
+  }
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* --- Slider (3c) --- */
+.slider {
+  padding: 1rem;
+}
+
+.slider__label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+  /* S1: reserves a line of height before content.json's copy fills the
+     text in, so the label doesn't collapse to 0 height on first paint
+     (an empty element has no line box to size from) and then grow once
+     JS runs. line-height is explicit (DIA-83), not the browser's "normal"
+     default — "normal" resolves from system-ui's own font metrics, which
+     measured a hair taller than 1.2em once real text rendered, growing
+     this box by a few px after first paint (same failure mode already
+     fixed once for .scene-stepper__label, DIA-65) and cascading into a
+     real (non-simulated) 0.0066 shift on #scene-wrap below it. */
+  line-height: 1.2;
+  min-height: 1.2em;
+}
+
+.slider__readout {
+  font-variant-numeric: tabular-nums;
+  margin: 0 0 0.5rem;
+  line-height: 1.2; /* DIA-83, see .slider__label */
+  min-height: 1.2em; /* S1, see .slider__label */
+}
+
+.slider input[type='range'] {
+  width: 100%;
+}
+
+.slider__ticks {
+  position: relative;
+  height: 1.5rem;
+  font-size: 0.65rem;
+}
+
+.slider__tick {
+  position: absolute;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+
+/* S2: the first labelled tick sits close to the left edge (band 80 isn't
+   quite at the slider's minimum) — left-align it instead of centring so
+   it can't bleed past the left edge. */
+.slider__tick--first {
+  transform: translateX(0);
+}
+
+/* S2: the 1,000+ stop is pinned to the right edge of the ticks row
+   (rather than left:100% + translateX(-50%), which put half the label
+   past the viewport and scrolled the whole page horizontally). */
+.slider__tick--beyond {
+  right: 0;
+  left: auto;
+  transform: none;
+}
+
+/* --- Toggle (3d) --- */
+.toggle {
+  padding: 0 1rem 0.5rem;
+  /* DIA-176: the without state never fills .toggle__subtitle, and once the
+     one-shot .toggle__nudge is dismissed for the rest of the session it
+     never fills either (both stay reserved regardless — DIA-51/DIA-83,
+     see below — because the total height here can never depend on state
+     or session history without reintroducing the shift those fixed). A
+     border at the same reserved height it already had reads that space as
+     deliberate padding before the room tabs (same pattern as .contact-line
+     below), not as a hole where content is missing. */
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.toggle__button {
+  font-size: 1rem;
+  font-weight: 700;
+  padding: 0.75rem 1.25rem;
+  min-height: 44px;
+  border-radius: 999px;
+  border: 2px solid var(--ink);
+  background: var(--toggle-fill);
+  cursor: pointer;
+}
+
+.toggle__button[aria-pressed='true'] {
+  background: var(--toggle-fill-pressed);
+  color: var(--toggle-text-pressed);
+}
+
+/* DIA-176 review round 2: .toggle__subtitle and .toggle__nudge never render
+   at once (src/ui/toggle.ts hides the subtitle whenever the nudge is
+   visible), so stacking a separate worst-case-2-lines reservation for each
+   — as the first DIA-176 fix did — reserved 4 lines for content that is
+   never more than 2 lines tall at a time. Overlapping both children on the
+   same grid cell makes the row's height the *max* of the two instead of
+   their sum: still a constant, state-independent reservation (DIA-51/DIA-83
+   still apply to each child), just sized to what can actually be visible. */
+.toggle__message {
+  display: grid;
+  margin: 0.25rem 0 0;
+  min-height: calc(1.2em * 2);
+}
+
+.toggle__subtitle,
+.toggle__nudge {
+  grid-area: 1 / 1;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.toggle__subtitle {
+  font-style: italic;
+  /* DIA-51: visibility, not the `hidden` attribute — the subtitle's two
+     lines stay reserved in the layout in both states, same trick as
+     .toggle__nudge below, so the without-state toggle never shifts
+     .scene-views/.scene-wrap/.scene-stepper up underneath it. */
+  visibility: visible;
+}
+
+.toggle__subtitle--hidden {
+  visibility: hidden;
+}
+
+.toggle__nudge {
+  font-weight: 600;
+  /* S1c/m2: visibility, not `hidden` — the nudge's line stays reserved in
+     the layout at all times so showing or hiding it (once, after the
+     first slider move; then again once the visitor toggles) never shifts
+     the scene below it. */
+  visibility: hidden;
+}
+
+.toggle__nudge--visible {
+  visibility: visible;
+}
+
+/* --- Room tabs (D-042a): one line, scrolls sideways, never wraps --- */
+.scene-views {
+  position: relative; /* offsetLeft base for scroll-into-view */
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0.4rem;
+  padding: 0 1rem;
+  /* CLS: a fixed height in every band, empty until the scene file names
+     the rooms. A wrapping row would grow with the band (750 has more rooms
+     than a phone is wide) and shift the page. No visible scrollbar: it
+     would change the row's height on desktop. */
+  height: calc(44px + 0.5rem);
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.scene-views::-webkit-scrollbar {
+  display: none;
+}
+
+.scene-views__button {
+  flex: 0 0 auto;
+  white-space: nowrap;
+  min-height: 44px;
+  max-height: 44px;
+  padding: 0.3rem 0.7rem;
+  border: 1px solid var(--ink);
+  border-radius: 999px;
+  background: var(--surface);
+  cursor: pointer;
+  font: inherit;
+}
+
+.scene-views__button[aria-selected='true'] {
+  background: var(--ink);
+  color: var(--ink-invert);
+}
+
+.scene-views__button:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* --- View-nav row (DIA-131): the punch-list button's own line, below the
+   room tabs and above the canvas — deliberately not sharing the tabs'
+   flex row (see index.html's comment: that row is already tight at the
+   750 band, and a second flex item there starved its scrollable width). */
+.view-nav {
+  display: flex;
+  padding: 0 1rem;
+  height: calc(44px + 0.5rem);
+}
+
+.punch-list-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  align-self: center;
+  min-width: 150px;
+  min-height: 44px;
+  max-height: 44px;
+  padding: 0.3rem 0.7rem;
+  border: 1px solid var(--ink);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.punch-list-button[aria-expanded='true'] {
+  background: var(--ink);
+  color: var(--ink-invert);
+}
+
+.punch-list-button:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.punch-list-button__icon {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+}
+
+/* --- Scene (3a/3b, replaced by PH1-09 per D-035) --- */
+.scene-wrap {
+  position: relative;
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  /* CLS: reserves box space before the scene file has even been fetched.
+     D-036 caps every view at 360x240 native px, so that's the widest/
+     tallest this box can ever need to be — and main.ts (fix round item 7)
+     deliberately does NOT narrow it to each loaded view's own ratio once
+     known; the aspect-ratio stays fixed at this worst case for the whole
+     page life. A smaller view just leaves empty space inside the box
+     (and now sits centred horizontally, not flush left — see
+     sizeAndPositionCanvas) instead of the box itself changing size,
+     which is what keeps this element's CLS contribution at ~0 after
+     first paint. */
+  aspect-ratio: 3 / 2;
+  /* D-042a: full viewport width up to 430px (a padded box would give a
+     180x120 close-up 1.5 css px per art px at 360; unpadded, 2.0), capped
+     and centred from there. Same box for every view, so a switch is a cut. */
+  max-width: 720px;
+  margin: 0 auto;
+  /* R-20: "pan/zoom is allowed, tiny hotspots are not" — a view wider
+     than the viewport (SCENE-FORMAT's `focus` rect) scrolls horizontally
+     to reach it rather than shrinking hotspots below 44px. canvas and
+     .hotspots-layer are both given the same explicit pixel width/height
+     in src/main.ts, so the absolute-positioned hotspots layer overlays
+     the full scrollable canvas, not just the visible viewport slice of it. */
+}
+
+/* DIA-122: main.ts's updatePanAffordance toggles --pannable whenever the
+   current view overflows either axis, and setupScenePan toggles --panning
+   for the duration of an actual drag — never on a plain hover/tap, so a
+   view that fits keeps the default cursor (acceptance criterion 2). */
+.scene-wrap--pannable {
+  cursor: grab;
+}
+
+.scene-wrap--pannable.scene-wrap--panning {
+  cursor: grabbing;
+}
+
+.scene-wrap canvas {
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+  display: block;
+  /* Review nit (DIA-46, non-blocking): centred by default so the static
+     shell's canvas (360x240, index.html) doesn't start flush left and then
+     jump when sizeAndPositionCanvas sets an explicit marginLeft on first
+     render — main.ts's own centred case computes the same position, so
+     this removes the load-time shift without changing the scrolled case
+     (which still sets marginLeft: 0px explicitly). */
+  margin: 0 auto;
+}
+
+.hotspots-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  /* DIA-65: every child button is itself `position: absolute`, so without
+     an explicit size this collapses to 0x0 (absolutely-positioned children
+     don't contribute to an auto-sized parent) — the layer would still be
+     hit-testable (overflow is visible, so out-of-box children still
+     render and respond to clicks/focus) but anything that reads its own
+     rect, e.g. tests/scene.spec.ts's centring check, would see a 0-size
+     box. `.scene-wrap`'s own box is already permanently fixed for every
+     view/band/state (D-042a) — spanning 100% of it makes the layer's own
+     box that exact same constant, never resized by main.ts again. */
+  width: 100%;
+  height: 100%;
+}
+
+/* DIA-124: the hotspot marker is four corner brackets (viewfinder L-ticks)
+   on the object's centre, where the 44px hit box is: the object's own size
+   plus 4px each side, clamped to 28-40px. Framing a whole exporter rect put
+   ticks on neighbouring objects and off the canvas edge; capped, it reads as
+   a reticle. Two-tone so it reads on any background: a 2px white core with
+   a 1px ink edge on every side. Nothing in the isometric art is an
+   axis-aligned right angle, so the brackets read as UI rather than as more
+   sprite outline. The button itself keeps
+   its 44px hit area (R-20); the brackets are pseudo-elements sized from
+   --obj-w/--obj-h (set in src/ui/panel.ts) with pointer-events: none. */
+.hotspot {
+  --hs-core: #ffffff;
+  --hs-edge: #1a1410;
+  --hs-arm: 10px; /* core arm length */
+  --hs-t: 2px; /* core thickness; the edge adds 1px each side */
+  --hs-pad: 4px; /* gap between the object rect and the brackets */
+  --hs-min: 28px; /* smallest frame, so a tiny object's ticks never merge */
+  --hs-max: 40px; /* largest frame: a reticle on the tap point, not a box round a big rect */
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  padding: 0;
+}
+
+.hotspot:not(.hotspot--zoom)::before,
+.hotspot:not(.hotspot--zoom)::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  background-repeat: no-repeat;
+  background-image:
+    linear-gradient(var(--c), var(--c)), linear-gradient(var(--c), var(--c)),
+    linear-gradient(var(--c), var(--c)), linear-gradient(var(--c), var(--c)),
+    linear-gradient(var(--c), var(--c)), linear-gradient(var(--c), var(--c)),
+    linear-gradient(var(--c), var(--c)), linear-gradient(var(--c), var(--c));
+  background-size:
+    var(--a) var(--t), var(--t) var(--a),
+    var(--a) var(--t), var(--t) var(--a),
+    var(--a) var(--t), var(--t) var(--a),
+    var(--a) var(--t), var(--t) var(--a);
+  background-position:
+    0 0, 0 0,
+    100% 0, 100% 0,
+    0 100%, 0 100%,
+    100% 100%, 100% 100%;
+  animation: hs-breathe 0.6s ease-in-out 2;
+}
+
+/* The core: eight bars, two per corner. */
+.hotspot:not(.hotspot--zoom)::after {
+  --a: var(--hs-arm);
+  --t: var(--hs-t);
+  --c: var(--hs-core);
+  width: min(max(calc(var(--obj-w, 0px) + 2 * var(--hs-pad)), var(--hs-min)), var(--hs-max));
+  height: min(max(calc(var(--obj-h, 0px) + 2 * var(--hs-pad)), var(--hs-min)), var(--hs-max));
+}
+
+/* The edge: the same bars 1px bigger on every side, drawn underneath. */
+.hotspot:not(.hotspot--zoom)::before {
+  --a: calc(var(--hs-arm) + 2px);
+  --t: calc(var(--hs-t) + 2px);
+  --c: var(--hs-edge);
+  width: calc(min(max(calc(var(--obj-w, 0px) + 2 * var(--hs-pad)), var(--hs-min)), var(--hs-max)) + 2px);
+  height: calc(min(max(calc(var(--obj-h, 0px) + 2 * var(--hs-pad)), var(--hs-min)), var(--hs-max)) + 2px);
+}
+
+/* R-03a: a quiet (earlier-band) item gets shorter ticks, never less
+   opacity — every marker keeps the full two-tone contrast. */
+.hotspot--quiet {
+  --hs-arm: 6px;
+}
+
+/* Hover/press: a faint light tint over the framed object. */
+.hotspot:not(.hotspot--zoom):hover::after,
+.hotspot:not(.hotspot--zoom):active::after {
+  background-color: rgba(255, 255, 255, 0.22);
+}
+
+/* Once, when the view appears or the toggle flips (both rebuild the
+   hotspot layer, so the animation replays by itself): two gentle outward
+   breaths, 1.2s in all, then static. No loop. */
+@keyframes hs-breathe {
+  50% {
+    transform: translate(-50%, -50%) scale(1.08);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hotspot:not(.hotspot--zoom)::before,
+  .hotspot:not(.hotspot--zoom)::after {
+    animation: none;
+  }
+}
+
+.hotspot:focus-visible {
+  /* D-046: this ring is drawn over the canvas — --scene-accent never
+     retheme, unlike the chrome buttons' --accent below. D-047's dark mat
+     (#241f19) still gives it ~3.46:1, above the 3:1 floor. */
+  outline: 3px solid var(--scene-accent);
+  outline-offset: 2px;
+}
+
+/* A room's "zoom in" target (DIA-55): a small label chip anchored on the
+   close-up's rect centre, not a button spanning the rect — a dense room's
+   rects overlap too much for spanning buttons to ever reach 44px without
+   covering each other (DIA-54). The chip's own text is what needs to be
+   readable and tappable, so it is sized to its content (never below 44px
+   on either axis) instead of to the rect; src/scene/layout.ts's
+   `placeChips` keeps chips apart regardless of how densely the rects
+   themselves overlap. */
+.hotspot--zoom {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  border: none;
+  background: transparent;
+}
+
+.hotspot__caption {
+  padding: 4px 8px;
+  /* D-046: painted over the scene, same as .hotspot above — --scene-ink
+     never retheme. */
+  background: var(--scene-ink);
+  color: var(--scene-ink-invert);
+  border-radius: 999px;
+  font: 600 0.7rem/1.2 system-ui, sans-serif;
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* --- Stepper (D-042a): previous, "label · n of N", next, whole floor --- */
+.scene-stepper {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  height: 44px; /* CLS: fixed; the label wraps to two lines inside it */
+  margin: 0.5rem auto 0;
+  max-width: 720px;
+  padding: 0 1rem;
+  /* Below ~220px (200% zoom on a 390px phone) the four controls no longer
+     fit; contain the overflow here rather than widening the document, same
+     as .scene-views. */
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.scene-stepper__button,
+.scene-stepper__floor {
+  flex: 0 0 auto;
+  min-width: 44px;
+  min-height: 44px;
+  border: 1px solid var(--ink);
+  border-radius: 999px;
+  background: var(--surface);
+  font: inherit;
+  cursor: pointer;
+}
+
+.scene-stepper__button {
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+.scene-stepper__floor {
+  padding: 0 0.8rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  /* CLS (DIA-83): index.html ships this button empty (its label is JS-set
+     content, not hard-coded markup — main.ts's syncStepper() writes it in
+     from content.json's `ui.wholeFloor` after the scene file resolves), so
+     without this it renders at the shared 44px min-width and then grows
+     once the label lands. Same "reserve the space" trick as
+     .slider__label/.toggle__subtitle, just width instead of height.
+     Review round 2: 100px wasn't enough — CI's Chromium (a different
+     "system-ui, sans-serif" fallback than whatever measured ~94px
+     locally) actually rendered "Whole floor" at 116px, still a real
+     shift against the 100px reservation. 150px is real CI-measured
+     headroom (~29% over 116px), not a guess. */
+  min-width: 150px;
+}
+
+.scene-stepper__floor[aria-pressed='true'] {
+  background: var(--ink);
+  color: var(--ink-invert);
+}
+
+.scene-stepper [aria-disabled='true'] {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.scene-stepper button:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.scene-stepper__label {
+  flex: 1 1 0;
+  min-width: 0;
+  margin: 0;
+  font-size: 0.8rem;
+  line-height: 1.15;
+  text-align: center;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  /* DIA-65 CI flake round 2: a room's short "Room: Floor 2" label wraps
+     to 1 line while a close-up's longer position label wraps to 2 —
+     genuinely and deterministically, in whatever font-fallback CI's
+     Chromium resolves "system-ui, sans-serif" to (this never reproduced
+     with this sandbox's own fonts, but CI measured the identical 0.000104
+     shift twice, on two different commits, which a timing race never
+     would). Reserving 2 lines' worth of height always means going from 2
+     lines of real text to 1 never shrinks the box. min-height, not
+     height, because unitless line-height rounds to a sub-pixel value
+     that can differ by a hair from what two live text lines actually
+     take. */
+  min-height: calc(0.8rem * 1.15 * 2);
+}
+
+/* A visible affordance (not just a scrollbar) that a view scrolls further
+   than the viewport shows — SCENE-FORMAT "wider-than-viewport views
+   scroll to focus with a visible hint". Reserves its own line so showing
+   it doesn't shift the scene (same visibility trick as .toggle__nudge). */
+.scene-scroll-hint {
+  margin: 0.35rem 1rem 0;
+  font-size: 0.8rem;
+  opacity: 0.75;
+  min-height: 1.1em;
+  visibility: hidden;
+}
+
+.scene-scroll-hint--visible {
+  visibility: visible;
+}
+
+/* --- Panel (3e): bottom sheet on phone, side panel from 768px --- */
+.panel {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  max-height: 70vh;
+  overflow-y: auto;
+  background: var(--surface);
+  border-top: 2px solid var(--ink);
+  border-radius: 12px 12px 0 0;
+  padding: 1rem;
+  box-shadow: 0 -4px 16px var(--shadow);
+}
+
+/* DIA-135: `.checklist__close` shares this exact rule block (same look,
+   same 44px hit area, same "Close" glyph) rather than the checklist's close
+   button taking the `.panel__close` class itself — the two buttons close
+   two different, unrelated surfaces (the gag panel vs. the punch-list
+   sheet), and pre-existing specs locate `.panel__close` unscoped assuming
+   exactly one match on the page. */
+.panel__close,
+.checklist__close {
+  min-width: 44px;
+  min-height: 44px;
+  border: 1px solid var(--ink);
+  background: var(--surface);
+  border-radius: 4px;
+  float: right;
+  cursor: pointer;
+}
+
+.panel__strip {
+  font-variant-numeric: tabular-nums;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  opacity: 0.75;
+  clear: both;
+}
+
+.panel__thumb {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 48px;
+  border: 2px dashed var(--ink);
+  font: 700 0.65rem monospace;
+  margin: 0.5rem 0;
+  overflow: hidden;
+}
+
+/* Fix round item 8 / review fix 5: the `display: inline-flex` above wins
+   over the UA stylesheet's default `[hidden] { display: none }` (a class
+   selector beats an attribute-only one), so `thumb.hidden = true`
+   (panel.ts's thumbImg.onerror) would otherwise leave the dashed frame
+   visibly on screen despite the attribute being set. This restores it. */
+.panel__thumb[hidden] {
+  display: none;
+}
+
+/* PH1-09: the thumbnail is a real <img src="/sprites/thumbs/<gagId>.png">
+   (R-04) now, not a coloured div — see src/ui/panel.ts. The dashed border
+   above stays as the loading/missing-file frame; pixelated rendering
+   matches the rest of the scene (R-25). */
+.panel__thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+}
+
+.contact-line {
+  border-top: 1px solid var(--border);
+  margin-top: 1rem;
+  padding-top: 0.5rem;
+}
+
+.contact-line a {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  color: var(--accent);
+}
+
+@media (min-width: 768px) {
+  .panel {
+    left: auto;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 360px;
+    max-height: none;
+    border-top: none;
+    border-left: 2px solid var(--ink);
+    border-radius: 0;
+  }
+}
+
+/* --- Checklist (3f, reworked DIA-131) --- */
+.checklist {
+  padding: 1rem;
+}
+
+.checklist > .contact-line {
+  margin-top: 0;
+}
+
+.checklist__panel {
+  padding: 1rem;
+}
+
+/* D-048/R-24: visually hidden until opened, but never display:none and
+   never a closed <details> — a clip pattern (like .sr-only above), so the
+   panel stays in the DOM and the accessibility tree, just not sighted.
+   Deliberately no explicit width/height/overflow:hidden here (unlike
+   .sr-only): those would size this box to a fixed 1x1px, which — because
+   it has no positioned ancestor of its own, so its containing block is
+   the initial containing block — collapses the *whole page's* scrollable
+   height down to exactly the viewport once the (now off-flow) 26-row list
+   no longer contributes any scrollable overflow. A real Chromium run
+   showed a scrollbar disappearing that way changes hit-testing on an open
+   gag panel elsewhere on the page (DIA-131 review). `clip` alone hides
+   every pixel regardless of the box's real (large) size, so the list's
+   natural height still keeps contributing scrollable overflow same as it
+   did before this box was ever collapsed. */
+.checklist__panel--collapsed {
+  position: absolute;
+  clip: rect(0, 0, 0, 0);
+}
+
+.checklist__panel--open {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  max-height: 70vh;
+  overflow-y: auto;
+  background: var(--surface);
+  color: var(--ink);
+  border-top: 2px solid var(--ink);
+  border-radius: 12px 12px 0 0;
+  padding: 1rem;
+  box-shadow: 0 -4px 16px var(--shadow);
+  z-index: 20;
+}
+
+@media (min-width: 768px) {
+  .checklist__panel--open {
+    left: auto;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 360px;
+    max-height: none;
+    border-top: none;
+    border-left: 2px solid var(--ink);
+    border-radius: 0;
+  }
+}
+
+/* DIA-135: the sheet's own header row — title left, close button right.
+   The close button (.checklist__close) shares .panel__close's exact rule
+   block above (same 44px hit area, same "Close" glyph) so the tap panel
+   and the punch-list sheet close the same way, without the two buttons
+   sharing a class name (see that rule's own comment for why). Flex items
+   ignore `float`, so the shared rule's `float: right` (needed in
+   panel.ts's non-flex layout) is a no-op here, not a conflict. */
+.checklist__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.checklist__header-title {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.checklist__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.checklist__item {
+  border-bottom: 1px solid var(--border-soft);
+  padding: 0.75rem 0;
+}
+
+/* R-04-style without-state thumbnail — same frame as .panel__thumb (the
+   gag panel's own), decorative (aria-hidden), hidden on a 404 rather than
+   showing a broken-image icon (src/ui/checklist.ts's img.onerror). */
+.checklist__thumb {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 48px;
+  border: 2px dashed var(--ink);
+  margin: 0 0 0.4rem;
+  overflow: hidden;
+}
+
+.checklist__thumb[hidden] {
+  display: none;
+}
+
+.checklist__thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+}
+
+.checklist__without,
+.checklist__worth {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.checklist__download {
+  min-height: 44px;
+  margin-bottom: 1rem;
+  padding: 0.3rem 0.7rem;
+  border: 1px solid var(--ink);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  cursor: pointer;
+}
+
+.checklist__translation {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+.checklist__translation th,
+.checklist__translation td {
+  border: 1px solid var(--border);
+  padding: 0.4rem;
+  text-align: left;
+  font-size: 0.85rem;
+}
+
+@media print {
+  .slider,
+  .toggle,
+  .scene-wrap,
+  .scene-views,
+  .view-nav,
+  .scene-stepper,
+  .panel,
+  .checklist__header,
+  .checklist__download {
+    display: none !important;
+  }
+
+  /* Print (Cmd-P) always prints the full list, open or closed (D-048 item
+     5) — undo the collapsed clip and the opened sheet's fixed positioning
+     regardless of on-screen state. */
+  .checklist__panel--collapsed {
+    position: static;
+    clip: auto;
+  }
+
+  .checklist__panel--open {
+    position: static;
+    max-height: none;
+    overflow: visible;
+    border: 0;
+    box-shadow: none;
+  }
+}

@@ -39,7 +39,10 @@ Two registers, kept strictly apart.
      manufacture a payoff.
 - **Employer descriptors (D-014, amended): neither company is named.** Fixed phrases,
   first mention in a panel → thereafter:
-  - current: *"a $3B+ clean-energy company"* → *"the company"*
+  - current, panels dated 2023 or later: *"a $3B+ clean-energy company"* → *"the company"*
+  - current, panels dated before 2023 (it was not $3B+ then): *"a clean-energy company,
+    now $3B+"* → *"the company"*. Both forms are deliberate (mastermind ruling
+    2026-09-16; the 2026-09-24 panel check's "wrong descriptor" finding was a false positive).
   - previous: *"a $200M company on a nine-building campus"* → *"the campus"*
   Cities and years are fine. Panels that cite both in one breath say "at the campus
   company in 2013, and again at the clean-energy company in 2019".
@@ -60,8 +63,8 @@ Two registers, kept strictly apart.
 > for a SOC 2 report before they'll sign, and the honest answer — with no program and no
 > one whose job it is — is "no". The deal dies in procurement, not in the budget.
 >
-> **Worth it later:** the second audit is cheaper than the first. `[JOSH: only if true —
-> otherwise omit this beat]`
+> **Worth it later:** the second audit is cheaper than the first. *(Only if true;
+> otherwise omit this beat.)*
 >
 > Talk to Josh →
 
@@ -73,5 +76,42 @@ Two registers, kept strictly apart.
 - Nudge (once, after the first slider move): *"Now see what this looks like without him."*
 - Share caption: *"By the time the company was your size, Josh had already fixed this."*
 - OG title: *Ahead of It — Josh Gister's résumé* (D-010, decided 2026-09-24). Slider label: *at your scale*.
+- **Contact (R-12, D-019; Josh 2026-09-24):** email `joshua.gister@gmail.com` — assembled
+  client-side, never a plain `mailto:` in the source. LinkedIn: `https://www.linkedin.com/in/joshgister/`.
 - **OG description / tagline (F-4, D-027):** *Build it, then make sure it doesn't need you.*
   Also the subtitle under the "What he'd already built" toggle state.
+
+## Landing copy (D-051)
+
+The page's own introduction (DIA-161). It is plain and says what the page is and what to do
+first. It adds no date, headcount or figure and names no employer (D-014). The toggle sits
+directly under the slider and keeps its own words, so the lede does not repeat "without
+him". These are served as `content.json` `ui.<key>` once the pipeline knows the keys.
+
+| key | copy | where |
+|---|---|---|
+| `intro` | `Josh Gister's résumé, as a building. Slide to your company's headcount: everything you can tap was already in place by the time his company was that size.` | Lede paragraph under the `h1`, above the slider. Height is reserved in the static shell. |
+| `roomHint` | `Tap an area to zoom in` | Visible stepper text in the room view, replacing the `{room}: whole floor` text there. The room is already named on the active tab. `announceRoom` is unchanged. |
+
+## Navigation copy (D-042a)
+
+The close-up navigation's strings (brief D042-W item 8). Plain, short, functional: these
+are signposts, not jokes, and they never mention Josh or an employer. `{placeholders}` are
+filled by the web: `{room}` a room's label, `{label}` a close-up's label (both from the
+scene file, ≤ 24 chars, reviewed separately), `{n}` a close-up's position and `{total}` the
+band's close-up count in array order, `{count}` the gags whose one primary is in that room.
+Wording avoids plurals that break at 1. Served as `content.json` `ui.<key>`.
+
+| key | copy | where |
+|---|---|---|
+| `wholeFloor` | `Whole floor` | Stepper-row control that toggles the room view; one label, state via `aria-pressed`. |
+| `previous` | `Previous close-up` | Accessible name of `‹`. |
+| `next` | `Next close-up` | Accessible name of `›`. |
+| `position` | `{label} · {n} of {total}` | Visible stepper text. |
+| `zoomIn` | `Zoom in: {label}` | Accessible name of each room-view "zoom in" button. |
+| `atStart` | `No earlier close-ups` | Live region, when `‹` is pressed at the first close-up. |
+| `atEnd` | `No more close-ups` | Live region, when `›` is pressed at the last close-up. |
+| `roomTab` | `{room} ({count})` | Visible room tab text. |
+| `roomTabName` | `{room}: {count} to tap` | Accessible name of a room tab. |
+| `announce` | `{room}: {label}, {n} of {total}` | Live region, on every close-up change. |
+| `announceRoom` | `{room}: whole floor` | Live region, on entering the room view. |

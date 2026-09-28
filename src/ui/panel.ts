@@ -1,0 +1,362 @@
+// PH1-04 panel (brief 3e): bottom sheet on phone, side panel >=768px — a
+// single markup structure, the split handled by CSS (src/style.css), not
+// duplicated JS. Order is fixed by D-021 / TONE.md: strip -> already ->
+// prevented (with a without-state thumbnail) -> worth it later (if any) ->
+// the one contact line. Hotspots are real <button>s positioned from the
+// same SceneLayout the canvas draws from, so the picture and the buttons
+// can never disagree, sized >=44px regardless of the canvas's own pixel
+// scale (R-20).
+import type { Gag, PanelFields } from '../content';
+import { getBeyond, getGags } from '../content';
+import type { Chip, SceneLayout, ZoomLayout } from '../scene/layout';
+import { placeChips } from '../scene/layout';
+import { createContactLine } from './contact';
+import { ui } from './strings';
+
+const MIN_TAP_PX = 44;
+
+export interface PanelOpenOptions {
+  /** Set false to open without stealing focus (R-24 — the auto-opened Beyond panel must not move focus off the slider at its last stop). Defaults to true. */
+  focus?: boolean;
+  /** The element to return focus to when the panel closes (R-24 — a non-modal dialog returns focus to its invoker). */
+  returnFocusTo?: HTMLElement;
+}
+
+export interface PanelHandles {
+  root: HTMLElement;
+  open: (fields: PanelFields, thumbnailState: 'built' | 'without', options?: PanelOpenOptions) => void;
+  close: () => void;
+  isOpen: () => boolean;
+  /** DIA-13: repoints B4's return-focus target without touching content or
+   * live focus — for a re-render that rebuilds the hotspot layer out from
+   * under an open panel's invoking button (F3.2). The invoker reference
+   * `open()` was given is now a detached node; this swaps in its
+   * replacement so a later Escape/close still lands somewhere real. */
+  setReturnFocusTo: (el: HTMLElement | null) => void;
+}
+
+const PANEL_TITLE_ID = 'panel-title';
+
+function renderBeats(container: HTMLElement, fields: PanelFields, thumbnailState: 'built' | 'without') {
+  container.replaceChildren();
+
+  const strip = document.createElement('p');
+  strip.className = 'panel__strip';
+  strip.textContent = `${fields.strip.year} · ${fields.strip.headcount} · ${fields.strip.descriptor}`;
+
+  const title = document.createElement('h2');
+  title.id = PANEL_TITLE_ID;
+  title.className = 'panel__title';
+  title.textContent = fields.title;
+
+  const already = document.createElement('section');
+  already.className = 'panel__beat panel__beat--already';
+  const alreadyH = document.createElement('h3');
+  alreadyH.textContent = 'What was already built';
+  const alreadyP = document.createElement('p');
+  alreadyP.textContent = fields.already;
+  already.append(alreadyH, alreadyP);
+
+  // "What it prevented" and "Worth it later" are written to follow an
+  // *inline* bold label ("**What it prevented:** at your size…" — see
+  // PANELS.md and TONE.md's sample panel), not a heading followed by a
+  // stand-alone paragraph. Rendering them as separate <h3>s made the copy
+  // read as a typo on every panel (review B5) — the label goes inside the
+  // paragraph instead.
+  const prevented = document.createElement('section');
+  prevented.className = 'panel__beat panel__beat--prevented';
+  // R-04 / PH1-09: a real without-state thumbnail, cropped by the art
+  // exporter from the without scene around the gag's primary hotspot
+  // (SCENE-FORMAT "Files": public/sprites/thumbs/<gagId>.png) — no
+  // longer the PH1-04 coloured placeholder div. `thumbnailState` is
+  // always 'without' in practice (R-04: the panel always shows what was
+  // prevented), kept as a param so a future built-state thumbnail is a
+  // one-line change here.
+  //
+  // DIA-65: the Beyond panel's fields (beyondPanelFields()) are a bare
+  // PanelFields, not a Gag — there is no single hotspot/without-scene
+  // moment for the exporter to have cropped a thumbnail from, and
+  // `/sprites/thumbs/B.png` (or whatever its id is) never exists. Building
+  // the frame there anyway just meant thumbImg.onerror hid it a frame
+  // later, after the panel had already been laid out visible — a real,
+  // measured layout shift (R-01b's auto-opened Beyond panel was the only
+  // thing in the whole app that reached this path, hence only ever
+  // caught reaching 'beyond'). `'band' in fields` is exactly the
+  // distinction Gag vs. bare PanelFields already draws (build-content.ts).
+  const preventedP = document.createElement('p');
+  const preventedLabel = document.createElement('strong');
+  preventedLabel.textContent = 'What it prevented:';
+  preventedP.append(preventedLabel, document.createTextNode(` ${fields.prevented}`));
+  if ('band' in fields) {
+    const thumb = document.createElement('div');
+    thumb.className = 'panel__thumb';
+    thumb.setAttribute('aria-hidden', 'true');
+    const thumbImg = document.createElement('img');
+    thumbImg.src = `/sprites/thumbs/${fields.id}.png`;
+    thumbImg.alt = '';
+    thumbImg.width = 64;
+    thumbImg.height = 48;
+    // Fix round item 8 / review fix 5: no thumb exported for this gag yet
+    // (public/sprites/thumbs/ is still incomplete pre-PH1-08b) shouldn't
+    // show a browser's broken-image icon — hide the whole frame instead of
+    // leaving a visibly broken box in a shipped panel.
+    thumbImg.onerror = () => {
+      thumb.hidden = true;
+    };
+    thumb.dataset.state = thumbnailState;
+    thumb.append(thumbImg);
+    prevented.append(thumb, preventedP);
+  } else {
+    prevented.append(preventedP);
+  }
+
+  container.append(strip, title, already, prevented);
+
+  if (fields.worthLater) {
+    const worth = document.createElement('section');
+    worth.className = 'panel__beat panel__beat--worth';
+    const worthP = document.createElement('p');
+    const worthLabel = document.createElement('strong');
+    worthLabel.textContent = 'Worth it later:';
+    worthP.append(worthLabel, document.createTextNode(` ${fields.worthLater}`));
+    worth.append(worthP);
+    container.append(worth);
+  }
+
+  container.append(createContactLine());
+}
+
+export function createPanel(): PanelHandles {
+  const root = document.createElement('aside');
+  root.className = 'panel';
+  root.hidden = true;
+  root.setAttribute('role', 'dialog');
+  root.setAttribute('aria-modal', 'false');
+  // m1: labelled by the panel's own title h2 (renderBeats gives it
+  // PANEL_TITLE_ID), not a generic "Panel" string.
+  root.setAttribute('aria-labelledby', PANEL_TITLE_ID);
+
+  const closeButton = document.createElement('button');
+  closeButton.type = 'button';
+  closeButton.className = 'panel__close';
+  closeButton.textContent = 'Close';
+  closeButton.setAttribute('aria-label', 'Close panel');
+
+  const body = document.createElement('div');
+  body.className = 'panel__body';
+
+  root.append(closeButton, body);
+
+  // B4: return focus to whichever element opened the panel (a hotspot
+  // button, or the slider for the auto-opened Beyond panel) on close,
+  // whether closed via the close button or Escape.
+  let returnFocusTo: HTMLElement | null = null;
+
+  function close() {
+    if (root.hidden) return;
+    root.hidden = true;
+    const target = returnFocusTo;
+    returnFocusTo = null;
+    target?.focus();
+  }
+
+  closeButton.addEventListener('click', close);
+
+  // B4: Escape closes the panel regardless of which element currently has
+  // focus (the invoking hotspot, the slider, or the close button itself),
+  // so it has to listen at the document, not just within `root`.
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && !root.hidden) {
+      close();
+    }
+  });
+
+  return {
+    root,
+    open(fields, thumbnailState, options = {}) {
+      renderBeats(body, fields, thumbnailState);
+      root.hidden = false;
+      returnFocusTo = options.returnFocusTo ?? null;
+      // B4: reaching `beyond` with the keyboard must not steal focus off
+      // the slider at its last stop — callers pass { focus: false } there.
+      if (options.focus !== false) {
+        closeButton.focus();
+      }
+    },
+    close,
+    isOpen: () => !root.hidden,
+    setReturnFocusTo(el) {
+      returnFocusTo = el;
+    },
+  };
+}
+
+/** Looks up the panel content (PanelFields) for a hotspot's gagId, or the Beyond panel for 'beyond'. */
+export function panelFieldsFor(gagId: string): PanelFields | undefined {
+  const gag: Gag | undefined = getGags().find((g) => g.id === gagId);
+  return gag;
+}
+
+export function beyondPanelFields(): PanelFields {
+  return getBeyond().panel;
+}
+
+/**
+ * DIA-65: the canvas's own on-screen box (css px, relative to
+ * `.hotspots-layer`'s permanently-fixed origin — see main.ts's
+ * `sizeAndPositionCanvas`). `#hotspots-layer` itself is never resized or
+ * moved any more (a real Chromium run showed that even a fixed-top-left
+ * resize of an *existing* element still scores as a layout shift), so every
+ * hotspot button now carries the canvas's offset/scale itself, in pixels,
+ * instead of relying on `%` positions resolved against a container box that
+ * used to track the canvas exactly.
+ */
+export interface CanvasBox {
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+}
+
+/** Positions `button` over the canvas from a rect in the layout's native units: centred on `rect.marker` when set (D-047), else on the rect's centre (B2); never smaller than 44 css px (R-20). Returns the centre, in the same buffer units as `rect`. */
+function placeButton(
+  button: HTMLButtonElement,
+  rect: { x: number; y: number; w: number; h: number; marker?: { x: number; y: number } },
+  layout: { bufferW: number; bufferH: number },
+  canvasBox: CanvasBox
+): { cx: number; cy: number } {
+  button.style.position = 'absolute';
+  // B2: position from the rect's centre, not its top-left corner —
+  // `rect.x/y` is the top-left, so the point translate(-50%,-50%)
+  // centres on has to be (x + w/2, y + h/2). D-047: a `marker` point (set
+  // by the exporter, always inside this rect) overrides that centre for
+  // the button and reticle only — `--obj-w/h` below still come from the
+  // rect, so the reticle's frame size is unaffected.
+  const cx = rect.marker ? rect.marker.x : rect.x + rect.w / 2;
+  const cy = rect.marker ? rect.marker.y : rect.y + rect.h / 2;
+  button.style.left = `${canvasBox.left + (cx / layout.bufferW) * canvasBox.width}px`;
+  button.style.top = `${canvasBox.top + (cy / layout.bufferH) * canvasBox.height}px`;
+  button.style.minWidth = `${MIN_TAP_PX}px`;
+  button.style.minHeight = `${MIN_TAP_PX}px`;
+  button.style.transform = 'translate(-50%, -50%)';
+  // DIA-124: the object's own on-screen size, for the marker (style.css
+  // `.hotspot::before/::after`) to frame the object rather than the 44px
+  // hit box. Visual only — the button's hit area above is unchanged (R-20).
+  button.style.setProperty('--obj-w', `${(rect.w / layout.bufferW) * canvasBox.width}px`);
+  button.style.setProperty('--obj-h', `${(rect.h / layout.bufferH) * canvasBox.height}px`);
+  return { cx, cy };
+}
+
+/**
+ * Renders one real <button> per hotspot in `layout`, absolutely positioned
+ * over the canvas from the same coordinates the assembler drew from, each
+ * at least 44x44 CSS px (R-20) regardless of the canvas's internal scale.
+ * `onOpen` receives the gag id (never the part-qualified hotspotId — both
+ * parts of a two-part gag open the same panel, per the brief).
+ */
+export function renderHotspots(
+  container: HTMLElement,
+  layout: SceneLayout,
+  canvasBox: CanvasBox,
+  onOpen: (gagId: string, button: HTMLButtonElement) => void
+): void {
+  container.replaceChildren();
+  // Exposed for tests/scene.spec.ts's centering assertion (S4/B2): the
+  // buffer size the hotspot rects below are expressed in, so a test can
+  // recover the CSS-px scale factor independently of chooseScale().
+  container.dataset.bufferW = String(layout.bufferW);
+  container.dataset.bufferH = String(layout.bufferH);
+  for (const hotspot of layout.hotspots) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = `hotspot hotspot--${hotspot.emphasis}`;
+    button.dataset.gagId = hotspot.gagId;
+    button.dataset.hotspotId = hotspot.hotspotId;
+    // B3: the accessible name is the gag's panel title, not its id — a
+    // screen-reader user should hear "A helpdesk with an owner", not
+    // "G2.1". panelFieldsFor falls back to the id defensively (it should
+    // never actually be missing — every hotspot's gagId comes from a real
+    // gag, checked by layout.test.ts's coverage test).
+    const title = panelFieldsFor(hotspot.gagId)?.title ?? hotspot.gagId;
+    button.setAttribute('aria-label', title);
+    const { cx, cy } = placeButton(button, hotspot, layout, canvasBox);
+    // Test-only (S4): the exact centre point in buffer units, so
+    // tests/scene.spec.ts can assert the rendered button centre matches
+    // within 1px without duplicating the layout math.
+    button.dataset.cx = String(cx);
+    button.dataset.cy = String(cy);
+    button.addEventListener('click', () => onOpen(hotspot.gagId, button));
+    container.append(button);
+  }
+}
+
+/**
+ * D-042a: a room has no gag hotspots; instead one "zoom in" <button> per
+ * close-up. DIA-55: the button is a small label chip anchored on the
+ * close-up's `rect` centre, not a button spanning the whole rect — a dense
+ * room's rects overlap too much for spanning buttons to ever reach 44px
+ * without covering each other (DIA-54; see src/scene/layout.ts's
+ * `placeChips` doc comment for the full story). The chip is inserted first
+ * so its real rendered size (label + CSS padding, already floored at 44px)
+ * can be measured, then `placeChips` finds each one a position — its
+ * anchor if that's free, else the nearest free spot — so two chips never
+ * cover the same point regardless of how densely the room's close-ups are
+ * packed.
+ */
+export function renderZoomTargets(
+  container: HTMLElement,
+  layout: ZoomLayout,
+  canvasBox: CanvasBox,
+  onZoom: (viewId: string, button: HTMLButtonElement) => void
+): void {
+  container.replaceChildren();
+  container.dataset.bufferW = String(layout.bufferW);
+  container.dataset.bufferH = String(layout.bufferH);
+
+  const buttons = layout.targets.map((target) => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'hotspot hotspot--zoom';
+    button.dataset.viewId = target.viewId;
+    button.setAttribute('aria-label', ui('zoomIn', { label: target.label }));
+    button.style.position = 'absolute';
+
+    const caption = document.createElement('span');
+    caption.className = 'hotspot__caption';
+    caption.setAttribute('aria-hidden', 'true');
+    caption.textContent = target.label;
+    button.append(caption);
+
+    button.addEventListener('click', () => onZoom(target.viewId, button));
+    container.append(button);
+    return button;
+  });
+
+  // DIA-65: chip placement works in the canvas's own box (css px), not the
+  // (now permanently full-size) container's — `canvasBox` is main.ts's
+  // sizeAndPositionCanvas result, the room's actual on-screen size,
+  // regardless of the buffer's native-pixel units.
+  const cssW = canvasBox.width || layout.bufferW;
+  const cssH = canvasBox.height || layout.bufferH;
+
+  const chips: Chip[] = layout.targets.map((target, i) => {
+    const box = buttons[i].getBoundingClientRect();
+    return {
+      cx: ((target.x + target.w / 2) / layout.bufferW) * cssW,
+      cy: ((target.y + target.h / 2) / layout.bufferH) * cssH,
+      w: box.width,
+      h: box.height,
+    };
+  });
+
+  const positions = placeChips(chips, { w: cssW, h: cssH });
+
+  buttons.forEach((button, i) => {
+    const { x, y } = positions[i];
+    button.style.left = `${canvasBox.left + x}px`;
+    button.style.top = `${canvasBox.top + y}px`;
+    button.style.transform = 'translate(-50%, -50%)';
+    button.dataset.cx = String(x);
+    button.dataset.cy = String(y);
+  });
+}

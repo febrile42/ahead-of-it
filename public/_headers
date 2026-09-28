@@ -1,0 +1,13 @@
+/*
+  X-Robots-Tag: noindex, nofollow
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+
+# /assets/* is content-hashed by Vite, so a 1-year cache is safe. /sprites/*
+# is not: the exporter reuses file names (scenes/80-built.json, manifest.json,
+# every PNG), so browsers must revalidate them (DIA-102).
+/sprites/*
+  Cache-Control: public, max-age=0, must-revalidate
+/assets/*
+  Cache-Control: public, max-age=31536000

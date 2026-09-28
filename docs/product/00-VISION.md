@@ -15,9 +15,10 @@ humour lives in the "without" state and is what makes a recruiter share it.
 
 ## The rare fact this is built from
 
-Josh built the IT function from zero **twice** — a web/IT organisation at the previous employer
+Josh built the IT function from zero **twice** — a web/IT organisation at a $200M company
 (4 → 80 on the web team; a 300-person, nine-building campus) and the entire IT function at
-the current employer (0 → an 11-person org supporting 750+ people, six offices, a $3B+ balance sheet) —
+a clean-energy company (0 → an 11-person org supporting 750+ people, six offices, a $3B+
+balance sheet) —
 and **stayed long enough to be graded on the founding decisions**. Nineteen years, two
 companies. Most IT leaders have 2–3 year tenures and never see their bets mature.
 
@@ -27,7 +28,7 @@ It also gives him something no cloud-native IT director has: **buildings**. Stru
 cabling, badge access, intrusion detection, AV, 100k and 200k sq ft facilities — plus the
 identity, SaaS, security and AI-governance layers on top. The building in this product is
 literally his. That is the "unique for a reason" test, and it is why this idea survived
-and twelve others didn't (`docs/brainstorm/`).
+and twelve others didn't.
 
 ## Who it's for
 
@@ -62,8 +63,8 @@ and twelve others didn't (`docs/brainstorm/`).
    gets an executive. Phase 0 is writing, and no code is written until it is signed off.
    **The "without" toggle must be encouraged** (D-022) — it is where the humour and the
    share live; if people don't flip it, the site is a brochure.
-3. **Nothing invented.** Every receipt is on the resume or confirmed by Josh. See
-   `CLAUDE.md`. Exaggeration lives in the pixels, never in the panel text.
+3. **Nothing invented.** Every receipt is on the resume or confirmed by Josh; the
+   ledger is `docs/content/EVIDENCE.md`. Exaggeration lives in the pixels, never in the panel text.
 4. **Failures are systemic, never personal.** The developer-who-became-IT is a hero. The
    worker under the invoices is a victim of a missing function. Nobody in the building is
    stupid. See `docs/content/TONE.md`.

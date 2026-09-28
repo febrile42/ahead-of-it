@@ -1,0 +1,19 @@
+{
+  "name": "ahead-of-it",
+  "compatibility_date": "2026-09-24",
+
+  // Static assets only: no Worker script. Only ./dist (Vite's build output)
+  // is uploaded, so .git, docs/ and this file never become public URLs
+  // (R-26). not_found_handling mirrors joshgister; public/404.html backs it.
+  "assets": {
+    "directory": "./dist",
+    "html_handling": "auto-trailing-slash",
+    "not_found_handling": "404-page"
+  },
+
+  // No custom domain / routes yet (Phase 4 — D-005, D-018: noindex until the
+  // publicity gate opens). Left on the workers.dev subdomain for now so a
+  // deploy has a real URL to smoke-test; revisit at the DNS cutover.
+  "workers_dev": true,
+  "preview_urls": true
+}
