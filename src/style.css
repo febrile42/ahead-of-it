@@ -235,7 +235,16 @@ h1 {
 
 /* --- Toggle (3d) --- */
 .toggle {
-  padding: 0 1rem 1rem;
+  padding: 0 1rem 0.5rem;
+  /* DIA-176: the without state never fills .toggle__subtitle, and once the
+     one-shot .toggle__nudge is dismissed for the rest of the session it
+     never fills either (both stay reserved regardless — DIA-51/DIA-83,
+     see below — because the total height here can never depend on state
+     or session history without reintroducing the shift those fixed). A
+     border at the same reserved height it already had reads that space as
+     deliberate padding before the room tabs (same pattern as .contact-line
+     below), not as a hole where content is missing. */
+  border-bottom: 1px solid var(--border-soft);
 }
 
 .toggle__button {
@@ -254,23 +263,29 @@ h1 {
   color: var(--toggle-text-pressed);
 }
 
-.toggle__subtitle {
-  margin: 0.5rem 0 0;
-  font-style: italic;
-  line-height: 1.2;
-  /* DIA-83 review round 2: 1.2em (one line) wasn't enough — CI's
-     Chromium resolves "system-ui, sans-serif" to a wider fallback than
-     whatever font measured this locally, so copy.ogDescription genuinely
-     wraps to 2 lines there while fitting 1 on other machines (confirmed:
-     CI's Lighthouse layout-shifts audit blamed #scene-wrap for a real,
-     deterministic 0.01145 shift, same across all 9 runs — not noise, and
-     not fixed by adding line-height alone). Same failure mode, and same
-     fix, DIA-65 already applied once to .scene-stepper__label below:
-     reserve the worst-case line count with min-height (never height —
-     unitless line-height rounds to a sub-pixel value that can differ by
-     a hair from what real text takes), so growing from 0/1 real line to
-     2 can never shift anything, on any font. */
+/* DIA-176 review round 2: .toggle__subtitle and .toggle__nudge never render
+   at once (src/ui/toggle.ts hides the subtitle whenever the nudge is
+   visible), so stacking a separate worst-case-2-lines reservation for each
+   — as the first DIA-176 fix did — reserved 4 lines for content that is
+   never more than 2 lines tall at a time. Overlapping both children on the
+   same grid cell makes the row's height the *max* of the two instead of
+   their sum: still a constant, state-independent reservation (DIA-51/DIA-83
+   still apply to each child), just sized to what can actually be visible. */
+.toggle__message {
+  display: grid;
+  margin: 0.25rem 0 0;
   min-height: calc(1.2em * 2);
+}
+
+.toggle__subtitle,
+.toggle__nudge {
+  grid-area: 1 / 1;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.toggle__subtitle {
+  font-style: italic;
   /* DIA-51: visibility, not the `hidden` attribute — the subtitle's two
      lines stay reserved in the layout in both states, same trick as
      .toggle__nudge below, so the without-state toggle never shifts
@@ -283,14 +298,7 @@ h1 {
 }
 
 .toggle__nudge {
-  margin: 0.5rem 0 0;
   font-weight: 600;
-  line-height: 1.2;
-  /* DIA-83 review round 2, see .toggle__subtitle above — copy.nudge is
-     long enough (and bold, which renders wider per character than the
-     subtitle's italic) to wrap to 2 lines on CI's font fallback too, so
-     it gets the same worst-case-2-lines reservation. */
-  min-height: calc(1.2em * 2);
   /* S1c/m2: visibility, not `hidden` — the nudge's line stays reserved in
      the layout at all times so showing or hiding it (once, after the
      first slider move; then again once the visitor toggles) never shifts

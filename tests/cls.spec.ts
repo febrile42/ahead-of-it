@@ -295,6 +295,123 @@ test.describe('CLS is exactly 0 across every band/view switch (DIA-65)', () => {
   });
 });
 
+// DIA-176: the without state left ~80px of dead space under the toggle —
+// .toggle__subtitle only ever renders in built, and .toggle__nudge is a
+// one-shot that's usually already spent, but both permanently reserve
+// worst-case-2-lines forever (DIA-51/DIA-83), so their box can never
+// shrink or collapse per state or session history without reintroducing
+// the exact shift those two fixes eliminated (confirmed against this
+// suite's own unfiltered CLS observer — DIA-46 item 3 measures every real
+// layout-shift entry, not just ones a `hadRecentInput` filter would keep).
+//
+// Round 1 only tightened the constant spacing around the reservation and
+// left the review round unconvinced (still ~95px of blank space reading as
+// a hole on the landing frame). Round 2 (this test) instead removes the
+// double-reservation: .toggle__subtitle and .toggle__nudge never render at
+// once (src/ui/toggle.ts hides the subtitle whenever the nudge is visible),
+// so style.css's .toggle__message overlaps both on one grid cell — the
+// reserved height becomes max(subtitle, nudge) instead of their sum, a
+// constant in every state exactly like before, just half the size.
+test.describe('the toggle has no dead space under it once reserved lines are blank (DIA-176)', () => {
+  test('.toggle keeps a constant height across built, without, and nudge-visible', async ({ page }) => {
+    await interceptFixtureScenes(page);
+    await page.setViewportSize(VIEWPORT);
+    await page.goto('/');
+    await page.waitForFunction(() => document.body.dataset.renderedToken !== undefined);
+
+    const heightOf = (selector: string) =>
+      page.evaluate((sel) => document.querySelector(sel)!.getBoundingClientRect().height, selector);
+
+    const builtHeight = await heightOf('#toggle-root');
+    // Toggled with a real click, same as a visitor's first tap — never
+    // having moved the slider first, so the nudge is still in its
+    // never-shown, fully-reserved state (the worst case for this element).
+    await H.setState(page, 'without');
+    const withoutHeight = await heightOf('#toggle-root');
+    expect(withoutHeight, '.toggle-root must not resize when the subtitle blanks out').toBe(builtHeight);
+
+    await H.setState(page, 'built');
+    await page.locator('#headcount-slider').fill('360'); // R-06a: first slider move shows the nudge
+    const nudgeVisibleHeight = await heightOf('#toggle-root');
+    expect(nudgeVisibleHeight, '.toggle-root must not resize when the nudge takes the subtitle place').toBe(
+      builtHeight
+    );
+
+    // The reserved slot itself must be sized to one item (max), never two
+    // stacked — this is the regression this round of DIA-176 fixes. The
+    // pre-fix layout stacked two calc(1.2em * 2) boxes plus two margins,
+    // which measured ~80px on top of the button; a single shared slot at
+    // 1rem font-size measures ~38-40px depending on the platform's exact
+    // font metrics (DIA-83) — bounding it well under the old double-height
+    // catches a reversion without pinning a brittle exact pixel value.
+    const messageHeight = await heightOf('.toggle__message');
+    expect(messageHeight, '.toggle__message must reserve one item, not two stacked').toBeLessThan(50);
+
+    // The gap is now bounded by the toggle's own bottom padding plus a 1px
+    // divider — not that plus a whole second blank reserved line on top,
+    // which is what made it read as dead space.
+    const [paddingBottom, borderBottomWidth] = await page.evaluate(() => {
+      const style = getComputedStyle(document.querySelector('.toggle')!);
+      return [parseFloat(style.paddingBottom), parseFloat(style.borderBottomWidth)];
+    });
+    expect(paddingBottom, 'DIA-176 tightened .toggle bottom padding to 0.5rem (8px)').toBe(8);
+    expect(borderBottomWidth, 'DIA-176 gives the reserved space a visible boundary instead of reading as empty').toBe(
+      1
+    );
+
+    const gap = await page.evaluate(() => {
+      const toggleRoot = document.querySelector('#toggle-root')!.getBoundingClientRect();
+      const sceneViews = document.querySelector('#scene-views')!.getBoundingClientRect();
+      return sceneViews.top - toggleRoot.bottom;
+    });
+    expect(gap, 'scene-views should sit directly against .toggle-root, no extra gap beyond it').toBe(0);
+  });
+
+  // Review round 2: the one path where `state === 'built'` (subtitle's own
+  // trigger) and the nudge can both want to show is the R-10 `?it=built`
+  // deep link, landed in built, then the visitor moves the slider. The
+  // subtitle must yield to the nudge rather than both painting into the
+  // same grid cell at once.
+  test('deep-linked into built: the nudge takes the shared slot instead of overlapping the subtitle', async ({
+    page,
+  }) => {
+    await interceptFixtureScenes(page);
+    await page.setViewportSize(VIEWPORT);
+    await page.goto('/?n=80&it=built');
+    await page.waitForFunction(() => document.body.dataset.renderedToken !== undefined);
+
+    await expect(page.locator('.toggle__button')).toHaveAttribute('aria-pressed', 'false');
+    const subtitleVisibleBefore = await page
+      .locator('.toggle__subtitle')
+      .evaluate((el) => getComputedStyle(el).visibility);
+    expect(subtitleVisibleBefore, 'subtitle renders normally in built, before the nudge has any reason to show').toBe(
+      'visible'
+    );
+
+    await page.locator('#headcount-slider').fill('360');
+
+    const [subtitleVisibility, subtitleAriaHidden, nudgeVisibility] = await Promise.all([
+      page.locator('.toggle__subtitle').evaluate((el) => getComputedStyle(el).visibility),
+      page.locator('.toggle__subtitle').getAttribute('aria-hidden'),
+      page.locator('.toggle__nudge').evaluate((el) => getComputedStyle(el).visibility),
+    ]);
+    expect(subtitleVisibility, 'the subtitle must yield the shared slot to the nudge').toBe('hidden');
+    expect(subtitleAriaHidden, 'a visually hidden subtitle must also be hidden from assistive tech').toBe('true');
+    expect(nudgeVisibility, 'the nudge takes the slot the subtitle just gave up').toBe('visible');
+
+    // Once the visitor toggles, the nudge is spent for the session and the
+    // subtitle goes back to depending on state alone (still built here).
+    await H.setState(page, 'without');
+    await H.setState(page, 'built');
+    const [subtitleVisibilityAfter, nudgeVisibilityAfter] = await Promise.all([
+      page.locator('.toggle__subtitle').evaluate((el) => getComputedStyle(el).visibility),
+      page.locator('.toggle__nudge').evaluate((el) => getComputedStyle(el).visibility),
+    ]);
+    expect(subtitleVisibilityAfter, 'the subtitle returns once the nudge is spent').toBe('visible');
+    expect(nudgeVisibilityAfter, 'the nudge stays spent for the rest of the session').toBe('hidden');
+  });
+});
+
 test.describe('no page-level horizontal scroll at 390px (PH1-04 review S2)', () => {
   test('documentElement.scrollWidth equals the viewport width', async ({ page }) => {
     await interceptFixtureScenes(page);

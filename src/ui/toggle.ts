@@ -33,19 +33,29 @@ export function createToggle(container: HTMLElement, initial: SceneState = 'buil
   nudge.textContent = copy.nudge;
 
   let state: SceneState = initial;
+  // DIA-176 review round 2: the subtitle and nudge now share one reserved
+  // slot (.toggle__message in style.css), so at most one of them may be
+  // visible at a time — track the nudge's visibility here so the subtitle
+  // side can defer to it (the R-10 `?it=built` deep link is the one path
+  // where `state === 'built'` and the nudge can both be true at once).
+  let nudgeVisible = false;
   const listeners: Array<(state: SceneState) => void> = [];
 
-  function render() {
-    button!.textContent = state === 'built' ? copy.toggleToWithout : copy.toggleToBuilt;
-    button!.setAttribute('aria-pressed', state === 'without' ? 'true' : 'false');
+  function updateSubtitle() {
     // DIA-51: toggle a visibility class, not the `hidden` attribute —
     // `hidden` is `display: none`, which drops the subtitle's box from
     // layout and shifts .scene-views/.scene-wrap/.scene-stepper up 29px
     // underneath the visitor's thumb. Keeping the box present but invisible
     // (see .toggle__subtitle--hidden) reserves its space in both states.
-    const hide = state !== 'built';
+    const hide = state !== 'built' || nudgeVisible;
     subtitle!.classList.toggle('toggle__subtitle--hidden', hide);
     subtitle!.setAttribute('aria-hidden', String(hide));
+  }
+
+  function render() {
+    button!.textContent = state === 'built' ? copy.toggleToWithout : copy.toggleToBuilt;
+    button!.setAttribute('aria-pressed', state === 'without' ? 'true' : 'false');
+    updateSubtitle();
   }
 
   button.addEventListener('click', () => {
@@ -65,10 +75,14 @@ export function createToggle(container: HTMLElement, initial: SceneState = 'buil
     showNudge() {
       // S1c: visibility, not `hidden` — the nudge's line stays reserved in
       // the layout so revealing it doesn't push the scene down.
+      nudgeVisible = true;
       nudge!.classList.add('toggle__nudge--visible');
+      updateSubtitle();
     },
     hideNudge() {
+      nudgeVisible = false;
       nudge!.classList.remove('toggle__nudge--visible');
+      updateSubtitle();
     },
   };
 }

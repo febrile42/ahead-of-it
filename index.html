@@ -53,8 +53,14 @@
       </div>
       <div class="toggle" id="toggle-root">
         <button type="button" class="toggle__button"></button>
-        <p class="toggle__subtitle"></p>
-        <p class="toggle__nudge"></p>
+        <!-- DIA-176 review round 2: subtitle and nudge never render at the
+             same time (see src/ui/toggle.ts), so they share one reserved
+             slot instead of each reserving its own worst-case-2-lines box
+             stacked on top of the other's. -->
+        <div class="toggle__message">
+          <p class="toggle__subtitle"></p>
+          <p class="toggle__nudge"></p>
+        </div>
       </div>
       <!-- D-042a: the room tab row above the scene and the stepper row
            below it are static shell too, each a fixed height, so a band
