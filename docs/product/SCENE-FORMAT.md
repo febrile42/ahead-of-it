@@ -59,6 +59,12 @@ Rules
   `base` in list order, then `main` sorted by `(depth, order)`, then `over` in list order.
 - Entries may extend past a view's rect (a road tile at `x: -8`); the canvas clips them.
   Hotspots and `focus` must lie inside the view.
+- **Marker point (D-049).** A close-up hotspot may carry `"marker": {"x", "y"}` in close-up
+  coordinates, on the half-pixel grid, inside that hotspot's own rect. When present, the web
+  centres the 44 × 44 button and the reticle on it instead of on the rect's centre. The rect
+  still sizes the reticle and still drives walker and moment exclusion. The exporter emits a
+  marker only where the rect centre would put a reticle tick on sign lettering. It is never
+  hand-edited into a scene file.
 - `depth` is kept on every entry so Phase 2 can insert walkers between props (A2).
 - The painter draws **images only** (A3). Dotted lines, roads, links are overlay sprites
   (PNG-8, palette-checked), tagged with their gag.

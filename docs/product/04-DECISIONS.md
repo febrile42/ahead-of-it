@@ -570,6 +570,34 @@ Open, not in scope:
 - Visitors without JavaScript, and crawlers, get no list, because it is rendered by JS. A
   build-time `<noscript>` list would fix that for share previews. Its own ticket if wanted.
 
+**D-049 · 2026-09-27 · Hotspots may carry a `marker` point, separate from their rect
+(DIA-133; Art Director, Product & Content Lead, CEO).**
+The DIA-124 reticle is centred on the hotspot rect, and on 97 hotspots that put a tick through
+sign lettering (AUDITOR, UNVETTED, CAUTION and more). Moving the rect is not the fix, because
+the rect does three jobs: it is the object's extent, it sizes the reticle (`--obj-w/h`), and
+walkers and moments keep out of it. So a close-up hotspot may carry an optional
+`marker: {x, y}`:
+1. **Where it is.** It uses close-up coordinates, like the rect. Values are on the half-pixel
+   grid (a multiple of 0.5), because a rect's centre often is. It must lie **inside its own
+   hotspot's rect**, so the marker always sits on the object it opens (R-20).
+2. **What it moves.** The web centres the 44 × 44 button and the reticle on `marker` when it
+   is present, and on the rect's centre when it is not. It changes nothing else. The reticle
+   is still sized from the rect, the hit area is still 44 × 44, walker and moment exclusion
+   still use the rect, and zoom targets and `focus` are unaffected.
+3. **Who sets it.** The exporter sets it, never a hand edit to a scene file. It emits one only
+   where the rect centre would put a tick on lettering at a phone scale (1.5–2.0 css px per
+   art px). The rule it serves: **a tick never touches sign lettering.** Touching a sign's
+   plate is allowed. Desktop scales are reported, not enforced.
+4. **One accepted exception.** On 360–375 px phones, one tick touches one letter pixel of
+   INFRA on G7.3 (hat stack) at 750 without. The Product Lead accepted this (DIA-133): the stack
+   reads from its shape, and re-composing the back aisle is not worth one pixel.
+   `check_lettering.py` names this exception, and it fails on anything beyond it.
+This is additive: `schema` stays **2**, and a painter that ignores `marker` still works, only
+with the old centring. Rejected: a per-hotspot CSS offset, because a second source of
+position would drift from the art on every re-composition.
+*CEO signed off 2026-09-27 (DIA-133). The Web Engineer confirms the contract in DIA-134
+before PR #57 leaves draft.*
+
 **D-051 · 2026-09-27 · The page opens on the whole floor, under a two-line introduction
 (DIA-161; the owner's direction; Product & Content Lead, for CEO sign-off).**
 Today's first paint is the band's `default` close-up (D-042 item 6). At 80 that is "Sales
