@@ -780,6 +780,21 @@ if (
     // DIA-13: captured before anything below touches the DOM — the layers
     // that are about to be rebuilt are exactly the ones that can hold focus.
     const focusCapture = captureFocus();
+    // PH2-04 step 3 (DIA-114, CEO ruling on DIA-88): checklist.render(band)
+    // used to run here, ahead of loadScene/renderScene below, to unblock the
+    // checklist section's own <h2> — band 750's LCP element at the time.
+    // D-048 ("punch list on demand", #59) landed on develop after that fix
+    // and made the whole checklist panel visually hidden until a visitor
+    // opens it (`checklist__panel--collapsed`), so its <h2> is no longer an
+    // LCP candidate at all — the original justification is moot. Worse,
+    // rendering it this early broke the panel's own lazy-loading: its per-gag
+    // thumbnails (checklist.ts) rely on `loading="lazy"` deferring their
+    // fetch because the panel is already laid out and clipped by the time
+    // they're inserted. Inserted this early — before the page's first
+    // layout/paint pass — WebKit couldn't tell they were off-screen and
+    // fetched all of them (up to 26) immediately, which is a real
+    // regression against this same perf goal. Reverted to running after the
+    // scene/sprite work, same as before DIA-114.
     let scene: SceneFile | null = null;
     try {
       scene = await loadScene(band, state);
