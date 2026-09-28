@@ -609,3 +609,21 @@ Rejected:
   of fixing it.
 - **An animated zoom-out on load.** Transitions belong to the Phase 2 animation pass
   (D-042a). A later zoom-in from `rect` stays possible.
+
+**D-052 · 2026-09-27 · The pressed toggle's label goes black; the pink stays (DIA-163).**
+Amends D-046 point 4. The pressed toggle ("What he'd already built") set white text
+(`--toggle-text-pressed: #fff`) on pink (`--toggle-fill-pressed: #ff3dae`). That is 3.22:1.
+The label is 16 px / 700, under the 18.66 px bold large-text threshold, so D-046 point 6's
+4.5:1 gate applies. It fails in both schemes, because the toggle never rethemes.
+1. **`--toggle-text-pressed` becomes `#000`.** Black on `#ff3dae` is 6.53:1. The fill does not
+   change, so what D-046 point 4 protects still holds: yellow "without" and pink "built" read
+   the same in both schemes. The pressed label now matches the unpressed one (black on yellow).
+2. **Still never rethemed.** The token keeps one value for light and dark, like every other
+   toggle token.
+No art, copy or served image changes. The toggle screenshots are regenerated.
+
+Rejected:
+- **A darker pink (≈`#d4007f`) for white text.** It changes the gag state's colour identity,
+  which D-046 point 4 exists to keep.
+- **A larger label (≥18.66 px bold) under the 3:1 rule.** It passes at 3.22:1 with no margin,
+  and it makes the toggle bigger on a 390 px phone, next to the thing it must not crowd.

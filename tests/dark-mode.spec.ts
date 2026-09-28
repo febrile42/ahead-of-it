@@ -79,6 +79,22 @@ test.describe('dark mode contrast (D-046 point 6, WCAG AA)', () => {
     expect(contrastRatio(color, background)).toBeGreaterThanOrEqual(4.5);
   });
 
+  test("the toggle's pressed label is at least 4.5:1 on its fill", async ({ page }) => {
+    // D-052 (DIA-163): --toggle-text-pressed was #fff on --toggle-fill-pressed's
+    // #ff3dae, 3.22:1 at 16px/700 (under the 18.66px bold large-text threshold,
+    // so the 4.5:1 text gate applies, not the 3:1 one). Never rethemed (D-046
+    // pt 4), so this must hold in both schemes — see the light-mode sibling
+    // below.
+    await openApp(page, { viewport: PHONE });
+    await setState(page, 'without');
+    const button = page.locator('.toggle__button');
+    const [color, background] = await button.evaluate((el) => {
+      const style = getComputedStyle(el);
+      return [style.color, style.backgroundColor];
+    });
+    expect(contrastRatio(color, background)).toBeGreaterThanOrEqual(4.5);
+  });
+
   test('a chrome focus ring is at least 3:1 on the page', async ({ page }) => {
     await openApp(page, { viewport: PHONE });
     const tab = page.locator('.scene-views__button').first();
@@ -96,5 +112,24 @@ test.describe('dark mode contrast (D-046 point 6, WCAG AA)', () => {
     });
     expect(ringDrawn).toBe(true);
     expect(contrastRatio(outlineColor, background)).toBeGreaterThanOrEqual(3);
+  });
+});
+
+test.describe('light mode contrast (D-046 point 6, WCAG AA)', () => {
+  test.use({ colorScheme: 'light' });
+
+  test("the toggle's pressed label is at least 4.5:1 on its fill", async ({ page }) => {
+    // D-052 (DIA-163): the pressed-toggle failure (3.22:1) predated dark mode
+    // and reproduced identically in light — --toggle-text-pressed is never
+    // rethemed (D-046 pt 4). Sibling of the dark-mode test above; both must
+    // pass since the token carries one value for both schemes.
+    await openApp(page, { viewport: PHONE });
+    await setState(page, 'without');
+    const button = page.locator('.toggle__button');
+    const [color, background] = await button.evaluate((el) => {
+      const style = getComputedStyle(el);
+      return [style.color, style.backgroundColor];
+    });
+    expect(contrastRatio(color, background)).toBeGreaterThanOrEqual(4.5);
   });
 });

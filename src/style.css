@@ -24,7 +24,9 @@
    - the toggle (`--toggle-fill`, `--toggle-fill-pressed`, `--toggle-text`,
      `--toggle-text-pressed`): never retheme (D-046 point 4, "the toggle
      keeps its fills"). Its border is chrome (`--ink`) and does retheme, so
-     the pill's edge still shows against a dark page. */
+     the pill's edge still shows against a dark page. `--toggle-text-pressed`
+     is black, not white (D-052, DIA-163): white on `--toggle-fill-pressed`
+     was 3.22:1, under the 4.5:1 gate D-046 point 6 sets for 16px/700 text. */
 :root {
   color-scheme: light dark;
   --ink: #1a1410;
@@ -51,7 +53,7 @@
      Chromium, rgba(0,0,0,.8) in WebKit — so no single value here could be
      pixel-identical in both engines. */
   --toggle-text: #000;
-  --toggle-text-pressed: #fff;
+  --toggle-text-pressed: #000;
   font-family: system-ui, sans-serif;
 }
 
