@@ -162,6 +162,19 @@ h1 {
   min-height: calc(1.3em * 4);
 }
 
+/* DIA-175: the 4-line reserve above only covers >=324px. At the narrowest
+   phone-first target (320px, e.g. iPhone SE) content.json's actual intro
+   copy wraps to a 5th line, so the reserve is short by one line and the
+   real text growing in causes a small shift the 390px CLS gate never
+   measures. Widening the base reserve to 5 lines for every width would
+   also work but leaves needless empty space above 324px; scoping it to
+   the one width band that actually wraps further keeps both properties. */
+@media (max-width: 320px) {
+  .app__intro {
+    min-height: calc(1.3em * 5);
+  }
+}
+
 .sr-only {
   position: absolute;
   width: 1px;

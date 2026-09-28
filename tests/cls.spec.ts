@@ -189,6 +189,31 @@ test.describe('CLS is exactly 0 on first load, unthrottled (DIA-83 review round 
   }
 });
 
+// DIA-175: the 390px CLS gate above never exercised the narrowest
+// phone-first target. At 320px content.json's actual intro copy wraps to a
+// 5th line, one more than .app__intro's min-height used to reserve
+// (style.css), so the block grew after first paint on that width alone —
+// a real, measured shift the 390px-only run could never catch. Same three
+// Lighthouse-gated URLs as the block above, just at 320px.
+const VIEWPORT_320 = { width: 320, height: 844 };
+test.describe('CLS is exactly 0 on first load at 320px, unthrottled (DIA-175)', () => {
+  for (const [label, path] of [
+    ['band 80 (default)', '/'],
+    ['band 750, built', '/?n=750&it=built'],
+    ['band 750, without', '/?n=750&it=none'],
+  ] as const) {
+    test(`${label}: first paint through settle measures 0 layout shift at 320px`, async ({ page }) => {
+      await installClsObserver(page);
+      await interceptFixtureScenes(page);
+      await page.setViewportSize(VIEWPORT_320);
+      await page.goto(path);
+      await page.waitForFunction(() => document.body.dataset.renderedToken !== undefined);
+      const cls = await settleCls(page);
+      expect(cls, `first load at 320px (${label}): expected 0 layout shift, measured ${cls}${await clsSources(page)}`).toBe(0);
+    });
+  }
+});
+
 // Review fix (DIA-46 item 3): the test above only measures first load. The
 // brief's own acceptance line is "switching views and bands measures 0" —
 // sizeAndPositionCanvas keeps .scene-wrap's box, the tab row and the
