@@ -14,6 +14,10 @@ export interface Hotspot {
   y: number;
   w: number;
   h: number;
+  /** D-047: mirrors SceneHotspot.marker — where the button and reticle
+   * centre instead of this rect's own centre, when set. Always inside
+   * this hotspot's own rect. */
+  marker?: { x: number; y: number };
   /** PH1-04's per-hotspot de-emphasis ("quiet" earlier-band items, boxed
    * smaller + 55% opacity) is gone: R-03a's emphasis is now the art
    * side's call, baked into the picture (SceneEntry.alpha or a quiet

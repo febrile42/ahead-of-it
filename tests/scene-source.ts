@@ -18,8 +18,17 @@ export interface SceneIndex {
 export interface SceneHotspot {
   gagId: string;
   part?: string;
+  x?: number;
+  y?: number;
+  w?: number;
+  h?: number;
   primary?: boolean;
   placeholder?: boolean;
+  /** D-047 (DIA-133): an exporter-set point, inside this hotspot's own
+   * rect, that the web centres the button/reticle on instead of the
+   * rect's own centre — set only where the rect's centre would put a
+   * tick on sign lettering. */
+  marker?: { x: number; y: number };
 }
 
 /** PH2-01 Part B (SCENE-FORMAT § Motion): just enough of an entry for specs
@@ -94,7 +103,7 @@ export async function interceptFixtureScenes(page: Page): Promise<void> {
 /** Reads the scene file for `band`/`state`, or undefined for a band this
  * index has no entry (or no file for that state) for yet — same "not drawn
  * yet" case `expectedHotspotCount` treats as zero. */
-function readBandSceneFile(band: number | 'beyond', state: 'built' | 'without'): SceneFile | undefined {
+export function readBandSceneFile(band: number | 'beyond', state: 'built' | 'without'): SceneFile | undefined {
   const index = readIndex();
   const key = band === 'beyond' ? index.beyond : String(band);
   const entry = index.bands[key];

@@ -490,16 +490,102 @@ h1 {
   height: 100%;
 }
 
+/* DIA-124: the hotspot marker is four corner brackets (viewfinder L-ticks)
+   on the object's centre, where the 44px hit box is: the object's own size
+   plus 4px each side, clamped to 28-40px. Framing a whole exporter rect put
+   ticks on neighbouring objects and off the canvas edge; capped, it reads as
+   a reticle. Two-tone so it reads on any background: a 2px white core with
+   a 1px ink edge on every side. Nothing in the isometric art is an
+   axis-aligned right angle, so the brackets read as UI rather than as more
+   sprite outline. The button itself keeps
+   its 44px hit area (R-20); the brackets are pseudo-elements sized from
+   --obj-w/--obj-h (set in src/ui/panel.ts) with pointer-events: none. */
 .hotspot {
+  --hs-core: #ffffff;
+  --hs-edge: #1a1410;
+  --hs-arm: 10px; /* core arm length */
+  --hs-t: 2px; /* core thickness; the edge adds 1px each side */
+  --hs-pad: 4px; /* gap between the object rect and the brackets */
+  --hs-min: 28px; /* smallest frame, so a tiny object's ticks never merge */
+  --hs-max: 40px; /* largest frame: a reticle on the tap point, not a box round a big rect */
   background: transparent;
-  border: 2px dashed rgba(var(--scene-ink-rgb), 0.6);
+  border: none;
   border-radius: 4px;
   cursor: pointer;
   padding: 0;
 }
 
+.hotspot:not(.hotspot--zoom)::before,
+.hotspot:not(.hotspot--zoom)::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  background-repeat: no-repeat;
+  background-image:
+    linear-gradient(var(--c), var(--c)), linear-gradient(var(--c), var(--c)),
+    linear-gradient(var(--c), var(--c)), linear-gradient(var(--c), var(--c)),
+    linear-gradient(var(--c), var(--c)), linear-gradient(var(--c), var(--c)),
+    linear-gradient(var(--c), var(--c)), linear-gradient(var(--c), var(--c));
+  background-size:
+    var(--a) var(--t), var(--t) var(--a),
+    var(--a) var(--t), var(--t) var(--a),
+    var(--a) var(--t), var(--t) var(--a),
+    var(--a) var(--t), var(--t) var(--a);
+  background-position:
+    0 0, 0 0,
+    100% 0, 100% 0,
+    0 100%, 0 100%,
+    100% 100%, 100% 100%;
+  animation: hs-breathe 0.6s ease-in-out 2;
+}
+
+/* The core: eight bars, two per corner. */
+.hotspot:not(.hotspot--zoom)::after {
+  --a: var(--hs-arm);
+  --t: var(--hs-t);
+  --c: var(--hs-core);
+  width: min(max(calc(var(--obj-w, 0px) + 2 * var(--hs-pad)), var(--hs-min)), var(--hs-max));
+  height: min(max(calc(var(--obj-h, 0px) + 2 * var(--hs-pad)), var(--hs-min)), var(--hs-max));
+}
+
+/* The edge: the same bars 1px bigger on every side, drawn underneath. */
+.hotspot:not(.hotspot--zoom)::before {
+  --a: calc(var(--hs-arm) + 2px);
+  --t: calc(var(--hs-t) + 2px);
+  --c: var(--hs-edge);
+  width: calc(min(max(calc(var(--obj-w, 0px) + 2 * var(--hs-pad)), var(--hs-min)), var(--hs-max)) + 2px);
+  height: calc(min(max(calc(var(--obj-h, 0px) + 2 * var(--hs-pad)), var(--hs-min)), var(--hs-max)) + 2px);
+}
+
+/* R-03a: a quiet (earlier-band) item gets shorter ticks, never less
+   opacity — every marker keeps the full two-tone contrast. */
 .hotspot--quiet {
-  opacity: 0.7;
+  --hs-arm: 6px;
+}
+
+/* Hover/press: a faint light tint over the framed object. */
+.hotspot:not(.hotspot--zoom):hover::after,
+.hotspot:not(.hotspot--zoom):active::after {
+  background-color: rgba(255, 255, 255, 0.22);
+}
+
+/* Once, when the view appears or the toggle flips (both rebuild the
+   hotspot layer, so the animation replays by itself): two gentle outward
+   breaths, 1.2s in all, then static. No loop. */
+@keyframes hs-breathe {
+  50% {
+    transform: translate(-50%, -50%) scale(1.08);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hotspot:not(.hotspot--zoom)::before,
+  .hotspot:not(.hotspot--zoom)::after {
+    animation: none;
+  }
 }
 
 .hotspot:focus-visible {

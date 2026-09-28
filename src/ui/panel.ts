@@ -218,24 +218,32 @@ export interface CanvasBox {
   height: number;
 }
 
-/** Positions `button` over the canvas from a rect in the layout's native units: centred on the rect's centre (B2), never smaller than 44 css px (R-20). Returns the centre, in the same buffer units as `rect`. */
+/** Positions `button` over the canvas from a rect in the layout's native units: centred on `rect.marker` when set (D-047), else on the rect's centre (B2); never smaller than 44 css px (R-20). Returns the centre, in the same buffer units as `rect`. */
 function placeButton(
   button: HTMLButtonElement,
-  rect: { x: number; y: number; w: number; h: number },
+  rect: { x: number; y: number; w: number; h: number; marker?: { x: number; y: number } },
   layout: { bufferW: number; bufferH: number },
   canvasBox: CanvasBox
 ): { cx: number; cy: number } {
   button.style.position = 'absolute';
   // B2: position from the rect's centre, not its top-left corner —
   // `rect.x/y` is the top-left, so the point translate(-50%,-50%)
-  // centres on has to be (x + w/2, y + h/2).
-  const cx = rect.x + rect.w / 2;
-  const cy = rect.y + rect.h / 2;
+  // centres on has to be (x + w/2, y + h/2). D-047: a `marker` point (set
+  // by the exporter, always inside this rect) overrides that centre for
+  // the button and reticle only — `--obj-w/h` below still come from the
+  // rect, so the reticle's frame size is unaffected.
+  const cx = rect.marker ? rect.marker.x : rect.x + rect.w / 2;
+  const cy = rect.marker ? rect.marker.y : rect.y + rect.h / 2;
   button.style.left = `${canvasBox.left + (cx / layout.bufferW) * canvasBox.width}px`;
   button.style.top = `${canvasBox.top + (cy / layout.bufferH) * canvasBox.height}px`;
   button.style.minWidth = `${MIN_TAP_PX}px`;
   button.style.minHeight = `${MIN_TAP_PX}px`;
   button.style.transform = 'translate(-50%, -50%)';
+  // DIA-124: the object's own on-screen size, for the marker (style.css
+  // `.hotspot::before/::after`) to frame the object rather than the 44px
+  // hit box. Visual only — the button's hit area above is unchanged (R-20).
+  button.style.setProperty('--obj-w', `${(rect.w / layout.bufferW) * canvasBox.width}px`);
+  button.style.setProperty('--obj-h', `${(rect.h / layout.bufferH) * canvasBox.height}px`);
   return { cx, cy };
 }
 

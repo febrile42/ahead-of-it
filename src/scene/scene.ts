@@ -58,6 +58,12 @@ export interface SceneHotspot {
   w: number;
   h: number;
   primary: boolean;
+  /** D-047: where the reticle and button centre instead of the rect's
+   * centre, when the rect's centre would put a tick on sign lettering.
+   * Exporter-set only, always inside this hotspot's own rect. The rect
+   * itself still sizes the reticle (`--obj-w/h`) and still drives walker
+   * and moment exclusion. */
+  marker?: { x: number; y: number };
   /** No composer yet for this band: the web draws its own labelled box
    * instead of a sprite (SCENE-FORMAT "Placeholders"). */
   placeholder?: boolean;

@@ -391,6 +391,7 @@ if (
       y: h.y,
       w: h.w,
       h: h.h,
+      marker: h.marker,
       emphasis: 'current',
     }));
     return { bufferW: view.size.w, bufferH: view.size.h, hotspots };
