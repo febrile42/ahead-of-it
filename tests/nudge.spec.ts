@@ -1,7 +1,7 @@
 // QA (DIA-11): the R-06a nudge, across the toggle x slider ordering pairs.
 //
 // The nudge's whole job is to get the visitor from `built` into `without`
-// once (R-06a; docs/briefs/PH1-04-REVIEW.md item m2 — "the nudge stays
+// once (R-06a; the PH1-04 review item m2 — "the nudge stays
 // visible after the visitor has already toggled ... hide it on first
 // toggle"). src/main.ts shows it on the first slider move guarded only by
 // `hasMovedSlider`, and src/ui/toggle.ts's hideNudge is the only thing

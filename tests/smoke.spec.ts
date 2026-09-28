@@ -1,14 +1,14 @@
 import { expect, test } from '@playwright/test';
 
 // R-21/R-16/R-26 (PH1-05): every route the app exposes, crawled at phone
-// and desktop widths. Only '/' exists today — CLAUDE.md's "phone-first"
+// and desktop widths. Only '/' exists today — R-20's "phone-first"
 // rule and D-018 apply to whatever gets added later, so this list is the
 // single place a new route needs to be registered for these checks to
 // cover it.
 const ROUTES = ['/'];
 
 // R-14 companion viewports: 390px is the phone-first design width
-// (CLAUDE.md), 1280px is the desktop check.
+// (R-20), 1280px is the desktop check.
 const VIEWPORTS = [
   { name: 'phone', width: 390, height: 844 },
   { name: 'desktop', width: 1280, height: 900 },

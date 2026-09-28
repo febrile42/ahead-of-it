@@ -1,6 +1,6 @@
 # 02 — Phases
 
-Current phase: **1** (Josh's go, 2026-09-24). Phase 0 exited 2026-09-24 and was promoted to `main`. Live status: `docs/STATUS.md`; briefs: `docs/briefs/`. Phases exit on criteria, not dates. Owners: **J** = Josh,
+Current phase: **1** (Josh's go, 2026-09-24). Phase 0 exited 2026-09-24 and was promoted to `main`. Phases exit on criteria, not dates. Owners: **J** = Josh,
 **M** = mastermind (Opus session agent), **S** = sonnet subagents, **H** = haiku subagents,
 **A** = pixel artist (Phase 3+).
 
@@ -13,10 +13,10 @@ Deliverables
 - `docs/content/EVIDENCE.md` — receipt ledger; every `E-xx` cites a resume line or is confirmed by J. (M drafts, **J fills and confirms**)
 - `docs/content/TONE.md` — humour and copy rules. (M)
 - Panel copy for every gag, final voice. (M drafts; S may produce first-pass variants for M to edit; never below opus for final)
-- `05-OPEN-QUESTIONS.md` answered by J, at minimum Q-1 (employer naming), Q-2 (name), Q-3 (topology fork).
+- Open questions answered by J, at minimum Q-1 (employer naming), Q-2 (name), Q-3 (topology fork).
 
 Exit criteria
-- J has approved the gag list with no `[JOSH: confirm]` left on any gag that ships in Phase 1.
+- J has approved the gag list with no unconfirmed claim left on any gag that ships in Phase 1.
 - Every gag has an E-xx and every E-xx is resolved or explicitly deferred.
 - Gag count ≤ 28; bands = 7.
 
@@ -32,7 +32,7 @@ Exit criteria
 > the hallway test (gag naming and toggle discoverability) is **deferred by Josh, not
 > waived**, and is unrun; its kit is merged (PR #2). The internal picture review (DIA-70)
 > rated three gags weak: G6.3 and G6.1 are redrawn and now read, and G3.1's redraw is
-> landing (PR #39). None blocks Phase 2. Live state is in `docs/STATUS.md`.
+> landing (PR #39). None blocks Phase 2.
 
 Deliverables
 - Repo scaffold: build tooling, `wrangler.jsonc` (assets-only Worker), CI for staging preview on `develop`. (S, brief from M)
@@ -44,7 +44,7 @@ Deliverables
 - Checklist (R-14) generated from the same data. (S)
 - Phone-first layout at 390px (R-20). (S, reviewed by M on a real phone screenshot)
 - No-third-party test (R-21), the employer-name build check (R-33, D-014), and `noindex` (R-16). (S)
-- ~~Art research brief (D-020)~~ done: `docs/research/ART-PACKS-2026-09.md`.
+- ~~Art research brief (D-020)~~ done.
 - **Art pipeline spike (D-024):** style-reference sheet, then five assets generated against it (floor, wall+window, desk+chair, worker walk cycle, badge reader), hand-cleaned. Go/no-go on in-house art. (S runs the pipeline, H slices/validates, M judges consistency — J sees the five before anything else is drawn)
 
 Exit criteria
@@ -55,16 +55,15 @@ Exit criteria
 
 > **The two hallway-test criteria are deferred, not waived (D-040).** Josh has deferred
 > *running* the test; the criteria above stand unchanged. Phase 1 therefore closes marked
-> **conditionally met, pending hallway test** — said out loud here and in `STATUS.md`, never
-> quietly ticked. The kit to run it is built and parked: `docs/hallway-test/` (protocol,
-> generated scoring sheet, 390px without-state screenshots) and
-> `tools/hallway-test/build-kit.mjs` to regenerate all of it. A gag that fails when the test
+> **conditionally met, pending hallway test** — said out loud here and in the status notes, never
+> quietly ticked. The kit to run it is built and parked (protocol, generated scoring sheet,
+> 390px without-state screenshots); `tools/hallway-test/build-kit.mjs` regenerates it. A gag that fails when the test
 > is eventually run is redrawn — in-house, hours, not a re-commission.
 
 ## Phase 2 — The switch and the workers
 
 > **Progress (2026-09-26): starting.** Briefs PH2-01…04 and D-043 are merged (PR #35);
-> dispatch order is in `docs/briefs/README.md`, PH2-02 (`prefers-reduced-motion`) first.
+> PH2-02 (`prefers-reduced-motion`) is dispatched first.
 
 Deliverables
 - Toggle + nudge (R-06, R-06a, R-07) polished; **band-crossing moment**: when the slider crosses into a band, the new threat briefly appears *already handled* (Q-20 item 5). (S, copy by M)
@@ -97,10 +96,10 @@ Exit criteria
 
 - GitHub remote (J approves), `main` promotion with merge commit, production deploy, smoke test.
 - **Publicity gate (D-018):** ships `noindex`, unlinked. Making it discoverable or linking from joshgister.com requires a deliberate professionalism / resume-exposure review that J opens explicitly. Not part of launch.
-- DNS: `resume.joshgister.com` moves from lime's `000-default` placeholder (`A 45.33.69.96`) to the Worker custom domain. **J approves the cutover explicitly.** Note in joshgister `CLAUDE.md` that the placeholder can be retired.
+- DNS: `resume.joshgister.com` moves from the current placeholder host to the Worker custom domain. **J approves the cutover explicitly.**
 - Post-launch: one week of first-party numbers against `00-VISION.md` success section, then a retro entry in `04-DECISIONS.md`.
 
 ## What is explicitly *not* scheduled
 
-Anything in `01-REQUIREMENTS.md` non-goals. If it comes up, it goes in `05-OPEN-QUESTIONS.md`
+Anything in `01-REQUIREMENTS.md` non-goals. If it comes up, it goes in an open question
 or a decision entry — not into a phase.

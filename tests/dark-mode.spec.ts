@@ -2,7 +2,7 @@
 // building doesn't. `test.use({ colorScheme: 'dark' })` is Playwright's
 // emulation of that OS preference — no in-page switch exists to drive
 // instead (D-046 point 1). PHONE (interaction-helpers.ts) is the 390px
-// viewport CLAUDE.md designs every feature against first.
+// viewport every feature is designed against first.
 import { expect, test } from '@playwright/test';
 import { PHONE, openApp, openFirstHotspot, openPunchList, setBand, setState } from './interaction-helpers';
 import { contrastRatio } from './contrast';

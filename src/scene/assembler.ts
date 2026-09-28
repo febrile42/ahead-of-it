@@ -4,7 +4,7 @@
 // file per band x state (docs/product/SCENE-FORMAT.md) and this module
 // draws exactly what it says, in order, nothing invented.
 //
-// What's kept from PH1-04 (docs/briefs/PH1-04-REVIEW.md §b): the
+// What's kept from PH1-04 (the PH1-04 review §b): the
 // labelled-box code, now drawn only for hotspots the exporter has
 // explicitly flagged `placeholder: true` — bands with no composer yet
 // (SCENE-FORMAT "Placeholders"). Everything else (floor strips, street

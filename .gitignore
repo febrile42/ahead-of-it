@@ -16,5 +16,8 @@ playwright-report/
 blob-report/
 playwright/.cache/
 
+# tools/hallway-test/build-kit.mjs default output (the kit itself is kept privately)
+hallway-kit/
+
 # Lighthouse CI (PH1-05, R-23) — generated reports, filesystem upload target
 .lighthouseci/

@@ -42,7 +42,7 @@ Two registers, kept strictly apart.
   - current, panels dated 2023 or later: *"a $3B+ clean-energy company"* → *"the company"*
   - current, panels dated before 2023 (it was not $3B+ then): *"a clean-energy company,
     now $3B+"* → *"the company"*. Both forms are deliberate (mastermind ruling
-    2026-09-16; the PANELS-CHECK "wrong descriptor" finding was a false positive).
+    2026-09-16; the 2026-09-24 panel check's "wrong descriptor" finding was a false positive).
   - previous: *"a $200M company on a nine-building campus"* → *"the campus"*
   Cities and years are fine. Panels that cite both in one breath say "at the campus
   company in 2013, and again at the clean-energy company in 2019".
@@ -63,8 +63,8 @@ Two registers, kept strictly apart.
 > for a SOC 2 report before they'll sign, and the honest answer — with no program and no
 > one whose job it is — is "no". The deal dies in procurement, not in the budget.
 >
-> **Worth it later:** the second audit is cheaper than the first. `[JOSH: only if true —
-> otherwise omit this beat]`
+> **Worth it later:** the second audit is cheaper than the first. *(Only if true;
+> otherwise omit this beat.)*
 >
 > Talk to Josh →
 

@@ -24,7 +24,7 @@ const REAL_TONE_MD = readFileSync(new URL('../../docs/content/TONE.md', import.m
 // ---------------------------------------------------------------------------
 // Fixtures. Small, self-contained markdown — not the real docs/content/*.md
 // (those are covered by `npm run build` against the real docs and by
-// docs/content/PANELS-CHECK-2026-09-24.md). Shapes mirror the real files
+// the 2026-09-24 panel check). Shapes mirror the real files
 // closely enough to exercise every regex the parser relies on: the bands
 // table row, the "## <id> · <year> · *title*" band heading, the "### <id> ·
 // <title>" gag/panel heading, the scene bullets, the strip line, the beat
@@ -443,7 +443,7 @@ describe('parsePanelBody', () => {
 
 // ---------------------------------------------------------------------------
 // countWords — standalone punctuation tokens are not words (PH1-03 review
-// should-fix #2): matches PANELS-CHECK-2026-09-24.md's manual counting
+// should-fix #2): matches the 2026-09-24 panel check's manual counting
 // method, which does not count a free-standing em/en dash, middle dot,
 // hyphen or arrow as a word.
 // ---------------------------------------------------------------------------

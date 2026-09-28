@@ -1,9 +1,17 @@
 #!/usr/bin/env bash
-# R-33 / D-014 (amended): neither employer may be named in served content —
-# not the name, not the logo, not the domain. Names come from
-# docs/content/TIMELINE.md's headings ("Previous employer — a $200M company on a nine-building campus" and
-# "Current employer — a $3B+ clean-energy company, Boston MA"); docs/content/TONE.md's descriptor rule is what
-# replaces them in panel copy. Case-insensitive; exits 1 on any hit.
+# R-33 / D-014 (amended): neither employer may be named — not the name, not
+# the logo, not the domain. Checks the built output (default `dist`) and,
+# inside a git work tree, every tracked file in the repo.
+#
+# The names are deliberately not in this repo. They come from the
+# EMPLOYER_DENYLIST environment variable (an Actions secret in CI):
+# comma- or newline-separated, matched case-insensitively as plain
+# substrings. docs/content/TONE.md's descriptors are what replace them.
+#
+# Unset list: fails when CI is set (the guard must never pass by default in
+# CI), otherwise warns and skips so a fresh clone still builds. On a hit it
+# prints file:line and the entry's position in the list, never the name
+# itself — CI logs are public.
 set -euo pipefail
 
 DIST_DIR="${1:-dist}"
@@ -13,14 +21,38 @@ if [ ! -d "$DIST_DIR" ]; then
   exit 1
 fi
 
-EMPLOYERS=("the previous employer" "the current employer")
-found=0
+EMPLOYERS=()
+while IFS= read -r entry; do
+  entry="${entry#"${entry%%[![:space:]]*}"}"
+  entry="${entry%"${entry##*[![:space:]]}"}"
+  if [ -n "$entry" ]; then EMPLOYERS+=("$entry"); fi
+done < <(printf '%s\n' "${EMPLOYER_DENYLIST:-}" | tr ',' '\n')
 
-for name in "${EMPLOYERS[@]}"; do
-  if grep -riIl --exclude-dir=.git -- "$name" "$DIST_DIR" > /dev/null 2>&1; then
-    echo "check-employer: forbidden employer name '$name' found in $DIST_DIR:" >&2
-    grep -riIn --exclude-dir=.git -- "$name" "$DIST_DIR" >&2 || true
+if [ "${#EMPLOYERS[@]}" -eq 0 ]; then
+  if [ -n "${CI:-}" ]; then
+    echo "check-employer: EMPLOYER_DENYLIST is empty in CI — set the Actions secret." >&2
+    exit 1
+  fi
+  echo "check-employer: EMPLOYER_DENYLIST is not set — skipping (CI always runs this check)." >&2
+  exit 0
+fi
+
+found=0
+report() { # $1 = entry number, $2 = where; stdin = grep -n output
+  local hits
+  hits=$(cut -d: -f1-2)
+  if [ -n "$hits" ]; then
+    echo "check-employer: denylist entry #$1 found in $2:" >&2
+    printf '%s\n' "$hits" | sed 's/^/  /' >&2
     found=1
+  fi
+}
+
+for i in "${!EMPLOYERS[@]}"; do
+  name="${EMPLOYERS[$i]}"
+  report "$((i + 1))" "$DIST_DIR" < <(grep -riIFn --exclude-dir=.git -- "$name" "$DIST_DIR" || true)
+  if git rev-parse --is-inside-work-tree > /dev/null 2>&1; then
+    report "$((i + 1))" "the repo" < <(git grep -iIFn -- "$name" || true)
   fi
 done
 
@@ -28,4 +60,4 @@ if [ "$found" -ne 0 ]; then
   exit 1
 fi
 
-echo "check-employer: clean — neither employer name appears in $DIST_DIR."
+echo "check-employer: clean — no denylisted employer name in $DIST_DIR or the repo (${#EMPLOYERS[@]} entries)."

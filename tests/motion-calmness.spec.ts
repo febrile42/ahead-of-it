@@ -1,4 +1,4 @@
-// PH2-01 Part B (docs/briefs/PH2-01-workers.md, DIA-100): "calmer is
+// PH2-01 Part B (DIA-100): "calmer is
 // measured, not asserted." For each of the seven bands, this measures the
 // changed-pixel fraction a second over 5s at 390px on the band's default
 // view, for both states, and asserts built < without. Each test logs its

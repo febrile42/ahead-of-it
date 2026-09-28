@@ -1,4 +1,4 @@
-// PH2-01 Part B (docs/briefs/PH2-01-workers.md, DIA-100): "no long task >
+// PH2-01 Part B (DIA-100): "no long task >
 // 50ms at 4x throttle" — the ticker's own repaint work (resolveViewAt +
 // motionChanged + a canvas redraw), under the same CDP CPU-throttling
 // technique tests/cls.spec.ts already uses for real (not simulated)

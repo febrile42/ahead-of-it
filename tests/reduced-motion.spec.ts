@@ -6,7 +6,7 @@
 import { expect, test } from '@playwright/test';
 import * as H from './interaction-helpers';
 
-// H.openApp defaults to H.PHONE (390 × 844, CLAUDE.md's phone-first width) —
+// H.openApp defaults to H.PHONE (390 × 844, R-20's phone-first width) —
 // nothing here needs a different viewport.
 
 /** No running CSS/Web Animations under reduced motion, on any band/state. */

@@ -2,7 +2,7 @@
 // criteria). Runs against `vite preview` (the exact build output that would
 // be deployed — same reasoning as playwright.config.ts). CHROME_PATH must
 // point at a local Chromium binary; never `playwright install` on this
-// machine (see docs/briefs/PH1-05-checks.md) — CI installs its own.
+// machine (see PH1-05) — CI installs its own.
 //
 // No third-party dependency in the *check* itself (R-21 is about the served
 // site, but a check that phones home would be its own violation): upload
@@ -11,7 +11,7 @@
 if (!process.env.CHROME_PATH) {
   throw new Error(
     'lighthouserc.cjs: CHROME_PATH is not set. Point it at a local Chromium binary ' +
-      '(see docs/briefs/PH1-05-checks.md) — Lighthouse CI must not download its own.',
+      '(see PH1-05) — Lighthouse CI must not download its own.',
   );
 }
 

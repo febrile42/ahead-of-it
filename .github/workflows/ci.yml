@@ -55,6 +55,13 @@ on:
       - "docs/content/**"
       - "docs/product/SCENE-FORMAT.md"
 
+# R-33 / D-014: scripts/check-employer.sh reads the employer names from this
+# secret so they never appear in the repo; every `npm run build` runs it, and
+# it fails when the list is empty in CI. Fork PRs don't get secrets, so they
+# fail this check by design.
+env:
+  EMPLOYER_DENYLIST: ${{ secrets.EMPLOYER_DENYLIST }}
+
 jobs:
   check:
     name: build, test, serving, lighthouse
@@ -170,9 +177,7 @@ jobs:
           retention-days: 14
 
   # ── develop → preview URL (staging-ahead-of-it.<subdomain>.workers.dev) ──
-  # Will not run until a remote exists and the Cloudflare secrets are set
-  # (docs/STATUS.md "Public actions still needing Josh's explicit yes"). That
-  # is expected — this job exists so the deploy shape is settled now.
+  # Needs the CLOUDFLARE_API_TOKEN / CLOUDFLARE_ACCOUNT_ID secrets.
   preview:
     name: Upload Preview
     needs: check

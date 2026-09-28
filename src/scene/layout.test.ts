@@ -135,7 +135,7 @@ describe('placeChips', () => {
 
   // DIA-54: the real band-750 `ground` room (six 180x120 art-px close-ups on
   // a 348x220 art-px room) is the scene that broke resolveZoomOverlaps +
-  // placeButton's 44px regrow (docs/briefs/DIA-55-zoom-chips.md has the
+  // placeButton's 44px regrow (DIA-55 has the
   // reproduction). At a 390px-wide phone viewport, chooseScale picks an
   // integer scale of 1 for this room (floor(390/348) = 1), so buffer units
   // and css px coincide 1:1 here and the rects below can be used directly as

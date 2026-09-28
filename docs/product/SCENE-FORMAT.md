@@ -280,7 +280,7 @@ integer-exact given `t`, so two painters at the same `t` paint the same pixels.
 ## Band-crossing moment (PH2-03)
 
 Status: proposed by the Art Director on 2026-09-27 (DIA-101, step 2 of
-`docs/briefs/PH2-03-band-crossing.md`); needs the Web Engineer's sign-off in step 3 before
+PH2-03); needs the Web Engineer's sign-off in step 3 before
 anything plays it. When the moment plays (built only, rising, once per band per session,
 never on first load or `1,000+`, cut by any input, never under reduced motion) is the
 brief's rule, not the file's. The beats are `docs/content/MOMENTS.md` (D-045).

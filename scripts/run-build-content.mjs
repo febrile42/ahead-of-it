@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Runs scripts/build-content.ts without adding a TS-execution dependency
-// (no tsx/ts-node — CLAUDE.md's dependency allowlist is vite, typescript,
+// (no tsx/ts-node — the dependency allowlist is vite, typescript,
 // vitest, @playwright/test, wrangler only).
 //
 // Why this exists: build-content.ts is plain TypeScript with type-only

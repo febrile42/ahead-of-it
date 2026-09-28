@@ -5,6 +5,6 @@ import { defineConfig } from 'vitest/config';
 // (no jsdom/happy-dom). Playwright covers anything that needs a real page.
 export default defineConfig({
   test: {
-    include: ['src/**/*.test.ts'],
+    include: ['src/**/*.test.ts', 'scripts/**/*.test.ts'],
   },
 });

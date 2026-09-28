@@ -11,7 +11,7 @@ import { defineConfig, devices } from '@playwright/test';
 const PORT = Number(process.env.PREVIEW_PORT ?? 4173);
 const ORIGIN = `http://localhost:${PORT}`;
 
-// DIA-15: iOS Safari is the primary real-world target (CLAUDE.md, R-20) and
+// DIA-15: iOS Safari is the primary real-world target (R-20) and
 // was previously untested — every test ran on Chromium only. `webkit` here
 // uses Playwright's own WebKit build, which is the closest engine-level
 // proxy for iOS Safari available in CI (there is no way to run the real

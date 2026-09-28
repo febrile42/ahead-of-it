@@ -1,5 +1,5 @@
 // PH1-09: what survives of the PH1-04 tile-grid assembler after D-035
-// (docs/briefs/PH1-04-REVIEW.md §b) — just the `Hotspot` / `SceneLayout`
+// (the PH1-04 review §b) — just the `Hotspot` / `SceneLayout`
 // shape src/ui/panel.ts renders real <button>s from, so panel.ts stays
 // untouched by the scene-file switch. Geometry now comes straight from
 // the art-authored scene file (src/scene/scene.ts's `SceneView.hotspots`)

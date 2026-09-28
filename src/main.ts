@@ -132,7 +132,7 @@ if (
   // the (possibly new) current view at its own `t`.
   let previousResolved: (ResolvedFrame | null)[] | null = null;
 
-  // PH2-03 (DIA-113, docs/briefs/PH2-03-band-crossing.md): the band the last
+  // PH2-03 (DIA-113): the band the last
   // *committed* render actually painted — distinct from `band` (this
   // render's target, which during a fast drag can race ahead of what has
   // actually finished painting, S5). Comparing against this, not `band`'s
@@ -381,7 +381,7 @@ if (
 
   /** Adapts a SCENE-FORMAT view's `hotspots[]` into the `Hotspot[]` shape
    * src/ui/panel.ts's `renderHotspots` already draws real <button>s from
-   * (docs/briefs/PH1-04-REVIEW.md §b — that seam is why panel.ts didn't
+   * (the PH1-04 review §b — that seam is why panel.ts didn't
    * need to change). */
   function toSceneLayout(view: SceneView): SceneLayout {
     const hotspots: Hotspot[] = view.hotspots.map((h) => ({

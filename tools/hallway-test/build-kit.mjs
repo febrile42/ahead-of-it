@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Hallway-test kit builder (D-040). Regenerates everything in
-// docs/hallway-test/ that is derived from the product: the printable
+// the kit directory that is derived from the product: the printable
 // scoring sheet, the 390 px "without" screenshots, the per-gag crops and
 // the manifest that says what was captured and when.
 //
@@ -23,7 +23,7 @@
 //
 //   --sheet-only      regenerate the scoring sheet + manifest, no browser
 //   --base-url URL    use a server that is already running
-//   --out DIR         output dir (default docs/hallway-test)
+//   --out DIR         output dir (default hallway-kit/, gitignored)
 //
 // Needs the Playwright chromium browser for screenshots; --sheet-only
 // needs nothing but node and the repo.
@@ -41,7 +41,7 @@ const repoRoot = fileURLToPath(new URL('../../', import.meta.url));
 // the Beyond capture at the end of `capture()`.
 const BANDS = [80, 150, 220, 360, 490, 610, 750];
 
-// 390 px is the phone-first design width (CLAUDE.md); 3x is a real
+// 390 px is the phone-first design width (R-20); 3x is a real
 // phone's pixel ratio and makes the prints hold up at arm's length.
 const VIEWPORT = { width: 390, height: 844 };
 const DEVICE_SCALE_FACTOR = 3;
@@ -55,7 +55,7 @@ const PARTICIPANTS = 5;
 const PASS_AT = 4;
 
 function parseArgs(argv) {
-  const args = { sheetOnly: false, baseUrl: null, out: path.join(repoRoot, 'docs/hallway-test') };
+  const args = { sheetOnly: false, baseUrl: null, out: path.join(repoRoot, 'hallway-kit') };
   for (let i = 0; i < argv.length; i += 1) {
     const arg = argv[i];
     if (arg === '--sheet-only') args.sheetOnly = true;

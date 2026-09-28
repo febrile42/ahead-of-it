@@ -1,8 +1,8 @@
 # Evidence ledger
 
 Every receipt used in a panel has a row here. **Source** is a resume quote (2026-09-15
-version), `TIMELINE.md` (Josh, 2026-09-16), or `[JOSH: confirm]`. Nothing marked
-`[JOSH: confirm]` ships. Status: `resume` · `confirmed` · `needs-josh` · `withheld` · `deferred`.
+version), `TIMELINE.md` (Josh, 2026-09-16), or a confirmation Josh has not given yet.
+Nothing unconfirmed ships. Status: `resume` · `confirmed` · `needs-josh` · `withheld` · `deferred`.
 
 Round 1 answered 2026-09-16. Remaining asks are in **bold**.
 
@@ -16,16 +16,16 @@ Round 1 answered 2026-09-16. Remaining asks are in **bold**.
 | E-06 | Network: Ruckus + Extreme WAPs, Cisco core, **Palo Alto NGFW at the edge from 2018, guest Wi-Fi segmented from the start**; Network Engineer hired 2023 | Resume + tooling + Josh 2026-09-24 | confirmed | G2.3 G5.2 |
 | E-07 | $500,000+ savings in 2024 via renegotiation, renewals, licensing audits, **mostly recurring (annual run-rate)**; owns enterprise IT budgeting and vendor strategy (resume) | Resume + Josh 2026-09-24 | confirmed | G6.2 |
 | E-08 | SaaS portfolio: Salesforce (admin hired 2019), NetSuite, HRIS/HCM, Procore, Primavera P6. **Ongoing since 2018; major work 2024** | Resume + TIMELINE | confirmed | G4.3 G6.1 |
-| E-09 | the previous employer: NetApp + data centralisation 2012 (before: workstations, portable drives, consumer NAS); VMware 2013; Commvault + DR 2015, **restore tested once at setup** | Resume + TIMELINE + Josh 2026-09-24 | confirmed | G5.3 G5.6 |
-| E-10 | the previous employer: VoIP 2011, −33% communication costs, remote + call-center teams | Resume + TIMELINE 2011 | confirmed | G5.4 |
-| E-11 | the previous employer: ~40% network/telecom/hosting cost reduction, +33% **WAN** capacity (**2013–2014**); $200M org, 300+ employees, nine-building campus; two new 200k+ sq ft facilities (**2015–2017**) | Resume + Josh 2026-09-24 | confirmed — capacity claim is WAN, not the fiber | G5.4 G6.3 |
+| E-09 | The campus: NetApp + data centralisation 2012 (before: workstations, portable drives, consumer NAS); VMware 2013; Commvault + DR 2015, **restore tested once at setup** | Resume + TIMELINE + Josh 2026-09-24 | confirmed | G5.3 G5.6 |
+| E-10 | The campus: VoIP 2011, −33% communication costs, remote + call-center teams | Resume + TIMELINE 2011 | confirmed | G5.4 |
+| E-11 | The campus: ~40% network/telecom/hosting cost reduction, +33% **WAN** capacity (**2013–2014**); $200M org, 300+ employees, nine-building campus; two new 200k+ sq ft facilities (**2015–2017**) | Resume + Josh 2026-09-24 | confirmed — capacity claim is WAN, not the fiber | G5.4 G6.3 |
 | E-12 | Enterprise AI adoption and governance: tool evaluation, vendor mgmt, usage policies, cost governance. **Started 2025** with ChatGPT introduced to the whole org; Glean rolled out 2026; Claude mid-2026 | Resume + Josh (Q-22) | confirmed; one citable improvement is parked | G7.1 (G7.4 note) |
 | E-13 | Reports to SVP Product & Technology **since H2 2022**; key contributor to strategic planning | Resume + Josh 2026-09-24 | confirmed | G7.2 |
 | E-14 | Incubated Software Dev (2018, 3 devs + 1 PM via team extension) → handed off 2019. Incubated Product (2020, Director of Product title, 2 PMs) → handed off 2021 | TIMELINE | confirmed | G7.3 G7.3a G4.3 G7.2 |
-| E-15 | Engagement survey ranking | — | **withheld** (Josh: keep for the resume) | G7.4 — **cut** (D-011) |
+| E-15 | Engagement survey ranking | — | **withheld** | G7.4 — **cut** (D-011) |
 | E-16 | 750+ employees and contractors, hybrid; $3B+ balance sheet | Resume | resume | band 7 framing |
 | E-17 | ip2geo.org: 8 years, 99.96%+ uptime | Resume | deferred | possible panel footer |
-| E-18 | the previous employer web: 4 → 80, $20M, 1.2M visitors/mo, 35k leads/mo | Resume | resume | G7.3 (one line, F-3) |
+| E-18 | The campus, web: 4 → 80, $20M, 1.2M visitors/mo, 35k leads/mo | Resume | resume | G7.3 (one line, F-3) |
 | E-19 | Intune deployed 2019 (Windows + mobile MDM); Jamf and Zebra later | TIMELINE 2019 + tooling | confirmed | G3.2 |
 | E-20 | Annual security training begins 2019. Email security: **Exchange ATP (now Defender for Office 365) and Area 1 via an MSSP** (year not stated; panel does not date the tools) | TIMELINE 2019 + Josh 2026-09-24 | confirmed | G4.2 |
 | E-21 | Onboarding time before/after | — | **does not exist — G3.1 ships without a number** | G3.1 |

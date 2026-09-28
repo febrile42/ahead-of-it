@@ -47,7 +47,7 @@ export function numericTestableBands(): Exclude<BandId, 'beyond'>[] {
   return drawnNumericBands() as Exclude<BandId, 'beyond'>[];
 }
 
-/** CLAUDE.md's phone-first design width. Every spec in this pass starts here. */
+/** R-20's phone-first design width. Every spec in this pass starts here. */
 export const PHONE = { width: 390, height: 844 };
 export const TABLET = { width: 768, height: 1024 };
 export const DESKTOP = { width: 1280, height: 900 };

@@ -6,7 +6,7 @@ marked, never deleted.
 ---
 
 **D-001 · 2026-09-16 · The concept is Occupancy.**
-Chosen over twelve alternatives (`docs/brainstorm/IDEAS-2026-09-15.md`) because it is the
+Chosen over twelve brainstormed alternatives because it is the
 only format that could not be built from a typical IT leader's resume: it requires having
 provisioned real buildings *and* run the abstract layers, twice, long enough to have receipts.
 Consequence: the building is the spine; every other idea survives only as a gag inside it.
@@ -40,8 +40,8 @@ pre-empts the "cute undercuts gravitas" risk. Consequence: R-07.
 
 **D-008 · 2026-09-16 · Mastermind/worker split is mandatory.**
 Session agent owns judgment and review; implementation is delegated by brief to sonnet,
-mechanical work to haiku; content voice never below opus. Consequence: `CLAUDE.md`
-"You are the mastermind" section and the routing table in 03.
+mechanical work to haiku; content voice never below opus. Consequence: the agent
+instructions and the model-routing table.
 
 **D-009 · (pending) · Rendering: vanilla canvas vs PixiJS.**
 Proposed: vanilla canvas; switch only on measured failure at Phase 2. Decide at Phase 1 start.
@@ -59,22 +59,22 @@ No before/after time-to-provision measure exists (E-21) and none will be implied
 panel describes the automation function's scope (E-03) and stops there. Consequence of R-30.
 
 **D-013 · 2026-09-16 · The +33% capacity and the campus fiber are separate claims.**
-the previous employer' +33% was WAN capacity (E-11); the nine buildings were linked by private
+The campus company's +33% was WAN capacity (E-11); the nine buildings were linked by private
 fiber (E-23). G5.1 uses E-23 only. Never attach the percentage to the fiber.
 
-**D-014 · 2026-09-16 · The current employer is never named on the site.**
-Josh: don't name the current employer; it's findable on LinkedIn by anyone curious. Served content uses
+**D-014 · 2026-09-16 · The clean-energy company is never named on the site.**
+Josh: don't name [the clean-energy company]; it's findable on LinkedIn by anyone curious. Served content uses
 one fixed descriptor — **"a $3B+ clean-energy company"** on first mention in a panel,
 "the company" after — and never the name, the logo, or the domain. City names and years
 may stay: Josh accepts that the combination is identifying; the rule is about not
-*saying* it. the previous employer is named (assumption A-1, reversible). A build-time check
-fails CI if the string appears in the output (R-33). Internal docs may use the name freely.
+*saying* it. The campus company is named (assumption A-1, reversible). A build-time check
+fails CI if the string appears in the output (R-33). Internal notes may use the name; this repository does not.
 
 **D-015 · 2026-09-16 · Many offices only. No campus topology.**
 Josh: "the analogy for a campus is close enough to self-evident to avoid the double work.
 If we have to choose, many offices is always preferred." R-09 is removed; R-10 drops the
 `topo` parameter; band 5 becomes *The second office* with an inset in another city. G5.1
-is reframed (Q-17). the previous employer receipts still apply — the problems are the same,
+is reframed (Q-17). The campus company's receipts still apply — the problems are the same,
 the building count isn't.
 
 **D-016 · 2026-09-16 · First-party Umami with a modest event set.**
@@ -111,7 +111,7 @@ worse first impression: it means nothing to a recruiter until explained. Awaitin
 confirmation (Q-15). Not applied to any served string yet.
 
 **D-014 (amended) · 2026-09-16 · Neither employer is named.**
-Josh: "Drop the previous employer — keep the companies generic. The details live in my real
+Josh: "Drop [the campus company] — keep the companies generic. The details live in my real
 resume or LinkedIn." Assumption A-1 reversed. Descriptors in `TONE.md`; the CI check greps
 for both names.
 
@@ -145,7 +145,7 @@ Supersedes D-002's round-number bands (still seven).
 
 **D-024 · 2026-09-16 · Art is generated in-house first.**
 Josh: "Let's try to generate all the assets ourselves. I will purchase stock or commission
-only if we have trouble doing it ourselves." Reverses 03-RESOURCING's "don't generate final
+only if we have trouble doing it ourselves." Reverses the resourcing plan's "don't generate final
 art with image models" and D-020's stock-first plan. Mitigation for the known failure mode
 (inconsistency across a tileset): one fixed palette, one tile size, one style-reference
 sheet generated first and every later asset generated *against* it, hand-cleaned in a
@@ -210,7 +210,7 @@ and carry the headcount timeline. `develop` is the default branch (PRs target it
 is promoted with merge commits. The Cloudflare secrets for CI are not yet set — that is a
 Phase 4 step alongside the custom domain.
 
-**D-033 · 2026-09-24 · Phase 1 started.** Briefs PH1-01…05 in `docs/briefs/`. PH1-01 and
+**D-033 · 2026-09-24 · Phase 1 started.** Briefs PH1-01…05 written. PH1-01 and
 PH1-02 running in parallel worktrees; 03 after 01; 04 after 01–03; 05 after 04.
 
 **D-034 · 2026-09-24 · In-house art confirmed; sprite work routes to Opus 5.5.**
@@ -232,8 +232,8 @@ PH1-07), PH1-09 painter (sonnet, after PH1-04 fixes). PH1-04's interaction plumb
 with fixes; its `slots/layout/assembler` are replaced.
 
 **D-036 · 2026-09-24 · Views: option A, one view per gag-carrying floor, ≤ 360 px wide.**
-Decided on the PH1-08a mocks (`art/spike/A-750.png` vs `B-750.png`;
-`docs/research/FLOOR-CONVENTION-2026-09.md`). Rule, enforced by `check_scenes.py`:
+Decided on the PH1-08a mocks (`art/spike/A-750.png` vs `B-750.png`
+and the floor-convention research). Rule, enforced by `check_scenes.py`:
 1. View ids ∈ {ground, floor-2 … floor-6, top, street}, unique, in that order.
 2. `ground` always exists; any other view only if it holds ≥ 1 primary hotspot.
 3. `w ≤ 360`, `h ≤ 240` native px (not 390: at 390 a worker shrinks to 8–12 CSS px on
@@ -325,13 +325,13 @@ The Phase 1 exit criterion stands as written in `02-PHASES.md`: a stranger names
 gag is from the without-state picture (≥ 4/5 per gag, or that gag is redrawn), and ≥ 4/5
 find and flip the toggle within 20 seconds unprompted (R-06a). **Josh has deferred running
 it.** Two reasons, both on the record: running it needs real strangers and his time
-(`STATUS.md`, "Needs Josh"), and on `develop` today 15 of the 26 gags are still placeholder
+(status notes, "Needs Josh"), and on `develop` today 15 of the 26 gags are still placeholder
 boxes, so a run now could not close the criterion for them whatever it found.
 Consequences:
 1. **Phase 1 closes marked *conditionally met, pending hallway test*, said out loud** in
-   `STATUS.md` and `02-PHASES.md` — never quietly ticked. The criterion is not amended and
+   the status notes and `02-PHASES.md` — never quietly ticked. The criterion is not amended and
    not waived; it is unrun.
-2. The kit is built and parked: `docs/hallway-test/` (README, protocol, generated scoring
+2. The kit is built and parked (README, protocol, generated scoring
    sheet, results template, 390 px without-state screenshots) plus
    `tools/hallway-test/build-kit.mjs`, which regenerates the sheet, the manifest and every
    screenshot from the repo. Running the test later is prep-free: refresh, print, run.
@@ -410,7 +410,7 @@ not 195 × 130). Amends D-036 rules 2, 4, 6 and 7 and D-038 item 1:
    gags fall into clusters of ≤ 3 that each fit 180 × 120 at 24 px spacing. 80–490 are
    re-exported, not redrawn. The exporter and `check_scenes.py` belong to the Art Director.
    The painter, navigation and contract test belong to the Web Engineer. Both are merged
-   together in a scratch worktree before either lands on `develop` (the CLAUDE.md
+   together in a scratch worktree before either lands on `develop` (the team's
    integration rule).
 
 **D-042a · 2026-09-25 · Web sign-off on the close-up contract, and the navigation ruling
@@ -597,6 +597,12 @@ with the old centring. Rejected: a per-hotspot CSS offset, because a second sour
 position would drift from the art on every re-composition.
 *CEO signed off 2026-09-27 (DIA-133). The Web Engineer confirms the contract in DIA-134
 before PR #57 leaves draft.*
+
+**D-050 · 2026-09-27 · The repository names neither employer; internal notes are private (DIA-144).**
+The repository names neither employer. `check:employer` reads the names from the
+`EMPLOYER_DENYLIST` secret and scans the whole tree as well as `dist/`. Internal notes live
+in the private `ahead-of-it-notes` repository.
+*CEO ruled 2026-09-27 on PR #65.*
 
 **D-051 · 2026-09-27 · The page opens on the whole floor, under a two-line introduction
 (DIA-161; the owner's direction; Product & Content Lead, for CEO sign-off).**

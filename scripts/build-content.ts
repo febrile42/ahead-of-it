@@ -1,6 +1,6 @@
 // PH1-03 content pipeline.
 //
-// docs/content/*.md is the single source of truth (CLAUDE.md: "Content is the
+// docs/content/*.md is the single source of truth (00-VISION.md: "Content is the
 // product"). This script parses it deterministically — no LLM, no invented
 // facts — into src/content/content.json, validated against
 // src/content/schema.json, and fails the build on drift: a gag with no panel
@@ -41,11 +41,11 @@
 // defines exactly ONE literal current-employer form — "a $3B+ clean-energy
 // company" -> "the company" after first mention — with no date-based
 // variant. PANELS.md's own header (lines 8-11), not TONE.md, is where "a
-// clean-energy company, now $3B+" comes from; PANELS-REVIEW.md's DW-1
+// clean-energy company, now $3B+" comes from; the 2026-09-16 panel review's DW-1
 // (2026-09-16) already flagged that header line as inconsistent with the
 // body and it was never fully corrected, so 15 panels (bands 80-490) still
 // carry the header's "now $3B+" wording instead of TONE.md's canonical
-// form while the rest use the correct one. PANELS-CHECK-2026-09-24.md's
+// form while the rest use the correct one. the 2026-09-24 panel check's
 // "wrong descriptor" finding checked the latter panels against that same
 // erroneous PANELS.md header instead of against TONE.md/D-014 — the
 // mastermind has ruled that finding a false positive. This script parses
@@ -198,7 +198,7 @@ function splitOnHeadings(text: string, headingRe: RegExp): Section[] {
 
 // A token made up entirely of punctuation — a free-standing em dash ("—"),
 // en dash ("–"), middle dot ("·"), hyphen ("-") or arrow ("→"), or any run
-// of those characters — is not a word. Matches PANELS-CHECK-2026-09-24.md's
+// of those characters — is not a word. Matches the 2026-09-24 panel check's
 // manual counting method, which does not count these as words either.
 const PUNCTUATION_ONLY_TOKEN_RE = /^[—–·\-→]+$/;
 

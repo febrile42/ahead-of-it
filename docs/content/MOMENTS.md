@@ -2,8 +2,8 @@
 
 When the visitor drags *up* into a year band in the built state, that band's threat arrives
 and meets what was already built. The rules (when it plays, ≤ 2.5 s, ends on the exported
-built scene, cancels on any input, no moment under reduced motion) are in
-`docs/briefs/PH2-03-band-crossing.md` and are not repeated here. This file is the design
+built scene, cancels on any input, no moment under reduced motion) are in the
+PH2-03 brief and are not repeated here. This file is the design
 input for step 2 (Art Director) and step 3 (Web Engineer).
 
 **Captions: none, in every band.** The default is no caption, and no band earned one (see

@@ -18,7 +18,7 @@ screen; this band's items are full-size, earlier ones quieter.
 | **750** | 2024+ | ~650→750 | The portfolio, the renewals, the robot, the chair, the library |
 | **1,000+** | — | Beyond | Not a year band (D-029): the building stops; one panel + a translation column for large-org readers |
 
-**Changes from v4:** every `[JOSH: year]` resolved (G7.1: 2025). G2.3 → 80 (Palo
+**Changes from v4:** every open year resolved (G7.1: 2025). G2.3 → 80 (Palo
 Alto 2018). G5.1 → 150 with a VPN receipt (E-27) — Chicago opened and was linked in 2019.
 G5.5 merged into G2.4 at 220 (same joke under offices-only). G3.3 → 610 (layers 2023).
 G6.4 → 490 (Lawrence + Boston 4th floor 2022); G6.3 → 610 (Austin/NYC/DC 2023). G6.1 and

@@ -1,4 +1,4 @@
-// PH2-01 Part B (docs/briefs/PH2-01-workers.md § Part B, DIA-100): the
+// PH2-01 Part B (DIA-100): the
 // painter plays the SCENE-FORMAT § Motion contract with one rAF ticker that
 // repaints the canvas only — never the DOM (the DIA-13 root cause) — and
 // stops on the three hard-stop conditions the brief names. This file is the

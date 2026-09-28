@@ -1,4 +1,4 @@
-// PH2-03 step 3 (DIA-113, docs/briefs/PH2-03-band-crossing.md): plays each
+// PH2-03 step 3 (DIA-113): plays each
 // band's `moment` block (docs/content/MOMENTS.md, D-045) with PH2-01's
 // ticker (tests/motion-playback.spec.ts), under the brief's rules — built
 // only, a genuine rising crossing, once per band per session, never on
