@@ -6,7 +6,7 @@
 // hand-edit content.json and never read docs/content/*.md at runtime; this
 // module is the only supported way the rest of the app reads content.
 import contentJson from './content.json';
-import type { Band, BandId, Beyond, ContentJson, Copy, Gag, PanelFields, Ui } from '../../scripts/build-content';
+import type { Band, BandId, Beyond, ContentJson, Copy, Gag, HaveBox, HaveBoxId, PanelFields, Ui } from '../../scripts/build-content';
 
 // The `as unknown as ContentJson` cast (rather than a plain `as`) is
 // because this repo has no `resolveJsonModule` in tsconfig.json (out of
@@ -47,6 +47,14 @@ export function getAmbientHover(): string {
   return content.ambient.hover;
 }
 
+/** PH3-03 (R-15, DIA-236): the "what do you already have?" box→gag map, in
+ * R-15's own fixed order — the same data src/ui/refine.ts and
+ * src/ui/panel.ts's applyHaveState read, so the checklist and the scene
+ * can never disagree about what a tick marks (R-14). */
+export function getHaveBoxes(): HaveBox[] {
+  return content.have;
+}
+
 /** Toggle/share/OG copy from TONE.md §"Toggle and share copy". */
 export const copy: Copy = content.copy;
 
@@ -61,4 +69,4 @@ export function getContact(): Copy['contact'] {
   return content.copy.contact;
 }
 
-export type { Band, BandId, Beyond, ContentJson, Copy, Gag, PanelFields, Ui };
+export type { Band, BandId, Beyond, ContentJson, Copy, Gag, HaveBox, HaveBoxId, PanelFields, Ui };

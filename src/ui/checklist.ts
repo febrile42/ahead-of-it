@@ -10,6 +10,7 @@ import { track } from '../analytics';
 import type { BandId, Gag } from '../content';
 import { getBeyond, getGags } from '../content';
 import { createContactLine } from './contact';
+import { ui } from './strings';
 
 /** Every gag through `band` (inclusive) — the same tier-collapse `render()`
  * below uses to build the list, split out so U-11(a) (DIA-194/197) can fill
@@ -41,11 +42,19 @@ export interface ChecklistHandles {
    * this to pop the history entry `onOpen` pushed, so Back never finds a
    * stale "sheet open" entry once the sheet is already closed some other way. */
   onClose: (listener: () => void) => void;
+  /** PH3-03 (R-15, DIA-236): re-applies which rows are marked "have"
+   * without rebuilding the list (ticking must not move focus, DIA-236 §6)
+   * — updates each row's tag/rule plus the `Punch list (n)`/`(n left)`
+   * label, and returns the number of rows still unmarked (the same `n`
+   * `haveAnnounce` reads). Marks persist across the next `render(band)`
+   * call, same as the tick state itself (§5). */
+  applyMarks: (markedGagIds: ReadonlySet<string>) => number;
 }
 
 function gagRow(gag: Gag): HTMLElement {
   const li = document.createElement('li');
   li.className = 'checklist__item';
+  li.dataset.gagId = gag.id;
 
   // R-04-style without-state thumbnail (public/sprites/thumbs/<gagId>.png,
   // the same file panel.ts's prevented-beat crops from) — a row now shows
@@ -77,6 +86,21 @@ function gagRow(gag: Gag): HTMLElement {
   };
   thumb.append(thumbImg);
 
+  // PH3-03 (R-15, DIA-236): "you're ahead of it" — a row's own line between
+  // the thumbnail and the strip line (design note §4.2), text always
+  // present but hidden until setRowMarked below shows it, so ticking never
+  // inserts/removes a node (no layout surprise beyond the row's own height
+  // changing, which only happens inside the already-open, already-scrolled
+  // sheet). The ✓ is decorative (aria-hidden); the words carry the meaning
+  // for assistive tech, same as the design note's §6 SR rule.
+  const tag = document.createElement('p');
+  tag.className = 'checklist__tag';
+  tag.hidden = true;
+  const tagGlyph = document.createElement('span');
+  tagGlyph.setAttribute('aria-hidden', 'true');
+  tagGlyph.textContent = '✓ ';
+  tag.append(tagGlyph, document.createTextNode(ui('haveTag')));
+
   const already = document.createElement('p');
   already.className = 'checklist__already';
   const strong = document.createElement('strong');
@@ -88,7 +112,7 @@ function gagRow(gag: Gag): HTMLElement {
   without.className = 'checklist__without';
   without.textContent = `Without it: ${gag.prevented}`;
 
-  li.append(thumb, already, without);
+  li.append(thumb, tag, already, without);
 
   // m4: R-14 asks for "each with its panel content" — Already and Without
   // were here, Worth it later wasn't, so the text checklist fell out of
@@ -101,6 +125,16 @@ function gagRow(gag: Gag): HTMLElement {
   }
 
   return li;
+}
+
+/** PH3-03 (R-15, DIA-236): toggles one row's "have" presentation — the 4px
+ * left rule (design note §4.2) plus the tag `gagRow` already built (hidden
+ * by default). Nothing is dimmed or struck through (§4.2: the receipt text
+ * stays full-contrast either way). */
+function setRowMarked(li: HTMLElement, marked: boolean) {
+  li.classList.toggle('checklist__item--have', marked);
+  const tag = li.querySelector<HTMLElement>('.checklist__tag');
+  if (tag) tag.hidden = !marked;
 }
 
 /** DIA-205: assigns the real `src` to every thumbnail still holding a
@@ -148,15 +182,18 @@ function beyondTranslationTable(): HTMLElement {
   return table;
 }
 
-/** Every `<a>`/`<button>` inside `panel` follows the panel's own open state
- * (D-048/R-24): tabbable when open, out of the tab order while collapsed —
- * so a keyboard visitor tabbing past the view-nav row never lands on a
- * control that isn't visibly there. The panel itself is never
- * `aria-hidden` and never `display:none` (that would drop it from the
- * accessibility tree too, which is exactly what R-14/R-24 forbid) — only
- * these descendants' *sequential* reachability changes. */
+/** Every `<a>`/`<button>`/`<input>` inside `panel` follows the panel's own
+ * open state (D-048/R-24): tabbable when open, out of the tab order while
+ * collapsed — so a keyboard visitor tabbing past the view-nav row never
+ * lands on a control that isn't visibly there. `input` covers PH3-03's
+ * refinement checkboxes (R-15, DIA-236) — design note §6: "While the sheet
+ * is collapsed, the boxes are out of the tab order... but still in the
+ * accessibility tree." The panel itself is never `aria-hidden` and never
+ * `display:none` (that would drop it from the accessibility tree too,
+ * which is exactly what R-14/R-24 forbid) — only these descendants'
+ * *sequential* reachability changes. */
 function setPanelTabbable(panel: HTMLElement, tabbable: boolean) {
-  for (const el of panel.querySelectorAll<HTMLElement>('a, button')) {
+  for (const el of panel.querySelectorAll<HTMLElement>('a, button, input')) {
     if (tabbable) el.removeAttribute('tabindex');
     else el.setAttribute('tabindex', '-1');
   }
@@ -181,8 +218,18 @@ function setPanelTabbable(panel: HTMLElement, tabbable: boolean) {
  * a sheet in the tap-panel's own style (src/style.css); its own foot is a
  * second contact line, so print and an open sheet both end the same way
  * panel.ts's gag panels do.
+ *
+ * PH3-03 (R-15, DIA-236): `refineRoot` (main.ts's `createRefineFieldset()`
+ * output) is inserted first thing under Download, ahead of the row list —
+ * design note §2's fixed order (header → Download → fieldset → rows) — so
+ * this module stays the one place that order is assembled, even though the
+ * fieldset's own box→gag logic lives in src/ui/refine.ts, not here.
  */
-export function createChecklist(trigger: HTMLButtonElement, triggerLabel: HTMLElement): ChecklistHandles {
+export function createChecklist(
+  trigger: HTMLButtonElement,
+  triggerLabel: HTMLElement,
+  refineRoot: HTMLElement,
+): ChecklistHandles {
   const root = document.createElement('div');
   root.className = 'checklist';
 
@@ -232,16 +279,42 @@ export function createChecklist(trigger: HTMLButtonElement, triggerLabel: HTMLEl
   const list = document.createElement('ul');
   list.className = 'checklist__list';
 
-  panel.append(header, printButton, list);
+  panel.append(header, printButton, refineRoot, list);
   root.append(panel);
 
   let open = false;
   const openListeners: Array<() => void> = [];
   const closeListeners: Array<() => void> = [];
+  // PH3-03: what the last render() actually listed, and the marks last
+  // applied to it — render() reapplies `lastMarked` itself (ticking must
+  // survive a band change, §5), and applyMarks (called from main.ts on
+  // every tick) needs `currentGags.length` to compute the same `n`
+  // punchListLeft/haveAnnounce read, without rebuilding the list.
+  let currentGags: Gag[] = [];
+  let lastMarked: ReadonlySet<string> = new Set();
+
+  function labelFor(total: number, unmarked: number): string {
+    return unmarked === total ? `Punch list (${total})` : ui('punchListLeft', { n: unmarked });
+  }
+
+  function applyMarksInternal(markedGagIds: ReadonlySet<string>): number {
+    lastMarked = markedGagIds;
+    let unmarked = 0;
+    for (const li of list.querySelectorAll<HTMLLIElement>('.checklist__item')) {
+      const marked = markedGagIds.has(li.dataset.gagId ?? '');
+      setRowMarked(li, marked);
+      if (!marked) unmarked += 1;
+    }
+    const label = labelFor(currentGags.length, unmarked);
+    triggerLabel.textContent = label;
+    headerTitle.textContent = label;
+    return unmarked;
+  }
 
   function render(band: BandId): number {
     list.replaceChildren();
     const gags = gagsThroughBand(band);
+    currentGags = gags;
     for (const gag of gags) {
       list.append(gagRow(gag));
     }
@@ -273,9 +346,10 @@ export function createChecklist(trigger: HTMLButtonElement, triggerLabel: HTMLEl
     // fresh rows above (list.replaceChildren()) — they're visible right
     // now, so they don't wait for a later setOpen(true) that isn't coming.
     if (open) loadPendingThumbs(panel);
-    const label = `Punch list (${gags.length})`;
-    triggerLabel.textContent = label;
-    headerTitle.textContent = label;
+    // PH3-03: re-applies whatever was ticked before this render (§5, ticks
+    // survive a band change) — also what sets triggerLabel/headerTitle now,
+    // so a band change with nothing ticked still gets the plain `(n)` form.
+    applyMarksInternal(lastMarked);
     return gags.length;
   }
 
@@ -326,5 +400,6 @@ export function createChecklist(trigger: HTMLButtonElement, triggerLabel: HTMLEl
     onClose(listener) {
       closeListeners.push(listener);
     },
+    applyMarks: applyMarksInternal,
   };
 }

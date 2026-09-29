@@ -791,6 +791,55 @@ h1 {
   --hs-arm: 6px;
 }
 
+/* PH3-03 (R-15, DIA-236): a hotspot whose gag is marked "have" (design note
+   §4.4) swaps the four-bracket reticle for one small ✓ badge in the
+   reticle frame's top-right corner — ground a bracket already occupies
+   (D-049), so nothing new needs clearing sign lettering. No breathe
+   animation, no opacity/filter/blend on the canvas or any sprite (D-046
+   item 3 still holds) — the badge is a small, solid, two-tone disc, the
+   same technique the brackets themselves use. `--have-frame-w/h` repeats
+   the brackets' own clamp (`::after` below) so the badge's corner point
+   agrees with the frame the brackets would have drawn, without either
+   reticle variant depending on the other's rule order.
+   `.hotspot--selected` (U-05, this hotspot's panel is open) is unchanged
+   by any of this: it comes later in this file, wins the tie on the same
+   pseudo-elements, and keeps drawing the filled reticle exactly as before
+   this class existed (design note §4.4: "the --selected solid state... are
+   unchanged"). */
+.hotspot--have {
+  --have-frame-w: min(max(calc(var(--obj-w, 0px) + 2 * var(--hs-pad)), var(--hs-min)), var(--hs-max));
+  --have-frame-h: min(max(calc(var(--obj-h, 0px) + 2 * var(--hs-pad)), var(--hs-min)), var(--hs-max));
+}
+
+.hotspot--have:not(.hotspot--selected):not(.hotspot--zoom)::before {
+  content: none;
+}
+
+.hotspot--have:not(.hotspot--selected):not(.hotspot--zoom)::after {
+  content: '✓';
+  animation: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  left: calc(50% + var(--have-frame-w) / 2);
+  top: calc(50% - var(--have-frame-h) / 2);
+  border-radius: 50%;
+  /* Overrides the base rule's bracket-bar layers (same property, this
+     selector's extra class wins) — without this the gradient bars still
+     paint over the badge's own background-color. */
+  background-image: none;
+  background-color: var(--hs-core);
+  /* The ring (2px --hs-edge), then the outer halo (1px --hs-core) —
+     18px disc + 1px halo, design note §4.4/§4.5's exact sizes. */
+  box-shadow:
+    0 0 0 2px var(--hs-edge),
+    0 0 0 3px var(--hs-core);
+  color: var(--hs-edge);
+  font: 700 10px/1 system-ui, sans-serif;
+}
+
 /* Hover/press: a faint light tint over the framed object. */
 .hotspot:not(.hotspot--zoom):hover::after,
 .hotspot:not(.hotspot--zoom):active::after {
@@ -1233,6 +1282,115 @@ h1 {
   font-size: 1rem;
 }
 
+/* PH3-03 (R-15, DIA-236): the "what do you already have?" boxes, first
+   thing under Download (design note §2) — progressive disclosure behind
+   the sheet, so they never compete with the toggle (D-022, D-046 item 1).
+   Reset the default fieldset chrome; the 1px rule below is what actually
+   separates it from the first row. */
+.checklist__have {
+  margin: 0 0 0.75rem;
+  padding: 0 0 0.75rem;
+  border: 0;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.checklist__have legend {
+  padding: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.checklist__have-help {
+  margin: 0.3rem 0 0.6rem;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+/* Two columns at every width (§4.1) — the D-056 rail is 368px, still room
+   for two. */
+.checklist__have-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+
+/* A whole-row label, deliberately square-ish (radius 4px, not a pill) —
+   every pill on the page is an action (the toggle, the tabs, the punch-list
+   button itself); these are not (§4.1). box-sizing: border-box so the
+   "checked" state's 2px border (below) doesn't shift the option's size. */
+.checklist__have-option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-sizing: border-box;
+  min-height: 44px;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid var(--ink);
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+/* §3: hidden (not disabled) below a box's earliest mapped gag's band — the
+   `[hidden]` attribute selector ties the UA stylesheet's own `[hidden] {
+   display: none }` in specificity, and the rule above (an author class
+   selector) would otherwise win the tie and keep it visually laid out
+   (same gotcha `.checklist__tag[hidden]`/`.checklist__thumb[hidden]`
+   already guard against). */
+.checklist__have-option[hidden] {
+  display: none;
+}
+
+/* Checked: three cues, none of them colour alone (§4.1) — the box fills,
+   the label border doubles, the label goes bold. */
+.checklist__have-option:has(input:checked) {
+  border-width: 2px;
+  font-weight: 700;
+}
+
+.checklist__have-option:has(input:focus-visible) {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* `appearance: none` because the native unchecked border is grey-on-dark
+   in dark mode and fails 3:1 (§4.1) — restyled as a 20px ink-bordered box
+   with its own tick glyph, drawn with a rotated border rather than a
+   content glyph so it inherits --ink-invert cleanly against the filled
+   checked state. Nothing here transitions (DIA-236 §6: nothing in this
+   feature animates). */
+.checklist__have-option input[type='checkbox'] {
+  appearance: none;
+  -webkit-appearance: none;
+  flex: none;
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  border: 2px solid var(--ink);
+  border-radius: 3px;
+  background: var(--surface);
+  display: inline-grid;
+  place-content: center;
+  cursor: pointer;
+}
+
+.checklist__have-option input[type='checkbox']::before {
+  content: '';
+  width: 5px;
+  height: 9px;
+  border: solid var(--ink-invert);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg) scale(0);
+}
+
+.checklist__have-option input[type='checkbox']:checked {
+  background: var(--ink);
+  border-color: var(--ink);
+}
+
+.checklist__have-option input[type='checkbox']:checked::before {
+  transform: rotate(45deg) scale(1);
+}
+
 .checklist__list {
   list-style: none;
   margin: 0;
@@ -1242,6 +1400,31 @@ h1 {
 .checklist__item {
   border-bottom: 1px solid var(--border-soft);
   padding: 0.75rem 0;
+}
+
+/* PH3-03 (R-15, DIA-236): a marked row's own signal — a rule down its left
+   edge, found by a scrolling eye without reading (design note §4.2).
+   Deliberately nothing dimmed or struck through: the receipt text stays
+   full-contrast either state. */
+.checklist__item--have {
+  border-left: 4px solid var(--ink);
+  padding-left: 0.75rem;
+}
+
+.checklist__tag {
+  display: inline-flex;
+  align-items: center;
+  margin: 0 0 0.4rem;
+  padding: 0.05rem 0.4rem;
+  border: 1px solid var(--ink);
+  border-radius: 3px;
+  color: var(--ink);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.checklist__tag[hidden] {
+  display: none;
 }
 
 /* R-04-style without-state thumbnail — same frame as .panel__thumb (the
@@ -1312,7 +1495,8 @@ h1 {
   .scene-stepper,
   .panel,
   .checklist__header,
-  .checklist__download {
+  .checklist__download,
+  .checklist__have {
     display: none !important;
   }
 

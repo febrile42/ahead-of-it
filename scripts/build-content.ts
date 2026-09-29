@@ -128,6 +128,20 @@ export interface Ambient {
   hover: string;
 }
 
+// PH3-03 (R-15, DIA-236): the "what do you already have?" refinement's
+// box→gag map — data, next to the gags, not a table in src/ (design note
+// §3a) — so the checklist and the scene read the same map (R-14). R-15's
+// own fixed order and set of five boxes; `parseHaveMap` below enforces
+// both. A box's `gagIds` may be empty (it never marks anything, or shows
+// at no band yet) but every id in it must be a real gag id.
+export const HAVE_BOX_ORDER = ['sso', 'securityLead', 'erp', 'network', 'mdm'] as const;
+export type HaveBoxId = (typeof HAVE_BOX_ORDER)[number];
+
+export interface HaveBox {
+  id: HaveBoxId;
+  gagIds: string[];
+}
+
 // D-042a close-up navigation strings (docs/content/TONE.md §"Navigation
 // copy"), plus D-051's landing copy (§"Landing copy"). Signposts only,
 // filled with {placeholders} by the web at render time — see parseUi below
@@ -154,6 +168,18 @@ export interface Ui {
   readoutAtBand: string;
   shareButton: string;
   shareButtonName: string;
+  // PH3-03 (R-15, DIA-236), TONE.md §"Refinement copy (R-15)".
+  haveLegend: string;
+  haveHelp: string;
+  haveSso: string;
+  haveSecurityLead: string;
+  haveErp: string;
+  haveNetwork: string;
+  haveMdm: string;
+  haveTag: string;
+  punchListLeft: string;
+  haveAnnounce: string;
+  haveHotspotSuffix: string;
 }
 
 export interface ContentJson {
@@ -163,6 +189,7 @@ export interface ContentJson {
   copy: Copy;
   ui: Ui;
   ambient: Ambient;
+  have: HaveBox[];
 }
 
 export class ContentPipelineError extends Error {
@@ -375,6 +402,75 @@ export function parseBandsGagIds(bandsMd: string): Map<string, number> {
 
 export function parseBandSectionsPublic(bandsMd: string): Array<{ id: number; year: string; title: string; intro: string }> {
   return parseBandSections(bandsMd).map(({ id, year, title, intro }) => ({ id, year, title, intro }));
+}
+
+// ---------------------------------------------------------------------------
+// BANDS-AND-GAGS.md §"Refinement map (R-15)" -> have[] (PH3-03, DIA-236)
+// ---------------------------------------------------------------------------
+
+const HAVE_MAP_HEADING = '## Refinement map (R-15)';
+
+/** The `| box | gags |` table of §"Refinement map (R-15)" — R-15's five
+ * boxes, each with the space-separated gag ids it marks (design note §3a;
+ * empty is valid, meaning the box never marks a row). Enforces the exact
+ * five box ids (HAVE_BOX_ORDER), no more and no less, each exactly once;
+ * a referenced gag id's existence is checked by the caller against
+ * `bandsGagIds` (checkHaveMapGagIds below), same layering as EVIDENCE.md's
+ * receipt check. Returns boxes in R-15's canonical order regardless of the
+ * table's own row order. */
+export function parseHaveMap(bandsMd: string): HaveBox[] {
+  const startIdx = bandsMd.indexOf(HAVE_MAP_HEADING);
+  if (startIdx === -1) {
+    throw new ContentPipelineError([`docs/content/BANDS-AND-GAGS.md: no "${HAVE_MAP_HEADING}" section found`]);
+  }
+  const nextHeadingIdx = bandsMd.indexOf('\n## ', startIdx + 1);
+  const section = bandsMd.slice(startIdx, nextHeadingIdx === -1 ? undefined : nextHeadingIdx);
+
+  const found = new Map<string, string[]>();
+  const errors: string[] = [];
+  // Lazy groups (not `\S+`/greedy): a separator row like `|---|---|` has no
+  // internal whitespace, so a greedy group1 can eat past its own `|` and
+  // `\s*` (which matches `\n` too) then bridges into the next line — same
+  // failure mode `parsePanelsMd`'s Beyond-table row regex above guards
+  // against. Lazy groups find the same-line, minimal-length match first.
+  const rowRe = /^\|\s*(.+?)\s*\|\s*(.+?)\s*\|\s*$/gm;
+  for (const m of section.matchAll(rowRe)) {
+    const [, id, gagsRaw] = m;
+    if (id === 'box' || /^-+$/.test(id)) continue; // header / separator row
+    if (found.has(id)) {
+      errors.push(`docs/content/BANDS-AND-GAGS.md: refinement box "${id}" is duplicated in §"${HAVE_MAP_HEADING}"`);
+      continue;
+    }
+    if (!(HAVE_BOX_ORDER as readonly string[]).includes(id)) {
+      errors.push(`docs/content/BANDS-AND-GAGS.md: unknown refinement box "${id}" in §"${HAVE_MAP_HEADING}"`);
+      continue;
+    }
+    found.set(id, gagsRaw.split(/\s+/).filter(Boolean));
+  }
+  for (const id of HAVE_BOX_ORDER) {
+    if (!found.has(id)) {
+      errors.push(`docs/content/BANDS-AND-GAGS.md: refinement box "${id}" is missing from §"${HAVE_MAP_HEADING}"`);
+    }
+  }
+  if (errors.length > 0) {
+    throw new ContentPipelineError(errors);
+  }
+
+  return HAVE_BOX_ORDER.map((id) => ({ id, gagIds: found.get(id)! }));
+}
+
+function checkHaveMapGagIds(bandsGagIds: Map<string, number>, have: HaveBox[]): string[] {
+  const errors: string[] = [];
+  for (const box of have) {
+    for (const gagId of box.gagIds) {
+      if (!bandsGagIds.has(gagId)) {
+        errors.push(
+          `docs/content/BANDS-AND-GAGS.md: refinement box "${box.id}" marks gag ${gagId}, which is not a gag id in the file`,
+        );
+      }
+    }
+  }
+  return errors;
 }
 
 // ---------------------------------------------------------------------------
@@ -641,6 +737,17 @@ const UI_PLACEHOLDERS: Record<keyof Ui, string[]> = {
   readoutAtBand: ['n', 'year'],
   shareButton: [],
   shareButtonName: [],
+  haveLegend: [],
+  haveHelp: [],
+  haveSso: [],
+  haveSecurityLead: [],
+  haveErp: [],
+  haveNetwork: [],
+  haveMdm: [],
+  haveTag: [],
+  punchListLeft: ['n'],
+  haveAnnounce: ['n'],
+  haveHotspotSuffix: ['title'],
 };
 
 // D-051's own section carries `intro`/`roomHint`; every other key still
@@ -671,6 +778,22 @@ const PAGE_STATE_UI_KEYS = [
 ] as const;
 // D-057 item 7's share control copy: the visible pill label and its accessible name.
 const SHARE_UI_KEYS = ['shareButton', 'shareButtonName'] as const;
+// PH3-03 (R-15, DIA-236): the refinement fieldset's copy — legend, helper
+// line, the five box labels, the row tag, the punch-list-left count, the
+// live announcement and the hotspot accessible-name suffix.
+const REFINEMENT_UI_KEYS = [
+  'haveLegend',
+  'haveHelp',
+  'haveSso',
+  'haveSecurityLead',
+  'haveErp',
+  'haveNetwork',
+  'haveMdm',
+  'haveTag',
+  'punchListLeft',
+  'haveAnnounce',
+  'haveHotspotSuffix',
+] as const;
 
 function placeholdersOf(copy: string): string[] {
   return [...new Set([...copy.matchAll(/\{(\w+)\}/g)].map((m) => m[1]))].sort();
@@ -729,13 +852,15 @@ function parseUiSection(toneMd: string, heading: string, keys: readonly (keyof U
 }
 
 /** TONE.md's §"Landing copy (D-051)", §"Navigation copy (D-042a)", §"Page
- * state copy (D-053)" and §"Share control copy (D-057)" tables, merged. */
+ * state copy (D-053)", §"Share control copy (D-057)" and §"Refinement copy
+ * (R-15)" tables, merged. */
 export function parseUi(toneMd: string): Ui {
   return {
     ...parseUiSection(toneMd, '## Landing copy (D-051)', LANDING_UI_KEYS),
     ...parseUiSection(toneMd, '## Navigation copy (D-042a)', NAVIGATION_UI_KEYS),
     ...parseUiSection(toneMd, '## Page state copy (D-053)', PAGE_STATE_UI_KEYS),
     ...parseUiSection(toneMd, '## Share control copy (D-057)', SHARE_UI_KEYS),
+    ...parseUiSection(toneMd, '## Refinement copy (R-15)', REFINEMENT_UI_KEYS),
   } as Ui;
 }
 
@@ -876,10 +1001,12 @@ export function buildContent(inputs: BuildInputs): ContentJson {
   const { gagPanels, beyond, ambientHover } = parsePanelsMd(panelsMd);
   const copy = parseCopy(toneMd);
   const ui = parseUi(toneMd);
+  const have = parseHaveMap(bandsMd);
 
   const errors: string[] = [];
 
   errors.push(...checkGagPanelParity(bandsGagIds, gagPanels));
+  errors.push(...checkHaveMapGagIds(bandsGagIds, have));
 
   // bands[]
   const bands: Band[] = bandsTable.map((row) => {
@@ -930,6 +1057,7 @@ export function buildContent(inputs: BuildInputs): ContentJson {
     copy,
     ui,
     ambient: { hover: ambientHover },
+    have,
   };
 
   errors.push(...checkNoEmployerNames(content, employerNames));
