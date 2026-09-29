@@ -350,15 +350,23 @@ test.describe('thumbnails stay deferred until opened (DIA-205)', () => {
 
     await H.openApp(page, { viewport: PHONE });
     await H.setBand(page, 750);
-    await page.waitForLoadState('networkidle');
+    // `waitForLoadState('networkidle')` resolves immediately once the page
+    // has already reached that state, so it doesn't actually wait out any
+    // fetches the band change might still be about to fire — settle two
+    // animation frames instead, which is when the eager-load bug's fetches
+    // landed pre-fix.
+    await page.evaluate(
+      () => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))),
+    );
 
     expect(thumbRequests, `unexpected eager thumbnail fetches: ${thumbRequests.join(', ')}`).toEqual([]);
 
     // Opening the sheet is what should actually load them — proves this
-    // isn't accidentally suppressing every thumbnail fetch outright.
+    // isn't accidentally suppressing every thumbnail fetch outright. Poll
+    // rather than trust `networkidle`/a fixed wait: the lazy fetches fire a
+    // frame or so after `src` is assigned, not synchronously with the click.
     await H.openPunchList(page);
-    await page.waitForLoadState('networkidle');
-    expect(thumbRequests.length).toBeGreaterThan(0);
+    await expect.poll(() => thumbRequests.length).toBeGreaterThan(0);
   });
 });
 
