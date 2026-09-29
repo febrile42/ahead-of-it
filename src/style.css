@@ -1395,6 +1395,21 @@ h1 {
     min-height: calc(1.3em * 4);
   }
 
+  /* U-14h (DIA-221): the toggle's tagline/nudge text at the 368px rail
+     width is CI's other system-ui-fallback casualty — every local
+     measurement fits it on one line with room to spare, but CI's wider
+     fallback wraps it to two (DIA-65 precedent, same mechanism as the
+     tabs-row fix above). `.toggle__message`'s reserved height is `em`
+     against its own font-size, not this element's, so sizing the text
+     down here doesn't reopen a DIA-176/D-051 CLS gap — it only buys back
+     the ~10% of line width CI's font needs. Both rules get it, not just
+     the subtitle, so neither visibly changes size when one replaces the
+     other in their shared grid slot. */
+  .toggle__subtitle,
+  .toggle__nudge {
+    font-size: 0.9em;
+  }
+
   /* Main, top-down: the room tabs, the scene, the stepper, the
      scroll-further hint (main.ts inserts `.scene-scroll-hint` right after
      #scene-stepper at setup — it is not in index.html's static shell) and
@@ -1441,12 +1456,22 @@ h1 {
 
   /* D-048 item 2 (amended for >=1152 only): the punch-list button shares
      the tabs' row, right-aligned — see the block comment above for why
-     this is `position: absolute` rather than a second float. */
+     this is `position: absolute` rather than a second float. Padding is
+     dropped here too (DIA-221): `.view-nav`'s base `0 1rem` exists to
+     match the phone/tablet row's own inset, but at this width the button
+     is absolutely positioned by its own box, so that padding only ate
+     into the width `updateDesktopLayout()` computes for #scene-views
+     (width: 720 - this element's real rendered width) — the exact
+     mechanism behind U-14f's CI-only overflow: CI's system-ui fallback
+     renders both the tabs and this button a few px wider than any local
+     measurement (DIA-65 precedent), and the unused 32px of padding here
+     was the difference between fitting and needing to scroll. */
   #app > #view-nav {
     position: absolute;
     top: 0;
     right: 0;
     width: auto;
+    padding: 0;
   }
 
   /* U-14a's hard "no scroll at 1152x648" gate leaves very little room
