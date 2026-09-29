@@ -12,6 +12,13 @@
 # CI), otherwise warns and skips so a fresh clone still builds. On a hit it
 # prints file:line and the entry's position in the list, never the name
 # itself — CI logs are public.
+#
+# PH3-05 (D-010, Phase 3 exit criterion): also gates the internal project
+# name "Occupancy" out of dist/ — content and filenames, case-insensitive.
+# Unlike the employer names this word isn't sensitive, so it is printed in
+# full and this half of the check always runs, independent of
+# EMPLOYER_DENYLIST. It only covers dist/: the word is expected throughout
+# docs/ and internal tooling (CLAUDE.md, README.md, briefs, etc).
 set -euo pipefail
 
 DIST_DIR="${1:-dist}"
@@ -19,6 +26,24 @@ DIST_DIR="${1:-dist}"
 if [ ! -d "$DIST_DIR" ]; then
   echo "check-employer: '$DIST_DIR' does not exist — run the build first." >&2
   exit 1
+fi
+
+found=0
+
+INTERNAL_NAME="occupancy"
+
+internal_hits=$(grep -riIn --exclude-dir=.git -- "$INTERNAL_NAME" "$DIST_DIR" || true)
+if [ -n "$internal_hits" ]; then
+  echo "check-employer: internal project name '$INTERNAL_NAME' found in $DIST_DIR content:" >&2
+  printf '%s\n' "$internal_hits" | sed 's/^/  /' >&2
+  found=1
+fi
+
+internal_name_hits=$(find "$DIST_DIR" -iname "*${INTERNAL_NAME}*")
+if [ -n "$internal_name_hits" ]; then
+  echo "check-employer: internal project name '$INTERNAL_NAME' found in $DIST_DIR filenames:" >&2
+  printf '%s\n' "$internal_name_hits" | sed 's/^/  /' >&2
+  found=1
 fi
 
 EMPLOYERS=()
@@ -33,11 +58,14 @@ if [ "${#EMPLOYERS[@]}" -eq 0 ]; then
     echo "check-employer: EMPLOYER_DENYLIST is empty in CI — set the Actions secret." >&2
     exit 1
   fi
-  echo "check-employer: EMPLOYER_DENYLIST is not set — skipping (CI always runs this check)." >&2
+  echo "check-employer: EMPLOYER_DENYLIST is not set — skipping employer check (CI always runs it)." >&2
+  if [ "$found" -ne 0 ]; then
+    exit 1
+  fi
+  echo "check-employer: clean — no internal project name in $DIST_DIR."
   exit 0
 fi
 
-found=0
 report() { # $1 = entry number, $2 = where; stdin = grep -n output
   local hits
   hits=$(cut -d: -f1-2)
@@ -60,4 +88,4 @@ if [ "$found" -ne 0 ]; then
   exit 1
 fi
 
-echo "check-employer: clean — no denylisted employer name in $DIST_DIR or the repo (${#EMPLOYERS[@]} entries)."
+echo "check-employer: clean — no denylisted employer name or internal project name in $DIST_DIR or the repo (${#EMPLOYERS[@]} employer entries)."
