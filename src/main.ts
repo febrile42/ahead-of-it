@@ -37,7 +37,7 @@ import { createSlider } from './ui/slider';
 import { createToggle } from './ui/toggle';
 import { initShareControl, syncShareHref, trackShareImage } from './ui/share';
 import { motionGate } from './motion';
-import { parseInitialSceneState } from './url-state';
+import { LIST_HASH, panelHash, parseInitialSceneState, sceneSearchParams } from './url-state';
 import { motionChanged, resolveViewAt } from './scene/motion-playback';
 import type { ResolvedFrame } from './scene/motion-playback';
 import { loadManifest } from './scene/sprites';
@@ -262,6 +262,91 @@ if (
   // `loading="lazy"` thumbnails DIA-114 found WebKit fetches all at once if
   // they exist before the page's first layout/paint pass.
   punchListLabel.textContent = `Punch list (${gagsThroughBand(band).length})`;
+
+  // PH3-01 (R-10 write side, U-09 "Back closes an open panel"):
+  //
+  // - `writeSceneQuery()` keeps `n`/`it` (D-043's own names) current with
+  //   `history.replaceState` on every visitor-driven band/state change —
+  //   never `pushState`, so dragging through all eight stops and flipping
+  //   the toggle twice collapses into the one entry already there
+  //   (`history.length` unchanged, brief item 1).
+  // - `overlayHash` tracks the one hash entry *we* pushed or replaced for
+  //   an open gag panel or the punch-list sheet (`openOverlay`, item 2) —
+  //   null when no overlay owns an entry, which is also true for the
+  //   auto-opened Beyond panel (slider.onChange below never calls
+  //   openOverlay for it): that panel must not grow history at all, or
+  //   dragging to 'beyond' would need two Backs to leave, not one.
+  // - Closing that overlay any way other than Back (`panel.onClose` /
+  //   `checklist.onClose`, which fire for the close button, Escape and the
+  //   outside-tap alike, item 4) pops the entry with `history.back()` so
+  //   the stack never holds a stale "panel open" entry once the visitor has
+  //   already closed it themselves.
+  // - A real Back press pops that same entry on its own; the `popstate`
+  //   listener below just has to notice the entry is gone and close
+  //   whichever overlay is still visibly open (item 3) — through the exact
+  //   same `panel.close()`/`checklist.close()` calls Escape already uses,
+  //   so focus-return and the live announcement are identical either way.
+  //   `consumingOwnBack` tells the two triggers (our own `history.back()`
+  //   call vs. a real Back press) apart, so neither one double-acts on the
+  //   other's half of the round trip.
+  function writeSceneQuery() {
+    const query = sceneSearchParams(band, state);
+    history.replaceState(history.state, '', `?${query}${window.location.hash}`);
+  }
+
+  let overlayHash: string | null = null;
+  let consumingOwnBack = false;
+  // PR #16 review, B1: `sceneSearchParams(band, state)` at the moment the overlay
+  // entry was first *pushed* (item 2) — null whenever no overlay owns an entry.
+  // The landing (pre-overlay) entry's `n`/`it` are frozen at whatever they were
+  // then; if a slider drag or toggle flip changes band/state while the panel/
+  // sheet stays open (non-modal at >=768px, U-06), only *that* entry's own query
+  // gets kept live (`writeSceneQuery()`'s ordinary replaceState calls). Switching
+  // straight from one overlay to another (item 5's replace branch below) is the
+  // same entry throughout, so it deliberately leaves this snapshot alone — only
+  // the first push of the "session" is the baseline to compare the live query
+  // against once Back lands back on the pre-overlay entry.
+  let overlayOpenQuery: string | null = null;
+
+  function landingQueryIsStale(): boolean {
+    return overlayOpenQuery !== null && overlayOpenQuery !== sceneSearchParams(band, state);
+  }
+
+  function openOverlay(hash: string) {
+    if (overlayHash) {
+      history.replaceState(history.state, '', hash); // item 5: switching straight to another overlay replaces, no second push
+    } else {
+      history.pushState(null, '', hash);
+      overlayOpenQuery = sceneSearchParams(band, state);
+    }
+    overlayHash = hash;
+  }
+
+  function closeOverlayEntry() {
+    if (!overlayHash) return;
+    overlayHash = null;
+    consumingOwnBack = true;
+    history.back();
+  }
+
+  panel.onClose(closeOverlayEntry);
+  checklist.onClose(closeOverlayEntry);
+  checklist.onOpen(() => openOverlay(LIST_HASH)); // item 2/5: same push-or-replace rule as a gag panel
+
+  window.addEventListener('popstate', () => {
+    if (consumingOwnBack) {
+      consumingOwnBack = false;
+      if (landingQueryIsStale()) writeSceneQuery(); // B1: only touch the landing entry if it needs it
+      overlayOpenQuery = null;
+      return;
+    }
+    if (!overlayHash) return; // Back with nothing of ours open — let the browser leave/navigate normally
+    overlayHash = null;
+    if (panel.isOpen()) panel.close();
+    if (checklist.isOpen()) checklist.close();
+    if (landingQueryIsStale()) writeSceneQuery(); // B1: same staleness check for a real Back press
+    overlayOpenQuery = null;
+  });
 
   // D-056 (DIA-217/U-14): two things at >=1152 that src/style.css's own
   // `@media (min-width: 1152px)` block can't finish on its own — both
@@ -889,6 +974,7 @@ if (
     // R-04: the prevented-beat thumbnail is always the without-state
     // scene. B4: closing returns focus to the hotspot that opened it.
     panel.open(fields, 'without', { returnFocusTo: source });
+    openOverlay(panelHash(gagId)); // PH3-01/U-09: item 2 (push) or item 5 (replace, switching from another open panel)
   }
 
   // S5: render() is async (it fetches the scene file and awaits sprite
@@ -1311,6 +1397,12 @@ if (
       // syncOpenPanel()'s concern (DIA-13). U-06: `modal: false` — the
       // "what works" keep-list's own rule is that this one opens without
       // trapping, so the slider stays usable above the sheet.
+      // PR #16 review, N1: a gag panel open when the drag reaches 'beyond' has its own
+      // overlay entry (`openOverlay`, item 2) — the auto-opened Beyond panel below swaps
+      // that panel's *content*, not a fresh open, so it must give up that entry first or
+      // it would inherit one it never pushed, breaking "never owns an entry" (item 2's
+      // own note above) and leaving a stale `#panel=<gag>` in the URL.
+      if (openPanelGagId) closeOverlayEntry();
       openPanelGagId = null;
       applyPanelTop(); // DIA-218: keep the docked top fresh for this auto-open too.
       panel.open(beyondPanelFields(), 'without', { focus: false, returnFocusTo: slider.input, modal: false });
@@ -1322,6 +1414,7 @@ if (
       openPanelGagId = null;
       panel.close();
     }
+    writeSceneQuery(); // R-10 item 1: replaceState only, never a push, however many bands this drag crossed
     void render();
   });
 
@@ -1339,6 +1432,7 @@ if (
     sceneStartTime = performance.now();
     document.body.dataset.sceneStartTime = String(sceneStartTime);
     previousResolved = null;
+    writeSceneQuery(); // R-10 item 1
     void render();
   });
 
