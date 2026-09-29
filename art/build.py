@@ -22,6 +22,7 @@ from art.src.dsl import Canvas, save_png, scale_nn
 from art.src import iso
 from art.src.sprites import floor, wall, desk, worker, badge_reader, room, band80, poses
 from art.src.sprites import band150, band220, street, band360, band490, band610, band750
+from art.src.sprites import share
 from art.src import compose, layout, export_scene, moments, motion
 from art.src.vox import Sprite
 
@@ -300,6 +301,24 @@ def build_props(manifest, registry):
             save_sprite(manifest, registry, name, spr)
 
 
+def build_share(manifest):
+    """PH3-02 (D-057): the share image's sprites, each with the `shareScale` the web
+    draws it at (SCENE-FORMAT "Share sprites"). Lettering anchors at its top-left."""
+    fl = share.flag()
+    manifest["share-flag"] = save_entry("share-flag", {"default": [fl]}, fl.w, fl.h,
+                                        share.FLAG_ANCHOR)
+    manifest["share-flag"]["shareScale"] = share.FLAG_SCALE
+    cap = share.caption()
+    manifest["share-caption"] = save_entry("share-caption", {"default": [cap]}, cap.w, cap.h,
+                                           (0, 0))
+    manifest["share-caption"]["shareScale"] = share.CAPTION_SCALE
+    urls = share.urls()
+    w, h = urls["80"].w, urls["80"].h
+    manifest["share-url"] = save_entry("share-url", {n: [cv] for n, cv in urls.items()}, w, h,
+                                       (0, 0))
+    manifest["share-url"]["shareScale"] = share.URL_SCALE
+
+
 def build_manifest():
     manifest, static = build_static_sprites()
     badge_entry, badge_rendered = build_badge_reader()
@@ -308,6 +327,7 @@ def build_manifest():
     worker_rendered = build_worker(manifest, registry)
     build_desks(manifest, registry)
     build_props(manifest, registry)
+    build_share(manifest)
 
     # PH1-07: the VISITOR callout is for the 4x previews only; at 1x the chest sticker
     # on `visitor` carries it. The flag tells the renderer to leave it out.

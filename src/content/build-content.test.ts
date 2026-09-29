@@ -142,6 +142,13 @@ const VALID_TONE_MD = `# Tone — fixture
 | \`loadFailed\` | \`The building didn't load. Everything in it is in the punch list.\` | fixture. |
 | \`retry\` | \`Try again\` | fixture. |
 | \`readoutAtBand\` | \`~{n} → {year}\` | fixture. |
+
+## Share control copy (D-057) (fixture)
+
+| key | copy | where |
+|---|---|---|
+| \`shareButton\` | \`Share it without him\` | fixture. |
+| \`shareButtonName\` | \`Share it without him: a picture of this building\` | fixture. |
 `;
 
 const VALID_UI = {
@@ -164,6 +171,8 @@ const VALID_UI = {
   loadFailed: "The building didn't load. Everything in it is in the punch list.",
   retry: 'Try again',
   readoutAtBand: '~{n} → {year}',
+  shareButton: 'Share it without him',
+  shareButtonName: 'Share it without him: a picture of this building',
 };
 
 function validInputs(overrides: Partial<BuildInputs> = {}): BuildInputs {
@@ -283,6 +292,8 @@ describe('parsing ui (D-042a)', () => {
       loadFailed: "The building didn't load. Everything in it is in the punch list.",
       retry: 'Try again',
       readoutAtBand: '~{n} → {year}',
+      shareButton: 'Share it without him',
+      shareButtonName: 'Share it without him: a picture of this building',
     });
   });
 

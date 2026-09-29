@@ -22,6 +22,7 @@ python3 art/build.py                 # renders public/sprites/*.png + manifest.j
                                       # and art/preview/{room,sheet,sheet@4x}.png
                                       # and art/preview/band80-{without,built}.png
 python3 art/checks/check_palette.py  # independent palette-only verification
+python3 art/checks/check_share.py    # the share sprites meet SCENE-FORMAT (PH3-02)
 ```
 
 No dependencies beyond the stdlib and Pillow (`pip install pillow`, already present
@@ -67,6 +68,10 @@ here).
 - `art/src/sprites/street.py` (PH1-10) — the street exterior: `pavement`, HQ as a
   building (`hq-3`, `hq-4`: a storey per narrated floor) and `hq-door`. `art/src/compose.py` renders it from `manifest.json` and
   the shipped PNGs alone, the way the site's painter will.
+- `art/src/face.py`, `art/src/sprites/share.py` (PH3-02, D-057) — a mixed-case face
+  (cap 7, x-height 5, descenders 2) and the share image's `share-flag`,
+  `share-caption` (lettered from `copy.shareCaption` at build time) and `share-url`,
+  each with the `shareScale` the web draws it at.
 - `art/build.py` — orchestrates: builds every sprite, writes 1x PNGs to
   `public/sprites/`, writes `manifest.json`, composes the preview images.
 

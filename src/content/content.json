@@ -678,7 +678,9 @@
     "loading": "Loading the building…",
     "loadFailed": "The building didn't load. Everything in it is in the punch list.",
     "retry": "Try again",
-    "readoutAtBand": "~{n} → {year}"
+    "readoutAtBand": "~{n} → {year}",
+    "shareButton": "Share it without him",
+    "shareButtonName": "Share it without him: a picture of this building"
   },
   "ambient": {
     "hover": "Someone is always on call. In the built state, it's a rotation."

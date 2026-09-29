@@ -25,6 +25,22 @@
     <meta property="og:type" content="website" />
     <meta property="og:title" content="Ahead of It — Josh Gister's résumé" />
     <meta property="og:description" content="Build it, then make sure it doesn't need you." />
+    <!-- D-057 item 6: production values for band 80, the fallback for any
+         unfurler/crawler request the Worker's rewrite doesn't reach
+         (src/worker/index.ts rewrites og:image/twitter:image/og:url for
+         every other `?n=` stop — see computeShareOg). og:image:alt doesn't
+         vary by band (copy.shareCaption, hand-copied like og:title/
+         og:description above), so this static value is correct for every
+         stop, not just 80. Absolute https URLs, per the unfurl size rules
+         (1200x630, < 5MB). -->
+    <meta property="og:image" content="https://resume.joshgister.com/share/80.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:alt" content="By the time the company was your size, Josh had already fixed this." />
+    <meta property="og:url" content="https://resume.joshgister.com/?n=80" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="https://resume.joshgister.com/share/80.png" />
     <link rel="stylesheet" href="/src/style.css" />
   </head>
   <body>
@@ -100,6 +116,18 @@
           />
           <span class="punch-list-button__label"></span>
         </button>
+        <!-- D-057 item 7: the "Share image" control. Below 1152px it lives
+             here, right-aligned opposite the punch-list button (.share-control's
+             margin-left: auto); from 1152px src/main.ts moves this element
+             into the rail under the toggle (see style.css's @media block
+             and updateDesktopLayout's own comment) — one node, repositioned,
+             never duplicated. href/download start pointed at band 80's
+             image (S1: a real, working link even before src/main.ts runs);
+             src/ui/share.ts's syncShareHref keeps them pointed at the
+             current stop's "without" image, and the label/aria-label are
+             filled from content.json's ui.shareButton/ui.shareButtonName —
+             nothing visitor-read is written here. -->
+        <a href="/share/80.png" download="ahead-of-it-80.png" class="share-control" id="share-control"></a>
       </div>
       <!-- S1: width/height reserve the scene's final box (3:2, D-042a:
            full viewport width up to 430px, so a 180x120 close-up paints at
