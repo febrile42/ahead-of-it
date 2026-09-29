@@ -789,3 +789,43 @@ tall, so trimming rows to clear 900 would still fail most desktop visitors.
 Rejected: capping the scene by height (the painter's integer scale drops to 1–1.5×, halving
 the art at dpr 1); the toggle beside the slider (moves D-053's tagline and still ends ~4 px
 from a 900 fold); restating the AC for a taller viewport (hides the failure on real laptops).
+
+**D-058 · 2026-09-29 · PH3-06 read-in-place pass: seven locked lines change, three served
+strings are named for the web (DIA-232; Product Lead; needs CEO sign-off).**
+PH3-06 read every visible string on staging `62bcd91` at 390 and 1440, in both colour
+schemes. `PANELS.md` v4 passed review as a document. Read in place, a few lines point at
+the wrong thing or claim more than their receipt, and a few internal ids reach the page.
+Nothing here adds a claim; every change removes one or points at something that exists.
+1. **G6.1 / G6.2 cross-links** (F-2's "cross-link, both directions") said "the next panel"
+   and "the previous panel". That only holds in the punch list. In the building, at 750, G6.1
+   is close-up 5 of 14 and G6.2 is 9 of 14. G6.1 now says the audits "have their own panel,
+   in the finance corner". G6.2 drops "in the previous panel". `E-07 E-08`
+2. **G3.3 title** "Nine people, four functions, …" sat above a body that names five areas.
+   The title is now *"Nine people, with leaders between them and me"*. The count goes, the
+   body keeps its sourced list. `E-02`
+3. **Beyond panel, Already:** "at 80, at 150, at 600" becomes "at 610", a stop the slider
+   actually has.
+4. **Beyond translation column** (served in the punch list at 1,000+):
+   - The gag-id suffixes "(G2.2, G6.3, G6.4)" … "(all)" are dropped. They are internal ids
+     and mean nothing to a visitor.
+   - The literal asterisks in "shipped \*with\* the tool" are dropped. The checklist renders
+     plain text, so they showed on the page.
+   - "$500,000+ **a year** back from vendors" becomes "$500,000+ back from vendors in 2024,
+     most of it recurring". E-07 is $500,000+ in 2024, *mostly* recurring, and "a year"
+     claimed an annual run-rate the receipt does not state.
+   - "**Nine functions**, one building, eight years" becomes "One person, one building,
+     eight years". No receipt counts nine functions. The eight years (2018–2026) is E-01…E-26.
+5. **G7.2 strip:** "~490→750" becomes "~490 → 750", matching G6.1/G6.2's "~650 → 750".
+6. **For the web (not in this entry's PR; the pipeline rejects unknown `ui` keys):**
+   - Readout at the 1,000+ stop: "~1000 → Beyond" disagrees with the tick's "1,000+".
+     At the slider's maximum it reads **`1,000+ → Beyond`**. Below the maximum,
+     `~{n} → Beyond` is unchanged. DIA-197's U-17 already fixed the other known item
+     ("~610 → 2023, ~610"): the clause drops when the number equals the band.
+   - The punch-list translation caption **"At 1,000+, translated (R-14a)"** shows a
+     requirement id. It becomes **"At 1,000+, translated"**.
+   - The punch-list sheet's accessible name "Checklist: what was already in place" becomes
+     **"Punch list: what was already in place"**, the name the visitor sees.
+Rejected: rewording G6.1/G6.2 so neither mentions the other (F-2 asked for the cross-link);
+keeping "four functions" and adding a fifth to the body (it would mean a new claim to source
+or a claim cut from E-02); rendering Markdown in the translation column (a code change, for
+one word of emphasis).
