@@ -55,7 +55,12 @@ test.describe('U-01: every ?n= band round-trips to the matching slider value and
       expect(await H.currentBand(page), 'the rendered scene').toBe(String(band));
       await expect(page.locator('#headcount-slider'), 'slider value').toHaveValue(String(band));
       const info = bandInfo(band);
-      await expect(page.locator('.slider__readout')).toHaveText(`~${band} → ${info.year}, ${info.people}`);
+      // U-17 (DIA-197, D-053's readoutAtBand): a deep link's raw `n` here
+      // is exactly the band's own number, so the readout drops the
+      // redundant ", ~<band>" clause — this used to read e.g.
+      // "~80 → 2018, ~80" before that fix landed (this test's own value at
+      // DIA-198 time, when U-17 was still open).
+      await expect(page.locator('.slider__readout')).toHaveText(`~${band} → ${info.year}`);
       expect(await H.panelIsOpen(page), 'no stray Beyond panel on a plain numeric deep link').toBe(false);
     });
   }
@@ -143,7 +148,9 @@ test.describe('U-03: the keyboard slider steps between bands', () => {
     await slider.focus();
     await page.keyboard.press('Home');
     await expect.poll(() => H.currentBand(page)).toBe('80');
-    await expect(page.locator('.slider__readout')).toHaveText('~80 → 2018, ~80');
+    // U-17 (DIA-197): Home lands raw exactly on 80, so the readout drops
+    // the redundant ", ~80" (see the U-01 describe block above).
+    await expect(page.locator('.slider__readout')).toHaveText('~80 → 2018');
   });
 });
 
@@ -242,16 +249,13 @@ test.describe('U-07: the collapsed punch list adds no blank scroll (390px, band 
 // ---------------------------------------------------------------------------
 
 test.describe('U-08: focus never lands on <body> around a panel interaction (390px)', () => {
-  test('tapping outside an open panel keeps focus on something real', async ({ browser, browserName }) => {
-    // Cause: there is no outside-tap handler at all yet (main.ts never
-    // listens for a pointerdown outside `.panel`), so a tap that lands on
-    // a non-focusable element blurs whatever had focus with nothing to take
-    // its place — the review's own repro tapped (200,100), on Chromium.
-    // WebKit does not refocus <body> the same way on a tap outside every
-    // focusable element, so this is chromium-only until DIA-195 gives both
-    // engines an explicit outside-tap behaviour.
-    test.fail(browserName === 'chromium', 'DIA-194 U-08: tapping outside the panel drops focus to <body> on Chromium');
-
+  test('tapping outside an open panel keeps focus on something real', async ({ browser }) => {
+    // Fixed (DIA-197): src/ui/panel.ts now listens for `pointerdown`
+    // outside `.panel` while modal (≤767px) and closes it, returning focus
+    // to the invoking hotspot via the same `close()` path Escape and the
+    // Close button already use — the review's own repro tapped (200,100),
+    // on Chromium; WebKit is exercised here too since the fix isn't
+    // engine-specific.
     const context = await browser.newContext({ hasTouch: true, viewport: H.PHONE });
     const p = await context.newPage();
     try {

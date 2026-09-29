@@ -104,6 +104,13 @@
     overflow-y: hidden;
   }
 
+  /* U-11: the status overlay sits over .scene-wrap and must match its dark
+     background exactly, or the loading/failure state would show a bright
+     white box against the dark mat above. */
+  .scene-status {
+    background: var(--scene-mat-dark);
+  }
+
   /* D-047 (DIA-151): `.hotspot`'s dashed border is
      `rgba(var(--scene-ink-rgb), .6)` — near-black — which now disappears
      against the dark mat above. A light halo restores it there while still
@@ -172,6 +179,28 @@ h1 {
 @media (max-width: 320px) {
   .app__intro {
     min-height: calc(1.3em * 5);
+  }
+}
+
+/* U-14 (DIA-194/197): from 768px up, cap the whole controls column at the
+   scene's own 720px (D-042a) and centre it, instead of letting the slider
+   and toggle stretch the full viewport while the scene stays 720 — that
+   left the stepper below the fold at 1440x900 and put ~700px between the
+   slider's thumb travel and the scene it controls. `.scene-wrap` and
+   `.scene-stepper` already cap/centre at 720px on their own; once #app is
+   exactly that wide too, their own centring becomes a no-op rather than a
+   conflict. */
+@media (min-width: 768px) {
+  #app {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+
+  /* DIA-175's 4-line phone reserve (above) is worst-case for a 390px
+     column; the same copy wraps to 2 lines at 720px. Reserving 4 here left
+     an ~80px empty band above the slider (DIA-194 U-14 evidence). */
+  .app__intro {
+    min-height: calc(1.3em * 2);
   }
 }
 
@@ -279,6 +308,24 @@ h1 {
   outline-offset: 2px;
 }
 
+/* U-13 (DIA-194/197): one :focus-visible rule for every page-chrome
+   interactive element (the slider thumb above and the scene's own
+   .hotspot below are pseudo-element/--scene-accent special cases that
+   can't join this selector list, but match its width/offset exactly) —
+   before this, the toggle, panel close, punch-list download and contact
+   links fell through to each browser's own default outline. */
+.scene-views__button:focus-visible,
+.punch-list-button:focus-visible,
+.scene-stepper button:focus-visible,
+.toggle__button:focus-visible,
+.panel__close:focus-visible,
+.checklist__close:focus-visible,
+.checklist__download:focus-visible,
+.contact-line a:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
 .slider__ticks {
   position: relative;
   height: 1.5rem;
@@ -289,6 +336,17 @@ h1 {
   position: absolute;
   transform: translateX(-50%);
   white-space: nowrap;
+}
+
+/* U-16 (DIA-194/197): the four stops with no year label (S2) still get a
+   mark — a short line at the top of the row, clear of the text ticks
+   below it, so all 8 stops read as a scale rather than 4 labels floating
+   with 4 unmarked gaps between them. */
+.slider__tick--mark {
+  top: 0;
+  width: 1px;
+  height: 6px;
+  background: var(--border);
 }
 
 /* S2: the first labelled tick sits close to the left edge (band 80 isn't
@@ -332,7 +390,10 @@ h1 {
   cursor: pointer;
 }
 
-.toggle__button[aria-pressed='true'] {
+/* U-10 (DIA-194/197): keyed off data-state, not aria-pressed — a button
+   whose accessible name changes with state must not also carry pressed
+   state (see src/ui/toggle.ts). */
+.toggle__button[data-state='without'] {
   background: var(--toggle-fill-pressed);
   color: var(--toggle-text-pressed);
 }
@@ -432,11 +493,6 @@ h1 {
   color: var(--ink-invert);
 }
 
-.scene-views__button:focus-visible {
-  outline: 3px solid var(--accent);
-  outline-offset: 2px;
-}
-
 /* --- View-nav row (DIA-131): the punch-list button's own line, below the
    room tabs and above the canvas — deliberately not sharing the tabs'
    flex row (see index.html's comment: that row is already tight at the
@@ -470,10 +526,6 @@ h1 {
   color: var(--ink-invert);
 }
 
-.punch-list-button:focus-visible {
-  outline: 3px solid var(--accent);
-  outline-offset: 2px;
-}
 
 .punch-list-button__icon {
   width: 16px;
@@ -555,6 +607,59 @@ h1 {
      box that exact same constant, never resized by main.ts again. */
   width: 100%;
   height: 100%;
+}
+
+/* U-11 (DIA-194/197): the loading/failure overlay — same box as
+   .hotspots-layer above, on top of it, painted with the mat colour
+   (never-retheme `--scene-mat` in light, the dark block below matches
+   `.scene-wrap`'s own dark override) so it fully hides whatever the
+   canvas last painted underneath. `hidden` (index.html) keeps it out of
+   the accessibility tree and the tab order until main.ts needs it. */
+.scene-status {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  text-align: center;
+  background: var(--scene-mat);
+}
+
+/* Fix round item 8 / review fix 5's own gotcha, repeated here: the class
+   selector above outranks the UA stylesheet's attribute-only
+   `[hidden] { display: none }`, so without this override the "hidden"
+   overlay still gets laid out and — being `position: absolute; inset: 0`
+   over the canvas — intercepts every click/tap on the hotspots underneath
+   even while invisible. See `.panel__thumb[hidden]` above for the same
+   pattern. */
+.scene-status[hidden] {
+  display: none;
+}
+
+.scene-status__message {
+  margin: 0;
+  color: var(--scene-ink);
+  max-width: 28ch;
+}
+
+.scene-status__retry {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0.3rem 0.9rem;
+  border: 1px solid var(--scene-ink);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--scene-ink);
+  font: inherit;
+  cursor: pointer;
+}
+
+.scene-status__retry:focus-visible {
+  outline: 3px solid var(--scene-accent);
+  outline-offset: 2px;
 }
 
 /* DIA-124: the hotspot marker is four corner brackets (viewfinder L-ticks)
@@ -772,11 +877,6 @@ h1 {
 .scene-stepper [aria-disabled='true'] {
   opacity: 0.4;
   cursor: default;
-}
-
-.scene-stepper button:focus-visible {
-  outline: 3px solid var(--accent);
-  outline-offset: 2px;
 }
 
 .scene-stepper__label {

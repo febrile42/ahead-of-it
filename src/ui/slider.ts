@@ -64,13 +64,18 @@ export function createSlider(container: HTMLElement, initialBand: BandId = 80): 
 
   ticks.replaceChildren();
   for (const band of NUMERIC_BANDS) {
-    if (!LABELED_TICKS.has(band)) continue;
     const tick = document.createElement('span');
-    tick.className = 'slider__tick';
+    // U-16 (DIA-194/197): every stop gets a mark; only the four boundary
+    // bands (plus 'beyond' below) keep a year label — S2's crowding/overlap
+    // reasoning for *labels* still holds, it just no longer means the other
+    // four stops go unmarked entirely.
+    tick.className = LABELED_TICKS.has(band) ? 'slider__tick' : 'slider__tick slider__tick--mark';
     if (band === NUMERIC_BANDS[0]) tick.classList.add('slider__tick--first');
     tick.style.left = `${percentFor(band)}%`;
-    const info = getBand(band);
-    tick.textContent = info?.year ?? String(band);
+    if (LABELED_TICKS.has(band)) {
+      const info = getBand(band);
+      tick.textContent = info?.year ?? String(band);
+    }
     ticks.append(tick);
   }
   // S2: the 1,000+ stop sits at the very top of the range — anchoring it

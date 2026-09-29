@@ -405,7 +405,7 @@ test.describe('the toggle has no dead space under it once reserved lines are bla
     await page.goto('/?n=80&it=built');
     await page.waitForFunction(() => document.body.dataset.renderedToken !== undefined);
 
-    await expect(page.locator('.toggle__button')).toHaveAttribute('aria-pressed', 'false');
+    await expect(page.locator('.toggle__button')).toHaveAttribute('data-state', 'built');
     const subtitleVisibleBefore = await page
       .locator('.toggle__subtitle')
       .evaluate((el) => getComputedStyle(el).visibility);

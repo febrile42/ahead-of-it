@@ -26,7 +26,7 @@ import {
 } from './scene/scene';
 import type { SceneFile, SceneView } from './scene/scene';
 import { bandIndex } from './scene/bands';
-import { createChecklist } from './ui/checklist';
+import { createChecklist, gagsThroughBand } from './ui/checklist';
 import type { CanvasBox } from './ui/panel';
 import { beyondPanelFields, createPanel, panelFieldsFor, renderHotspots, renderZoomTargets } from './ui/panel';
 import { ui } from './ui/strings';
@@ -87,7 +87,7 @@ if (
   // Focus and live-region text to apply once the render that follows a
   // navigation commits. A stale render leaves them pending for the newer
   // one; only a committed paint consumes them.
-  let pendingFocus: { kind: 'floor' } | { kind: 'zoomOf'; viewId: string } | null = null;
+  let pendingFocus: { kind: 'firstHotspot' } | { kind: 'zoomOf'; viewId: string } | null = null;
   let pendingAnnounce: string | null = null;
   // DIA-13: the gagId of the hotspot whose panel is currently open, or null
   // when the open panel isn't hotspot-sourced (the auto-opened Beyond panel)
@@ -234,6 +234,14 @@ if (
   }
   const checklist = createChecklist(punchListButton, punchListLabel);
   checklistRoot.append(checklist.root);
+  // U-11(a) (DIA-194/197): the "Punch list (n)" label is generated from
+  // content.json's own gag list, not the scene file, so it does not need to
+  // wait on render()'s scene fetch to be correct. Sets *only* the label
+  // text here (never blank while a slow load is in flight) — deliberately
+  // not `checklist.render(band)`, which builds the list DOM with
+  // `loading="lazy"` thumbnails DIA-114 found WebKit fetches all at once if
+  // they exist before the page's first layout/paint pass.
+  punchListLabel.textContent = `Punch list (${gagsThroughBand(band).length})`;
 
   // The "scroll for more" hint (SCENE-FORMAT: a view wider than the
   // viewport scrolls to `focus`) only matters below ~360px now that a
@@ -413,8 +421,40 @@ if (
   // The existing live region (slider.ts writes band changes to it); a
   // navigation announces its own view here.
   const liveRegion = sliderRoot.querySelector<HTMLParagraphElement>('.slider__live');
-  if (!prevButton || !nextButton || !stepperLabel || !floorButton || !liveRegion) {
+  const sceneStatus = sceneWrap.querySelector<HTMLDivElement>('.scene-status');
+  const sceneStatusMessage = sceneWrap.querySelector<HTMLParagraphElement>('.scene-status__message');
+  const sceneStatusRetry = sceneWrap.querySelector<HTMLButtonElement>('.scene-status__retry');
+  if (
+    !prevButton ||
+    !nextButton ||
+    !stepperLabel ||
+    !floorButton ||
+    !liveRegion ||
+    !sceneStatus ||
+    !sceneStatusMessage ||
+    !sceneStatusRetry
+  ) {
     throw new Error('index.html static shell is missing the stepper controls');
+  }
+  // U-11(a): "Whole floor" is static per-session copy (TONE.md), not
+  // computed from the scene — filling it before the first render()'s scene
+  // fetch means it is never blank while a slow load is in flight. syncStepper
+  // (below) still sets it on every render(), which is fine — same string.
+  floorButton.textContent = ui('wholeFloor');
+
+  /** U-11(b)/(c): the loading/failure overlay over the canvas. `retry`
+   * re-runs the given callback (rebound on every show — a stale retry
+   * closure from an earlier band would otherwise re-request the wrong
+   * one). Hidden has no retry action, so the button stays hidden then. */
+  function showSceneStatus(message: string, retry: (() => void) | null) {
+    sceneStatusMessage!.textContent = message;
+    sceneStatusRetry!.hidden = !retry;
+    sceneStatusRetry!.textContent = retry ? ui('retry') : '';
+    sceneStatusRetry!.onclick = retry;
+    sceneStatus!.hidden = false;
+  }
+  function hideSceneStatus() {
+    sceneStatus!.hidden = true;
   }
 
   // S6: G3.A's ambient hover on the *whole* scene was noise (a tooltip on
@@ -871,16 +911,30 @@ if (
     // regression against this same perf goal. Reverted to running after the
     // scene/sprite work, same as before DIA-114.
     let scene: SceneFile | null = null;
+    // U-11(b): "Loading the building…" only after 300ms — most loads never
+    // paint it. Cleared in `finally` regardless of outcome or staleness;
+    // the token check inside still guards against a stale render showing
+    // a loading message for a band a newer render has already moved past.
+    const loadingTimer = window.setTimeout(() => {
+      if (token === renderToken) showSceneStatus(ui('loading'), null);
+    }, 300);
     try {
       scene = await loadScene(band, state);
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error(`no scene file for band ${band}/${state} yet`, err);
+    } finally {
+      window.clearTimeout(loadingTimer);
     }
     if (token !== renderToken) return; // superseded — drop this stale scene fetch too; the newer render owns renderInFlight now
 
     if (!scene) {
       renderMissingScene();
+      // U-11(c): replaces the canvas-drawn "not drawn yet" text (never
+      // reachable by a screen reader) with a Content-owned sentence and a
+      // working retry — the punch list (filled above, independent of the
+      // scene) stays usable either way.
+      showSceneStatus(ui('loadFailed'), () => void render());
       checklist.render(band);
       document.body.dataset.renderedToken = String(token);
       document.body.dataset.band = String(band);
@@ -889,6 +943,7 @@ if (
       renderInFlight = false;
       return;
     }
+    hideSceneStatus();
 
     // Toggle, tab, stepper, whole-floor and resize renders all keep (or, for
     // a tab/stepper/whole-floor change, already reset by selectView() to)
@@ -1009,7 +1064,11 @@ if (
     lastCommittedBand = band;
     if (view.kind === 'room') {
       renderZoomTargets(hotspotsLayer!, toZoomLayout(scene, view), canvasBox, (viewId) =>
-        selectView(viewId, { focus: { kind: 'floor' } })
+        // U-12 (DIA-194/197): a zoom-in used to land focus on "Whole floor"
+        // (it comes after the hotspots in DOM order), forcing a keyboard
+        // visitor to Shift+Tab back past the stepper to reach anything in
+        // the close-up they just opened.
+        selectView(viewId, { focus: { kind: 'firstHotspot' } })
       );
     } else {
       renderHotspots(hotspotsLayer!, toSceneLayout(view), canvasBox, openPanel);
@@ -1026,7 +1085,9 @@ if (
       const target =
         pendingFocus.kind === 'zoomOf'
           ? hotspotsLayer!.querySelector<HTMLButtonElement>(`[data-view-id="${CSS.escape(pendingFocus.viewId)}"]`)
-          : null;
+          // U-12: the close-up's first hotspot, in the same DOM order
+          // renderHotspots just built it in.
+          : hotspotsLayer!.querySelector<HTMLButtonElement>('[data-hotspot-id]');
       (target ?? floorButton!).focus();
       pendingFocus = null;
     }
@@ -1105,6 +1166,10 @@ if (
   toggle.onChange((newState) => {
     cancelActiveMoment(); // PH2-03: flipping the toggle cancels a playing moment at once.
     state = newState;
+    // U-10 (DIA-194/197): the toggle's own name is the action, not the
+    // state (aria-pressed removed, src/ui/toggle.ts) — announce the new
+    // state once, in the existing polite live region.
+    liveRegion!.textContent = ui(newState === 'without' ? 'announceWithout' : 'announceBuilt');
     nudgeSpent = true; // DIA-17: latch on the first toggle, shown or not (R-06a: once per session).
     toggle.hideNudge(); // m2: the nudge's only job was getting them to toggle once.
     // PH2-01 Part B: the toggle picks a new scene file — reset t to 0 for it.

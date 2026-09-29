@@ -192,8 +192,12 @@ export async function setBandByKeyboard(page: Page, band: BandId): Promise<void>
 // ---------------------------------------------------------------------------
 
 export async function currentState(page: Page): Promise<SceneState> {
-  const pressed = await page.locator('.toggle__button').getAttribute('aria-pressed');
-  return pressed === 'true' ? 'without' : 'built';
+  // U-10 (DIA-194/197): the toggle button no longer carries `aria-pressed`
+  // (a button whose accessible name changes with state must not also
+  // carry pressed state, WAI-ARIA APG) — src/ui/toggle.ts keys the fill
+  // off `data-state` instead.
+  const state = await page.locator('.toggle__button').getAttribute('data-state');
+  return state === 'without' ? 'without' : 'built';
 }
 
 /** Flips the toggle to `state`. Returns false when already there (no render). */

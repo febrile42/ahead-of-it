@@ -10,6 +10,17 @@ import type { BandId, Gag } from '../content';
 import { getBeyond, getGags } from '../content';
 import { createContactLine } from './contact';
 
+/** Every gag through `band` (inclusive) — the same tier-collapse `render()`
+ * below uses to build the list, split out so U-11(a) (DIA-194/197) can fill
+ * the trigger's `Punch list (n)` label at boot from content.json alone.
+ * Deliberately does NOT touch the DOM: `render()`'s own list build inserts
+ * `loading="lazy"` thumbnails that must not exist before the page's first
+ * layout/paint pass, or WebKit fetches all of them at once (DIA-114). */
+export function gagsThroughBand(band: BandId): Gag[] {
+  const tier = band === 'beyond' ? 750 : band;
+  return getGags().filter((g) => (g.band === 'beyond' ? 750 : g.band) <= tier);
+}
+
 export interface ChecklistHandles {
   root: HTMLElement;
   /** Rebuilds the list for `band` and returns the gag count, so the nav
@@ -215,9 +226,7 @@ export function createChecklist(trigger: HTMLButtonElement, triggerLabel: HTMLEl
 
   function render(band: BandId): number {
     list.replaceChildren();
-    const tier = band === 'beyond' ? 750 : band;
-    // gag.band is never 'beyond' in practice (see layout.ts's same note).
-    const gags = getGags().filter((g) => (g.band === 'beyond' ? 750 : g.band) <= tier);
+    const gags = gagsThroughBand(band);
     for (const gag of gags) {
       list.append(gagRow(gag));
     }

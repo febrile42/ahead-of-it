@@ -234,6 +234,30 @@ export function createPanel(): PanelHandles {
     }
   });
 
+  // U-08 (DIA-194/197): on phone, a tap outside the sheet left it open and
+  // dropped focus to <body> (everything else is `inert` there — U-06 — so
+  // the tap can't land on any real control). `pointerdown`, not `click`:
+  // it fires before the hotspot's own `click` that calls open() below, so
+  // the interaction that opens the panel is never mistaken for one outside
+  // it. On desktop (non-modal) this is a no-op, matching the "what works"
+  // keep-list's side panel that stays open behind a click elsewhere.
+  document.addEventListener('pointerdown', (event) => {
+    if (root.hidden || !modalNow) return;
+    if (!root.contains(event.target as Node)) {
+      // Chromium review round: close() re-focuses the invoking hotspot
+      // synchronously, but the *same* touch gesture still has its
+      // compatibility mousedown/click ahead of it — a mousedown on
+      // whatever non-focusable element sits at this point (a <p>, the
+      // canvas, …) is itself a browser default that blurs back to <body>.
+      // preventDefault() here (for a touch-sourced pointerdown, per the
+      // Pointer Events spec) cancels those compatibility events outright,
+      // so the outside tap only ever dismisses the sheet — it can't also
+      // land a click on whatever it happened to hit behind it.
+      event.preventDefault();
+      close();
+    }
+  });
+
   return {
     root,
     open(fields, thumbnailState, options = {}) {
