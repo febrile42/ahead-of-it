@@ -166,8 +166,13 @@ export async function setBand(page: Page, band: BandId, via: InputMethod = 'mous
 }
 
 /** Walks the slider to `band` with Home/End + arrow keys only — no value
- * assignment. This is the path a keyboard visitor actually takes, and it
- * fires `input` once per key press. */
+ * assignment. This is the path a keyboard visitor actually takes.
+ *
+ * U-03 (DIA-194/195): src/ui/slider.ts's own keydown handler now
+ * `preventDefault()`s the native range behaviour and moves exactly one
+ * *band* per Home/End/Arrow/Page press (Home -> the first band, End -> the
+ * last), not one raw unit — so this presses the BAND_ORDER index distance
+ * from Home (always index 0) rather than the old raw-value distance. */
 export async function setBandByKeyboard(page: Page, band: BandId): Promise<void> {
   const slider = page.locator('#headcount-slider');
   await slider.focus();
@@ -175,15 +180,10 @@ export async function setBandByKeyboard(page: Page, band: BandId): Promise<void>
     await page.keyboard.press('End');
     return;
   }
-  // Home lands on SLIDER_MIN (25), which snaps to band 80, then step up to
-  // the target's exact raw value. `step` is 1 (src/ui/slider.ts), so this is
-  // a deliberate storm of `input` events rather than one jump.
   await page.keyboard.press('Home');
-  const from = Number(await slider.inputValue());
-  const to = rawFor(band);
-  const key = to >= from ? 'ArrowRight' : 'ArrowLeft';
-  for (let i = 0; i < Math.abs(to - from); i += 1) {
-    await page.keyboard.press(key);
+  const toIndex = BAND_ORDER.indexOf(band);
+  for (let i = 0; i < toIndex; i += 1) {
+    await page.keyboard.press('ArrowRight');
   }
 }
 
@@ -192,8 +192,12 @@ export async function setBandByKeyboard(page: Page, band: BandId): Promise<void>
 // ---------------------------------------------------------------------------
 
 export async function currentState(page: Page): Promise<SceneState> {
-  const pressed = await page.locator('.toggle__button').getAttribute('aria-pressed');
-  return pressed === 'true' ? 'without' : 'built';
+  // U-10 (DIA-194/197): the toggle button no longer carries `aria-pressed`
+  // (a button whose accessible name changes with state must not also
+  // carry pressed state, WAI-ARIA APG) — src/ui/toggle.ts keys the fill
+  // off `data-state` instead.
+  const state = await page.locator('.toggle__button').getAttribute('data-state');
+  return state === 'without' ? 'without' : 'built';
 }
 
 /** Flips the toggle to `state`. Returns false when already there (no render). */
@@ -393,9 +397,16 @@ export function hotspots(page: Page): Locator {
  * fresh load can land on a room now, so any spec that wants a gag hotspot
  * (rather than a zoom-in tile, which is also `.hotspot` in the DOM — see
  * src/ui/panel.ts) must call this first instead of assuming one is on
- * screen. */
+ * screen.
+ * R-01b/U-06: the 'beyond' band auto-opens its own (non-modal) panel over
+ * the lower half of the phone screen, which can genuinely cover the
+ * "Whole floor" stepper this needs to click (D-054/U-04 now correctly
+ * keeps a room-kind exit on the room there too, so this isn't a no-op for
+ * 'beyond' the way it used to be by accident). Escape closes any open
+ * panel without changing the view (B4) before the click is attempted. */
 export async function ensureCloseup(page: Page): Promise<void> {
   if ((await currentView(page)) === (await currentRoomId(page))) {
+    if (await panelIsOpen(page)) await page.keyboard.press('Escape');
     await toggleWholeFloor(page);
   }
 }

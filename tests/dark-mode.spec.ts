@@ -113,6 +113,35 @@ test.describe('dark mode contrast (D-046 point 6, WCAG AA)', () => {
     expect(ringDrawn).toBe(true);
     expect(contrastRatio(outlineColor, background)).toBeGreaterThanOrEqual(3);
   });
+
+  test("the toggle's own focus ring is at least 3:1 on the page", async ({ page }) => {
+    // DIA-214 manual QA pass: .toggle__button had no :focus-visible rule of
+    // its own (unlike .scene-views__button above, .punch-list-button,
+    // .hotspot and .scene-stepper button, which all set an explicit
+    // `outline: 3px solid var(--accent)`), so it fell back to the UA's
+    // `outline-color: auto`. Chromium's auto resolves near-white and passed;
+    // WebKit's auto instead resolved to the button's own --toggle-text ink
+    // (#000, D-046 point 4's fill never rethemes), which measured ~1.14:1
+    // against --page-bg (#171310) — invisible to a Safari/iPhone keyboard
+    // user (R-20) tabbing to the headline toggle in dark mode. Same failure
+    // in both pressed and unpressed state, since both kept black text.
+    // DIA-216 added the explicit .toggle__button:focus-visible rule (see
+    // the sibling test above), so this now runs as a plain assertion.
+    await openApp(page, { viewport: PHONE });
+    const button = page.locator('.toggle__button');
+    await button.focus();
+    const { ringDrawn, outlineColor, background } = await page.evaluate(() => {
+      const el = document.activeElement as HTMLElement;
+      const style = getComputedStyle(el);
+      return {
+        ringDrawn: el.matches(':focus-visible') && style.outlineStyle !== 'none',
+        outlineColor: style.outlineColor,
+        background: getComputedStyle(document.body).backgroundColor,
+      };
+    });
+    expect(ringDrawn).toBe(true);
+    expect(contrastRatio(outlineColor, background)).toBeGreaterThanOrEqual(3);
+  });
 });
 
 test.describe('light mode contrast (D-046 point 6, WCAG AA)', () => {

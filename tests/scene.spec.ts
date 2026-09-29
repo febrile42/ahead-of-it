@@ -59,8 +59,9 @@ async function setBand(page: Page, band: BandId) {
 
 async function setState(page: Page, state: 'built' | 'without') {
   const button = page.locator('.toggle__button');
-  const pressed = await button.getAttribute('aria-pressed');
-  const isWithout = pressed === 'true';
+  // U-10 (DIA-194/197): aria-pressed removed from the toggle; data-state
+  // carries which fill it is in instead.
+  const isWithout = (await button.getAttribute('data-state')) === 'without';
   if ((state === 'without') !== isWithout) {
     const prev = await currentRenderToken(page);
     await button.click();
@@ -72,11 +73,18 @@ async function setState(page: Page, state: 'built' | 'without') {
  * hotspots, only "zoom in" tiles, which share the `.hotspot` class
  * (src/ui/panel.ts). Lands on that room's default close-up via "Whole
  * floor" so a spec after this only ever sees gag hotspots. No-op once
- * already on a close-up. */
+ * already on a close-up.
+ * R-01b/U-06: the 'beyond' band auto-opens its (non-modal) panel over the
+ * lower half of the phone screen — D-054/U-04 now correctly keeps a
+ * room-kind exit on the room there too (previously an accident of the old
+ * fallback logic skipped this entirely by always landing straight on a
+ * close-up), so the stepper button this needs to click can be genuinely
+ * covered. Escape closes any open panel without changing the view (B4). */
 async function ensureCloseup(page: Page) {
   const [view, room] = await page.evaluate(() => [document.body.dataset.view, document.body.dataset.room]);
   if (view === room) {
     const prev = await currentRenderToken(page);
+    if (await page.locator('.panel:not([hidden])').count()) await page.keyboard.press('Escape');
     await page.locator('.scene-stepper__floor').click();
     await waitForNextRender(page, prev);
   }

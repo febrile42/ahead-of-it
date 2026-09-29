@@ -104,6 +104,13 @@
     overflow-y: hidden;
   }
 
+  /* U-11: the status overlay sits over .scene-wrap and must match its dark
+     background exactly, or the loading/failure state would show a bright
+     white box against the dark mat above. */
+  .scene-status {
+    background: var(--scene-mat-dark);
+  }
+
   /* D-047 (DIA-151): `.hotspot`'s dashed border is
      `rgba(var(--scene-ink-rgb), .6)` — near-black — which now disappears
      against the dark mat above. A light halo restores it there while still
@@ -175,6 +182,28 @@ h1 {
   }
 }
 
+/* U-14 (DIA-194/197): from 768px up, cap the whole controls column at the
+   scene's own 720px (D-042a) and centre it, instead of letting the slider
+   and toggle stretch the full viewport while the scene stays 720 — that
+   left the stepper below the fold at 1440x900 and put ~700px between the
+   slider's thumb travel and the scene it controls. `.scene-wrap` and
+   `.scene-stepper` already cap/centre at 720px on their own; once #app is
+   exactly that wide too, their own centring becomes a no-op rather than a
+   conflict. */
+@media (min-width: 768px) {
+  #app {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+
+  /* DIA-175's 4-line phone reserve (above) is worst-case for a 390px
+     column; the same copy wraps to 2 lines at 720px. Reserving 4 here left
+     an ~80px empty band above the slider (DIA-194 U-14 evidence). */
+  .app__intro {
+    min-height: calc(1.3em * 2);
+  }
+}
+
 .sr-only {
   position: absolute;
   width: 1px;
@@ -216,8 +245,85 @@ h1 {
   min-height: 1.2em; /* S1, see .slider__label */
 }
 
+/* U-02 (DIA-194/195): the unstyled native control was 16px tall at 390px —
+   a tap 10-14px off its centre missed entirely (R-20/R-24's 44px minimum).
+   The input's own box is now the full 44px hit area (a tap anywhere in it
+   still jumps the native track, same as before — nothing here changes
+   hit-testing, only what's painted), with a thin 4px track and a >=28px
+   thumb drawn on top, in both engines' own pseudo-elements. */
 .slider input[type='range'] {
   width: 100%;
+  height: 44px;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+}
+
+.slider input[type='range']::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 999px;
+  background: var(--border);
+}
+
+.slider input[type='range']::-moz-range-track {
+  height: 4px;
+  border-radius: 999px;
+  background: var(--border);
+}
+
+.slider input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid var(--surface);
+  /* Centres the 28px thumb on the 4px track: (28 - 4) / 2. Firefox's
+     ::-moz-range-thumb centres on its track natively, no margin needed. */
+  margin-top: -12px;
+}
+
+.slider input[type='range']::-moz-range-thumb {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid var(--surface);
+}
+
+/* U-13-style ring (D-046 point 6 contrast rules apply): both engines'
+   thumb pseudo-elements needs the rule repeated — a selector list with an
+   unsupported pseudo-element (`::-moz-range-thumb` in WebKit or vice
+   versa) invalidates the *whole* rule, not just its own branch. */
+.slider input[type='range']:focus-visible::-webkit-slider-thumb {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.slider input[type='range']:focus-visible::-moz-range-thumb {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* U-13 (DIA-194/197): one :focus-visible rule for every page-chrome
+   interactive element (the slider thumb above and the scene's own
+   .hotspot below are pseudo-element/--scene-accent special cases that
+   can't join this selector list, but match its width/offset exactly) —
+   before this, the toggle, panel close, punch-list download and contact
+   links fell through to each browser's own default outline. */
+.scene-views__button:focus-visible,
+.punch-list-button:focus-visible,
+.scene-stepper button:focus-visible,
+.toggle__button:focus-visible,
+.panel__close:focus-visible,
+.checklist__close:focus-visible,
+.checklist__download:focus-visible,
+.contact-line a:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
 }
 
 .slider__ticks {
@@ -230,6 +336,17 @@ h1 {
   position: absolute;
   transform: translateX(-50%);
   white-space: nowrap;
+}
+
+/* U-16 (DIA-194/197): the four stops with no year label (S2) still get a
+   mark — a short line at the top of the row, clear of the text ticks
+   below it, so all 8 stops read as a scale rather than 4 labels floating
+   with 4 unmarked gaps between them. */
+.slider__tick--mark {
+  top: 0;
+  width: 1px;
+  height: 6px;
+  background: var(--border);
 }
 
 /* S2: the first labelled tick sits close to the left edge (band 80 isn't
@@ -273,9 +390,20 @@ h1 {
   cursor: pointer;
 }
 
-.toggle__button[aria-pressed='true'] {
+/* U-10 (DIA-194/197): keyed off data-state, not aria-pressed — a button
+   whose accessible name changes with state must not also carry pressed
+   state (see src/ui/toggle.ts). */
+.toggle__button[data-state='without'] {
   background: var(--toggle-fill-pressed);
   color: var(--toggle-text-pressed);
+}
+
+/* DIA-216: WebKit's UA `outline-color: auto` resolves to the button's own
+   (black) text color instead of a near-white default, ~1.14:1 against
+   --page-bg in dark mode. Explicit ring matches every other control below. */
+.toggle__button:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
 }
 
 /* DIA-176 review round 2: .toggle__subtitle and .toggle__nudge never render
@@ -365,11 +493,6 @@ h1 {
   color: var(--ink-invert);
 }
 
-.scene-views__button:focus-visible {
-  outline: 3px solid var(--accent);
-  outline-offset: 2px;
-}
-
 /* --- View-nav row (DIA-131): the punch-list button's own line, below the
    room tabs and above the canvas — deliberately not sharing the tabs'
    flex row (see index.html's comment: that row is already tight at the
@@ -403,10 +526,6 @@ h1 {
   color: var(--ink-invert);
 }
 
-.punch-list-button:focus-visible {
-  outline: 3px solid var(--accent);
-  outline-offset: 2px;
-}
 
 .punch-list-button__icon {
   width: 16px;
@@ -488,6 +607,59 @@ h1 {
      box that exact same constant, never resized by main.ts again. */
   width: 100%;
   height: 100%;
+}
+
+/* U-11 (DIA-194/197): the loading/failure overlay — same box as
+   .hotspots-layer above, on top of it, painted with the mat colour
+   (never-retheme `--scene-mat` in light, the dark block below matches
+   `.scene-wrap`'s own dark override) so it fully hides whatever the
+   canvas last painted underneath. `hidden` (index.html) keeps it out of
+   the accessibility tree and the tab order until main.ts needs it. */
+.scene-status {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  text-align: center;
+  background: var(--scene-mat);
+}
+
+/* Fix round item 8 / review fix 5's own gotcha, repeated here: the class
+   selector above outranks the UA stylesheet's attribute-only
+   `[hidden] { display: none }`, so without this override the "hidden"
+   overlay still gets laid out and — being `position: absolute; inset: 0`
+   over the canvas — intercepts every click/tap on the hotspots underneath
+   even while invisible. See `.panel__thumb[hidden]` above for the same
+   pattern. */
+.scene-status[hidden] {
+  display: none;
+}
+
+.scene-status__message {
+  margin: 0;
+  color: var(--scene-ink);
+  max-width: 28ch;
+}
+
+.scene-status__retry {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0.3rem 0.9rem;
+  border: 1px solid var(--scene-ink);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--scene-ink);
+  font: inherit;
+  cursor: pointer;
+}
+
+.scene-status__retry:focus-visible {
+  outline: 3px solid var(--scene-accent);
+  outline-offset: 2px;
 }
 
 /* DIA-124: the hotspot marker is four corner brackets (viewfinder L-ticks)
@@ -596,6 +768,26 @@ h1 {
   outline-offset: 2px;
 }
 
+/* U-05 (DIA-194/195): while a hotspot's panel is open, its reticle draws
+   solid instead of the default two-tone outline (main.ts's
+   setHotspotSelected toggles this class alongside aria-expanded) — the
+   object stays identifiable once the sheet covers most of the phone
+   screen. Reuses the bracket pseudo-elements' own box sizing (--obj-w/h),
+   just filled instead of framed. */
+.hotspot--selected:not(.hotspot--zoom)::before,
+.hotspot--selected:not(.hotspot--zoom)::after {
+  animation: none;
+  background-image: none;
+}
+
+.hotspot--selected:not(.hotspot--zoom)::after {
+  background-color: var(--hs-core);
+}
+
+.hotspot--selected:not(.hotspot--zoom)::before {
+  background-color: var(--hs-edge);
+}
+
 /* A room's "zoom in" target (DIA-55): a small label chip anchored on the
    close-up's rect centre, not a button spanning the rect — a dense room's
    rects overlap too much for spanning buttons to ever reach 44px without
@@ -687,11 +879,6 @@ h1 {
   cursor: default;
 }
 
-.scene-stepper button:focus-visible {
-  outline: 3px solid var(--accent);
-  outline-offset: 2px;
-}
-
 .scene-stepper__label {
   flex: 1 1 0;
   min-width: 0;
@@ -733,19 +920,53 @@ h1 {
   visibility: visible;
 }
 
+/* U-05 (DIA-194/195): main.ts's scrollHotspotAboveSheet adds this only when
+   the document doesn't already have ~50vh of room below the current scroll
+   position to bring a low-on-screen hotspot above the sheet's top edge —
+   removed again on close. `max-width: 767px` matches `.panel`'s own sheet
+   breakpoint just below; above it the panel is a side panel that never
+   covers the scene, so there's nothing to scroll clear of. */
+@media (max-width: 767px) {
+  body.panel-scroll-space {
+    padding-bottom: calc(50vh + 16px);
+  }
+}
+
 /* --- Panel (3e): bottom sheet on phone, side panel from 768px --- */
 .panel {
   position: fixed;
   left: 0;
   right: 0;
   bottom: 0;
-  max-height: 70vh;
+  /* U-05 (DIA-194/195): capped at 50vh (≈422px at 844px) below 768px so the
+     tapped hotspot stays visible above the sheet's own top edge — the
+     >=768px override two rules down still lifts this to `none`. */
+  max-height: 50vh;
   overflow-y: auto;
+  /* U-05 AC: overscrolling the sheet must not scroll the page underneath it. */
+  overscroll-behavior: contain;
   background: var(--surface);
   border-top: 2px solid var(--ink);
   border-radius: 12px 12px 0 0;
-  padding: 1rem;
+  padding: 1.5rem 1rem 1rem;
   box-shadow: 0 -4px 16px var(--shadow);
+}
+
+/* U-05: a visible grab edge on the phone bottom sheet — decorative only
+   (no content, no a11y-tree entry), so it carries none of the panel's own
+   copy or state. Absent >=768px, where .panel is a side panel, not a sheet. */
+@media (max-width: 767px) {
+  .panel::before {
+    content: '';
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    width: 36px;
+    height: 4px;
+    border-radius: 999px;
+    background: var(--border);
+    transform: translateX(-50%);
+  }
 }
 
 /* DIA-135: `.checklist__close` shares this exact rule block (same look,
@@ -836,12 +1057,32 @@ h1 {
 }
 
 /* --- Checklist (3f, reworked DIA-131) --- */
+/* U-07 (DIA-194/195): no bottom padding here. `body`'s own 2rem bottom
+   padding (top of this file) is the page's one generic end-of-content
+   allowance; the collapsed `#checklist-panel` sliver is the last in-flow
+   thing in this wrapper, so a second bottom pad here only stacked on top
+   of that and pushed scrollHeight ~32px past the DIA-198 U-07 AC's own
+   +32 tolerance (which already assumes the body-level pad is the only
+   one). The open sheet is `position: fixed`, so it never reads this
+   padding either way. */
 .checklist {
-  padding: 1rem;
+  padding: 1rem 1rem 0;
 }
 
 .checklist > .contact-line {
   margin-top: 0;
+  /* U-07 (DIA-194/195): `<p>`'s user-agent default margin-bottom (~1em)
+     was never reset here (only margin-top was, above) — with this now
+     the last in-flow box in `.checklist` (no bottom padding to contain
+     it), that stray margin escaped into the document's own auto height,
+     the other half of the ~32-48px overshoot measured against the U-07
+     AC alongside `.checklist__panel--collapsed`'s padding, below.
+     -1px rather than 0: with the stray margin gone this box is the
+     document's exact last edge, and Chromium's `scrollHeight` is an
+     integer ceiling of that (sub-pixel, DPR/font-dependent) edge —
+     against the DIA-198 AC's own un-rounded threshold, zero slack ceils
+     past it by <1px on Chromium at 390x844/band 750 specifically. */
+  margin-bottom: -1px;
 }
 
 .checklist__panel {
@@ -849,22 +1090,44 @@ h1 {
 }
 
 /* D-048/R-24: visually hidden until opened, but never display:none and
-   never a closed <details> — a clip pattern (like .sr-only above), so the
-   panel stays in the DOM and the accessibility tree, just not sighted.
-   Deliberately no explicit width/height/overflow:hidden here (unlike
-   .sr-only): those would size this box to a fixed 1x1px, which — because
-   it has no positioned ancestor of its own, so its containing block is
-   the initial containing block — collapses the *whole page's* scrollable
-   height down to exactly the viewport once the (now off-flow) 26-row list
-   no longer contributes any scrollable overflow. A real Chromium run
-   showed a scrollbar disappearing that way changes hit-testing on an open
-   gag panel elsewhere on the page (DIA-131 review). `clip` alone hides
-   every pixel regardless of the box's real (large) size, so the list's
-   natural height still keeps contributing scrollable overflow same as it
-   did before this box was ever collapsed. */
+   never a closed <details> — the same .sr-only pattern used elsewhere in
+   this file, so the panel stays in the DOM and the accessibility tree,
+   just not sighted.
+   U-07 (DIA-194/195): DIA-131 deliberately avoided .sr-only's fixed
+   1x1px box here at the time, because collapsing it (no positioned
+   ancestor of its own, so its containing block was the initial
+   containing block) let the whole page's scrollable height shrink to the
+   viewport once the 26-row list went off-flow — and a real Chromium run
+   at the time showed the vertical scrollbar disappearing with it, which
+   shifted the viewport's own width and moved an open gag panel's
+   hit-testing coordinates out from under a running interaction. Trading
+   that fix for this one instead left the box's full natural height
+   (~2,200px) contributing scrollable overflow at every band whenever
+   collapsed (the normal state), which is what the UX review measured as
+   ~2,200px of blank scroll below the contact line. That scrollbar-toggle
+   risk no longer applies: `.checklist__panel--open` below is `position:
+   fixed`, out of flow and never contributing to document scroll height,
+   so switching between these two states never changes whether the page
+   needs a vertical scrollbar at all — which makes the standard 1x1px
+   pattern safe to use here after all, with no scrollbar-gutter reservation
+   needed (one was tried and reverted: it cost every layout ~15px of
+   width, enough to drop D-042's close-up scale below its signed-off 1.9x
+   minimum at the 360px boundary). Padding/border must be zeroed here too:
+   `.checklist__panel`'s own 1rem padding, under this element's
+   box-sizing:border-box, is not overridden by width/height:1px alone —
+   a border-box can't shrink below its padding+border sum, so it still
+   rendered as a 32px box (measured) until this rule reset them. */
 .checklist__panel--collapsed {
   position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
   clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 .checklist__panel--open {
@@ -1001,11 +1264,18 @@ h1 {
   }
 
   /* Print (Cmd-P) always prints the full list, open or closed (D-048 item
-     5) — undo the collapsed clip and the opened sheet's fixed positioning
-     regardless of on-screen state. */
+     5) — undo the collapsed .sr-only sizing and the opened sheet's fixed
+     positioning regardless of on-screen state. */
   .checklist__panel--collapsed {
     position: static;
+    width: auto;
+    height: auto;
+    margin: 0;
+    padding: 1rem;
+    overflow: visible;
     clip: auto;
+    clip-path: none;
+    white-space: normal;
   }
 
   .checklist__panel--open {
@@ -1014,5 +1284,224 @@ h1 {
     overflow: visible;
     border: 0;
     box-shadow: none;
+  }
+}
+
+/* --- D-056 (DIA-217/U-14): two columns from 1152px --- */
+/* Only this media query changes; every rule above it (the 768-1151 single
+   720px column and its 360px right-edge side panel included) stays
+   byte-for-byte, so nothing below 1152 moves (U-14g). This block must stay
+   last in the file: `#app`'s max-width/margin here override the >=768px
+   rule earlier by source order, and the panel/checklist docking rules
+   below override the >=768px docking rules the same way.
+
+   #app becomes two columns, 368px rail (left, floated) and 720px main
+   (right, plain in-flow blocks with a matching left margin) — a 32px
+   gutter falls out automatically (368 + 720 = 1088, leaving 32 of #app's
+   1120 unused down the middle) rather than being a track of its own. The
+   DOM order in index.html is unchanged — neither a float nor a margin
+   moves anything in the DOM, so reading order and tab order still follow
+   DOM order (U-14e). `display: flow-root` on #app is this century's
+   clearfix: without it, a container with only floated children has zero
+   height, since floats are removed from normal flow.
+
+   Not a shared grid for both columns, on purpose: a shared grid row sizes
+   to its *tallest* member across both columns, so anything placed in the
+   room tabs' own row-track would inflate every rail row by the same
+   amount (or, spanning multiple rail rows to dodge that, the next
+   main-column item would start only after the *whole span* ends, landing
+   well below the tabs — both dead ends this file's history included
+   before landing here). The rail is floated (`float: left`, `clear:
+   left` on every item after the first, so each stacks under the one
+   before it — without `clear`, an earlier-placed float leaves room a
+   later same-direction item could still fit beside instead of under, and
+   DOM order is float placement order). The main column is deliberately
+   *not* also floated: CSS floats must never sit higher than the top of
+   *any* earlier float regardless of direction (CSS2.1 §9.5.1 rule 5), so
+   a float here would be pinned down to the rail's last float (the
+   toggle) instead of starting right after the room tabs — re-coupling
+   this column to the rail's height the long way round. A plain
+   block-level box has no such rule: floated siblings are simply not
+   part of its flow, so `margin-left: 400px` (368px rail + 32px gutter,
+   both fixed design constants, not measured content) places the main
+   column's own items where the rail's floats end, and they then stack by
+   their own heights alone, unaffected by the rail's. Both columns' first
+   item still lands at y: 0 (U-14c): the rail's float is placed "as high
+   as possible" in its own stack, and the main column's first in-flow
+   block starts at #app's own top because floated siblings don't count as
+   "previous" for a normal block's flow position either.
+
+   The punch-list button (#view-nav) is the one main-column piece that
+   isn't full-width — it comes *after* the room tabs in DOM (index.html)
+   and needs to sit beside them, not under, so a plain in-flow block
+   (which would just push the tabs down onto a new line) doesn't fit
+   either. `position: absolute` sidesteps the ordering problem entirely,
+   pinning the button to the main column's own top-right corner (needs
+   #app's `position: relative` two rules down) independent of the tabs
+   row's own placement. The room tabs' width is then set from src/main.ts's
+   updateDesktopLayout(), not a fixed number here — see the comment there
+   for why.
+
+   The detail slot (the tap panel and the punch-list sheet) is the other
+   piece CSS alone can't place: both need to dock "under the toggle,
+   running to the viewport bottom" — a `position: fixed` box whose `left`
+   is the rail's own left edge and `top` is the toggle's own bottom edge.
+   `left`/`right` can't be pure CSS here: #app's `margin: 0 auto` centring
+   means the rail's left edge is `(100vw - 1120px) / 2`, and `100vw`
+   overcounts by half a scrollbar's width whenever one is present — the
+   short-viewport case, point 5 of the D-056 decision. `top` can't be pure
+   CSS either: the toggle's own bottom depends on real rendered text
+   metrics (line-height, font fallback), the same "normal never equals a
+   hand-computed sum" problem DIA-83/DIA-65 hit before — hand-summing the
+   rail's four reserved heights into a calc() would duplicate that
+   knowledge and drift the moment any of them changes. `updateDesktopLayout`
+   in src/main.ts reads both from the real layout instead
+   (`#app`/`#toggle-root`'s own `getBoundingClientRect()`), gated by
+   `matchMedia('(min-width: 1152px)')` and re-run on the same debounced
+   resize `render()` already uses, mirroring the existing `(max-width:
+   767px)` pattern already in that file. `top` alone is also re-derived on
+   every scroll event (DIA-218: `position: fixed` doesn't track document
+   flow, so a stale `top` either covers the toggle or drifts away from it
+   the moment scrollY changes) — see `applyPanelTop()`/`toggleBottomDoc` in
+   that same file. `bottom: 0` below is plain CSS —
+   with no transformed/positioned ancestor, a fixed box's containing block
+   is the real viewport, so it already reaches the literal window bottom
+   with no extra work, the same as the phone/tablet sheet above it. */
+@media (min-width: 1152px) {
+  #app {
+    max-width: 1120px;
+    margin: 0 auto;
+    display: flow-root;
+    position: relative;
+  }
+
+  /* Rail, top-down: h1, lede, slider, toggle (+ tagline/nudge slot, D-051),
+     then the (usually empty) tap-panel placeholder. */
+  #app > h1,
+  #app > .app__intro,
+  #app > #slider-root,
+  #app > #toggle-root,
+  #app > #panel-root {
+    float: left;
+    clear: left;
+    width: 368px;
+  }
+
+  #app > .app__intro {
+    /* Overrides the >=768px rule's 2-line reserve above, sized for the
+       720px-wide single column — the same copy wraps to 4 lines at the
+       368px rail width (U-14h is the tagline's version of this same
+       "narrower column, more lines" fact). */
+    min-height: calc(1.3em * 4);
+  }
+
+  /* U-14h (DIA-221): the toggle's tagline/nudge text at the 368px rail
+     width is CI's other system-ui-fallback casualty — every local
+     measurement fits it on one line with room to spare, but CI's wider
+     fallback wraps it to two (DIA-65 precedent, same mechanism as the
+     tabs-row fix above). `.toggle__message`'s reserved height is `em`
+     against its own font-size, not this element's, so sizing the text
+     down here doesn't reopen a DIA-176/D-051 CLS gap — it only buys back
+     the ~10% of line width CI's font needs. Both rules get it, not just
+     the subtitle, so neither visibly changes size when one replaces the
+     other in their shared grid slot. */
+  .toggle__subtitle,
+  .toggle__nudge {
+    font-size: 0.9em;
+  }
+
+  /* Main, top-down: the room tabs, the scene, the stepper, the
+     scroll-further hint (main.ts inserts `.scene-scroll-hint` right after
+     #scene-stepper at setup — it is not in index.html's static shell) and
+     the checklist's persistent contact line (D-048 item 1: nothing under
+     the scene but the contact line). Plain in-flow blocks, not floats:
+     CSS floats must never sit higher than the top of *any* earlier float
+     regardless of direction (CSS2.1 §9.5.1 rule 5) — since the rail's own
+     floats (above) come first in DOM order and the last of them (the
+     toggle) sits well below y: 0, a float here would be pinned down to
+     the toggle's own top instead of starting right after the room tabs,
+     re-coupling this column to the rail's height the long way round. A
+     normal block-level box has no such rule: floated siblings are simply
+     not part of its flow, so these stack by their own heights alone,
+     starting at #app's own top (y: 0) because floated rail content
+     doesn't count as this column's "previous sibling" either. `margin-
+     left: 400px` (368px rail + 32px gutter, both fixed design constants,
+     not measured content) places their left edge where the rail's floats
+     end, without needing `clear` (nothing here is floated to clear). */
+  #app > #scene-views,
+  #app > #scene-wrap,
+  #app > #scene-stepper,
+  #app > #checklist-root {
+    margin-left: 400px;
+    width: 720px;
+  }
+
+  /* The room tabs are the one item above narrower than the full 720px —
+     it leaves room for the punch-list button, below. Overrides the width
+     from the shared rule above. */
+  #app > #scene-views {
+    width: 538px; /* overridden from src/main.ts's updateDesktopLayout() once #view-nav's real width is known — see the comment there */
+  }
+
+  /* The "scroll to see the rest" hint's own comment (above its base rule)
+     already says it "only matters below ~360px" — .scene-wrap is a fixed
+     720x480 box at this width (D-042a, unchanged), well above that, so
+     the hint has nothing to say here. Dropping its reserved ~23px (it
+     never renders, but the space was always held open) is what closes
+     the last few px of U-14a's hard "no scroll at 1152x648" gate — see
+     the two rules below it for the rest of that budget. */
+  #app > .scene-scroll-hint {
+    display: none;
+  }
+
+  /* D-048 item 2 (amended for >=1152 only): the punch-list button shares
+     the tabs' row, right-aligned — see the block comment above for why
+     this is `position: absolute` rather than a second float. Padding is
+     dropped here too (DIA-221): `.view-nav`'s base `0 1rem` exists to
+     match the phone/tablet row's own inset, but at this width the button
+     is absolutely positioned by its own box, so that padding only ate
+     into the width `updateDesktopLayout()` computes for #scene-views
+     (width: 720 - this element's real rendered width) — the exact
+     mechanism behind U-14f's CI-only overflow: CI's system-ui fallback
+     renders both the tabs and this button a few px wider than any local
+     measurement (DIA-65 precedent), and the unused 32px of padding here
+     was the difference between fitting and needing to scroll. */
+  #app > #view-nav {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: auto;
+    padding: 0;
+  }
+
+  /* U-14a's hard "no scroll at 1152x648" gate leaves very little room
+     below the stepper once the scene (480px, D-042a) and the tabs row are
+     both fixed: the checklist's own top padding (matching the gap the
+     scene-wrap-to-stepper 8px already sets, not the 1rem used <1152,
+     where there's no such budget) and body's bottom padding (a global
+     end-of-page margin that isn't needed here — this column's own
+     trailing space already reads as intentional) both shrink, on top of
+     the scroll-hint drop above. */
+  body {
+    padding-bottom: 0;
+  }
+
+  .checklist {
+    padding-top: 0.5rem;
+  }
+
+  /* --- Detail slot: the tap panel and the punch-list sheet dock in the
+     rail, under the toggle, instead of the viewport's right edge —
+     `left`/`top` are set from src/main.ts's updateDesktopLayout(), see
+     the block comment above for why. */
+  .panel,
+  .checklist__panel--open {
+    right: auto;
+    bottom: 0;
+    width: 368px;
+    max-height: none;
+    border-left: none;
+    border-top: 2px solid var(--ink);
+    border-radius: 12px 12px 0 0;
   }
 }

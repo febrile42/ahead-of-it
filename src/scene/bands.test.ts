@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { BAND_ORDER, formatReadout, isAtLeast, nearestBand } from './bands';
+import { BAND_ORDER, formatReadout, isAtLeast, nearestBand, rawValueForBand } from './bands';
 
 describe('nearestBand (R-01 slider snapping)', () => {
   it('snaps low values to the first band', () => {
@@ -49,6 +49,23 @@ describe('BAND_ORDER / isAtLeast', () => {
   });
 });
 
+describe('rawValueForBand (U-01, DIA-194/195)', () => {
+  it('round-trips every band id through nearestBand', () => {
+    for (const band of BAND_ORDER) {
+      expect(nearestBand(rawValueForBand(band))).toBe(band);
+    }
+  });
+
+  it('gives the numeric band its own id as the raw value', () => {
+    expect(rawValueForBand(750)).toBe(750);
+    expect(rawValueForBand(80)).toBe(80);
+  });
+
+  it("gives 'beyond' the slider's own max, never a parsed display string", () => {
+    expect(rawValueForBand('beyond')).toBe(1000);
+  });
+});
+
 describe('formatReadout', () => {
   it('matches the brief\'s worked example shape', () => {
     expect(formatReadout(400, 490)).toBe('~400 → 2022, ~490');
@@ -60,5 +77,18 @@ describe('formatReadout', () => {
 
   it('rounds the raw value', () => {
     expect(formatReadout(399.6, 490)).toBe('~400 → 2022, ~490');
+  });
+
+  // U-17 (DIA-194/197): the raw value repeating the band right after the
+  // arrow ("~80 → 2018, ~80") was the review's own example of the bug.
+  it('drops the redundant ", ~band" clause when raw is exactly the band (first paint, or a ?n= deep link that lands on it exactly)', () => {
+    expect(formatReadout(80, 80)).toBe('~80 → 2018');
+  });
+
+  it('keeps the full form when raw only rounds/snaps to the band, since the two numbers still differ', () => {
+    // DIA-194 U-17's own worked example: ?n=600 snaps to band 610 but must
+    // still show the visitor's actual 600, not the band's 610, before the
+    // arrow (R-01: "shows the visitor's number").
+    expect(formatReadout(600, 610)).toBe('~600 → 2023, ~610');
   });
 });

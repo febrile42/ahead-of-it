@@ -24,6 +24,12 @@ export const UI_KEYS = [
   'roomTabName',
   'announce',
   'announceRoom',
+  'announceWithout',
+  'announceBuilt',
+  'loading',
+  'loadFailed',
+  'retry',
+  'readoutAtBand',
 ] as const;
 
 export type UiKey = (typeof UI_KEYS)[number];

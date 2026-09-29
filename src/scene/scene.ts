@@ -137,7 +137,14 @@ function fetchJson<T>(url: string): Promise<T> {
 
 export function loadSceneIndex(): Promise<SceneIndex> {
   if (!indexPromise) {
-    indexPromise = fetchJson<SceneIndex>('/sprites/scenes/index.json');
+    // U-11(c) (DIA-194/197): a failed fetch must not poison this cache
+    // forever — without clearing it here, the "Try again" button could
+    // never actually try again, since every retry would just replay the
+    // same rejected promise without a new network request.
+    indexPromise = fetchJson<SceneIndex>('/sprites/scenes/index.json').catch((err) => {
+      indexPromise = null;
+      throw err;
+    });
   }
   return indexPromise;
 }
@@ -160,12 +167,20 @@ export async function loadScene(band: BandId, state: 'built' | 'without'): Promi
   }
   let cached = sceneCache.get(fileName);
   if (!cached) {
-    cached = fetchJson<SceneFile>(`/sprites/scenes/${fileName}`).then((scene) => {
-      if (scene.schema !== SCENE_SCHEMA) {
-        throw new Error(`sprites/scenes/${fileName}: schema ${scene.schema}, this painter draws schema ${SCENE_SCHEMA}`);
-      }
-      return scene;
-    });
+    cached = fetchJson<SceneFile>(`/sprites/scenes/${fileName}`)
+      .then((scene) => {
+        if (scene.schema !== SCENE_SCHEMA) {
+          throw new Error(`sprites/scenes/${fileName}: schema ${scene.schema}, this painter draws schema ${SCENE_SCHEMA}`);
+        }
+        return scene;
+      })
+      // U-11(c): same reasoning as loadSceneIndex above — a failed load
+      // must not permanently poison this file's cache entry, or the
+      // failure-state "Try again" button could never actually retry.
+      .catch((err) => {
+        sceneCache.delete(fileName);
+        throw err;
+      });
     sceneCache.set(fileName, cached);
   }
   return cached;
@@ -219,10 +234,14 @@ export function defaultView(scene: SceneFile): SceneView {
  * deep link, D-043) is the room that holds the band's `default` close-up,
  * not the close-up itself — "Whole floor" pressed. `default` stays a
  * close-up in the scene format unchanged; the web opens on its `parent`.
- * Only this session's first commit uses this — a later slider/toggle reset
- * still falls back to `defaultView` (D-051 item 3, "as today"), which is
- * also what the band-crossing moment gate (SCENE-FORMAT § Band-crossing
- * moment) depends on staying the close-up. */
+ * This session's first commit always uses this; D-054 (amends D-051 item 3,
+ * U-04) also reuses it for a later band change that leaves a whole floor —
+ * a band change keeps the *kind* of view the visitor is in, so a room-kind
+ * exit lands here too, not on `defaultView`. A close-up exit still falls
+ * back to `defaultView` only when its own id doesn't exist in the new
+ * band's scene (main.ts's render()), which is also the only case the
+ * band-crossing moment gate (SCENE-FORMAT § Band-crossing moment) depends
+ * on landing on the close-up. */
 export function openingView(scene: SceneFile): SceneView {
   return roomOf(scene, defaultView(scene)) ?? rooms(scene)[0] ?? scene.views[0];
 }

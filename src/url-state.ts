@@ -7,22 +7,34 @@
 // parameter falls back to today's default for that parameter alone (band
 // 80, built) with no error shown — the two parameters are independent, so
 // `?it=none` with no `n` still gives band 80, without.
-import { nearestBand } from './scene/bands';
+import { nearestBand, rawValueForBand, SLIDER_MAX, SLIDER_MIN } from './scene/bands';
 import type { BandId } from './content';
 import type { SceneState } from './ui/toggle';
 
 export interface InitialSceneState {
   band: BandId;
   state: SceneState;
+  // U-17 (DIA-194/197): the slider's own initial raw value, not just the
+  // band it snaps to — a deep link that doesn't land exactly on a band
+  // (`?n=600`) must still show "~600 → 2023, ~610" (the band's own number
+  // repeated), not lose the 600 and read as if the link had said 610.
+  raw: number;
 }
 
-export const DEFAULT_INITIAL_STATE: InitialSceneState = { band: 80, state: 'built' };
+export const DEFAULT_INITIAL_STATE: InitialSceneState = {
+  band: 80,
+  state: 'built',
+  raw: rawValueForBand(80),
+};
 
-function parseBand(raw: string | null): BandId {
-  if (raw === null) return DEFAULT_INITIAL_STATE.band;
+/** Clamped to the slider's own range so the readout never shows a number
+ * further out than the thumb itself can represent (`rawValueForBand`'s own
+ * doc comment: the slider's raw value and 'beyond' both cap at SLIDER_MAX). */
+function parseRaw(raw: string | null): number | null {
+  if (raw === null) return null;
   const n = Number(raw);
-  if (!Number.isFinite(n) || n <= 0) return DEFAULT_INITIAL_STATE.band;
-  return nearestBand(n);
+  if (!Number.isFinite(n) || n <= 0) return null;
+  return Math.min(SLIDER_MAX, Math.max(SLIDER_MIN, n));
 }
 
 function parseState(raw: string | null): SceneState {
@@ -34,8 +46,10 @@ function parseState(raw: string | null): SceneState {
 /** Reads R-10's `n`/`it` params from a location.search string (e.g. `window.location.search`). */
 export function parseInitialSceneState(search: string): InitialSceneState {
   const params = new URLSearchParams(search);
+  const raw = parseRaw(params.get('n'));
   return {
-    band: parseBand(params.get('n')),
+    band: raw === null ? DEFAULT_INITIAL_STATE.band : nearestBand(raw),
     state: parseState(params.get('it')),
+    raw: raw ?? DEFAULT_INITIAL_STATE.raw,
   };
 }

@@ -5,6 +5,7 @@
 // into this module; it owns no snapping logic of its own.
 import { getBand } from '../content';
 import type { BandId } from '../content';
+import { ui } from '../ui/strings';
 
 /** The seven numeric bands in ascending order, then 'beyond' (R-01, R-01b, D-023, D-029). */
 export const BAND_ORDER: readonly BandId[] = [80, 150, 220, 360, 490, 610, 750, 'beyond'];
@@ -55,6 +56,19 @@ export function bandIndex(band: BandId): number {
 }
 
 /**
+ * The slider's own raw value for a band (U-01, DIA-194/195): the numeric
+ * band id itself, or SLIDER_MAX for 'beyond' — always round-trips back to
+ * the same band through `nearestBand` (bands.test.ts). Never derive this
+ * from a band's display copy (`getBand(band)?.people` is formatted for
+ * reading, e.g. band 750's "~650→750" — stripping its non-digits used to
+ * give 650750, clamped to SLIDER_MAX, which `nearestBand` snaps to
+ * 'beyond' instead of 750).
+ */
+export function rawValueForBand(band: BandId): number {
+  return band === 'beyond' ? SLIDER_MAX : band;
+}
+
+/**
  * True when `band` is at or after `threshold` in the fixed band order.
  * 'beyond' is always at-or-after every numeric threshold (it never grows
  * past what 750 already has — SCENE-FORMAT's `beyond` is an explicit
@@ -70,6 +84,13 @@ export function isAtLeast(band: BandId, threshold: Exclude<BandId, 'beyond'>): b
  * ~490". At the 'beyond' stop there is no year or snapped headcount to
  * show (content.json's band.year/people are null there), so the format
  * collapses to "~N → Beyond".
+ *
+ * U-17 (DIA-194/197): when the raw value is exactly the band's own number
+ * (first paint at 80, or a `?n=` deep link that lands on a band exactly),
+ * the ", ~BAND" clause only repeats the number already shown before the
+ * arrow — TONE.md's `readoutAtBand` ("~{n} → {year}") drops it. A raw
+ * value that only *rounds* to the band (e.g. `?n=600` snapping to 610)
+ * keeps the full form, since 600 and 610 are genuinely different numbers.
  */
 export function formatReadout(raw: number, band: BandId): string {
   const rounded = Math.round(raw);
@@ -78,6 +99,9 @@ export function formatReadout(raw: number, band: BandId): string {
   }
   const info = getBand(band);
   const year = info?.year ?? String(band);
+  if (rounded === band) {
+    return ui('readoutAtBand', { n: rounded, year });
+  }
   const people = info?.people ?? `~${band}`;
   return `~${rounded} → ${year}, ${people}`;
 }

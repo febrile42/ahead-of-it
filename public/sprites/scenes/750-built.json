@@ -2362,7 +2362,11 @@
           "y": 26,
           "w": 60,
           "h": 53,
-          "primary": true
+          "primary": true,
+          "marker": {
+            "x": 58.0,
+            "y": 44.5
+          }
         }
       ]
     },
@@ -3221,7 +3225,11 @@
           "y": 26,
           "w": 47,
           "h": 32,
-          "primary": true
+          "primary": true,
+          "marker": {
+            "x": 47.5,
+            "y": 41.5
+          }
         }
       ]
     },
@@ -4280,7 +4288,11 @@
           "y": 62,
           "w": 31,
           "h": 38,
-          "primary": true
+          "primary": true,
+          "marker": {
+            "x": 19.5,
+            "y": 88.5
+          }
         },
         {
           "gagId": "G7.1",
@@ -4289,7 +4301,11 @@
           "y": 32,
           "w": 58,
           "h": 46,
-          "primary": true
+          "primary": true,
+          "marker": {
+            "x": 146.0,
+            "y": 58.5
+          }
         }
       ],
       "default": true
@@ -5847,7 +5863,11 @@
           "y": 21,
           "w": 50,
           "h": 46,
-          "primary": true
+          "primary": true,
+          "marker": {
+            "x": 101.0,
+            "y": 46.5
+          }
         }
       ]
     },
@@ -6744,7 +6764,11 @@
           "y": 26,
           "w": 45,
           "h": 38,
-          "primary": true
+          "primary": true,
+          "marker": {
+            "x": 138.5,
+            "y": 55.5
+          }
         },
         {
           "gagId": "G3.1",
@@ -8954,7 +8978,11 @@
           "y": 4,
           "w": 113,
           "h": 69,
-          "primary": true
+          "primary": true,
+          "marker": {
+            "x": 106.5,
+            "y": 47.5
+          }
         },
         {
           "gagId": "G7.4",
@@ -8963,7 +8991,11 @@
           "y": 30,
           "w": 93,
           "h": 90,
-          "primary": true
+          "primary": true,
+          "marker": {
+            "x": 55.5,
+            "y": 80.5
+          }
         }
       ]
     },
@@ -9742,7 +9774,11 @@
           "y": 16,
           "w": 58,
           "h": 40,
-          "primary": true
+          "primary": true,
+          "marker": {
+            "x": 70.0,
+            "y": 39.5
+          }
         },
         {
           "gagId": "G4.2",
@@ -10871,7 +10907,11 @@
           "y": 47,
           "w": 62,
           "h": 32,
-          "primary": true
+          "primary": true,
+          "marker": {
+            "x": 67.0,
+            "y": 64.5
+          }
         },
         {
           "gagId": "G6.2",
@@ -10880,7 +10920,11 @@
           "y": 41,
           "w": 55,
           "h": 44,
-          "primary": true
+          "primary": true,
+          "marker": {
+            "x": 124.5,
+            "y": 73.5
+          }
         }
       ]
     },
@@ -11716,7 +11760,11 @@
           "y": 62,
           "w": 37,
           "h": 43,
-          "primary": true
+          "primary": true,
+          "marker": {
+            "x": 69.5,
+            "y": 92.0
+          }
         }
       ]
     },
@@ -17205,7 +17253,11 @@
           "y": 59,
           "w": 128,
           "h": 59,
-          "primary": true
+          "primary": true,
+          "marker": {
+            "x": 90.0,
+            "y": 81.5
+          }
         }
       ]
     }

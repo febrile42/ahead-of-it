@@ -91,7 +91,13 @@
         "roomTab",
         "roomTabName",
         "announce",
-        "announceRoom"
+        "announceRoom",
+        "announceWithout",
+        "announceBuilt",
+        "loading",
+        "loadFailed",
+        "retry",
+        "readoutAtBand"
       ],
       "properties": {
         "intro": { "type": "string", "minLength": 1 },
@@ -106,7 +112,13 @@
         "roomTab": { "type": "string", "minLength": 1 },
         "roomTabName": { "type": "string", "minLength": 1 },
         "announce": { "type": "string", "minLength": 1 },
-        "announceRoom": { "type": "string", "minLength": 1 }
+        "announceRoom": { "type": "string", "minLength": 1 },
+        "announceWithout": { "type": "string", "minLength": 1 },
+        "announceBuilt": { "type": "string", "minLength": 1 },
+        "loading": { "type": "string", "minLength": 1 },
+        "loadFailed": { "type": "string", "minLength": 1 },
+        "retry": { "type": "string", "minLength": 1 },
+        "readoutAtBand": { "type": "string", "minLength": 1 }
       }
     },
     "ambient": {

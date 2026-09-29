@@ -189,7 +189,10 @@ test.describe('focus after each control (DIA-46 item 2): connected, visible, and
     expect(focus.viewId).toBe(target);
   });
 
-  test('zoom-in: focus moves to the whole-floor control (main.ts pendingFocus kind "floor")', async ({ page }) => {
+  // U-12 (DIA-194/197): used to focus "Whole floor" (it comes after the
+  // hotspots in DOM order), forcing a keyboard visitor to Shift+Tab back
+  // past the stepper to reach anything in the close-up they just opened.
+  test("zoom-in: focus moves to the new close-up's first hotspot", async ({ page }) => {
     await H.openApp(page);
     await H.setBand(page, BAND);
     if ((await H.currentView(page)) !== (await H.currentRoomId(page))) {
@@ -197,14 +200,24 @@ test.describe('focus after each control (DIA-46 item 2): connected, visible, and
     }
     const viewId = await page.locator('.hotspot--zoom').first().getAttribute('data-view-id');
     await H.zoomInto(page, viewId!, 'keyboard');
+    const expectedGagId = await page
+      .locator('.hotspots-layer .hotspot[data-hotspot-id]')
+      .first()
+      .getAttribute('data-gag-id');
     const focus = await H.settledFocusInfo(page);
     expect(H.focusIsLost(focus), JSON.stringify(focus)).toBe(false);
-    expect(focus.className).toContain('scene-stepper__floor');
+    expect(focus.className).toContain('hotspot');
+    expect(focus.className).not.toContain('hotspot--zoom');
+    expect(focus.gagId).toBe(expectedGagId);
   });
 
   test('whole floor (leaving a room): focus moves to the zoom-in button of the close-up just left', async ({ page }) => {
     await H.openApp(page);
     await H.setBand(page, BAND);
+    // D-054/U-04: a band change now keeps view kind, so a fresh load's room
+    // (D-051 item 1) survives it — get onto a close-up first, the state
+    // this test (leaving one via "Whole floor") actually needs.
+    await H.ensureCloseup(page);
     const leftId = await H.currentView(page);
     await H.toggleWholeFloor(page, 'keyboard');
     const focus = await H.settledFocusInfo(page);

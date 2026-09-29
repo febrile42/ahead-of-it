@@ -47,14 +47,20 @@ export function createToggle(container: HTMLElement, initial: SceneState = 'buil
     // layout and shifts .scene-views/.scene-wrap/.scene-stepper up 29px
     // underneath the visitor's thumb. Keeping the box present but invisible
     // (see .toggle__subtitle--hidden) reserves its space in both states.
-    const hide = state !== 'built' || nudgeVisible;
+    // U-18 (DIA-194/197): the tagline now shows in both toggle states —
+    // only the nudge (while visible) takes its reserved slot instead.
+    const hide = nudgeVisible;
     subtitle!.classList.toggle('toggle__subtitle--hidden', hide);
     subtitle!.setAttribute('aria-hidden', String(hide));
   }
 
   function render() {
     button!.textContent = state === 'built' ? copy.toggleToWithout : copy.toggleToBuilt;
-    button!.setAttribute('aria-pressed', state === 'without' ? 'true' : 'false');
+    // U-10 (DIA-194/197): a button whose *name* changes must not also carry
+    // `aria-pressed` (WAI-ARIA APG) — it read the opposite of the state
+    // shown ("What he'd already built", pressed). The without/built fill
+    // (style.css) now keys off this data attribute instead.
+    button!.dataset.state = state;
     updateSubtitle();
   }
 

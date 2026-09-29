@@ -108,6 +108,17 @@
       <div class="scene-wrap" id="scene-wrap">
         <canvas id="scene-canvas" width="360" height="240"></canvas>
         <div class="hotspots-layer" id="hotspots-layer"></div>
+        <!-- U-11 (DIA-194/197): the loading/failure overlay, static shell
+             like everything else here (S1) — src/main.ts toggles `hidden`
+             and fills the message/retry text from content.json, it never
+             creates these nodes. Covers the canvas so a slow or blocked
+             scene fetch never leaves a blank box or "not drawn yet"
+             stamped straight onto the canvas (inaccessible to a screen
+             reader either way). -->
+        <div class="scene-status" id="scene-status" hidden>
+          <p class="scene-status__message"></p>
+          <button type="button" class="scene-status__retry" hidden></button>
+        </div>
       </div>
       <div class="scene-stepper" id="scene-stepper">
         <button type="button" class="scene-stepper__button scene-stepper__prev" aria-disabled="true">&#8249;</button>

@@ -26,7 +26,7 @@ import {
 } from './scene/scene';
 import type { SceneFile, SceneView } from './scene/scene';
 import { bandIndex } from './scene/bands';
-import { createChecklist } from './ui/checklist';
+import { createChecklist, gagsThroughBand } from './ui/checklist';
 import type { CanvasBox } from './ui/panel';
 import { beyondPanelFields, createPanel, panelFieldsFor, renderHotspots, renderZoomTargets } from './ui/panel';
 import { ui } from './ui/strings';
@@ -41,10 +41,12 @@ import { loadManifest } from './scene/sprites';
 import type { SpriteManifest } from './scene/sprites';
 import './style.css';
 
+const appRoot = document.querySelector<HTMLDivElement>('#app');
 const introEl = document.querySelector<HTMLParagraphElement>('#app-intro');
 const sliderRoot = document.querySelector<HTMLDivElement>('#slider-root');
 const toggleRoot = document.querySelector<HTMLDivElement>('#toggle-root');
 const viewsRow = document.querySelector<HTMLDivElement>('#scene-views');
+const viewNav = document.querySelector<HTMLDivElement>('#view-nav');
 const sceneWrap = document.querySelector<HTMLDivElement>('#scene-wrap');
 const stepper = document.querySelector<HTMLDivElement>('#scene-stepper');
 let canvas = document.querySelector<HTMLCanvasElement>('#scene-canvas');
@@ -54,10 +56,12 @@ const checklistRoot = document.querySelector<HTMLDivElement>('#checklist-root');
 const punchListButton = document.querySelector<HTMLButtonElement>('#punch-list-button');
 
 if (
+  appRoot &&
   introEl &&
   sliderRoot &&
   toggleRoot &&
   viewsRow &&
+  viewNav &&
   sceneWrap &&
   stepper &&
   canvas &&
@@ -87,7 +91,7 @@ if (
   // Focus and live-region text to apply once the render that follows a
   // navigation commits. A stale render leaves them pending for the newer
   // one; only a committed paint consumes them.
-  let pendingFocus: { kind: 'floor' } | { kind: 'zoomOf'; viewId: string } | null = null;
+  let pendingFocus: { kind: 'firstHotspot' } | { kind: 'zoomOf'; viewId: string } | null = null;
   let pendingAnnounce: string | null = null;
   // DIA-13: the gagId of the hotspot whose panel is currently open, or null
   // when the open panel isn't hotspot-sourced (the auto-opened Beyond panel)
@@ -168,19 +172,62 @@ if (
     document.body.dataset.momentPlaying = 'false';
   }
 
-  // D-051: the lede is static across the whole session (no band/state of
-  // its own to react to), so it is filled once, here, rather than on every
-  // render() — synchronously, before the first paint, same S1 reasoning as
-  // the slider/toggle shell below.
-  introEl.textContent = ui('intro');
+  // D-051/DIA-210: index.html's prerenderIntro Vite plugin already fills
+  // this from the same ui('intro') string at build/dev-serve time, so it
+  // paints at FCP instead of waiting on this module (CI LHR: this was the
+  // #app-intro LCP element's whole render delay). This is only a fallback
+  // for a static-shell context the plugin didn't run against — it must
+  // never overwrite an already-painted lede with an identical string
+  // (that would be a second paint, not a fix).
+  if (!introEl.textContent) {
+    introEl.textContent = ui('intro');
+  }
 
   // S1: slider and toggle markup already lives in index.html's static
   // shell (CLS) — these fill it in rather than creating/appending it.
-  const slider = createSlider(sliderRoot, band);
+  const slider = createSlider(sliderRoot, band, initial.raw);
   const toggle = createToggle(toggleRoot, state);
 
   const panel = createPanel();
   panelRoot.append(panel.root);
+
+  // U-06 (DIA-194/195): every top-level piece of the page other than the
+  // panel itself, so a modal open (≤767px) can make all of it `inert` —
+  // unreachable by Tab and hidden from the accessibility tree — leaving
+  // only the sheet's own contents behind. `#app`'s own children, not
+  // `#app` itself, because `panelRoot` is one of those children too;
+  // marking `#app` inert would take the panel down with it.
+  const pageContent = Array.from(document.querySelectorAll<HTMLElement>('#app > *')).filter(
+    (el) => el !== panelRoot
+  );
+  panel.onOpen((modal) => {
+    for (const el of pageContent) el.inert = modal;
+  });
+  panel.onClose(() => {
+    for (const el of pageContent) el.inert = false;
+  });
+
+  // U-05: the hotspot whose panel is currently open, so its reticle draws
+  // solid and it announces `aria-expanded="true"` for as long as that's
+  // true (DIA-13: the button itself doesn't survive a re-render, so this is
+  // repointed by syncOpenPanel below, the same way B4's return-focus target is).
+  let selectedHotspotButton: HTMLButtonElement | null = null;
+  function setHotspotSelected(button: HTMLButtonElement | null) {
+    if (selectedHotspotButton && selectedHotspotButton !== button) {
+      selectedHotspotButton.classList.remove('hotspot--selected');
+      selectedHotspotButton.setAttribute('aria-expanded', 'false');
+    }
+    selectedHotspotButton = button;
+    if (button) {
+      button.classList.add('hotspot--selected');
+      button.setAttribute('aria-expanded', 'true');
+    }
+  }
+
+  panel.onClose(() => setHotspotSelected(null));
+  // U-05: undo scrollHotspotAboveSheet's temporary scroll room, whether or
+  // not this particular open actually needed it — harmless no-op either way.
+  panel.onClose(() => document.body.classList.remove('panel-scroll-space'));
 
   // DIA-131: the punch-list button's label span lives inside its own
   // static-shell markup (index.html) — checklist.ts writes `Punch list (n)`
@@ -191,6 +238,105 @@ if (
   }
   const checklist = createChecklist(punchListButton, punchListLabel);
   checklistRoot.append(checklist.root);
+  // U-11(a) (DIA-194/197): the "Punch list (n)" label is generated from
+  // content.json's own gag list, not the scene file, so it does not need to
+  // wait on render()'s scene fetch to be correct. Sets *only* the label
+  // text here (never blank while a slow load is in flight) — deliberately
+  // not `checklist.render(band)`, which builds the list DOM with
+  // `loading="lazy"` thumbnails DIA-114 found WebKit fetches all at once if
+  // they exist before the page's first layout/paint pass.
+  punchListLabel.textContent = `Punch list (${gagsThroughBand(band).length})`;
+
+  // D-056 (DIA-217/U-14): two things at >=1152 that src/style.css's own
+  // `@media (min-width: 1152px)` block can't finish on its own — both
+  // documented there, restated briefly here:
+  //
+  // 1. The tap panel and the punch-list sheet dock in the rail under the
+  //    toggle instead of the viewport's right edge (CSS sets
+  //    `position: fixed; bottom: 0` there — everything but `left`/`top`).
+  //    `left` is the rail's own left edge, which #app's `margin: 0 auto`
+  //    centring only gives as `(100vw - 1120px) / 2` — a value that
+  //    drifts by half a scrollbar's width whenever one is present (the
+  //    short-viewport case, D-056 point 5). `top` is the toggle's own
+  //    bottom edge, which depends on real rendered text metrics the same
+  //    way DIA-83/DIA-65 found "normal" line-height never quite matches a
+  //    hand-computed sum.
+  // 2. The room tabs (#scene-views, an in-flow block in CSS, `margin-left:
+  //    400px` with the rest of the main column) need to leave room for the
+  //    punch-list button (#view-nav, `position: absolute;
+  //    right: 0` — it comes after the tabs in DOM, so a float on it could
+  //    never make the *earlier* tabs row avoid it, see the CSS comment).
+  //    The button's rendered width isn't a fixed number either — content
+  //    ("Punch list (n)") sizes it, and this codebase has already hit CI
+  //    rendering a fallback font a few px wider than any local measurement
+  //    (DIA-65's `.scene-stepper__floor` reservation).
+  //
+  // Both need the real layout, not a computed guess — reading them here is
+  // the one reliable source for either. Gated by matchMedia so this is a
+  // no-op below 1152 (nothing here overrides that breakpoint's own CSS),
+  // and re-run on the same debounced resize the render() call below
+  // already uses — mirrors the existing `(max-width: 767px)` pattern
+  // already in this file (see isModalWidth in src/ui/panel.ts).
+  //
+  // DIA-218 review: `top` docks the panel/sheet under the toggle as of
+  // *this* call. `getBoundingClientRect().bottom` is viewport-relative, and
+  // `.panel`'s `position: fixed` never re-reads it — so the moment scrollY
+  // changes (a scroll, or a reload that restores a non-zero scroll
+  // position) without another resize, the docked `top` is stale: covering
+  // the toggle if the page ends up scrolled less than it was at measurement
+  // time, floating well below it if scrolled more (U-14d, D-056 item 5).
+  // `rect.bottom + scrollY` is the toggle's bottom edge in *document*
+  // coordinates, which doesn't change under scrolling — caching that once
+  // per layout pass and re-deriving `top = docBottom - scrollY` on every
+  // scroll event keeps the docked position correct continuously, without
+  // forcing a `getBoundingClientRect()` layout read on every scroll frame.
+  const checklistPanelEl = checklistRoot.querySelector<HTMLElement>('#checklist-panel');
+  const desktopLayoutQuery = window.matchMedia('(min-width: 1152px)');
+  let toggleBottomDoc = 0;
+  function applyPanelTop() {
+    if (!desktopLayoutQuery.matches) return;
+    const top = `${Math.max(0, toggleBottomDoc - window.scrollY)}px`;
+    panel.root.style.top = top;
+    if (checklistPanelEl) checklistPanelEl.style.top = top;
+  }
+  function updateDesktopLayout() {
+    if (!desktopLayoutQuery.matches) {
+      panel.root.style.removeProperty('left');
+      panel.root.style.removeProperty('top');
+      checklistPanelEl?.style.removeProperty('left');
+      checklistPanelEl?.style.removeProperty('top');
+      viewsRow!.style.removeProperty('width');
+      return;
+    }
+    const left = `${appRoot!.getBoundingClientRect().left}px`;
+    toggleBottomDoc = toggleRoot!.getBoundingClientRect().bottom + window.scrollY;
+    panel.root.style.left = left;
+    if (checklistPanelEl) checklistPanelEl.style.left = left;
+    applyPanelTop();
+    viewsRow!.style.width = `${720 - viewNav!.getBoundingClientRect().width}px`;
+  }
+  updateDesktopLayout();
+  // rAF-throttled: scroll can fire many times per frame (momentum
+  // scrolling), applyPanelTop() only needs to run once per paint. Passive
+  // since it never calls preventDefault(). Gated inside applyPanelTop()
+  // itself (desktopLayoutQuery.matches), the same pattern as resize below.
+  let scrollTicking = false;
+  window.addEventListener(
+    'scroll',
+    () => {
+      if (scrollTicking) return;
+      scrollTicking = true;
+      requestAnimationFrame(() => {
+        applyPanelTop();
+        scrollTicking = false;
+      });
+    },
+    { passive: true }
+  );
+  // DIA-218: same belt-and-suspenders re-derive as openPanel()'s own call —
+  // createChecklist() below owns the click listener that actually opens the
+  // sheet, so this is a second, independent listener on the same button.
+  punchListButton.addEventListener('click', applyPanelTop);
 
   // The "scroll for more" hint (SCENE-FORMAT: a view wider than the
   // viewport scrolls to `focus`) only matters below ~360px now that a
@@ -370,8 +516,40 @@ if (
   // The existing live region (slider.ts writes band changes to it); a
   // navigation announces its own view here.
   const liveRegion = sliderRoot.querySelector<HTMLParagraphElement>('.slider__live');
-  if (!prevButton || !nextButton || !stepperLabel || !floorButton || !liveRegion) {
+  const sceneStatus = sceneWrap.querySelector<HTMLDivElement>('.scene-status');
+  const sceneStatusMessage = sceneWrap.querySelector<HTMLParagraphElement>('.scene-status__message');
+  const sceneStatusRetry = sceneWrap.querySelector<HTMLButtonElement>('.scene-status__retry');
+  if (
+    !prevButton ||
+    !nextButton ||
+    !stepperLabel ||
+    !floorButton ||
+    !liveRegion ||
+    !sceneStatus ||
+    !sceneStatusMessage ||
+    !sceneStatusRetry
+  ) {
     throw new Error('index.html static shell is missing the stepper controls');
+  }
+  // U-11(a): "Whole floor" is static per-session copy (TONE.md), not
+  // computed from the scene — filling it before the first render()'s scene
+  // fetch means it is never blank while a slow load is in flight. syncStepper
+  // (below) still sets it on every render(), which is fine — same string.
+  floorButton.textContent = ui('wholeFloor');
+
+  /** U-11(b)/(c): the loading/failure overlay over the canvas. `retry`
+   * re-runs the given callback (rebound on every show — a stale retry
+   * closure from an earlier band would otherwise re-request the wrong
+   * one). Hidden has no retry action, so the button stays hidden then. */
+  function showSceneStatus(message: string, retry: (() => void) | null) {
+    sceneStatusMessage!.textContent = message;
+    sceneStatusRetry!.hidden = !retry;
+    sceneStatusRetry!.textContent = retry ? ui('retry') : '';
+    sceneStatusRetry!.onclick = retry;
+    sceneStatus!.hidden = false;
+  }
+  function hideSceneStatus() {
+    sceneStatus!.hidden = true;
   }
 
   // S6: G3.A's ambient hover on the *whole* scene was noise (a tooltip on
@@ -625,11 +803,45 @@ if (
     return { left: offsetLeft, top: 0, width: cssW, height: cssH };
   }
 
+  // U-05 (DIA-194/195): scrolling the *scene* to the viewport top (the
+  // previous fix) only clears the sheet for a hotspot in the scene's own
+  // top ~50vh — on a tall/busy scene (the review's band-750 repro) a
+  // hotspot further down still ends up under it. Scroll by exactly what
+  // the tapped hotspot itself needs instead, with a small margin so its
+  // reticle isn't flush against the sheet's edge.
+  const PANEL_SHEET_MARGIN_PX = 8;
+
+  function scrollHotspotAboveSheet(source: HTMLElement) {
+    const sheetTop = window.innerHeight / 2; // .panel's own 50vh cap, style.css
+    const needed = source.getBoundingClientRect().bottom - (sheetTop - PANEL_SHEET_MARGIN_PX);
+    if (needed <= 0) return;
+    // The scene can sit close enough to the document's own end (little
+    // checklist/contact-line content below it) that there isn't ~50vh of
+    // real document left to scroll through — pad the document temporarily
+    // so the scroll below actually has room to land, same idea as opening
+    // a mobile keyboard reflowing the page. Removed again on close.
+    const maxScrollY = document.documentElement.scrollHeight - window.innerHeight;
+    if (needed > maxScrollY - window.scrollY) {
+      document.body.classList.add('panel-scroll-space');
+    }
+    window.scrollBy({ top: needed, left: 0 });
+  }
+
   function openPanel(gagId: string, source: HTMLElement) {
     const fields = panelFieldsFor(gagId);
     if (!fields) return;
     cancelActiveMoment(); // PH2-03: opening a panel cancels a playing moment at once.
     openPanelGagId = gagId;
+    if (source instanceof HTMLButtonElement) setHotspotSelected(source);
+    // Desktop's side panel never covers the scene, so this only runs below
+    // the same 767px breakpoint U-06 uses for making the sheet modal.
+    if (window.matchMedia('(max-width: 767px)').matches) {
+      scrollHotspotAboveSheet(source);
+    }
+    // DIA-218: a scroll event between the last layout pass and this click
+    // is already caught by the scroll listener above, but re-deriving here
+    // too means the docked top is never one rAF frame behind the open.
+    applyPanelTop();
     // R-04: the prevented-beat thumbnail is always the without-state
     // scene. B4: closing returns focus to the hotspot that opened it.
     panel.open(fields, 'without', { returnFocusTo: source });
@@ -730,6 +942,7 @@ if (
     );
     if (button) {
       panel.setReturnFocusTo(button);
+      setHotspotSelected(button); // U-05: repoint the solid-reticle state at the button's freshly rebuilt replacement.
     } else if (viewOnly) {
       panel.setReturnFocusTo(floorButton);
     } else {
@@ -781,6 +994,11 @@ if (
     // DIA-13: captured before anything below touches the DOM — the layers
     // that are about to be rebuilt are exactly the ones that can hold focus.
     const focusCapture = captureFocus();
+    // U-11(c): sceneStatusRetry is outside both layers captureFocus() checks,
+    // so a successful retry's own hideSceneStatus() (below) — which sets
+    // `hidden`, i.e. `display: none` (style.css) — silently blurs it to
+    // <body> unless something refocuses on the other side of the fetch.
+    const retryFocused = document.activeElement === sceneStatusRetry;
     // PH2-04 step 3 (DIA-114, CEO ruling on DIA-88): checklist.render(band)
     // used to run here, ahead of loadScene/renderScene below, to unblock the
     // checklist section's own <h2> — band 750's LCP element at the time.
@@ -797,16 +1015,30 @@ if (
     // regression against this same perf goal. Reverted to running after the
     // scene/sprite work, same as before DIA-114.
     let scene: SceneFile | null = null;
+    // U-11(b): "Loading the building…" only after 300ms — most loads never
+    // paint it. Cleared in `finally` regardless of outcome or staleness;
+    // the token check inside still guards against a stale render showing
+    // a loading message for a band a newer render has already moved past.
+    const loadingTimer = window.setTimeout(() => {
+      if (token === renderToken) showSceneStatus(ui('loading'), null);
+    }, 300);
     try {
       scene = await loadScene(band, state);
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error(`no scene file for band ${band}/${state} yet`, err);
+    } finally {
+      window.clearTimeout(loadingTimer);
     }
     if (token !== renderToken) return; // superseded — drop this stale scene fetch too; the newer render owns renderInFlight now
 
     if (!scene) {
       renderMissingScene();
+      // U-11(c): replaces the canvas-drawn "not drawn yet" text (never
+      // reachable by a screen reader) with a Content-owned sentence and a
+      // working retry — the punch list (filled above, independent of the
+      // scene) stays usable either way.
+      showSceneStatus(ui('loadFailed'), () => void render());
       checklist.render(band);
       document.body.dataset.renderedToken = String(token);
       document.body.dataset.band = String(band);
@@ -815,18 +1047,62 @@ if (
       renderInFlight = false;
       return;
     }
+    hideSceneStatus();
 
-    // Toggle and re-render keep the current view id (both states share the
-    // skeleton, D-042a); a slider change reset it to null; a missing id
-    // falls back to the band's default close-up — except before this
-    // session's first commit (`lastCommittedBand === null`: a fresh load,
-    // or a `?n=` deep link, D-043), where D-051 item 1 opens on that
-    // close-up's room instead, "Whole floor" pressed. A later slider/toggle
-    // reset keeps today's close-up fallback (D-051 item 3, "as today"),
-    // which the band-crossing moment check below depends on.
+    // Toggle, tab, stepper, whole-floor and resize renders all keep (or, for
+    // a tab/stepper/whole-floor change, already reset by selectView() to)
+    // the id they want — `currentViewId && findView(scene, currentViewId)`
+    // below finds it in the same band's scene every time. A slider change is
+    // the one case `currentViewId` is left holding the *previous* band's
+    // view id (main.ts's slider.onChange, deliberately un-nulled) —
+    // `isBandChange` below is what tells the two apart.
+    //
+    // D-054 (amends D-051 item 3, U-04): a band change keeps the *kind* of
+    // view the visitor is in, not the literal close-up. `previousView`
+    // looks the outgoing id up in `currentScene` (the previous band's scene
+    // — still not yet reassigned below) before anything here decides where
+    // to land: a room-kind exit ("Whole floor" pressed), same as this
+    // session's first commit (`lastCommittedBand === null`: a fresh load or
+    // a `?n=` deep link, D-043), opens the new band's own opening room. A
+    // close-up exit tries that same id in the *new* band's scene first
+    // (D-036 close-up ids are stable across bands), falling back to the new
+    // band's own default close-up only if it isn't there.
+    //
+    // A room id (`ground`, `floor-2`, …) is deliberately never looked up
+    // this way even though D-036 shares those across bands too: the room
+    // that happens to share this band's outgoing room id is not necessarily
+    // its *opening* room (D-051 item 1), so a room-kind exit always uses
+    // `openingView`, never `findView`.
+    const isBandChange = lastCommittedBand !== null && band !== lastCommittedBand;
+    const previousView = isBandChange && currentScene && currentViewId ? findView(currentScene, currentViewId) : undefined;
+    // PH2-03/D-054 item 3: a genuine rising crossing into a moment-bearing
+    // band always lands on the moment's own close-up, overriding the
+    // kind-preserving `view` choice below — real content grows monotonically
+    // (every band's close-up ids are a superset of the previous band's,
+    // content/*.json), so "falling back to the new band's default close-up
+    // only if [the outgoing id] isn't there" (this rule's own original
+    // phrasing) can never actually happen: the outgoing id is always still
+    // there. Gating this on `previousView?.kind !== 'room'` keeps D-054's
+    // actual fix intact — a room-kind exit (U-04's own bug: stranding a
+    // whole-floor visitor in an unrelated close-up) still always lands on
+    // `openingView`, never the moment — since the moment "plays nowhere
+    // else" (SCENE-FORMAT § Band-crossing moment) and a visitor who hasn't
+    // yet drilled into a close-up isn't the audience for one either.
+    const momentEligible =
+      isBandChange &&
+      state === 'built' &&
+      band !== 'beyond' && // D-029: 1,000+ is an alias of 750, never a crossing of its own
+      bandIndex(band) > bandIndex(lastCommittedBand!) &&
+      !motion.isReduced() && // the brief's rule: reduced motion plays no moment at all
+      !playedMomentBands.has(String(band)) &&
+      !!scene.moment &&
+      previousView?.kind !== 'room';
     const view =
-      (currentViewId && findView(scene, currentViewId)) ||
-      (lastCommittedBand === null ? openingView(scene) : defaultView(scene));
+      lastCommittedBand === null || previousView?.kind === 'room'
+        ? openingView(scene)
+        : momentEligible
+          ? findView(scene, scene.moment!.view)!
+          : (currentViewId && findView(scene, currentViewId)) || defaultView(scene);
     currentViewId = view.id;
     currentScene = scene;
     syncTabs(scene, roomOf(scene, view)?.id);
@@ -841,19 +1117,9 @@ if (
     // condition here only reads state already settled by this point in the
     // function; the mutations that follow (`playedMomentBands.add`,
     // `activeMoment = ...`) still wait for the stale-render check below,
-    // same as before.
-    const crossingMoment =
-      lastCommittedBand !== null &&
-      band !== lastCommittedBand &&
-      state === 'built' &&
-      band !== 'beyond' && // D-029: 1,000+ is an alias of 750, never a crossing of its own
-      bandIndex(band) > bandIndex(lastCommittedBand) &&
-      !motion.isReduced() && // the brief's rule: reduced motion plays no moment at all
-      !playedMomentBands.has(String(band)) &&
-      scene.moment &&
-      scene.moment.view === view.id // always the default close-up; the art check proves it
-        ? scene.moment
-        : null;
+    // same as before. `momentEligible` already forced `view` onto
+    // `scene.moment.view` above, so this is just that same decision.
+    const crossingMoment = momentEligible ? scene.moment! : null;
     // SCENE-FORMAT § Motion "rest pose = today's export": motion off
     // (reduced-motion, or the tab currently hidden) paints the rest pose,
     // same as a painter with no motion support — every pixel-parity golden
@@ -902,13 +1168,24 @@ if (
     lastCommittedBand = band;
     if (view.kind === 'room') {
       renderZoomTargets(hotspotsLayer!, toZoomLayout(scene, view), canvasBox, (viewId) =>
-        selectView(viewId, { focus: { kind: 'floor' } })
+        // U-12 (DIA-194/197): a zoom-in used to land focus on "Whole floor"
+        // (it comes after the hotspots in DOM order), forcing a keyboard
+        // visitor to Shift+Tab back past the stepper to reach anything in
+        // the close-up they just opened.
+        selectView(viewId, { focus: { kind: 'firstHotspot' } })
       );
     } else {
       renderHotspots(hotspotsLayer!, toSceneLayout(view), canvasBox, openPanel);
     }
     updatePanAffordance();
     restoreFocus(focusCapture);
+    if (retryFocused) {
+      // U-11(c): a successful retry hid the button focus was just on — land
+      // on the first room tab (freshest thing to explore), or "Whole floor"
+      // if the scene has none, rather than dropping to <body> (R-24).
+      const firstTab = viewsRow!.querySelector<HTMLButtonElement>('.scene-views__button');
+      (firstTab ?? floorButton!).focus();
+    }
     const paintKey = `${band}/${state}`;
     syncOpenPanel(paintKey === lastPaintKey);
     lastPaintKey = paintKey;
@@ -919,7 +1196,9 @@ if (
       const target =
         pendingFocus.kind === 'zoomOf'
           ? hotspotsLayer!.querySelector<HTMLButtonElement>(`[data-view-id="${CSS.escape(pendingFocus.viewId)}"]`)
-          : null;
+          // U-12: the close-up's first hotspot, in the same DOM order
+          // renderHotspots just built it in.
+          : hotspotsLayer!.querySelector<HTMLButtonElement>('[data-hotspot-id]');
       (target ?? floorButton!).focus();
       pendingFocus = null;
     }
@@ -947,7 +1226,15 @@ if (
     cancelActiveMoment(); // PH2-03: moving the slider cancels a playing moment at once.
     const wasBeyond = band === 'beyond';
     band = newBand;
-    currentViewId = null; // a new band picks its own default view
+    // D-054/U-04: `currentViewId` is deliberately left set, not nulled —
+    // render() below reads it (still holding the view being left, since
+    // nothing else touches it between here and the render() that follows)
+    // to decide whether this band change keeps a close-up's own id or
+    // opens the new band's opening room instead. A visitor dragging fast
+    // across several bands before any of them commits still fires this
+    // listener once per band; leaving `currentViewId` alone here (rather
+    // than nulling it per call) is what keeps that decision correct
+    // regardless of how many intermediate bands never get painted (S5).
     roomFromId = null;
     pendingFocus = null;
     pendingAnnounce = null;
@@ -971,9 +1258,12 @@ if (
       // R-01b: the Beyond band opens its panel automatically. B4: it must
       // not steal focus off the slider at its last stop, and Escape
       // should return focus there too. Not hotspot-sourced, so it is never
-      // syncOpenPanel()'s concern (DIA-13).
+      // syncOpenPanel()'s concern (DIA-13). U-06: `modal: false` — the
+      // "what works" keep-list's own rule is that this one opens without
+      // trapping, so the slider stays usable above the sheet.
       openPanelGagId = null;
-      panel.open(beyondPanelFields(), 'without', { focus: false, returnFocusTo: slider.input });
+      applyPanelTop(); // DIA-218: keep the docked top fresh for this auto-open too.
+      panel.open(beyondPanelFields(), 'without', { focus: false, returnFocusTo: slider.input, modal: false });
     } else if (wasBeyond) {
       // F5 (DIA-12): the auto-opened Beyond panel is only ever true for
       // the 'beyond' band — leaving it must close the panel rather than
@@ -988,6 +1278,10 @@ if (
   toggle.onChange((newState) => {
     cancelActiveMoment(); // PH2-03: flipping the toggle cancels a playing moment at once.
     state = newState;
+    // U-10 (DIA-194/197): the toggle's own name is the action, not the
+    // state (aria-pressed removed, src/ui/toggle.ts) — announce the new
+    // state once, in the existing polite live region.
+    liveRegion!.textContent = ui(newState === 'without' ? 'announceWithout' : 'announceBuilt');
     nudgeSpent = true; // DIA-17: latch on the first toggle, shown or not (R-06a: once per session).
     toggle.hideNudge(); // m2: the nudge's only job was getting them to toggle once.
     // PH2-01 Part B: the toggle picks a new scene file — reset t to 0 for it.
@@ -1013,6 +1307,7 @@ if (
     // resized one, a one-frame flash of the wrong picture.
     resizeDebounce = setTimeout(() => {
       cancelActiveMoment();
+      updateDesktopLayout();
       void render();
     }, 150);
   });

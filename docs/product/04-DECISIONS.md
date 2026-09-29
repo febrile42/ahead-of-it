@@ -661,3 +661,131 @@ Rejected:
   which D-046 point 4 exists to keep.
 - **A larger label (≥18.66 px bold) under the 3:1 rule.** It passes at 3.22:1 with no margin,
   and it makes the toggle bigger on a 390 px phone, next to the thing it must not crowd.
+
+**D-053 · 2026-09-29 · The tagline sits under the toggle in both states; page-state strings;
+the Beyond panel's "below" (DIA-196, from the DIA-194 UX review; Product & Content Lead, for
+CEO sign-off).**
+1. **Tagline (U-18).** TONE.md put the tagline under "the 'What he'd already built' toggle
+   state". That is ambiguous: the button *reads* "What he'd already built" in the without
+   state, but the build shows the tagline in the built state, so the without state has an
+   empty reserved slot. The tagline now shows in **both** states. The nudge takes the slot
+   while it shows, as it does today. The slot is never empty, and the line that states the
+   argument sits under the chaos, next to the way back.
+2. **Page-state strings (U-10, U-11, U-17)** go in TONE.md §Page state copy: the toggle's
+   live announcement, the loading line, the load-failure sentence and "Try again", and a
+   shorter readout when the visitor's number equals the band's. They add no date, headcount
+   or figure of their own. The toggle button keeps its action labels (D-022).
+3. **Beyond panel (open from D-048).** Its Worth it later line changes from "the checklist
+   **below** maps each receipt…" to "the **punch list** maps each receipt…". Since D-048 the
+   list is not below; it is behind the `Punch list (n)` button, which is the name the visitor
+   sees. This is spatial copy, not a receipt: no date, figure or `E-xx` changes.
+No other panel copy, receipt, date or figure changes.
+
+Rejected:
+- **Tagline only in the without state** (the literal reading of TONE.md). The built state's
+  slot would then be empty until the first slider move.
+- **A different line for the without state.** One more string to review, and nothing says
+  the argument better than the tagline does.
+- **Readout "2018 · ~80 people"** (the review's suggestion). It drops the `~N →` shape the
+  readout has at every other value, so the readout would change form mid-drag.
+- **"The checklist" in the Beyond line.** The visitor never sees that word; the button says
+  "Punch list".
+
+**D-054 · 2026-09-29 · A band change keeps the kind of view, not the literal close-up
+(amends D-051 item 3; DIA-194 U-04, accepted on DIA-194; DIA-195).**
+The DIA-194 UX review found the first slider move after D-051's whole-floor landing cuts
+straight to a close-up — sometimes on a different floor (80 whole floor → 220 "Floor 2 ·
+Conference room 6 of 7"). D-051 item 3 said the slider "keeps the visitor's place" but the
+code's fallback to the band's `default` close-up on every band change (D-042a counter 3, "as
+today") reads that more literally than intended: it strands a visitor who was on the whole
+floor, at the exact moment they're still learning the model is a building at all.
+1. **A band change keeps the *kind* of view the visitor is in.** On the whole floor, the new
+   band opens on its own opening room (`openingView`, D-051 item 1's same landing), "Whole
+   floor" pressed. In a close-up whose id exists in the new band's scene (D-036 close-up ids
+   are stable across bands), stay on it. Otherwise fall back to the new band's `default`
+   close-up, same as before.
+2. **A room id is never used to look up the destination.** D-036 room ids (`ground`,
+   `floor-2`, …) are shared across bands too, but the room sharing the outgoing room's id in
+   the new band is not necessarily that band's *opening* room — a whole-floor exit always
+   uses `openingView`, never a direct id lookup.
+3. **D-045's beats are unchanged.** The band-crossing moment still plays only when the
+   visitor lands on the band's own `default` close-up — now a narrower set of band changes
+   (only those that keep or land on that exact close-up) than before, since a whole-floor
+   exit or a close-up that only exists in the old band no longer forces a cut to it. Fewer
+   first slider moves play a moment; the trade-off the review named and CEO accepted.
+4. **Toggle and same-band navigation (tabs, stepper, whole floor, resize) are unaffected** —
+   D-042a's "both states share the skeleton" and D-051 item 2's tab landing keep their own
+   behaviour; only a slider-driven band change consults this rule.
+No panel copy, receipt, date, figure or scene-format change.
+
+Rejected:
+- **Keep the close-up cut for every band change.** Spends the visitor's orientation to buy
+  a moment on a first move they haven't yet learned to read as a building. UX review finding
+  U-04.
+- **Remember the visitor's exact close-up across every future band change, forever.** Not
+  asked for; the review's own AC only requires the close-up to persist while its id still
+  exists in the new band's scene.
+
+**D-055 · 2026-09-29 · The band-crossing moment overrides D-054's kind-preservation, not the
+other way round (amends D-054 item 3; DIA-195 implementation finding).**
+Implementing D-054 against the real per-band scene files (`public/sprites/scenes/`, not the
+80/750 fixtures) found item 3's premise false: content grows monotonically — every band's
+close-up ids are a strict superset of the previous band's, and a band's `moment.view` is
+always a close-up newly introduced at that band, never one that existed before. Under item
+1's literal rule ("a close-up whose id exists in the new band's scene ... stay on it"), the
+outgoing close-up's id is *always* still there and the fallback to `default` that the moment
+depends on is *never* reached — not "a narrower set of band changes," as item 3 said, but
+zero. D-045's moment would never play again for any real visitor.
+1. **A genuine rising, built-state crossing into a moment-bearing band lands on that band's
+   moment close-up, overriding D-054 item 1's "stay on the outgoing id" branch.** The moment
+   "plays nowhere else" (SCENE-FORMAT § Band-crossing moment) and is the whole reason D-045
+   exists; a rule that can incidentally starve it to zero is a bug in the rule, not a smaller
+   version of the feature.
+2. **Gated on the same `previousView.kind !== 'room'` D-054 already uses**, so D-054's actual
+   fix (U-04: don't strand a whole-floor visitor in an unrelated close-up) is untouched — a
+   room-kind exit still always opens the new band's own opening room, never the moment. Only
+   a visitor already in some close-up is eligible, same audience D-045 always aimed at.
+3. **`playedMomentBands`/reduced-motion/rising/built/not-`beyond` gates are unchanged** — this
+   only changes which `view` the moment lands on when everything else about the crossing
+   already qualifies it.
+No panel copy, receipt, date, figure or scene-format change. Flagged for Senior Software
+Engineer / CEO review in the DIA-195 PR — this reopens something D-054 (with CEO sign-off)
+believed still worked; the fix keeps D-054's own stated intent (fewer moments than before,
+not the feature going away entirely) rather than reverting it.
+
+**U-04's AC is amended accordingly, word for word:** "From Sales pit at 80, moving to 750
+stays on Sales pit, unless that crossing plays 750's moment (first rising, built-state
+crossing, motion allowed). With reduced motion, it stays on Sales pit."
+
+Rejected:
+- **Leave D-045 dark and update its tests to expect `false`.** Matches the code but not
+  D-054's own accepted premise, and quietly ships the removal of a previously signed-off
+  feature (PH2-03) with no decision entry naming it.
+- **Revert D-054 item 1's close-up-persistence rule instead.** Un-fixes U-04's actual bug
+  (the whole-floor stranding) to save a feature that only needs a narrower carve-out.
+- **(C) Play the moment only when the visitor's current close-up already is the moment
+  view.** Keeps the rule but makes the moment vanishingly rare in practice — CEO ruling,
+  DIA-195.
+
+**Signed off by the CEO, 2026-09-29 (DIA-195).**
+
+**D-056 · 2026-09-29 · From 1152 px the page is two columns: controls left, picture right
+(DIA-215, U-14; UX Lead; CEO signed off on DIA-215).**
+The DIA-194 review's U-14 asked for slider, toggle, tabs, scene and stepper above the fold at
+1440×900. The single 720 px column needs 986 px. Real laptop inner viewports are 650–790 px
+tall, so trimming rows to clear 900 would still fail most desktop visitors.
+1. **From 1152 px, a two-column layout:** a 368 px rail (h1, lede, slider, toggle + tagline)
+   and the 720 × 480 scene column (tabs row, scene, stepper, contact line). The DOM order is
+   unchanged. The layout needs about 600 px of height.
+2. **The punch-list button shares the tabs row there**, right-aligned. Amends D-048 item 2 for
+   ≥1152 only. On phone and tablet it keeps its own row.
+3. **The tap panel and punch-list sheet dock in the rail under the toggle** at ≥1152, not on
+   the viewport's right edge. This keeps the picture fully visible and keeps the slider and
+   toggle in view, so the visitor can flip the state while reading. Still non-modal (U-06).
+   Below about 610 px of viewport height the rail's own content plus a fully-open panel no
+   longer both fit, so the page scrolls instead of the rail panel assuming a tall viewport.
+4. D-042a's box, tabs, stepper and Whole floor, and D-051/D-053's order, are unchanged. No
+   copy, art, scene or receipt changes.
+Rejected: capping the scene by height (the painter's integer scale drops to 1–1.5×, halving
+the art at dpr 1); the toggle beside the slider (moves D-053's tagline and still ends ~4 px
+from a 900 fold); restating the AC for a taller viewport (hides the failure on real laptops).

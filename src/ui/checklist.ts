@@ -10,6 +10,17 @@ import type { BandId, Gag } from '../content';
 import { getBeyond, getGags } from '../content';
 import { createContactLine } from './contact';
 
+/** Every gag through `band` (inclusive) — the same tier-collapse `render()`
+ * below uses to build the list, split out so U-11(a) (DIA-194/197) can fill
+ * the trigger's `Punch list (n)` label at boot from content.json alone.
+ * Deliberately does NOT touch the DOM: `render()`'s own list build inserts
+ * `loading="lazy"` thumbnails that must not exist before the page's first
+ * layout/paint pass, or WebKit fetches all of them at once (DIA-114). */
+export function gagsThroughBand(band: BandId): Gag[] {
+  const tier = band === 'beyond' ? 750 : band;
+  return getGags().filter((g) => (g.band === 'beyond' ? 750 : g.band) <= tier);
+}
+
 export interface ChecklistHandles {
   root: HTMLElement;
   /** Rebuilds the list for `band` and returns the gag count, so the nav
@@ -33,15 +44,22 @@ function gagRow(gag: Gag): HTMLElement {
   thumb.className = 'checklist__thumb';
   thumb.setAttribute('aria-hidden', 'true');
   const thumbImg = document.createElement('img');
-  thumbImg.src = `/sprites/thumbs/${gag.id}.png`;
+  // DIA-205: `loading="lazy"` alone isn't a safe defer here. The collapsed
+  // sheet hides via the standard sr-only pattern (width/height:1px +
+  // overflow:hidden, style.css's `.checklist__panel--collapsed`) — Chromium
+  // treats an image inside a zero-size clipped ancestor as "can't tell how
+  // far it is from the viewport" and loads it immediately rather than
+  // deferring it, native `loading="lazy"` or not. That fired all 26 rows'
+  // fetches (up to 16 at band 750) on every page load, competing with the
+  // CSS/JS/scene fetches that gate the intro paragraph's paint (the actual
+  // LCP element, DIA-205) for bandwidth and decode time. `data-src` holds
+  // the real URL until loadPendingThumbs() below assigns it explicitly —
+  // on open, on a render() while already open, or on `beforeprint` — so
+  // nothing here depends on the browser's own visibility heuristic.
+  thumbImg.dataset.src = `/sprites/thumbs/${gag.id}.png`;
   thumbImg.alt = '';
   thumbImg.width = 64;
   thumbImg.height = 48;
-  // The sheet is visually hidden until opened (D-048) — up to 26 of these
-  // fire on a single render() while it's collapsed. `loading="lazy"` skips
-  // the fetch until the row is actually in the viewport (i.e. the sheet is
-  // open), instead of downloading and decoding every thumbnail nobody may
-  // ever see.
   thumbImg.loading = 'lazy';
   thumbImg.decoding = 'async';
   thumbImg.onerror = () => {
@@ -73,6 +91,18 @@ function gagRow(gag: Gag): HTMLElement {
   }
 
   return li;
+}
+
+/** DIA-205: assigns the real `src` to every thumbnail still holding a
+ * pending `data-src` (see gagRow's own comment) — called once the row is
+ * actually about to be seen: the sheet opening, a render() while it's
+ * already open, or a print. Idempotent: an already-loaded `<img>` has no
+ * `data-src` left to match. */
+function loadPendingThumbs(panel: HTMLElement) {
+  for (const img of panel.querySelectorAll<HTMLImageElement>('img[data-src]')) {
+    img.src = img.dataset.src!;
+    delete img.dataset.src;
+  }
 }
 
 function beyondTranslationTable(): HTMLElement {
@@ -196,9 +226,7 @@ export function createChecklist(trigger: HTMLButtonElement, triggerLabel: HTMLEl
 
   function render(band: BandId): number {
     list.replaceChildren();
-    const tier = band === 'beyond' ? 750 : band;
-    // gag.band is never 'beyond' in practice (see layout.ts's same note).
-    const gags = getGags().filter((g) => (g.band === 'beyond' ? 750 : g.band) <= tier);
+    const gags = gagsThroughBand(band);
     for (const gag of gags) {
       list.append(gagRow(gag));
     }
@@ -226,6 +254,10 @@ export function createChecklist(trigger: HTMLButtonElement, triggerLabel: HTMLEl
     panel.append(createContactLine());
 
     setPanelTabbable(panel, open);
+    // DIA-205: a band change while the sheet is already open still builds
+    // fresh rows above (list.replaceChildren()) — they're visible right
+    // now, so they don't wait for a later setOpen(true) that isn't coming.
+    if (open) loadPendingThumbs(panel);
     const label = `Punch list (${gags.length})`;
     triggerLabel.textContent = label;
     headerTitle.textContent = label;
@@ -240,6 +272,7 @@ export function createChecklist(trigger: HTMLButtonElement, triggerLabel: HTMLEl
     trigger.setAttribute('aria-expanded', String(open));
     setPanelTabbable(panel, open);
     if (open) {
+      loadPendingThumbs(panel);
       printButton.focus();
     } else {
       trigger.focus();
@@ -247,6 +280,13 @@ export function createChecklist(trigger: HTMLButtonElement, triggerLabel: HTMLEl
   }
 
   trigger.addEventListener('click', () => setOpen(!open));
+
+  // DIA-205/D-048 item 5: print (Cmd-P) must show the full list, open or
+  // not — the print stylesheet already forces the collapsed sheet visible
+  // regardless of `open`, but that CSS-only override never runs setOpen(),
+  // so it would otherwise print rows whose thumbnails still hold a pending
+  // data-src and never got a real one.
+  window.addEventListener('beforeprint', () => loadPendingThumbs(panel));
 
   // Same Escape convention as the gag panel (panel.ts) — closes regardless
   // of which element currently has focus, and only while this panel (not

@@ -570,7 +570,7 @@
       },
       "already": "Everything in this building was decided ahead of need — at 80, at 150, at 600 — by one person who stayed long enough to see the 2018 decisions carry 750 people across six cities.",
       "prevented": "nobody builds IT from zero at your size. Except every time you acquire a company, open a region, stand up a business unit, or a new category of tool arrives before anyone owns it. Each of those is a from-zero build inside a big company, with the same failure modes as the closet and the sticky notes — and more at stake.",
-      "worthLater": "the checklist below maps each receipt to what it looks like at yours.",
+      "worthLater": "the punch list maps each receipt to what it looks like at yours.",
       "receipts": [
         "E-01",
         "E-02",
@@ -672,7 +672,13 @@
     "roomTab": "{room} ({count})",
     "roomTabName": "{room}: {count} to tap",
     "announce": "{room}: {label}, {n} of {total}",
-    "announceRoom": "{room}: whole floor"
+    "announceRoom": "{room}: whole floor",
+    "announceWithout": "Showing the building without him",
+    "announceBuilt": "Showing what he'd already built",
+    "loading": "Loading the building…",
+    "loadFailed": "The building didn't load. Everything in it is in the punch list.",
+    "retry": "Try again",
+    "readoutAtBand": "~{n} → {year}"
   },
   "ambient": {
     "hover": "Someone is always on call. In the built state, it's a rotation."
