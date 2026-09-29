@@ -365,7 +365,7 @@ acquire a company, open a region, stand up a business unit, or a new category of
 arrives before anyone owns it. Each of those is a from-zero build inside a big company,
 with the same failure modes as the closet and the sticky notes — and more at stake.
 
-**Worth it later:** the checklist below maps each receipt to what it looks like at
+**Worth it later:** the punch list maps each receipt to what it looks like at
 yours. `E-01…E-30`
 
 **Checklist translation column (R-14, at this stop only):**
