@@ -1359,7 +1359,11 @@ h1 {
    (`#app`/`#toggle-root`'s own `getBoundingClientRect()`), gated by
    `matchMedia('(min-width: 1152px)')` and re-run on the same debounced
    resize `render()` already uses, mirroring the existing `(max-width:
-   767px)` pattern already in that file. `bottom: 0` below is plain CSS —
+   767px)` pattern already in that file. `top` alone is also re-derived on
+   every scroll event (DIA-218: `position: fixed` doesn't track document
+   flow, so a stale `top` either covers the toggle or drifts away from it
+   the moment scrollY changes) — see `applyPanelTop()`/`toggleBottomDoc` in
+   that same file. `bottom: 0` below is plain CSS —
    with no transformed/positioned ancestor, a fixed box's containing block
    is the real viewport, so it already reaches the literal window bottom
    with no extra work, the same as the phone/tablet sheet above it. */

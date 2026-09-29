@@ -160,7 +160,7 @@ test.describe('D-056 U-14d: an open panel docks in the rail, never over the scen
   }
 
   async function assertPanelDocked(page: Page, selector: string): Promise<void> {
-    const [panelBox, sceneBox, sliderCentre, toggleCentre] = await Promise.all([
+    const [panelBox, sceneBox, sliderCentre, toggleCentre, toggleBottom] = await Promise.all([
       page.locator(selector).boundingBox(),
       page.locator('#scene-wrap').boundingBox(),
       page.locator('#headcount-slider').evaluate((el) => {
@@ -171,6 +171,11 @@ test.describe('D-056 U-14d: an open panel docks in the rail, never over the scen
         const r = el.getBoundingClientRect();
         return { x: r.x + r.width / 2, y: r.y + r.height / 2 };
       }),
+      // #toggle-root, not .toggle__button: the rail item includes the
+      // subtitle/tagline below the button (index.html's .toggle__message),
+      // and updateDesktopLayout() docks under the whole item, not just the
+      // button — matching src/main.ts's own toggleRoot.getBoundingClientRect().
+      page.locator('#toggle-root').evaluate((el) => el.getBoundingClientRect().bottom),
     ]);
     expect(panelBox!.x).toBeLessThanOrEqual(sceneBox!.x);
     expect(panelBox!.x + panelBox!.width).toBeLessThanOrEqual(sceneBox!.x);
@@ -183,6 +188,69 @@ test.describe('D-056 U-14d: an open panel docks in the rail, never over the scen
     ]);
     expect(sliderHit).toBe(true);
     expect(toggleHit).toBe(true);
+    // DIA-218: the docked `top` must track the toggle's *current* viewport-
+    // relative bottom edge (clamped at >=0), not a value cached from the
+    // last resize/layout pass — this is what actually distinguishes "the
+    // panel happens to still overlap nothing" from "the panel is docked".
+    expect(Math.abs(panelBox!.y - Math.max(0, toggleBottom))).toBeLessThanOrEqual(1.5);
+  }
+
+  const SHORT_VIEWPORTS = CASES.slice(1); // the two D-056 point 5 short-viewport cases
+
+  /** Two rAFs: the scroll listener itself only schedules one (it drops a
+   * second 'scroll' event that arrives before the first's rAF has run), so
+   * one tick is enough for applyPanelTop() to have run — the second is
+   * slack against the page.evaluate() round-trip landing mid-frame. */
+  async function settleAfterScroll(page: Page): Promise<void> {
+    await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
+  }
+
+  for (const viewport of SHORT_VIEWPORTS) {
+    test(`${viewport.width}x${viewport.height}: scrolling before opening still docks a gag panel under the toggle (DIA-218)`, async ({
+      page,
+      browserName,
+    }) => {
+      test.skip(browserName !== 'chromium', 'webkit-iphone pins a 390px touch device, not a >=1152 desktop surface');
+      await openAt(page, viewport, '/?n=750');
+      // Scrolls to the page's own max — the document is short enough
+      // (D-056 point 5) that the toggle stays on screen throughout.
+      await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+      await H.openFirstHotspot(page);
+      await assertPanelDocked(page, '.panel');
+    });
+
+    // DIA-218 review: `updateDesktopLayout()` only ran at setup and on
+    // resize, so a scroll that happens *after* a panel/sheet is already
+    // open (no resize involved) left the docked `top` wherever it was
+    // computed — opening a fresh sheet/panel from a still-scrolled page
+    // (the tests above) isn't the only way to hit this: opening the
+    // checklist sheet in particular resets scrollY to 0 as a side effect
+    // (H.openPunchList's click brings focus into view), which happened to
+    // mask the bug for "scroll first, then open" — scrolling *after* open
+    // does not have that confound and reproduces it directly.
+    test(`${viewport.width}x${viewport.height}: opening a gag panel, then scrolling, keeps it docked under the toggle (DIA-218)`, async ({
+      page,
+      browserName,
+    }) => {
+      test.skip(browserName !== 'chromium', 'webkit-iphone pins a 390px touch device, not a >=1152 desktop surface');
+      await openAt(page, viewport, '/?n=750');
+      await H.openFirstHotspot(page);
+      await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+      await settleAfterScroll(page);
+      await assertPanelDocked(page, '.panel');
+    });
+
+    test(`${viewport.width}x${viewport.height}: opening the punch-list sheet, then scrolling, keeps it docked under the toggle (DIA-218)`, async ({
+      page,
+      browserName,
+    }) => {
+      test.skip(browserName !== 'chromium', 'webkit-iphone pins a 390px touch device, not a >=1152 desktop surface');
+      await openAt(page, viewport, '/?n=750');
+      await H.openPunchList(page);
+      await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+      await settleAfterScroll(page);
+      await assertPanelDocked(page, '#checklist-panel');
+    });
   }
 
   test('the Beyond panel opened via the keyboard at 1,000+ does not obscure the focused slider (WCAG 2.4.11)', async ({

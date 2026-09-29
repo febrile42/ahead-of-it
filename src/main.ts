@@ -261,8 +261,9 @@ if (
   //    bottom edge, which depends on real rendered text metrics the same
   //    way DIA-83/DIA-65 found "normal" line-height never quite matches a
   //    hand-computed sum.
-  // 2. The room tabs (#scene-views, `float: right` in CSS) need to leave
-  //    room for the punch-list button (#view-nav, `position: absolute;
+  // 2. The room tabs (#scene-views, an in-flow block in CSS, `margin-left:
+  //    400px` with the rest of the main column) need to leave room for the
+  //    punch-list button (#view-nav, `position: absolute;
   //    right: 0` — it comes after the tabs in DOM, so a float on it could
   //    never make the *earlier* tabs row avoid it, see the CSS comment).
   //    The button's rendered width isn't a fixed number either — content
@@ -276,8 +277,28 @@ if (
   // and re-run on the same debounced resize the render() call below
   // already uses — mirrors the existing `(max-width: 767px)` pattern
   // already in this file (see isModalWidth in src/ui/panel.ts).
+  //
+  // DIA-218 review: `top` docks the panel/sheet under the toggle as of
+  // *this* call. `getBoundingClientRect().bottom` is viewport-relative, and
+  // `.panel`'s `position: fixed` never re-reads it — so the moment scrollY
+  // changes (a scroll, or a reload that restores a non-zero scroll
+  // position) without another resize, the docked `top` is stale: covering
+  // the toggle if the page ends up scrolled less than it was at measurement
+  // time, floating well below it if scrolled more (U-14d, D-056 item 5).
+  // `rect.bottom + scrollY` is the toggle's bottom edge in *document*
+  // coordinates, which doesn't change under scrolling — caching that once
+  // per layout pass and re-deriving `top = docBottom - scrollY` on every
+  // scroll event keeps the docked position correct continuously, without
+  // forcing a `getBoundingClientRect()` layout read on every scroll frame.
   const checklistPanelEl = checklistRoot.querySelector<HTMLElement>('#checklist-panel');
   const desktopLayoutQuery = window.matchMedia('(min-width: 1152px)');
+  let toggleBottomDoc = 0;
+  function applyPanelTop() {
+    if (!desktopLayoutQuery.matches) return;
+    const top = `${Math.max(0, toggleBottomDoc - window.scrollY)}px`;
+    panel.root.style.top = top;
+    if (checklistPanelEl) checklistPanelEl.style.top = top;
+  }
   function updateDesktopLayout() {
     if (!desktopLayoutQuery.matches) {
       panel.root.style.removeProperty('left');
@@ -288,16 +309,34 @@ if (
       return;
     }
     const left = `${appRoot!.getBoundingClientRect().left}px`;
-    const top = `${toggleRoot!.getBoundingClientRect().bottom}px`;
+    toggleBottomDoc = toggleRoot!.getBoundingClientRect().bottom + window.scrollY;
     panel.root.style.left = left;
-    panel.root.style.top = top;
-    if (checklistPanelEl) {
-      checklistPanelEl.style.left = left;
-      checklistPanelEl.style.top = top;
-    }
+    if (checklistPanelEl) checklistPanelEl.style.left = left;
+    applyPanelTop();
     viewsRow!.style.width = `${720 - viewNav!.getBoundingClientRect().width}px`;
   }
   updateDesktopLayout();
+  // rAF-throttled: scroll can fire many times per frame (momentum
+  // scrolling), applyPanelTop() only needs to run once per paint. Passive
+  // since it never calls preventDefault(). Gated inside applyPanelTop()
+  // itself (desktopLayoutQuery.matches), the same pattern as resize below.
+  let scrollTicking = false;
+  window.addEventListener(
+    'scroll',
+    () => {
+      if (scrollTicking) return;
+      scrollTicking = true;
+      requestAnimationFrame(() => {
+        applyPanelTop();
+        scrollTicking = false;
+      });
+    },
+    { passive: true }
+  );
+  // DIA-218: same belt-and-suspenders re-derive as openPanel()'s own call —
+  // createChecklist() below owns the click listener that actually opens the
+  // sheet, so this is a second, independent listener on the same button.
+  punchListButton.addEventListener('click', applyPanelTop);
 
   // The "scroll for more" hint (SCENE-FORMAT: a view wider than the
   // viewport scrolls to `focus`) only matters below ~360px now that a
@@ -799,6 +838,10 @@ if (
     if (window.matchMedia('(max-width: 767px)').matches) {
       scrollHotspotAboveSheet(source);
     }
+    // DIA-218: a scroll event between the last layout pass and this click
+    // is already caught by the scroll listener above, but re-deriving here
+    // too means the docked top is never one rAF frame behind the open.
+    applyPanelTop();
     // R-04: the prevented-beat thumbnail is always the without-state
     // scene. B4: closing returns focus to the hotspot that opened it.
     panel.open(fields, 'without', { returnFocusTo: source });
@@ -1219,6 +1262,7 @@ if (
       // "what works" keep-list's own rule is that this one opens without
       // trapping, so the slider stays usable above the sheet.
       openPanelGagId = null;
+      applyPanelTop(); // DIA-218: keep the docked top fresh for this auto-open too.
       panel.open(beyondPanelFields(), 'without', { focus: false, returnFocusTo: slider.input, modal: false });
     } else if (wasBeyond) {
       // F5 (DIA-12): the auto-opened Beyond panel is only ever true for
