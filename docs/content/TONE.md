@@ -99,6 +99,20 @@ number as the readout shows it today, and `{year}` is the band's year. Served as
 | `retry` | `Try again` | Button under `loadFailed`; re-requests the scene. |
 | `readoutAtBand` | `~{n} → {year}` | The slider readout when the visitor's number equals the band's headcount (first paint at 80 reads `~80 → 2018`, not `~80 → 2018, ~80`). Otherwise the readout is unchanged. |
 
+## Share control copy (D-057)
+
+The "Share image" control (D-057 item 7): a secondary pill that always hands over the
+**without** picture of the current stop, from either state. The visible label says which
+picture it is, in the toggle's own words, so from the built state it also points at the
+toggle. The accessible name starts with the visible label (WCAG 2.5.3) and adds what the
+visitor gets. It adds no date, headcount or figure and names no employer (D-014). Served as
+`content.json` `ui.<key>`.
+
+| key | copy | where |
+|---|---|---|
+| `shareButton` | `Share it without him` | Visible pill text, below 1152 px in `#view-nav` opposite the punch list, from 1152 px in the rail under the toggle's message slot. |
+| `shareButtonName` | `Share it without him: a picture of this building` | Accessible name (`aria-label`) of the same control. |
+
 ## Landing copy (D-051)
 
 The page's own introduction (DIA-161). It is plain and says what the page is and what to do
