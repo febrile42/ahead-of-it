@@ -2481,7 +2481,11 @@
           "y": 44,
           "w": 47,
           "h": 32,
-          "primary": true
+          "primary": true,
+          "marker": {
+            "x": 79.5,
+            "y": 59.5
+          }
         }
       ]
     },
@@ -4170,7 +4174,11 @@
           "y": 55,
           "w": 45,
           "h": 38,
-          "primary": true
+          "primary": true,
+          "marker": {
+            "x": 134.5,
+            "y": 84.5
+          }
         }
       ]
     },
@@ -5621,7 +5629,11 @@
           "y": 83,
           "w": 62,
           "h": 32,
-          "primary": true
+          "primary": true,
+          "marker": {
+            "x": 67.0,
+            "y": 100.5
+          }
         }
       ],
       "default": true

@@ -2490,7 +2490,11 @@
           "y": 82,
           "w": 65,
           "h": 38,
-          "primary": true
+          "primary": true,
+          "marker": {
+            "x": 118.5,
+            "y": 101.5
+          }
         },
         {
           "gagId": "G5.3",
@@ -2499,7 +2503,11 @@
           "y": 20,
           "w": 61,
           "h": 92,
-          "primary": true
+          "primary": true,
+          "marker": {
+            "x": 70.5,
+            "y": 69.5
+          }
         }
       ]
     },
@@ -3429,7 +3437,11 @@
           "y": 73,
           "w": 17,
           "h": 22,
-          "primary": true
+          "primary": true,
+          "marker": {
+            "x": 81.5,
+            "y": 83.0
+          }
         },
         {
           "gagId": "G2.3",
@@ -3438,7 +3450,11 @@
           "y": 26,
           "w": 47,
           "h": 32,
-          "primary": true
+          "primary": true,
+          "marker": {
+            "x": 47.5,
+            "y": 41.5
+          }
         }
       ]
     },
@@ -4561,7 +4577,11 @@
           "y": 62,
           "w": 31,
           "h": 38,
-          "primary": true
+          "primary": true,
+          "marker": {
+            "x": 19.5,
+            "y": 88.5
+          }
         },
         {
           "gagId": "G7.1",
@@ -4570,7 +4590,11 @@
           "y": 32,
           "w": 55,
           "h": 46,
-          "primary": true
+          "primary": true,
+          "marker": {
+            "x": 148.5,
+            "y": 58.5
+          }
         }
       ],
       "default": true
@@ -9281,7 +9305,11 @@
           "y": 1,
           "w": 37,
           "h": 67,
-          "primary": true
+          "primary": true,
+          "marker": {
+            "x": 82.5,
+            "y": 43.5
+          }
         },
         {
           "gagId": "G7.4",
@@ -10033,7 +10061,11 @@
           "y": 16,
           "w": 58,
           "h": 40,
-          "primary": true
+          "primary": true,
+          "marker": {
+            "x": 70.0,
+            "y": 39.5
+          }
         },
         {
           "gagId": "G4.2",
@@ -11159,7 +11191,11 @@
           "y": 15,
           "w": 30,
           "h": 27,
-          "primary": false
+          "primary": false,
+          "marker": {
+            "x": 51.0,
+            "y": 23.5
+          }
         },
         {
           "gagId": "G4.3",
@@ -11168,7 +11204,11 @@
           "y": 38,
           "w": 88,
           "h": 41,
-          "primary": true
+          "primary": true,
+          "marker": {
+            "x": 67.0,
+            "y": 61.5
+          }
         },
         {
           "gagId": "G6.2",
@@ -11177,7 +11217,11 @@
           "y": 41,
           "w": 63,
           "h": 64,
-          "primary": true
+          "primary": true,
+          "marker": {
+            "x": 111.5,
+            "y": 80.5
+          }
         }
       ]
     },
@@ -12015,7 +12059,11 @@
           "y": 62,
           "w": 73,
           "h": 48,
-          "primary": true
+          "primary": true,
+          "marker": {
+            "x": 43.5,
+            "y": 92.5
+          }
         }
       ]
     },
@@ -13239,7 +13287,11 @@
           "y": 24,
           "w": 123,
           "h": 73,
-          "primary": true
+          "primary": true,
+          "marker": {
+            "x": 116.5,
+            "y": 59.5
+          }
         }
       ]
     },
@@ -15554,7 +15606,11 @@
           "y": 12,
           "w": 56,
           "h": 54,
-          "primary": true
+          "primary": true,
+          "marker": {
+            "x": 42.0,
+            "y": 59.5
+          }
         },
         {
           "gagId": "G6.4",
@@ -17330,7 +17386,11 @@
           "y": 59,
           "w": 128,
           "h": 59,
-          "primary": true
+          "primary": true,
+          "marker": {
+            "x": 90.0,
+            "y": 81.5
+          }
         }
       ]
     }

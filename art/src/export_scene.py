@@ -22,13 +22,14 @@ room that band 490 doesn't have yet (`top`) is an empty canvas holding only its 
 """
 from __future__ import annotations
 
+import atexit
 import json
 import os
 
 from PIL import Image
 
 from .dsl import Canvas, save_png
-from . import closeups, compose, layout, moments, motion
+from . import closeups, compose, layout, lettering, moments, motion
 from .closeups import CLOSEUP_W, CLOSEUP_H
 from .vox import dotted
 
@@ -446,11 +447,13 @@ def _build_views(lib: compose.Library, band: int, model: dict, own_gags: set) ->
                 if not 1 <= n_prim <= 3:
                     raise ValueError(f"band {band} {state}: close-up {cid} ({label}) holds "
                                      f"{n_prim} primaries, want 1-3 (D-042)")
+                cropped = _crop_entries(lib, entries_by_state[state], rect)
+                _clear_lettering(lib, band, state, cid, cropped, rect, hs)
                 out[state].append({
                     "id": cid, "kind": "closeup", "parent": view_id, "label": label,
                     "rect": dict(rect), "size": {"w": rect["w"], "h": rect["h"]},
                     "focus": {"x": 0, "y": 0, "w": rect["w"], "h": rect["h"]},
-                    "entries": _crop_entries(lib, entries_by_state[state], rect),
+                    "entries": cropped,
                     "hotspots": hs,
                 })
     for state in STATES:
@@ -460,6 +463,38 @@ def _build_views(lib: compose.Library, band: int, model: dict, own_gags: set) ->
                              f"add them to a cluster in closeups.py")
         _mark_default(out[state], own_gags)
     return out
+
+
+_blank_lib = None
+
+
+def _blank(lib: compose.Library):
+    """The glyph-free sprite set (lettering.py), built once per export."""
+    global _blank_lib
+    if _blank_lib is None:
+        ctx = lettering.Blank(lib)
+        _blank_lib = ctx.__enter__()
+        atexit.register(ctx.__exit__)
+    return _blank_lib
+
+
+def _clear_lettering(lib, band, state, cid, entries, rect, hs):
+    """DIA-133: give any hotspot whose centred marker would touch lettering in this
+    close-up a `marker` point that clears it (lettering.place_marker). The rect is
+    never changed."""
+    w, h = rect["w"], rect["h"]
+    lib.manifest.update(_manifest_additions)     # this view's baked overlays, to paint
+    letters = lettering.letter_pixels(paint_entries, lib, _blank(lib), entries, w, h)
+    if not letters:
+        return
+    for h_ in hs:
+        r = (h_["x"], h_["y"], h_["x"] + h_["w"], h_["y"] + h_["h"])
+        own = paint_entries(lib, [e for e in entries if e.get("gagId") == h_["gagId"]
+                                  and e.get("part") == h_["part"]], w, h)
+        m = lettering.place_marker(
+            r, own, letters, f"band {band} {state} {cid}: {h_['gagId']}/{h_['part']}")
+        if m:
+            h_["marker"] = {"x": m[0], "y": m[1]}
 
 
 def _write_doc(band: int, state: str, vlist: list, moment=None) -> str:
