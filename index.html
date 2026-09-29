@@ -25,6 +25,22 @@
     <meta property="og:type" content="website" />
     <meta property="og:title" content="Ahead of It — Josh Gister's résumé" />
     <meta property="og:description" content="Build it, then make sure it doesn't need you." />
+    <!-- D-057 item 6: production values for band 80, the fallback for any
+         unfurler/crawler request the Worker's rewrite doesn't reach
+         (src/worker/index.ts rewrites og:image/twitter:image/og:url for
+         every other `?n=` stop — see computeShareOg). og:image:alt doesn't
+         vary by band (copy.shareCaption, hand-copied like og:title/
+         og:description above), so this static value is correct for every
+         stop, not just 80. Absolute https URLs, per the unfurl size rules
+         (1200x630, < 5MB). -->
+    <meta property="og:image" content="https://resume.joshgister.com/share/80.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:alt" content="By the time the company was your size, Josh had already fixed this." />
+    <meta property="og:url" content="https://resume.joshgister.com/?n=80" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="https://resume.joshgister.com/share/80.png" />
     <link rel="stylesheet" href="/src/style.css" />
   </head>
   <body>

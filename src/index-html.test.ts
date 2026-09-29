@@ -37,4 +37,20 @@ describe('index.html OG/meta copy (m5)', () => {
     expect(html).toContain(`<meta name="description" content="${copy.ogDescription}" />`);
     expect(html).toContain(`<meta property="og:description" content="${copy.ogDescription}" />`);
   });
+
+  // D-057 item 6: og:image:alt doesn't vary by band (every share image uses
+  // the same caption), so it's hand-copied here like ogTitle/ogDescription
+  // above rather than something src/worker/index.ts rewrites per `?n=`.
+  it('og:image:alt matches content.json copy.shareCaption', () => {
+    expect(html).toContain(`<meta property="og:image:alt" content="${copy.shareCaption}" />`);
+  });
+
+  it('the static og:image/twitter:image/og:url fallback (band 80) is an absolute production URL, per the unfurl size rules', () => {
+    expect(html).toContain('<meta property="og:image" content="https://resume.joshgister.com/share/80.png" />');
+    expect(html).toContain('<meta property="og:image:width" content="1200" />');
+    expect(html).toContain('<meta property="og:image:height" content="630" />');
+    expect(html).toContain('<meta name="twitter:card" content="summary_large_image" />');
+    expect(html).toContain('<meta name="twitter:image" content="https://resume.joshgister.com/share/80.png" />');
+    expect(html).toContain('<meta property="og:url" content="https://resume.joshgister.com/?n=80" />');
+  });
 });

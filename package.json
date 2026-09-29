@@ -17,9 +17,11 @@
     "test": "npm run test:unit && npm run test:e2e",
     "check:employer": "bash scripts/check-employer.sh",
     "check:serving": "bash scripts/check-serving.sh",
+    "share:render": "node scripts/render-share-images.mjs",
+    "check:share-images": "node scripts/render-share-images.mjs --check",
     "kit:hallway": "node tools/hallway-test/build-kit.mjs",
     "check:lighthouse": "lhci autorun --config=./lighthouserc.cjs",
-    "check": "npm run build && npm run test && npm run check:serving && npm run check:lighthouse"
+    "check": "npm run build && npm run test && npm run check:serving && npm run check:share-images && npm run check:lighthouse"
   },
   "devDependencies": {
     "@lhci/cli": "0.15.1",

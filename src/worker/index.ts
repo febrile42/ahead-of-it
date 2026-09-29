@@ -15,11 +15,44 @@
 //
 // Adding a Worker script changes wrangler.jsonc from assets-only
 // (docs/product/03-RESOURCING.md) to assets + this script; everything that
-// isn't /u/* still resolves exactly as before, because Cloudflare only
-// invokes a Worker's fetch handler for a request that didn't already match
-// a static file (developers.cloudflare.com/workers/static-assets/binding),
-// and the one case that reaches this handler without matching /u/* below
-// (env.ASSETS.fetch) reapplies that same not_found_handling itself.
+// isn't /u/* or `/` still resolves exactly as before, because Cloudflare
+// only invokes a Worker's fetch handler for a request that didn't already
+// match a static file (developers.cloudflare.com/workers/static-assets/
+// binding) *unless* `run_worker_first` names the path (wrangler.jsonc lists
+// `/`, for D-057 below); the one case that reaches this handler without
+// matching a route below (env.ASSETS.fetch) reapplies that same
+// not_found_handling itself.
+//
+// D-057 (PH3-02, DIA-235): `/` also runs through this Worker so each `?n=`
+// stop gets its own `og:image`/`twitter:image`/`og:url` — unfurlers run no
+// JavaScript, so the static index.html's own tags can only ever be right
+// for one band (80). `computeShareOg` (src/worker/share-og.ts) is the pure
+// half of this (URL in, two strings out, fully unit-tested); this file only
+// adds the HTMLRewriter plumbing, which needs the real Workers runtime to
+// exercise (see src/worker/index.test.ts's header — same "not available in
+// this environment" limit PH3-04 hit; the src/worker/share-og.test.ts and
+// the minimal-shim rewrite test below are what this environment can run).
+
+/// <reference lib="webworker" />
+// Ambient — this repo's tsconfig.json doesn't include
+// @cloudflare/workers-types (no tsc --noEmit step exists yet to need the
+// full package, PH1-03's src/content/index.ts makes the same call), and DOM
+// lib has no HTMLRewriter. Only the narrow surface this file actually calls.
+declare global {
+  interface Element {
+    setAttribute(name: string, value: string): Element;
+  }
+  interface HTMLRewriterElementContentHandlers {
+    element?(element: Element): void;
+  }
+  class HTMLRewriter {
+    on(selector: string, handlers: HTMLRewriterElementContentHandlers): this;
+    transform(response: Response): Response;
+  }
+}
+
+import { computeShareOg } from './share-og';
+import shareHashes from './share-hashes.json';
 
 export interface Env {
   ASSETS: { fetch(request: Request): Promise<Response> };
@@ -28,6 +61,39 @@ export interface Env {
 
 const SCRIPT_PATH = '/u/script.js';
 const COLLECT_PATH = '/u/api/send';
+
+class SetContentAttribute implements HTMLRewriterElementContentHandlers {
+  constructor(private readonly value: string) {}
+  element(element: Element): void {
+    element.setAttribute('content', this.value);
+  }
+}
+
+/** D-057 item 6: rewrites the OG/Twitter image and the canonical OG URL to
+ * match `?n=`/`?it=`'s resolved stop. Only these three meta tags change —
+ * `og:image:alt` is the caption verbatim and doesn't vary by band, so the
+ * static value already in index.html is correct for every stop. */
+function rewriteShareOg(html: Response, og: { image: string; url: string }): Response {
+  return new HTMLRewriter()
+    .on('meta[property="og:image"]', new SetContentAttribute(og.image))
+    .on('meta[name="twitter:image"]', new SetContentAttribute(og.image))
+    .on('meta[property="og:url"]', new SetContentAttribute(og.url))
+    .transform(html);
+}
+
+/** D-057 item 6: "If anything throws, it returns the static HTML
+ * untouched" — `assetResponse` is fetched once and only cloned into the
+ * rewriter, so a throw inside `rewriteShareOg` (or `computeShareOg`) still
+ * leaves the original, unread response available to return as-is. */
+async function serveIndexWithShareOg(request: Request, env: Env): Promise<Response> {
+  const assetResponse = await env.ASSETS.fetch(request);
+  try {
+    const og = computeShareOg(new URL(request.url), shareHashes);
+    return rewriteShareOg(assetResponse.clone(), og);
+  } catch {
+    return assetResponse;
+  }
+}
 
 // Rebuilding the response rather than returning `upstream` directly keeps
 // this proxy from forwarding anything upstream-specific (Set-Cookie, CF-*)
@@ -66,6 +132,10 @@ export default {
 
     if (url.pathname === COLLECT_PATH && request.method === 'POST') {
       return proxyCollect(request, env);
+    }
+
+    if (url.pathname === '/' && request.method === 'GET') {
+      return serveIndexWithShareOg(request, env);
     }
 
     return env.ASSETS.fetch(request);
