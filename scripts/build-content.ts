@@ -154,6 +154,7 @@ export interface Ui {
   readoutAtBand: string;
   shareButton: string;
   shareButtonName: string;
+  shareCopied: string;
 }
 
 export interface ContentJson {
@@ -641,6 +642,7 @@ const UI_PLACEHOLDERS: Record<keyof Ui, string[]> = {
   readoutAtBand: ['n', 'year'],
   shareButton: [],
   shareButtonName: [],
+  shareCopied: [],
 };
 
 // D-051's own section carries `intro`/`roomHint`; every other key still
@@ -669,8 +671,9 @@ const PAGE_STATE_UI_KEYS = [
   'retry',
   'readoutAtBand',
 ] as const;
-// D-057 item 7's share control copy: the visible pill label and its accessible name.
-const SHARE_UI_KEYS = ['shareButton', 'shareButtonName'] as const;
+// D-057 item 7's share control copy: the visible pill label, its accessible name, and
+// the copied-link toast (DIA-262).
+const SHARE_UI_KEYS = ['shareButton', 'shareButtonName', 'shareCopied'] as const;
 
 function placeholdersOf(copy: string): string[] {
   return [...new Set([...copy.matchAll(/\{(\w+)\}/g)].map((m) => m[1]))].sort();
