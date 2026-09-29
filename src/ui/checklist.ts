@@ -288,8 +288,13 @@ export function createChecklist(trigger: HTMLButtonElement, triggerLabel: HTMLEl
     setPanelTabbable(panel, open);
     if (open) {
       loadPendingThumbs(panel);
-      printButton.focus();
+      // DIA-253: openListeners before this sheet's own focus grab —
+      // main.ts's listener closes a gag panel left open at >=768px (U-06
+      // keeps both non-modal there), and that close() call focuses the
+      // panel's own invoker. Firing after printButton.focus() let that
+      // steal focus right back off this sheet.
       for (const listener of openListeners) listener();
+      printButton.focus();
     } else {
       trigger.focus();
       for (const listener of closeListeners) listener();

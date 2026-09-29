@@ -295,7 +295,21 @@ if (
   }
 
   let overlayHash: string | null = null;
+  // DIA-253: which surface owns `overlayHash`, so switching straight from one
+  // to the other (item 5's replace branch) can close the *other* one's DOM
+  // state too — `openOverlay`'s own `if (overlayHash)` check already knew it
+  // was replacing an entry, but never told the surface that lost it, so both
+  // `panel.isOpen()` and `checklist.isOpen()` ended up true at once at
+  // >=768px, where U-06 leaves both non-modal and reachable (390px is safe:
+  // an open panel's `inert` layer already covers the punch-list button).
+  let overlayOwner: 'panel' | 'list' | null = null;
   let consumingOwnBack = false;
+  // Set while closeOtherOverlay below drives the losing surface's own
+  // close() (so its DOM/focus/inert side effects still run) — suppresses
+  // that close's `onClose` -> `closeOverlayEntry` call, which must not also
+  // run `history.back()`: the history side is already handled by the
+  // `history.replaceState` a caller-side `openOverlay` performs right after.
+  let suppressOverlayClose = false;
   // PR #16 review, B1: `sceneSearchParams(band, state)` at the moment the overlay
   // entry was first *pushed* (item 2) — null whenever no overlay owns an entry.
   // The landing (pre-overlay) entry's `n`/`it` are frozen at whatever they were
@@ -312,7 +326,19 @@ if (
     return overlayOpenQuery !== null && overlayOpenQuery !== sceneSearchParams(band, state);
   }
 
-  function openOverlay(hash: string) {
+  // DIA-253: called before the incoming surface does its own open() / focus
+  // work, so if it steals focus back (closeButton / printButton) that wins
+  // over whatever the losing surface's own close() just focused.
+  function closeOtherOverlay(owner: 'panel' | 'list') {
+    if (overlayOwner === null || overlayOwner === owner) return;
+    suppressOverlayClose = true;
+    if (overlayOwner === 'panel') panel.close();
+    else checklist.close();
+    suppressOverlayClose = false;
+  }
+
+  function openOverlay(hash: string, owner: 'panel' | 'list') {
+    closeOtherOverlay(owner);
     if (overlayHash) {
       history.replaceState(history.state, '', hash); // item 5: switching straight to another overlay replaces, no second push
     } else {
@@ -320,18 +346,21 @@ if (
       overlayOpenQuery = sceneSearchParams(band, state);
     }
     overlayHash = hash;
+    overlayOwner = owner;
   }
 
   function closeOverlayEntry() {
+    if (suppressOverlayClose) return; // DIA-253: closeOtherOverlay is handling the DOM side; history already correct
     if (!overlayHash) return;
     overlayHash = null;
+    overlayOwner = null;
     consumingOwnBack = true;
     history.back();
   }
 
   panel.onClose(closeOverlayEntry);
   checklist.onClose(closeOverlayEntry);
-  checklist.onOpen(() => openOverlay(LIST_HASH)); // item 2/5: same push-or-replace rule as a gag panel
+  checklist.onOpen(() => openOverlay(LIST_HASH, 'list')); // item 2/5: same push-or-replace rule as a gag panel
 
   window.addEventListener('popstate', () => {
     if (consumingOwnBack) {
@@ -342,6 +371,7 @@ if (
     }
     if (!overlayHash) return; // Back with nothing of ours open — let the browser leave/navigate normally
     overlayHash = null;
+    overlayOwner = null;
     if (panel.isOpen()) panel.close();
     if (checklist.isOpen()) checklist.close();
     if (landingQueryIsStale()) writeSceneQuery(); // B1: same staleness check for a real Back press
@@ -971,10 +1001,14 @@ if (
     // is already caught by the scroll listener above, but re-deriving here
     // too means the docked top is never one rAF frame behind the open.
     applyPanelTop();
+    // DIA-253: before panel.open() below claims focus (closeButton) — if the
+    // punch-list is open, openOverlay's closeOtherOverlay must close it and
+    // let *its* close() focus land first, or panel.open()'s own focus call
+    // would just get stolen back by checklist.close()'s trigger.focus().
+    openOverlay(panelHash(gagId), 'panel'); // PH3-01/U-09: item 2 (push) or item 5 (replace, switching from another open panel)
     // R-04: the prevented-beat thumbnail is always the without-state
     // scene. B4: closing returns focus to the hotspot that opened it.
     panel.open(fields, 'without', { returnFocusTo: source });
-    openOverlay(panelHash(gagId)); // PH3-01/U-09: item 2 (push) or item 5 (replace, switching from another open panel)
   }
 
   // S5: render() is async (it fetches the scene file and awaits sprite
