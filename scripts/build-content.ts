@@ -146,6 +146,12 @@ export interface Ui {
   roomTabName: string;
   announce: string;
   announceRoom: string;
+  announceWithout: string;
+  announceBuilt: string;
+  loading: string;
+  loadFailed: string;
+  retry: string;
+  readoutAtBand: string;
 }
 
 export interface ContentJson {
@@ -625,6 +631,12 @@ const UI_PLACEHOLDERS: Record<keyof Ui, string[]> = {
   roomTabName: ['count', 'room'],
   announce: ['label', 'n', 'room', 'total'],
   announceRoom: ['room'],
+  announceWithout: [],
+  announceBuilt: [],
+  loading: [],
+  loadFailed: [],
+  retry: [],
+  readoutAtBand: ['n', 'year'],
 };
 
 // D-051's own section carries `intro`/`roomHint`; every other key still
@@ -643,6 +655,15 @@ const NAVIGATION_UI_KEYS = [
   'roomTabName',
   'announce',
   'announceRoom',
+] as const;
+// D-053's page-state copy: toggle live announcement, loading/failure, readout (DIA-194 U-10/U-11/U-17).
+const PAGE_STATE_UI_KEYS = [
+  'announceWithout',
+  'announceBuilt',
+  'loading',
+  'loadFailed',
+  'retry',
+  'readoutAtBand',
 ] as const;
 
 function placeholdersOf(copy: string): string[] {
@@ -706,6 +727,7 @@ export function parseUi(toneMd: string): Ui {
   return {
     ...parseUiSection(toneMd, '## Landing copy (D-051)', LANDING_UI_KEYS),
     ...parseUiSection(toneMd, '## Navigation copy (D-042a)', NAVIGATION_UI_KEYS),
+    ...parseUiSection(toneMd, '## Page state copy (D-053)', PAGE_STATE_UI_KEYS),
   } as Ui;
 }
 

@@ -131,6 +131,17 @@ const VALID_TONE_MD = `# Tone — fixture
 | \`roomTabName\` | \`{room}: {count} to tap\` | fixture. |
 | \`announce\` | \`{room}: {label}, {n} of {total}\` | fixture. |
 | \`announceRoom\` | \`{room}: whole floor\` | fixture. |
+
+## Page state copy (D-053) (fixture)
+
+| key | copy | where |
+|---|---|---|
+| \`announceWithout\` | \`Showing the building without him\` | fixture. |
+| \`announceBuilt\` | \`Showing what he'd already built\` | fixture. |
+| \`loading\` | \`Loading the building…\` | fixture. |
+| \`loadFailed\` | \`The building didn't load. Everything in it is in the punch list.\` | fixture. |
+| \`retry\` | \`Try again\` | fixture. |
+| \`readoutAtBand\` | \`~{n} → {year}\` | fixture. |
 `;
 
 const VALID_UI = {
@@ -147,6 +158,12 @@ const VALID_UI = {
   roomTabName: '{room}: {count} to tap',
   announce: '{room}: {label}, {n} of {total}',
   announceRoom: '{room}: whole floor',
+  announceWithout: 'Showing the building without him',
+  announceBuilt: "Showing what he'd already built",
+  loading: 'Loading the building…',
+  loadFailed: "The building didn't load. Everything in it is in the punch list.",
+  retry: 'Try again',
+  readoutAtBand: '~{n} → {year}',
 };
 
 function validInputs(overrides: Partial<BuildInputs> = {}): BuildInputs {
@@ -260,6 +277,12 @@ describe('parsing ui (D-042a)', () => {
       roomTabName: '{room}: {count} to tap',
       announce: '{room}: {label}, {n} of {total}',
       announceRoom: '{room}: whole floor',
+      announceWithout: 'Showing the building without him',
+      announceBuilt: "Showing what he'd already built",
+      loading: 'Loading the building…',
+      loadFailed: "The building didn't load. Everything in it is in the punch list.",
+      retry: 'Try again',
+      readoutAtBand: '~{n} → {year}',
     });
   });
 
