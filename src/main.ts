@@ -280,12 +280,28 @@ if (
 
   let overlayHash: string | null = null;
   let consumingOwnBack = false;
+  // PR #16 review, B1: `sceneSearchParams(band, state)` at the moment the overlay
+  // entry was first *pushed* (item 2) — null whenever no overlay owns an entry.
+  // The landing (pre-overlay) entry's `n`/`it` are frozen at whatever they were
+  // then; if a slider drag or toggle flip changes band/state while the panel/
+  // sheet stays open (non-modal at >=768px, U-06), only *that* entry's own query
+  // gets kept live (`writeSceneQuery()`'s ordinary replaceState calls). Switching
+  // straight from one overlay to another (item 5's replace branch below) is the
+  // same entry throughout, so it deliberately leaves this snapshot alone — only
+  // the first push of the "session" is the baseline to compare the live query
+  // against once Back lands back on the pre-overlay entry.
+  let overlayOpenQuery: string | null = null;
+
+  function landingQueryIsStale(): boolean {
+    return overlayOpenQuery !== null && overlayOpenQuery !== sceneSearchParams(band, state);
+  }
 
   function openOverlay(hash: string) {
     if (overlayHash) {
       history.replaceState(history.state, '', hash); // item 5: switching straight to another overlay replaces, no second push
     } else {
       history.pushState(null, '', hash);
+      overlayOpenQuery = sceneSearchParams(band, state);
     }
     overlayHash = hash;
   }
@@ -304,12 +320,16 @@ if (
   window.addEventListener('popstate', () => {
     if (consumingOwnBack) {
       consumingOwnBack = false;
+      if (landingQueryIsStale()) writeSceneQuery(); // B1: only touch the landing entry if it needs it
+      overlayOpenQuery = null;
       return;
     }
     if (!overlayHash) return; // Back with nothing of ours open — let the browser leave/navigate normally
     overlayHash = null;
     if (panel.isOpen()) panel.close();
     if (checklist.isOpen()) checklist.close();
+    if (landingQueryIsStale()) writeSceneQuery(); // B1: same staleness check for a real Back press
+    overlayOpenQuery = null;
   });
 
   // D-056 (DIA-217/U-14): two things at >=1152 that src/style.css's own
@@ -1327,6 +1347,12 @@ if (
       // syncOpenPanel()'s concern (DIA-13). U-06: `modal: false` — the
       // "what works" keep-list's own rule is that this one opens without
       // trapping, so the slider stays usable above the sheet.
+      // PR #16 review, N1: a gag panel open when the drag reaches 'beyond' has its own
+      // overlay entry (`openOverlay`, item 2) — the auto-opened Beyond panel below swaps
+      // that panel's *content*, not a fresh open, so it must give up that entry first or
+      // it would inherit one it never pushed, breaking "never owns an entry" (item 2's
+      // own note above) and leaving a stale `#panel=<gag>` in the URL.
+      if (openPanelGagId) closeOverlayEntry();
       openPanelGagId = null;
       applyPanelTop(); // DIA-218: keep the docked top fresh for this auto-open too.
       panel.open(beyondPanelFields(), 'without', { focus: false, returnFocusTo: slider.input, modal: false });

@@ -150,6 +150,67 @@ test.describe('U-09: Back closes an open gag panel', () => {
   });
 });
 
+test.describe('PR #16 review B1: the query stays live while a non-modal panel is open (U-06)', () => {
+  // At >=768px the panel doesn't trap input (U-06) — the slider/toggle stay
+  // usable while it's open. Before this fix, `writeSceneQuery()` (main.ts)
+  // kept replacing the *panel's own* history entry while it was open, so the
+  // entry the visitor lands back on after closing it (pushed before the
+  // panel opened) still held whatever `n`/`it` were at that time.
+  test('closing the panel with the close button leaves the latest toggle state, not the pre-panel one', async ({
+    page,
+  }) => {
+    await H.openApp(page, { viewport: H.DESKTOP });
+
+    const gagId = await H.openFirstHotspot(page);
+    expect(page.url()).toContain(`#panel=${encodeURIComponent(gagId)}`);
+
+    await H.setState(page, 'without');
+    expect(await H.panelIsOpen(page)).toBe(true); // still open — non-modal, the toggle didn't close it
+
+    await page.locator('.panel__close').click();
+    await page.waitForFunction(() => location.hash === '');
+
+    expect(page.url()).toContain('it=none');
+  });
+
+  test('closing the panel with a real Back press leaves the latest toggle state, not the pre-panel one', async ({
+    page,
+  }) => {
+    await H.openApp(page, { viewport: H.DESKTOP });
+
+    const gagId = await H.openFirstHotspot(page);
+    expect(page.url()).toContain(`#panel=${encodeURIComponent(gagId)}`);
+
+    await H.setState(page, 'without');
+    expect(await H.panelIsOpen(page)).toBe(true);
+
+    await page.goBack();
+    await page.locator('.panel').waitFor({ state: 'hidden' });
+
+    expect(page.url()).toContain('it=none');
+  });
+
+  test('the panel auto-closing on a band change (syncOpenPanel) leaves the latest band, not the pre-panel one', async ({
+    page,
+  }) => {
+    await H.openApp(page, { viewport: H.DESKTOP });
+
+    const gagId = await H.openFirstHotspot(page);
+    expect(page.url()).toContain(`#panel=${encodeURIComponent(gagId)}`);
+
+    // Band 220 has no fixture scene, so this gag's own hotspot is gone from
+    // the rebuilt view — syncOpenPanel (main.ts) closes the panel itself,
+    // the third of the three close paths B1 named (not the close button or
+    // a Back press, both already covered above and by the pre-existing
+    // U-09 specs).
+    await H.setBand(page, 220);
+    await page.waitForFunction(() => location.hash === '');
+
+    expect(await H.panelIsOpen(page)).toBe(false);
+    expect(page.url()).toContain('n=220');
+  });
+});
+
 test.describe('U-09: Back closes the open punch-list sheet (D-048)', () => {
   test('at 390: Back closes it, the query is unchanged, the page is not left', async ({ page }) => {
     await H.openApp(page);
@@ -184,4 +245,25 @@ test('the 1,000+ auto-opened panel never pushes a history entry (it is not gag-p
   expect(await H.panelIsOpen(page)).toBe(true); // R-01b: opens automatically
   expect(new URL(page.url()).hash).toBe(''); // ...but item 2 only covers a hotspot/punch-list open
   expect(await page.evaluate(() => history.length)).toBe(before);
+});
+
+test('PR #16 review N1: dragging to beyond while a gag panel is open drops that panel\'s overlay entry', async ({
+  page,
+}) => {
+  await H.openApp(page, { viewport: H.DESKTOP });
+
+  await H.openFirstHotspot(page);
+  expect(page.url()).toContain('#panel=');
+
+  await H.setBand(page, 'beyond');
+  expect(await H.panelIsOpen(page)).toBe(true); // the Beyond panel, swapped in over the gag panel
+  // The dropped entry's own history.back() (closeOverlayEntry, called from the
+  // 'beyond' branch) lands asynchronously, same as every other close path here.
+  await page.waitForFunction(() => location.hash === '');
+  expect(new URL(page.url()).hash).toBe(''); // the gag panel's own entry must not survive the swap
+
+  // One Back should now leave the page, same as the plain auto-open case above —
+  // not close a panel that no longer owns a history entry.
+  await page.goBack();
+  expect(page.url()).toBe('about:blank');
 });
