@@ -589,6 +589,51 @@ h1 {
   white-space: nowrap;
 }
 
+/* D-061 step 4: the "Link copied" toast — fixed/out of flow (S1: no box to
+   reserve, no CLS), so it works the same next to the control whichever
+   container currently holds it (#view-nav below 1152px, the rail from
+   1152px, see .share-control's own comment) without any positioning code
+   in src/main.ts. `[hidden]` (display: none) means a re-`hidden = false`
+   always starts the `toast-in` animation fresh — there is no separate
+   "replay" step needed for the "second click restarts the toast" rule
+   (src/ui/share.ts's own showToast just resets its hide timer). */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  z-index: 20;
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--ink);
+  color: var(--ink-invert);
+  font: inherit;
+  font-size: 0.9rem;
+  box-shadow: 0 2px 8px var(--shadow);
+  transform: translateX(-50%);
+}
+
+.toast:not([hidden]) {
+  animation: toast-in 0.2s ease-out;
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 6px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toast:not([hidden]) {
+    animation: none;
+  }
+}
+
 /* --- Scene (3a/3b, replaced by PH1-09 per D-035) --- */
 .scene-wrap {
   position: relative;
