@@ -118,6 +118,13 @@ function pickDefaultView(scene: SceneFile): SceneView | undefined {
   return scene.views.find((v) => v.default) ?? scene.views.find((v) => v.kind === 'closeup') ?? scene.views[0];
 }
 
+/** DIA-257: the hotspots the app actually turns into buttons — only
+ * primaries (src/main.ts's toSceneLayout); a two-part gag's other part is
+ * scenery. */
+export function renderedHotspots(view: SceneView): SceneHotspot[] {
+  return view.hotspots.filter((h) => h.primary);
+}
+
 /**
  * The hotspot count the app will actually render for `band`/`state`:
  * whichever view is `default` in that band's scene file (mirrors
@@ -131,7 +138,7 @@ function pickDefaultView(scene: SceneFile): SceneView | undefined {
 export function expectedHotspotCount(band: number | 'beyond', state: 'built' | 'without'): number {
   const scene = readBandSceneFile(band, state);
   const view = scene && pickDefaultView(scene);
-  return view ? view.hotspots.length : 0;
+  return view ? renderedHotspots(view).length : 0;
 }
 
 /** Every gagId with a hotspot in `band`/`state`'s *default* view — the view
@@ -142,14 +149,14 @@ export function expectedHotspotCount(band: number | 'beyond', state: 'built' | '
 export function defaultViewGagIds(band: number | 'beyond', state: 'built' | 'without'): string[] {
   const scene = readBandSceneFile(band, state);
   const view = scene && pickDefaultView(scene);
-  return view ? view.hotspots.map((h) => h.gagId) : [];
+  return view ? renderedHotspots(view).map((h) => h.gagId) : [];
 }
 
 /** Every gagId with a hotspot anywhere in `band`/`state`'s scene, across
  * every view (not just the default one). */
 export function allGagIds(band: number | 'beyond', state: 'built' | 'without'): string[] {
   const scene = readBandSceneFile(band, state);
-  return scene ? scene.views.flatMap((v) => v.hotspots.map((h) => h.gagId)) : [];
+  return scene ? scene.views.flatMap((v) => renderedHotspots(v).map((h) => h.gagId)) : [];
 }
 
 /** The view holding `gagId`'s hotspot in `band`/`state`'s scene, if any —
@@ -161,7 +168,7 @@ export function findGagView(
   gagId: string
 ): SceneView | undefined {
   const scene = readBandSceneFile(band, state);
-  return scene?.views.find((v) => v.hotspots.some((h) => h.gagId === gagId));
+  return scene?.views.find((v) => renderedHotspots(v).some((h) => h.gagId === gagId));
 }
 
 /** True if `view` has at least one `motion` entry positioned inside its own

@@ -11,7 +11,7 @@
 import { expect, test } from '@playwright/test';
 import type { Locator, Page } from '@playwright/test';
 import * as H from './interaction-helpers';
-import { readBandSceneFile } from './scene-source';
+import { readBandSceneFile, renderedHotspots } from './scene-source';
 import type { SceneHotspot } from './scene-source';
 
 /** Reads a computed style property off a real pseudo-element, not the
@@ -151,8 +151,8 @@ function findMarkerDemo(): MarkerDemo | undefined {
       const scene = readBandSceneFile(band, state);
       for (const view of scene?.views ?? []) {
         if (view.kind !== 'closeup' || !view.parent) continue;
-        const withMarker = view.hotspots.find((h) => h.marker);
-        const withoutMarker = view.hotspots.find(
+        const withMarker = renderedHotspots(view).find((h) => h.marker);
+        const withoutMarker = renderedHotspots(view).find(
           (h): h is SceneHotspot & { x: number; y: number; w: number; h: number } =>
             !h.marker && h.x !== undefined && h.y !== undefined && h.w !== undefined && h.h !== undefined
         );

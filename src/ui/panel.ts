@@ -344,50 +344,10 @@ function placeButton(
 }
 
 /**
- * DIA-244 (DIA-240 fix, wording from DIA-243 — Product Lead's call, not
- * sourced from content.json: this is screen-reader-only metadata, never
- * shown to a sighted visitor, so it doesn't go through the docs/content
- * pipeline any more than the hardcoded "Close panel" label above does).
- * Every part of a two-part (or, for G5.1's `without` state, three-part)
- * gag otherwise gets the identical aria-label (the gag's panel title
- * alone), so a screen reader announces the same name twice/thrice in a
- * row with nothing to tell the focus stops apart. Keyed by the hotspot's
- * own `part` id (from `hotspotId`'s `${gagId}#${part}` suffix — see
- * src/main.ts's `toSceneLayout` and src/scene/layout.ts's `Hotspot`) so a
- * gag+part not listed here — including every single-hotspot gag — falls
- * back to the bare title, unchanged from before this fix.
- */
-const HOTSPOT_PART_SUFFIXES: Record<string, string> = {
-  'G4.1#door': 'at the front door',
-  'G4.1#deal': 'in the sales pit',
-  'G6.4#door': 'at the badge reader',
-  'G6.4#chair': 'at the door down the hall',
-  'G6.3#shell': 'at the new building',
-  'G6.3#map': 'on the map',
-  'G5.1#handover': 'at the headquarters door',
-  'G5.1#truck': 'on the line between offices',
-  'G5.1#inset-door': "at the second office's door",
-};
-
-/** DIA-244: builds a hotspot's accessible name from its panel title plus,
- * when this exact gag+part has disambiguating wording, an em-dash suffix
- * (an em dash rather than a comma — G4.1's title already contains one,
- * and default screen-reader settings read the dash as a pause without
- * announcing it). `hotspot.hotspotId` is `${gagId}#${part}` for a
- * multi-part gag and bare `gagId` otherwise, so a single-hotspot gag
- * never matches a key here and keeps today's plain title. */
-function hotspotAriaLabel(title: string, hotspotId: string, gagId: string): string {
-  if (hotspotId === gagId) return title;
-  const suffix = HOTSPOT_PART_SUFFIXES[hotspotId];
-  return suffix ? `${title} — ${suffix}` : title;
-}
-
-/**
  * Renders one real <button> per hotspot in `layout`, absolutely positioned
  * over the canvas from the same coordinates the assembler drew from, each
  * at least 44x44 CSS px (R-20) regardless of the canvas's internal scale.
- * `onOpen` receives the gag id (never the part-qualified hotspotId — both
- * parts of a two-part gag open the same panel, per the brief).
+ * `onOpen` receives the gag id, never the part-qualified hotspotId.
  */
 export function renderHotspots(
   container: HTMLElement,
@@ -411,11 +371,10 @@ export function renderHotspots(
     // screen-reader user should hear "A helpdesk with an owner", not
     // "G2.1". panelFieldsFor falls back to the id defensively (it should
     // never actually be missing — every hotspot's gagId comes from a real
-    // gag, checked by layout.test.ts's coverage test). DIA-244:
-    // hotspotAriaLabel appends a per-part suffix when this gag has more
-    // than one hotspot, so the parts don't collide on the same name.
-    const title = panelFieldsFor(hotspot.gagId)?.title ?? hotspot.gagId;
-    button.setAttribute('aria-label', hotspotAriaLabel(title, hotspot.hotspotId, hotspot.gagId));
+    // gag, checked by layout.test.ts's coverage test). DIA-257: only a
+    // gag's primary hotspot gets a button (src/main.ts's toSceneLayout),
+    // so the title alone never collides with a sibling part's name.
+    button.setAttribute('aria-label', panelFieldsFor(hotspot.gagId)?.title ?? hotspot.gagId);
     // U-05: main.ts's setHotspotSelected flips this to 'true' — and adds
     // .hotspot--selected's solid reticle — for as long as this hotspot's
     // own panel is open.

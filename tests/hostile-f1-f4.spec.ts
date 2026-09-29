@@ -28,7 +28,14 @@ import { readFileSync } from 'node:fs';
 import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
 import * as H from './interaction-helpers';
-import { allGagIds, defaultViewGagIds, findGagView, readBandSceneFile, sceneSourceDir } from './scene-source';
+import {
+  allGagIds,
+  defaultViewGagIds,
+  findGagView,
+  readBandSceneFile,
+  renderedHotspots,
+  sceneSourceDir,
+} from './scene-source';
 
 /** The gag ids the currently-rendered view actually has hotspots for. The
  * oracle for "does the open panel describe something that is on screen". */
@@ -78,7 +85,7 @@ test.describe('F1 — an open panel survives a re-render that removes its subjec
     function survivesBandChangeToD053(id: string): boolean {
       const fromView = findGagView(80, 'built', id);
       const sameIdView = fromView && band750Scene?.views.find((v) => v.id === fromView.id);
-      const landingGags = sameIdView ? new Set(sameIdView.hotspots.map((h) => h.gagId)) : band750DefaultGags;
+      const landingGags = sameIdView ? new Set(renderedHotspots(sameIdView).map((h) => h.gagId)) : band750DefaultGags;
       return landingGags.has(id);
     }
     const gagId = allGagIds(80, 'built').find((id) => !survivesBandChangeToD053(id));
