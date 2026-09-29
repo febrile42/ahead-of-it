@@ -303,10 +303,16 @@ test.describe('D-056 U-14f: the tabs row never needs to scroll at >=1152', () =>
     test(`?n=${n}`, async ({ page, browserName }) => {
       test.skip(browserName !== 'chromium', 'webkit-iphone pins a 390px touch device, not a >=1152 desktop surface');
       await openAt(page, { width: 1440, height: 900 }, `/?n=${n}`);
-      const overflow = await page
+      // DIA-65 precedent: CI's Chromium can resolve `system-ui, sans-serif`
+      // a few px wider than any local measurement (never reproduces on this
+      // sandbox's own fonts). Report the actual box so a CI-only failure
+      // says how much margin is missing instead of just true/false.
+      const { scrollWidth, clientWidth } = await page
         .locator('#scene-views')
-        .evaluate((el) => el.scrollWidth > el.clientWidth + 0.5);
-      expect(overflow).toBe(false);
+        .evaluate((el) => ({ scrollWidth: el.scrollWidth, clientWidth: el.clientWidth }));
+      expect(scrollWidth, `scrollWidth=${scrollWidth} clientWidth=${clientWidth}`).toBeLessThanOrEqual(
+        clientWidth + 0.5,
+      );
     });
   }
 });
@@ -321,12 +327,13 @@ test.describe('D-056 U-14h: the tagline stays on one line in the rail at 1440', 
     // height (.toggle__message's grid-area stretch, DIA-176) regardless of
     // how many lines the text itself actually takes — a Range over the text
     // node's own line boxes is what actually answers "did this wrap".
-    const lineCount = await page.locator('.toggle__subtitle').evaluate((el) => {
+    const { lineCount, scrollWidth, clientWidth } = await page.locator('.toggle__subtitle').evaluate((el) => {
       const range = document.createRange();
       range.selectNodeContents(el);
-      return range.getClientRects().length;
+      return { lineCount: range.getClientRects().length, scrollWidth: el.scrollWidth, clientWidth: el.clientWidth };
     });
-    expect(lineCount).toBe(1);
+    // See the U-14f case above for why this reports the box on failure.
+    expect(lineCount, `scrollWidth=${scrollWidth} clientWidth=${clientWidth}`).toBe(1);
   });
 });
 
