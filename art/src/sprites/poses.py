@@ -327,20 +327,29 @@ WAVE_MS = 280
 def seated_wave_frames(look_name: str) -> list[Canvas]:
     """G2.4 built (PH1-10 fix round): seated from behind, facing the screen, one hand
     up — the wave returned. Desk canvas + anchor, like `worker-seated`: paste over a
-    `chair` (or a desk) at the same point. Frame 1 tips the hand out a pixel."""
+    `chair` (or a desk) at the same point.
+
+    PH3-07: the arm used to run up the side of the head, so from behind it merged
+    into the head's silhouette and read as a stub. Now the elbow goes out to the side,
+    a gap of background separates the forearm from the head, and an open palm (3 x 4,
+    thumb out) stands clear above the crown. Frame 1 swings the hand 2 px outward from
+    the elbow: at 390 px the sideways swing is what says "wave"."""
     from .worker import seated_frame
-    arms = [
-        {(13, y) for y in range(13, 20)} | {(14, y) for y in range(10, 20)} | {(15, 10), (15, 11)},
-        {(13, y) for y in range(13, 20)} | {(14, y) for y in range(12, 20)}
-        | {(15, y) for y in range(9, 13)} | {(16, 9), (16, 10)},
+    # shoulder -> elbow, out to the side, the same in both frames (canvas pixels)
+    upper = {(14, 21), (14, 20), (15, 20), (15, 19), (16, 19), (16, 18), (17, 18), (17, 17)}
+    poses = [
+        # upright: forearm straight up from the elbow, palm over it
+        ({(x, y) for x in (17, 18) for y in range(11, 17)},
+         {(x, y) for x in range(17, 20) for y in range(7, 11)} | {(16, 9)}),
+        # swung out: the forearm leans a column right above its middle
+        ({(x, y) for x in (17, 18) for y in range(14, 17)}
+         | {(x, y) for x in (18, 19) for y in range(11, 14)},
+         {(x, y) for x in range(19, 22) for y in range(7, 11)} | {(18, 9)}),
     ]
     out = []
-    for arm in arms:
-        top = min(y for _, y in arm)
-
-        def hook(body, arm=arm, top=top):
-            body.blob(arm, lambda p: "s" if p[1] <= top + 1 and p[0] >= 15 else "T",
-                      ring="outer")
+    for fore, hand in poses:
+        def hook(body, arm=upper | fore, hand=hand):
+            body.blob(arm | hand, lambda p: "s" if p in hand else "T", ring="outer")
         out.append(seated_frame(look_name, arm=hook))
     return out
 
