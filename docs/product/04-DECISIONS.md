@@ -927,3 +927,49 @@ Rejected:
   painter to keep in parity with the first.
 - **Numbered flags with a legend of gag titles.** It adds 26 lettered titles to maintain,
   and the text is illegible at card size anyway.
+
+**D-059 · 2026-09-29 · The slider has eight labelled detents, and 1,000+ never opens the
+Beyond panel by itself (DIA-256, U2-03/U2-06/U2-09; UX Lead; owner decided on DIA-256).**
+The owner asked for "clicks" that land only where something changes. Content changes only at
+the seven real headcounts (D-023) and at 1,000+ (D-029), so those eight are the whole set.
+The DIA-256 review measured 76 distinct readouts across one drag for 8 real states, and low
+stops 23 px apart at 390. Overshooting to 1,000+ on a phone opened Beyond mid-drag, made the
+page inert and left focus on `<body>`, while `?n=1000` on load did not open it at all.
+1. **Eight detents, evenly spaced.** A native `<input type="range">` with `min=0 max=7
+   step=1`; the value is the stop index. ~47 px apart at 390. U-02's 44 px hit band and
+   ≥ 28 px thumb stay, as does U-03's keyboard (Home = 80, End = 1,000+).
+2. **Every stop is labelled with headcount:** `80 · 150 · 220 · 360 · 490 · 610 · 750 ·
+   1,000+`. Years move to the readout. The current label is bold `--ink`; a tap on a label
+   selects its stop.
+3. **The readout shows the band, not the visitor's number** (e.g. "~150 people · 2019"; the
+   wording is the Product Lead's). D-053 item 2 rejected a band-only readout because it would
+   change form mid-drag; with detents there is no mid-drag value, so that reason is gone.
+4. **`?n=` is unchanged:** it writes the band's value (80…750, 1000). An off-band `?n=437`
+   still snaps to the nearest band (D-023), which now applies only to links.
+5. **Beyond never auto-opens, on any path.** The 1,000+ readout carries a one-line
+   "What changes past 750 →" button (Product Lead's string) that opens the panel. Focus goes
+   to the panel heading; Close returns it to the slider. The slider and a `?n=1000` link give
+   the same result.
+Amends R-01 (range, tick labels, readout), R-01b ("opens the Beyond panel automatically"),
+D-023's last clause and D-053 item 2's readout forms.
+Rejected: keeping 25–1,000 with snapping on release (still 76 readouts, still 23 px stops);
+opening Beyond on release only (keeps two paths that behave differently).
+
+**D-060 · 2026-09-29 · Desktop centres vertically and paints the scene at 3× on large
+screens; Punch list and Share move to one row under the picture at every width (DIA-256,
+U2-04/U2-07; UX Lead; owner decided on DIA-256).**
+At 1440×900 the page was a 644 px block pinned to the top, with 256 px empty below; at
+1920×1080, 436 px. On a phone three pill rows sat between the tagline and the picture, so the
+scene started at y 470.
+1. **Vertical centring:** from 1152 px wide and ≥ 700 px tall, the two-column block (D-056) is
+   centred vertically, with the top offset capped at 20 vh. Below 700 px tall, as today.
+2. **3× from ≥ 1600 × 960:** the scene paints at integer scale 3 (1080 × 720). This lifts
+   D-042a's 720 px cap for those viewports only. Integer scale keeps R-25 pixel-true. At
+   1920×1080 the layout is ~1,496 × 882 px and does not scroll.
+3. **One utility row:** Punch list and Share sit together in one row under the stepper, above
+   the contact line, at every width. The tabs row sits directly on the scene. Amends D-048
+   item 2 (Punch list's own row) and reverses D-056 item 2 (Punch list in the tabs row at
+   ≥ 1152) and D-057 item 7's placement of Share. Targets stay ≥ 44 px high and ≥ 8 px apart.
+Acceptance: at 390×844 on landing the scene top is ≤ 416 px and the whole picture and its
+controls fit the first viewport at bands 80–750; at 1440×900 the gaps above and below the
+block match ±16 px with no scroll; at 1920×1080 the scene box is 1080 × 720 with no scroll.

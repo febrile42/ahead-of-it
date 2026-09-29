@@ -7,8 +7,8 @@ Change any of these by writing a `04-DECISIONS.md` entry first.
 
 | ID | Requirement | Phase |
 |---|---|---|
-| R-01 | A headcount **slider** (range ~25 to 1,000+) that **snaps to seven bands at Josh's real headcounts** — 80 · 150 · 220 · 360 · 490 · 610 · 750 (D-023). Ticks are labelled with the year. The readout shows the visitor's number, the snapped band, and the year: "~400 → 2022, ~490". | 1 |
-| R-01b | Past 750 the slider has **one more stop, `1,000+`** (D-029). The building does not grow further; the band opens the Beyond panel automatically and the checklist shows its translation column. | 1 |
+| R-01 | A headcount **slider** with **eight evenly spaced detents at Josh's real headcounts** — 80 · 150 · 220 · 360 · 490 · 610 · 750 · 1,000+ (D-023, D-059). Every stop is labelled with its headcount. The readout shows the band and the year, e.g. "~150 people · 2019". An off-band `?n=` snaps to the nearest band. | 1 |
+| R-01b | Past 750 the slider has **one more stop, `1,000+`** (D-029). The building does not grow further; the checklist shows its translation column. The Beyond panel **never opens by itself**: the 1,000+ readout has a "What changes past 750 →" button that opens it (D-059). | 1 |
 | R-02 | The **building renders per band** as an isometric pixel-art scene assembled from a tileset, **in its built state by default** (D-022). Floors, desks, rooms and (from 360) an inset office change with the band. | 1 |
 | R-03 | In the **"without" state**, each band shows its **gags** as distinct, visually legible scenes placed where the problem physically occurs. In the built state the same spots show the **fix** (the "already" object). | 1 (static) / 2 (animated) |
 | R-03a | **States are cumulative** (D-026): band N shows all fixes (built) or all gags (without) from years ≤ N; the current band's items are rendered at full prominence, earlier bands' items smaller/quieter. Hotspots exist for all of them. | 1 |
