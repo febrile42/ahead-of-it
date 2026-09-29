@@ -7,7 +7,16 @@
 // in, it does not create or append them.
 import { copy, getBand } from '../content';
 import type { BandId } from '../content';
-import { BAND_ORDER, NUMERIC_BANDS, SLIDER_MAX, SLIDER_MIN, formatAnnouncement, formatReadout, nearestBand } from '../scene/bands';
+import {
+  BAND_ORDER,
+  NUMERIC_BANDS,
+  SLIDER_MAX,
+  SLIDER_MIN,
+  formatAnnouncement,
+  formatReadout,
+  nearestBand,
+  rawValueForBand,
+} from '../scene/bands';
 
 export interface SliderHandles {
   input: HTMLInputElement;
@@ -50,10 +59,8 @@ export function createSlider(container: HTMLElement, initialBand: BandId = 80): 
   input.min = String(SLIDER_MIN);
   input.max = String(SLIDER_MAX);
   input.step = '1';
-  const initialInfo = getBand(initialBand);
-  input.value = String(
-    initialBand === 'beyond' ? SLIDER_MAX : Number(initialInfo?.people?.replace(/[^0-9]/g, '') || initialBand)
-  );
+  // U-01 (DIA-194/195): see rawValueForBand's own doc comment.
+  input.value = String(rawValueForBand(initialBand));
 
   ticks.replaceChildren();
   for (const band of NUMERIC_BANDS) {
@@ -91,6 +98,35 @@ export function createSlider(container: HTMLElement, initialBand: BandId = 80): 
   }
 
   input.addEventListener('input', () => update(Number(input.value), true));
+
+  // U-03 (DIA-194/195): the native range's default key handling moves the
+  // raw value by one *unit* per Arrow/PageUp/PageDown press (90 presses to
+  // cross from 80 to the next band) and Home/End go to SLIDER_MIN/MAX (25 /
+  // 1000), not the first/last band. preventDefault() on keydown suppresses
+  // that default entirely (range inputs change value from their keydown
+  // handler, not a later keyup/input), so every key path below is this
+  // module's own band-stepping, and a real drag (the 'input' listener
+  // above) is untouched — it stays continuous.
+  const STEP_KEYS = new Set(['ArrowRight', 'ArrowUp', 'PageUp', 'ArrowLeft', 'ArrowDown', 'PageDown', 'Home', 'End']);
+  input.addEventListener('keydown', (event) => {
+    if (!STEP_KEYS.has(event.key)) return;
+    event.preventDefault();
+    const atIndex = BAND_ORDER.indexOf(nearestBand(Number(input.value)));
+    const lastIndex = BAND_ORDER.length - 1;
+    const toIndex =
+      event.key === 'Home'
+        ? 0
+        : event.key === 'End'
+          ? lastIndex
+          : event.key === 'ArrowRight' || event.key === 'ArrowUp' || event.key === 'PageUp'
+            ? Math.min(lastIndex, atIndex + 1)
+            : Math.max(0, atIndex - 1);
+    const toBand = BAND_ORDER[toIndex];
+    const toRaw = rawValueForBand(toBand);
+    input.value = String(toRaw);
+    update(toRaw, true);
+  });
+
   update(Number(input.value), false);
 
   return {

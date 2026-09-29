@@ -182,6 +182,41 @@ if (
   const panel = createPanel();
   panelRoot.append(panel.root);
 
+  // U-06 (DIA-194/195): every top-level piece of the page other than the
+  // panel itself, so a modal open (≤767px) can make all of it `inert` —
+  // unreachable by Tab and hidden from the accessibility tree — leaving
+  // only the sheet's own contents behind. `#app`'s own children, not
+  // `#app` itself, because `panelRoot` is one of those children too;
+  // marking `#app` inert would take the panel down with it.
+  const pageContent = Array.from(document.querySelectorAll<HTMLElement>('#app > *')).filter(
+    (el) => el !== panelRoot
+  );
+  panel.onOpen((modal) => {
+    for (const el of pageContent) el.inert = modal;
+  });
+  panel.onClose(() => {
+    for (const el of pageContent) el.inert = false;
+  });
+
+  // U-05: the hotspot whose panel is currently open, so its reticle draws
+  // solid and it announces `aria-expanded="true"` for as long as that's
+  // true (DIA-13: the button itself doesn't survive a re-render, so this is
+  // repointed by syncOpenPanel below, the same way B4's return-focus target is).
+  let selectedHotspotButton: HTMLButtonElement | null = null;
+  function setHotspotSelected(button: HTMLButtonElement | null) {
+    if (selectedHotspotButton && selectedHotspotButton !== button) {
+      selectedHotspotButton.classList.remove('hotspot--selected');
+      selectedHotspotButton.setAttribute('aria-expanded', 'false');
+    }
+    selectedHotspotButton = button;
+    if (button) {
+      button.classList.add('hotspot--selected');
+      button.setAttribute('aria-expanded', 'true');
+    }
+  }
+
+  panel.onClose(() => setHotspotSelected(null));
+
   // DIA-131: the punch-list button's label span lives inside its own
   // static-shell markup (index.html) — checklist.ts writes `Punch list (n)`
   // into it on every render(), from the same count the sheet lists.
@@ -630,6 +665,15 @@ if (
     if (!fields) return;
     cancelActiveMoment(); // PH2-03: opening a panel cancels a playing moment at once.
     openPanelGagId = gagId;
+    if (source instanceof HTMLButtonElement) setHotspotSelected(source);
+    // U-05: on a phone the sheet is about to cover the scene from ~50vh
+    // down — scroll so the scene's own top meets the viewport top first,
+    // so the tapped hotspot (always inside it) lands above the sheet's
+    // edge instead of under it. Desktop's side panel never covers the
+    // scene, so this only runs below the same 767px breakpoint U-06 uses.
+    if (window.matchMedia('(max-width: 767px)').matches) {
+      sceneWrap!.scrollIntoView({ block: 'start', inline: 'nearest' });
+    }
     // R-04: the prevented-beat thumbnail is always the without-state
     // scene. B4: closing returns focus to the hotspot that opened it.
     panel.open(fields, 'without', { returnFocusTo: source });
@@ -730,6 +774,7 @@ if (
     );
     if (button) {
       panel.setReturnFocusTo(button);
+      setHotspotSelected(button); // U-05: repoint the solid-reticle state at the button's freshly rebuilt replacement.
     } else if (viewOnly) {
       panel.setReturnFocusTo(floorButton);
     } else {
@@ -816,17 +861,38 @@ if (
       return;
     }
 
-    // Toggle and re-render keep the current view id (both states share the
-    // skeleton, D-042a); a slider change reset it to null; a missing id
-    // falls back to the band's default close-up — except before this
-    // session's first commit (`lastCommittedBand === null`: a fresh load,
-    // or a `?n=` deep link, D-043), where D-051 item 1 opens on that
-    // close-up's room instead, "Whole floor" pressed. A later slider/toggle
-    // reset keeps today's close-up fallback (D-051 item 3, "as today"),
-    // which the band-crossing moment check below depends on.
+    // Toggle, tab, stepper, whole-floor and resize renders all keep (or, for
+    // a tab/stepper/whole-floor change, already reset by selectView() to)
+    // the id they want — `currentViewId && findView(scene, currentViewId)`
+    // below finds it in the same band's scene every time. A slider change is
+    // the one case `currentViewId` is left holding the *previous* band's
+    // view id (main.ts's slider.onChange, deliberately un-nulled) —
+    // `isBandChange` below is what tells the two apart.
+    //
+    // D-054 (amends D-051 item 3, U-04): a band change keeps the *kind* of
+    // view the visitor is in, not the literal close-up. `previousView`
+    // looks the outgoing id up in `currentScene` (the previous band's scene
+    // — still not yet reassigned below) before anything here decides where
+    // to land: a room-kind exit ("Whole floor" pressed), same as this
+    // session's first commit (`lastCommittedBand === null`: a fresh load or
+    // a `?n=` deep link, D-043), opens the new band's own opening room. A
+    // close-up exit tries that same id in the *new* band's scene first
+    // (D-036 close-up ids are stable across bands), falling back to the new
+    // band's own default close-up only if it isn't there — which is also
+    // the only case the band-crossing moment check below ever fires for
+    // (its own `scene.moment.view` is always a default close-up).
+    //
+    // A room id (`ground`, `floor-2`, …) is deliberately never looked up
+    // this way even though D-036 shares those across bands too: the room
+    // that happens to share this band's outgoing room id is not necessarily
+    // its *opening* room (D-051 item 1), so a room-kind exit always uses
+    // `openingView`, never `findView`.
+    const isBandChange = lastCommittedBand !== null && band !== lastCommittedBand;
+    const previousView = isBandChange && currentScene && currentViewId ? findView(currentScene, currentViewId) : undefined;
     const view =
-      (currentViewId && findView(scene, currentViewId)) ||
-      (lastCommittedBand === null ? openingView(scene) : defaultView(scene));
+      lastCommittedBand === null || previousView?.kind === 'room'
+        ? openingView(scene)
+        : (currentViewId && findView(scene, currentViewId)) || defaultView(scene);
     currentViewId = view.id;
     currentScene = scene;
     syncTabs(scene, roomOf(scene, view)?.id);
@@ -947,7 +1013,15 @@ if (
     cancelActiveMoment(); // PH2-03: moving the slider cancels a playing moment at once.
     const wasBeyond = band === 'beyond';
     band = newBand;
-    currentViewId = null; // a new band picks its own default view
+    // D-054/U-04: `currentViewId` is deliberately left set, not nulled —
+    // render() below reads it (still holding the view being left, since
+    // nothing else touches it between here and the render() that follows)
+    // to decide whether this band change keeps a close-up's own id or
+    // opens the new band's opening room instead. A visitor dragging fast
+    // across several bands before any of them commits still fires this
+    // listener once per band; leaving `currentViewId` alone here (rather
+    // than nulling it per call) is what keeps that decision correct
+    // regardless of how many intermediate bands never get painted (S5).
     roomFromId = null;
     pendingFocus = null;
     pendingAnnounce = null;
@@ -971,9 +1045,11 @@ if (
       // R-01b: the Beyond band opens its panel automatically. B4: it must
       // not steal focus off the slider at its last stop, and Escape
       // should return focus there too. Not hotspot-sourced, so it is never
-      // syncOpenPanel()'s concern (DIA-13).
+      // syncOpenPanel()'s concern (DIA-13). U-06: `modal: false` — the
+      // "what works" keep-list's own rule is that this one opens without
+      // trapping, so the slider stays usable above the sheet.
       openPanelGagId = null;
-      panel.open(beyondPanelFields(), 'without', { focus: false, returnFocusTo: slider.input });
+      panel.open(beyondPanelFields(), 'without', { focus: false, returnFocusTo: slider.input, modal: false });
     } else if (wasBeyond) {
       // F5 (DIA-12): the auto-opened Beyond panel is only ever true for
       // the 'beyond' band — leaving it must close the panel rather than

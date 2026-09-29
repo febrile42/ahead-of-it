@@ -139,6 +139,15 @@
   box-sizing: border-box;
 }
 
+/* U-07 (DIA-194/195): reserves the vertical scrollbar's width unconditionally,
+   whether or not the page is actually tall enough to need one — see the
+   .checklist__panel--collapsed comment below for the regression this
+   prevents (a scrollbar appearing/disappearing used to shift the viewport's
+   own width mid-interaction). */
+html {
+  scrollbar-gutter: stable;
+}
+
 body {
   margin: 0;
   padding: 0 0 2rem;
@@ -216,8 +225,67 @@ h1 {
   min-height: 1.2em; /* S1, see .slider__label */
 }
 
+/* U-02 (DIA-194/195): the unstyled native control was 16px tall at 390px —
+   a tap 10-14px off its centre missed entirely (R-20/R-24's 44px minimum).
+   The input's own box is now the full 44px hit area (a tap anywhere in it
+   still jumps the native track, same as before — nothing here changes
+   hit-testing, only what's painted), with a thin 4px track and a >=28px
+   thumb drawn on top, in both engines' own pseudo-elements. */
 .slider input[type='range'] {
   width: 100%;
+  height: 44px;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+}
+
+.slider input[type='range']::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 999px;
+  background: var(--border);
+}
+
+.slider input[type='range']::-moz-range-track {
+  height: 4px;
+  border-radius: 999px;
+  background: var(--border);
+}
+
+.slider input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid var(--surface);
+  /* Centres the 28px thumb on the 4px track: (28 - 4) / 2. Firefox's
+     ::-moz-range-thumb centres on its track natively, no margin needed. */
+  margin-top: -12px;
+}
+
+.slider input[type='range']::-moz-range-thumb {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid var(--surface);
+}
+
+/* U-13-style ring (D-046 point 6 contrast rules apply): both engines'
+   thumb pseudo-elements needs the rule repeated — a selector list with an
+   unsupported pseudo-element (`::-moz-range-thumb` in WebKit or vice
+   versa) invalidates the *whole* rule, not just its own branch. */
+.slider input[type='range']:focus-visible::-webkit-slider-thumb {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.slider input[type='range']:focus-visible::-moz-range-thumb {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
 }
 
 .slider__ticks {
@@ -596,6 +664,26 @@ h1 {
   outline-offset: 2px;
 }
 
+/* U-05 (DIA-194/195): while a hotspot's panel is open, its reticle draws
+   solid instead of the default two-tone outline (main.ts's
+   setHotspotSelected toggles this class alongside aria-expanded) — the
+   object stays identifiable once the sheet covers most of the phone
+   screen. Reuses the bracket pseudo-elements' own box sizing (--obj-w/h),
+   just filled instead of framed. */
+.hotspot--selected:not(.hotspot--zoom)::before,
+.hotspot--selected:not(.hotspot--zoom)::after {
+  animation: none;
+  background-image: none;
+}
+
+.hotspot--selected:not(.hotspot--zoom)::after {
+  background-color: var(--hs-core);
+}
+
+.hotspot--selected:not(.hotspot--zoom)::before {
+  background-color: var(--hs-edge);
+}
+
 /* A room's "zoom in" target (DIA-55): a small label chip anchored on the
    close-up's rect centre, not a button spanning the rect — a dense room's
    rects overlap too much for spanning buttons to ever reach 44px without
@@ -739,13 +827,35 @@ h1 {
   left: 0;
   right: 0;
   bottom: 0;
-  max-height: 70vh;
+  /* U-05 (DIA-194/195): capped at 50vh (≈422px at 844px) below 768px so the
+     tapped hotspot stays visible above the sheet's own top edge — the
+     >=768px override two rules down still lifts this to `none`. */
+  max-height: 50vh;
   overflow-y: auto;
+  /* U-05 AC: overscrolling the sheet must not scroll the page underneath it. */
+  overscroll-behavior: contain;
   background: var(--surface);
   border-top: 2px solid var(--ink);
   border-radius: 12px 12px 0 0;
-  padding: 1rem;
+  padding: 1.5rem 1rem 1rem;
   box-shadow: 0 -4px 16px var(--shadow);
+}
+
+/* U-05: a visible grab edge on the phone bottom sheet — decorative only
+   (no content, no a11y-tree entry), so it carries none of the panel's own
+   copy or state. Absent >=768px, where .panel is a side panel, not a sheet. */
+@media (max-width: 767px) {
+  .panel::before {
+    content: '';
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    width: 36px;
+    height: 4px;
+    border-radius: 999px;
+    background: var(--border);
+    transform: translateX(-50%);
+  }
 }
 
 /* DIA-135: `.checklist__close` shares this exact rule block (same look,
@@ -849,22 +959,32 @@ h1 {
 }
 
 /* D-048/R-24: visually hidden until opened, but never display:none and
-   never a closed <details> — a clip pattern (like .sr-only above), so the
-   panel stays in the DOM and the accessibility tree, just not sighted.
-   Deliberately no explicit width/height/overflow:hidden here (unlike
-   .sr-only): those would size this box to a fixed 1x1px, which — because
-   it has no positioned ancestor of its own, so its containing block is
-   the initial containing block — collapses the *whole page's* scrollable
-   height down to exactly the viewport once the (now off-flow) 26-row list
-   no longer contributes any scrollable overflow. A real Chromium run
-   showed a scrollbar disappearing that way changes hit-testing on an open
-   gag panel elsewhere on the page (DIA-131 review). `clip` alone hides
-   every pixel regardless of the box's real (large) size, so the list's
-   natural height still keeps contributing scrollable overflow same as it
-   did before this box was ever collapsed. */
+   never a closed <details> — the same .sr-only pattern used elsewhere in
+   this file, so the panel stays in the DOM and the accessibility tree,
+   just not sighted.
+   U-07 (DIA-194/195): DIA-131 deliberately avoided .sr-only's fixed
+   1x1px box here, because collapsing it (no positioned ancestor of its
+   own, so its containing block was the initial containing block) let the
+   whole page's scrollable height shrink to the viewport once the 26-row
+   list went off-flow — and a real Chromium run at the time showed the
+   vertical scrollbar disappearing with it, which shifted the viewport's
+   own width and moved an open gag panel's hit-testing coordinates out
+   from under a running interaction. Trading that fix for this one instead
+   left the *uncollapsed* box's full natural height (~2,200px) contributing
+   scrollable overflow at every band, which is what the UX review measured
+   as ~2,200px of blank scroll below the contact line. `scrollbar-gutter:
+   stable` on `body` (below) reserves the scrollbar's width unconditionally
+   now, so the width it used to shift on scrollbar disappearance never
+   moves again — the actual regression DIA-131 was routing around — which
+   makes the standard 1x1px pattern safe to use here after all. */
 .checklist__panel--collapsed {
   position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
   clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
 }
 
 .checklist__panel--open {
@@ -1001,11 +1121,16 @@ h1 {
   }
 
   /* Print (Cmd-P) always prints the full list, open or closed (D-048 item
-     5) — undo the collapsed clip and the opened sheet's fixed positioning
-     regardless of on-screen state. */
+     5) — undo the collapsed .sr-only sizing and the opened sheet's fixed
+     positioning regardless of on-screen state. */
   .checklist__panel--collapsed {
     position: static;
+    width: auto;
+    height: auto;
+    margin: 0;
+    overflow: visible;
     clip: auto;
+    white-space: normal;
   }
 
   .checklist__panel--open {

@@ -166,8 +166,13 @@ export async function setBand(page: Page, band: BandId, via: InputMethod = 'mous
 }
 
 /** Walks the slider to `band` with Home/End + arrow keys only — no value
- * assignment. This is the path a keyboard visitor actually takes, and it
- * fires `input` once per key press. */
+ * assignment. This is the path a keyboard visitor actually takes.
+ *
+ * U-03 (DIA-194/195): src/ui/slider.ts's own keydown handler now
+ * `preventDefault()`s the native range behaviour and moves exactly one
+ * *band* per Home/End/Arrow/Page press (Home -> the first band, End -> the
+ * last), not one raw unit — so this presses the BAND_ORDER index distance
+ * from Home (always index 0) rather than the old raw-value distance. */
 export async function setBandByKeyboard(page: Page, band: BandId): Promise<void> {
   const slider = page.locator('#headcount-slider');
   await slider.focus();
@@ -175,15 +180,10 @@ export async function setBandByKeyboard(page: Page, band: BandId): Promise<void>
     await page.keyboard.press('End');
     return;
   }
-  // Home lands on SLIDER_MIN (25), which snaps to band 80, then step up to
-  // the target's exact raw value. `step` is 1 (src/ui/slider.ts), so this is
-  // a deliberate storm of `input` events rather than one jump.
   await page.keyboard.press('Home');
-  const from = Number(await slider.inputValue());
-  const to = rawFor(band);
-  const key = to >= from ? 'ArrowRight' : 'ArrowLeft';
-  for (let i = 0; i < Math.abs(to - from); i += 1) {
-    await page.keyboard.press(key);
+  const toIndex = BAND_ORDER.indexOf(band);
+  for (let i = 0; i < toIndex; i += 1) {
+    await page.keyboard.press('ArrowRight');
   }
 }
 

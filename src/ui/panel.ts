@@ -20,6 +20,12 @@ export interface PanelOpenOptions {
   focus?: boolean;
   /** The element to return focus to when the panel closes (R-24 — a non-modal dialog returns focus to its invoker). */
   returnFocusTo?: HTMLElement;
+  /** U-06 (DIA-194/195): set false for the auto-opened Beyond panel — the
+   * "what works" keep-list's own rule is that it opens without trapping,
+   * "the slider stays usable above the sheet" even on a phone. Every
+   * hotspot-opened panel wants the default (true): modal on phone,
+   * whatever `isModalWidth()` says at open() time. */
+  modal?: boolean;
 }
 
 export interface PanelHandles {
@@ -33,6 +39,24 @@ export interface PanelHandles {
    * `open()` was given is now a detached node; this swaps in its
    * replacement so a later Escape/close still lands somewhere real. */
   setReturnFocusTo: (el: HTMLElement | null) => void;
+  /** U-06 (DIA-194/195): fires once per `open()` call, with whether *this*
+   * open is modal (phone width AND `options.modal !== false`) — main.ts
+   * uses this to make the rest of the page `inert`, only when true. */
+  onOpen: (listener: (modal: boolean) => void) => void;
+  /** U-05/U-06: fires once per `close()` call, however it was closed (the
+   * close button, Escape, or a future outside-tap) — main.ts uses this to
+   * undo the background `inert` and clear the tapped hotspot's selected
+   * state, in one place regardless of the close path. */
+  onClose: (listener: () => void) => void;
+}
+
+/** U-06: the panel is a modal dialog at ≤767px (a phone bottom sheet with
+ * nothing else reachable underneath it) and a non-modal side panel from
+ * 768px up (D-051 item 3's "side panel leaves the picture visible" stays
+ * true there). Read live rather than cached, so a panel opened before a
+ * resize still asks the right question at open() time. */
+function isModalWidth(): boolean {
+  return window.matchMedia('(max-width: 767px)').matches;
 }
 
 const PANEL_TITLE_ID = 'panel-title';
@@ -151,10 +175,24 @@ export function createPanel(): PanelHandles {
   // button, or the slider for the auto-opened Beyond panel) on close,
   // whether closed via the close button or Escape.
   let returnFocusTo: HTMLElement | null = null;
+  // U-06: whether *this* open is modal — set once per open() call (below)
+  // and read by the Tab-trap keydown handler, rather than recomputed from
+  // isModalWidth() on every keystroke, so a viewport resize mid-open can't
+  // make the trap disagree with whether main.ts actually made the
+  // background inert for this same open.
+  let modalNow = false;
+  const openListeners: Array<(modal: boolean) => void> = [];
+  const closeListeners: Array<() => void> = [];
 
   function close() {
     if (root.hidden) return;
     root.hidden = true;
+    // U-06: closeListeners run first — main.ts's own listener lifts `inert`
+    // off the rest of the page there, and B4's return-focus target usually
+    // lives inside it. Focusing it first, while that ancestor is still
+    // inert, is a silent no-op (an inert subtree holds no focusable
+    // elements) that drops focus to <body> instead.
+    for (const listener of closeListeners) listener();
     const target = returnFocusTo;
     returnFocusTo = null;
     target?.focus();
@@ -162,12 +200,37 @@ export function createPanel(): PanelHandles {
 
   closeButton.addEventListener('click', close);
 
+  /** U-06: every `a`/`button` inside the sheet, in DOM order — the panel's
+   * own tab sequence to trap Tab/Shift+Tab within, while modal. */
+  function focusableElements(): HTMLElement[] {
+    return Array.from(root.querySelectorAll<HTMLElement>('a[href], button:not([disabled])'));
+  }
+
   // B4: Escape closes the panel regardless of which element currently has
   // focus (the invoking hotspot, the slider, or the close button itself),
   // so it has to listen at the document, not just within `root`.
+  // U-06: while modal (≤767px), Tab/Shift+Tab from the sheet's first/last
+  // focusable element wraps back inside it instead of escaping to whatever
+  // sits behind the sheet — main.ts's own `inert` on the rest of the page
+  // already keeps those out of the *browser's* tab order, this is what
+  // still cycles the sheet's own ends into each other.
   document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape' && !root.hidden) {
+    if (root.hidden) return;
+    if (event.key === 'Escape') {
       close();
+      return;
+    }
+    if (event.key !== 'Tab' || !modalNow) return;
+    const items = focusableElements();
+    if (items.length === 0) return;
+    const first = items[0];
+    const last = items[items.length - 1];
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
     }
   });
 
@@ -176,17 +239,26 @@ export function createPanel(): PanelHandles {
     open(fields, thumbnailState, options = {}) {
       renderBeats(body, fields, thumbnailState);
       root.hidden = false;
+      modalNow = options.modal !== false && isModalWidth();
+      root.setAttribute('aria-modal', String(modalNow));
       returnFocusTo = options.returnFocusTo ?? null;
       // B4: reaching `beyond` with the keyboard must not steal focus off
       // the slider at its last stop — callers pass { focus: false } there.
       if (options.focus !== false) {
         closeButton.focus();
       }
+      for (const listener of openListeners) listener(modalNow);
     },
     close,
     isOpen: () => !root.hidden,
     setReturnFocusTo(el) {
       returnFocusTo = el;
+    },
+    onOpen(listener) {
+      openListeners.push(listener);
+    },
+    onClose(listener) {
+      closeListeners.push(listener);
     },
   };
 }
@@ -279,6 +351,10 @@ export function renderHotspots(
     // gag, checked by layout.test.ts's coverage test).
     const title = panelFieldsFor(hotspot.gagId)?.title ?? hotspot.gagId;
     button.setAttribute('aria-label', title);
+    // U-05: main.ts's setHotspotSelected flips this to 'true' — and adds
+    // .hotspot--selected's solid reticle — for as long as this hotspot's
+    // own panel is open.
+    button.setAttribute('aria-expanded', 'false');
     const { cx, cy } = placeButton(button, hotspot, layout, canvasBox);
     // Test-only (S4): the exact centre point in buffer units, so
     // tests/scene.spec.ts can assert the rendered button centre matches

@@ -55,6 +55,19 @@ export function bandIndex(band: BandId): number {
 }
 
 /**
+ * The slider's own raw value for a band (U-01, DIA-194/195): the numeric
+ * band id itself, or SLIDER_MAX for 'beyond' — always round-trips back to
+ * the same band through `nearestBand` (bands.test.ts). Never derive this
+ * from a band's display copy (`getBand(band)?.people` is formatted for
+ * reading, e.g. band 750's "~650→750" — stripping its non-digits used to
+ * give 650750, clamped to SLIDER_MAX, which `nearestBand` snaps to
+ * 'beyond' instead of 750).
+ */
+export function rawValueForBand(band: BandId): number {
+  return band === 'beyond' ? SLIDER_MAX : band;
+}
+
+/**
  * True when `band` is at or after `threshold` in the fixed band order.
  * 'beyond' is always at-or-after every numeric threshold (it never grows
  * past what 750 already has — SCENE-FORMAT's `beyond` is an explicit

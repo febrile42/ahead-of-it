@@ -661,3 +661,38 @@ Rejected:
   which D-046 point 4 exists to keep.
 - **A larger label (≥18.66 px bold) under the 3:1 rule.** It passes at 3.22:1 with no margin,
   and it makes the toggle bigger on a 390 px phone, next to the thing it must not crowd.
+
+**D-054 · 2026-09-29 · A band change keeps the kind of view, not the literal close-up
+(amends D-051 item 3; DIA-194 U-04, accepted on DIA-194; DIA-195).**
+The DIA-194 UX review found the first slider move after D-051's whole-floor landing cuts
+straight to a close-up — sometimes on a different floor (80 whole floor → 220 "Floor 2 ·
+Conference room 6 of 7"). D-051 item 3 said the slider "keeps the visitor's place" but the
+code's fallback to the band's `default` close-up on every band change (D-042a counter 3, "as
+today") reads that more literally than intended: it strands a visitor who was on the whole
+floor, at the exact moment they're still learning the model is a building at all.
+1. **A band change keeps the *kind* of view the visitor is in.** On the whole floor, the new
+   band opens on its own opening room (`openingView`, D-051 item 1's same landing), "Whole
+   floor" pressed. In a close-up whose id exists in the new band's scene (D-036 close-up ids
+   are stable across bands), stay on it. Otherwise fall back to the new band's `default`
+   close-up, same as before.
+2. **A room id is never used to look up the destination.** D-036 room ids (`ground`,
+   `floor-2`, …) are shared across bands too, but the room sharing the outgoing room's id in
+   the new band is not necessarily that band's *opening* room — a whole-floor exit always
+   uses `openingView`, never a direct id lookup.
+3. **D-045's beats are unchanged.** The band-crossing moment still plays only when the
+   visitor lands on the band's own `default` close-up — now a narrower set of band changes
+   (only those that keep or land on that exact close-up) than before, since a whole-floor
+   exit or a close-up that only exists in the old band no longer forces a cut to it. Fewer
+   first slider moves play a moment; the trade-off the review named and CEO accepted.
+4. **Toggle and same-band navigation (tabs, stepper, whole floor, resize) are unaffected** —
+   D-042a's "both states share the skeleton" and D-051 item 2's tab landing keep their own
+   behaviour; only a slider-driven band change consults this rule.
+No panel copy, receipt, date, figure or scene-format change.
+
+Rejected:
+- **Keep the close-up cut for every band change.** Spends the visitor's orientation to buy
+  a moment on a first move they haven't yet learned to read as a building. UX review finding
+  U-04.
+- **Remember the visitor's exact close-up across every future band change, forever.** Not
+  asked for; the review's own AC only requires the close-up to persist while its id still
+  exists in the new band's scene.

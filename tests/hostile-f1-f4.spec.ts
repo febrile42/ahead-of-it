@@ -28,7 +28,7 @@ import { readFileSync } from 'node:fs';
 import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
 import * as H from './interaction-helpers';
-import { allGagIds, defaultViewGagIds, sceneSourceDir } from './scene-source';
+import { allGagIds, defaultViewGagIds, findGagView, readBandSceneFile, sceneSourceDir } from './scene-source';
 
 /** The gag ids the currently-rendered view actually has hotspots for. The
  * oracle for "does the open panel describe something that is on screen". */
@@ -61,16 +61,30 @@ async function expectPanelAgreesWithScene(page: Page, openedGagId: string) {
 test.describe('F1 — an open panel survives a re-render that removes its subject', () => {
   test('F1.1 slider: a band-80 gag panel must not sit over the band-750 building', async ({ page }) => {
     // Data-driven pick (DIA-56): the premise under test is "a band-80 gag is
-    // not on the band-750 screen", not "the first hotspot at band 80 happens
-    // not to be". A real schema-2 export's band-80 default view can start
-    // with a gag that is *also* in band 750's default close-up — the app
-    // correctly keeps the panel open then, so hard-coding "first hotspot"
-    // made the test's premise false for that gag, not a defect.
+    // not on whatever band 750 actually lands on", not "the first hotspot at
+    // band 80 happens not to be". A real schema-2 export's band-80 default
+    // view can start with a gag that is *also* in band 750's default
+    // close-up — the app correctly keeps the panel open then, so hard-coding
+    // "first hotspot" made the test's premise false for that gag, not a
+    // defect.
+    // D-054 (U-04, DIA-194/195) widened where "lands on" can mean: a band
+    // change that leaves a close-up tries that same close-up id in the new
+    // band first, only falling back to its own default view if the id isn't
+    // there — so a gag merely absent from band 750's *default* view can
+    // still survive the change if it's in whatever band-750 view shares an
+    // id with the band-80 close-up the visitor was actually on.
     const band750DefaultGags = new Set(defaultViewGagIds(750, 'built'));
-    const gagId = allGagIds(80, 'built').find((id) => !band750DefaultGags.has(id));
+    const band750Scene = readBandSceneFile(750, 'built');
+    function survivesBandChangeToD053(id: string): boolean {
+      const fromView = findGagView(80, 'built', id);
+      const sameIdView = fromView && band750Scene?.views.find((v) => v.id === fromView.id);
+      const landingGags = sameIdView ? new Set(sameIdView.hotspots.map((h) => h.gagId)) : band750DefaultGags;
+      return landingGags.has(id);
+    }
+    const gagId = allGagIds(80, 'built').find((id) => !survivesBandChangeToD053(id));
     test.skip(
       gagId === undefined,
-      "every band-80 gag is also in band 750's default view in this scene source — F1.1 has nothing to exercise"
+      "every band-80 gag survives D-054's band-change rule into band 750 in this scene source — F1.1 has nothing to exercise"
     );
 
     await H.openApp(page); // 390px, mouse
@@ -137,7 +151,11 @@ test.describe('F1 — an open panel survives a re-render that removes its subjec
     // live control — Escape must land exactly where the brief says (item
     // 7): the same gag's hotspot if the close-up now shown still has it,
     // else the stepper's whole-floor control.
-    await H.openApp(page);
+    // U-06 (DIA-194/195): the room tab row sits behind the panel and is
+    // `inert` while it is a modal sheet (<=767px) — a room switch with the
+    // panel open is only reachable at the >=768px non-modal side-panel
+    // width (D-051 item 3), same as F3.1/F3.2.
+    await H.openApp(page, { viewport: H.TABLET });
     await H.setBand(page, 750);
     const gagId = await H.openFirstHotspot(page, 'mouse');
     const rooms = await H.roomIds(page);
@@ -301,7 +319,11 @@ test.describe('F3 — the toggle and an open panel', () => {
     // change — the candidate's premise does not hold. Asserted rather than
     // argued, so that a future built-state thumbnail turns this red instead
     // of shipping a genuinely stale panel.
-    await H.openApp(page);
+    // U-06 (DIA-194/195): the panel is a modal sheet at the default 390px —
+    // everything behind it, including the toggle, is `inert` until it
+    // closes, so this scenario (toggle a state while the panel is open) is
+    // only reachable at the >=768px side-panel width (D-051 item 3).
+    await H.openApp(page, { viewport: H.TABLET });
     await H.openFirstHotspot(page, 'mouse');
     const before = {
       strip: await H.panelStrip(page),
@@ -324,7 +346,9 @@ test.describe('F3 — the toggle and an open panel', () => {
     // return focus to (B4) no longer exists. Escape then lands wherever
     // focus happened to be, not on the invoker — silently, because
     // .focus() on a detached node neither throws nor logs.
-    await H.openApp(page);
+    // U-06 (DIA-194/195): see F3.1's own note — the toggle is only reachable
+    // with the panel open at the >=768px non-modal side-panel width.
+    await H.openApp(page, { viewport: H.TABLET });
     await H.ensureCloseup(page); // D-051: a fresh load can land on a room, which has no gag hotspots
     const hotspot = H.hotspots(page).first();
     const gagId = (await hotspot.getAttribute('data-gag-id')) ?? '';
