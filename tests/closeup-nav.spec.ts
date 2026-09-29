@@ -205,6 +205,10 @@ test.describe('focus after each control (DIA-46 item 2): connected, visible, and
   test('whole floor (leaving a room): focus moves to the zoom-in button of the close-up just left', async ({ page }) => {
     await H.openApp(page);
     await H.setBand(page, BAND);
+    // D-054/U-04: a band change now keeps view kind, so a fresh load's room
+    // (D-051 item 1) survives it — get onto a close-up first, the state
+    // this test (leaving one via "Whole floor") actually needs.
+    await H.ensureCloseup(page);
     const leftId = await H.currentView(page);
     await H.toggleWholeFloor(page, 'keyboard');
     const focus = await H.settledFocusInfo(page);

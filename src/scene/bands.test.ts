@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { BAND_ORDER, formatReadout, isAtLeast, nearestBand } from './bands';
+import { BAND_ORDER, formatReadout, isAtLeast, nearestBand, rawValueForBand } from './bands';
 
 describe('nearestBand (R-01 slider snapping)', () => {
   it('snaps low values to the first band', () => {
@@ -46,6 +46,23 @@ describe('BAND_ORDER / isAtLeast', () => {
     expect(isAtLeast(220, 150)).toBe(true);
     expect(isAtLeast(150, 220)).toBe(false);
     expect(isAtLeast(150, 150)).toBe(true);
+  });
+});
+
+describe('rawValueForBand (U-01, DIA-194/195)', () => {
+  it('round-trips every band id through nearestBand', () => {
+    for (const band of BAND_ORDER) {
+      expect(nearestBand(rawValueForBand(band))).toBe(band);
+    }
+  });
+
+  it('gives the numeric band its own id as the raw value', () => {
+    expect(rawValueForBand(750)).toBe(750);
+    expect(rawValueForBand(80)).toBe(80);
+  });
+
+  it("gives 'beyond' the slider's own max, never a parsed display string", () => {
+    expect(rawValueForBand('beyond')).toBe(1000);
   });
 });
 

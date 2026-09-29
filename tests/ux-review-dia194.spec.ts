@@ -50,15 +50,6 @@ test.describe('U-01: every ?n= band round-trips to the matching slider value and
     test(`?n=${band} sets the slider to ${band} and the readout to band ${band}'s own year/people`, async ({
       page,
     }) => {
-      if (band === 750) {
-        // Cause (DIA-194 U-01): src/ui/slider.ts's initial-value line strips
-        // non-digits from getBand(750).people ("~650→750"), giving 650750,
-        // which the native range input clamps to its max (1000) — so the
-        // slider opens on band 750 showing the Beyond stop. Delete this
-        // test.fail() once DIA-195 lands the fix.
-        test.fail(true, 'DIA-194 U-01: band 750 initial value is parsed from display copy, not the band id');
-      }
-
       await openAppAtQuery(page, `?n=${band}&it=built`);
 
       expect(await H.currentBand(page), 'the rendered scene').toBe(String(band));
@@ -84,26 +75,13 @@ test.describe('U-01: every ?n= band round-trips to the matching slider value and
 
 test.describe('U-02: the slider has a 44px touch target at 390px', () => {
   test("the input's own hit area is at least 44 css px tall", async ({ page }) => {
-    // Cause: src/style.css's `.slider input[type='range']` sets only
-    // `width: 100%`, leaving the native, unstyled control at its UA default
-    // height (measured 16px in the review). Delete once DIA-195 styles a
-    // 44px hit area (visible track can stay thin; the box just needs padding).
-    test.fail(true, "DIA-194 U-02: the range input's box is the UA default height, not 44px");
-
     await H.openApp(page, { viewport: H.PHONE });
     const box = await page.locator('#headcount-slider').boundingBox();
     expect(box).not.toBeNull();
     expect(box!.height).toBeGreaterThanOrEqual(44);
   });
 
-  test('a touch tap 20px above or below the track centre still moves the value', async ({ browser, browserName }) => {
-    // Chromium's native range input has essentially no extra hit slop
-    // beyond its own ~16px box, so a tap 20px off centre misses it. WebKit
-    // (this repo's iOS Safari proxy) already tolerates it — its native
-    // control has more built-in slop — so this is chromium-only until
-    // DIA-195 gives both engines an explicit 44px hit area.
-    test.fail(browserName === 'chromium', 'DIA-194 U-02: a tap that far off the (currently ~16px tall) track misses the control on Chromium');
-
+  test('a touch tap 20px above or below the track centre still moves the value', async ({ browser }) => {
     const context = await browser.newContext({ hasTouch: true, viewport: H.PHONE });
     const p = await context.newPage();
     try {
@@ -140,12 +118,6 @@ test.describe('U-03: the keyboard slider steps between bands', () => {
   test('7 ArrowRight presses from a fresh load visit every band, then Beyond, announcing each once', async ({
     page,
   }) => {
-    // Cause: src/ui/slider.ts sets `input.step = '1'` — a real range input's
-    // ArrowRight therefore moves one person, not one band, so this loop
-    // times out waiting for a render that (mostly) never fires. Delete once
-    // DIA-195 lands the band-stepping keys.
-    test.fail(true, 'DIA-194 U-03: ArrowRight moves +1 person, not to the next band stop');
-
     await H.openApp(page); // fresh load: band 80, per src/main.ts's DEFAULT_INITIAL_STATE
     const slider = page.locator('#headcount-slider');
     const live = page.locator('.slider__live');
@@ -165,13 +137,6 @@ test.describe('U-03: the keyboard slider steps between bands', () => {
   });
 
   test('Home returns to band 80 with its own readout, not the slider minimum', async ({ page }) => {
-    // Cause: Home is native range-input behaviour and jumps to `min`
-    // (SLIDER_MIN = 25 in src/scene/bands.ts), which still snaps to band 80
-    // but leaves the *raw* value at 25 — so the readout reads "~25 -> 2018,
-    // ~80" instead of "~80 -> 2018, ~80" (the review's own repro). Delete
-    // once DIA-195 makes Home land on the band 80 raw value itself.
-    test.fail(true, 'DIA-194 U-03: Home jumps to the slider minimum (25), not band 80 (80)');
-
     await H.openApp(page);
     await H.setBand(page, 750);
     const slider = page.locator('#headcount-slider');
@@ -189,14 +154,6 @@ test.describe('U-03: the keyboard slider steps between bands', () => {
 
 test.describe('U-05: the phone sheet does not cover the hotspot it explains (390px)', () => {
   test("the tapped hotspot's box stays fully above the sheet's top edge", async ({ page }) => {
-    // Cause: src/style.css's `.panel` is `position: fixed; bottom: 0;
-    // max-height: 70vh` with no scroll-into-view on open, so at 390x844 the
-    // sheet's top (y=253 in the review) sits well above the scene (y
-    // 470-730) — the hotspot the visitor just tapped ends up underneath it.
-    // Delete once DIA-195 scrolls the scene into view and/or caps the sheet
-    // at 50vh.
-    test.fail(true, "DIA-194 U-05: the sheet covers the scene, so the tapped hotspot is hidden");
-
     await H.openApp(page, { viewport: H.PHONE });
     await H.setBand(page, 750); // review's own repro band — a dense, busy scene
     await H.ensureCloseup(page);
@@ -231,12 +188,6 @@ test.describe('U-05: the phone sheet does not cover the hotspot it explains (390
 
 test.describe('U-06: the open panel traps Tab at 390px (DIA-194 U-06)', () => {
   test('10 Tab presses from Close never land outside the sheet', async ({ page }) => {
-    // Cause: src/ui/panel.ts hardcodes `aria-modal="false"` and never sets
-    // `inert` on the rest of the page, so nothing stops Tab walking out of
-    // the sheet into controls sitting behind it on a phone. Delete once
-    // DIA-195 makes the panel modal at <=767px.
-    test.fail(true, 'DIA-194 U-06: the panel is never modal, so Tab escapes it on a phone');
-
     await H.openApp(page, { viewport: H.PHONE });
     await H.ensureCloseup(page);
     await H.openFirstHotspot(page, 'keyboard'); // lands focus on the Close button
@@ -259,15 +210,6 @@ test.describe('U-06: the open panel traps Tab at 390px (DIA-194 U-06)', () => {
 
 test.describe('U-07: the collapsed punch list adds no blank scroll (390px, band 750)', () => {
   test('document.documentElement.scrollHeight stays within 32px of the last visible content', async ({ page }) => {
-    // Cause: src/style.css's `.checklist__panel--collapsed` is
-    // `position: absolute` with no explicit width/height (deliberately, per
-    // its own comment, to dodge a different DIA-131 regression) — its
-    // static position still lays its full (un-clipped) content height into
-    // the document, which the review measured at scrollHeight 3091 against
-    // ~906 of real content. Delete once DIA-195 lands a collapse that adds
-    // no scroll extent either way.
-    test.fail(true, 'DIA-194 U-07: the collapsed checklist still contributes ~2200px of scroll height');
-
     await H.openApp(page, { viewport: H.PHONE });
     await H.setBand(page, 750);
     expect(await H.punchListIsOpen(page), 'the list starts collapsed').toBe(false);

@@ -102,6 +102,17 @@ test.describe('motion plays: canvas changes, hotspot layer inert, focus and pane
         await H.waitForPanelOpen(page);
         const stripAtOpen = await H.panelStrip(page);
 
+        // U-05 (DIA-194/195): opening a panel now legitimately mutates the
+        // hotspot layer once — main.ts's setHotspotSelected toggles the
+        // opened hotspot's `hotspot--selected` class and `aria-expanded`
+        // so its reticle stays identifiable under the sheet. That settles
+        // before the panel finishes opening, so resetting the counter here
+        // isolates the thing this test is actually about: whether a *tick*
+        // ever touches the hotspot layer while the panel stays open.
+        await page.evaluate(() => {
+          (window as unknown as { __hotspotMutations: number }).__hotspotMutations = 0;
+        });
+
         await page.waitForTimeout(1500); // total observation window since the MutationObserver was installed: 5s
 
         const mutations = await page.evaluate(() => (window as unknown as { __hotspotMutations: number }).__hotspotMutations);
