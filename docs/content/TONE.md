@@ -147,3 +147,46 @@ Wording avoids plurals that break at 1. Served as `content.json` `ui.<key>`.
 | `roomTabName` | `{room}: {count} to tap` | Accessible name of a room tab. |
 | `announce` | `{room}: {label}, {n} of {total}` | Live region, on every close-up change. |
 | `announceRoom` | `{room}: whole floor` | Live region, on entering the room view. |
+
+## Slider and panel copy (D-059, DIA-256)
+
+The detent slider's readout (D-059 items 3 and 5) and the round-2 panel's header, footer and
+"without" thumbnail (DIA-256 U2-05, U2-10, U2-11, U2-12). Plain signposts, like §Navigation
+copy. They add no date, headcount or figure of their own and name no employer (D-014):
+`{people}` and `{year}` are the band's own `people` and `year` fields in `content.json`
+(e.g. `~150` and `2019`; at 750, `~650→750` and `2024+`), `{headcount}` is the stop's
+tick label (`80` … `750`), and the only other number, 750, is the last stop's own label
+(D-029). `{count}` is the gags whose `band` is that stop. `{room}` and `{label}` are the
+room and the gag's close-up labels from the scene file (≤ 24 chars, as in §Navigation copy),
+and `{n}` / `{total}` are the open gag's position among the band's gags in stepper order.
+`{title}` is the gag's panel title. Wording avoids plurals that break at 1. Arrows in the
+visible copy are decoration; accessible names leave them out and start with the visible
+words (WCAG 2.5.3). Served as `content.json` `ui.<key>` once the pipeline knows the keys.
+`readout` replaces `readoutAtBand` (§Page state copy), which retires with the detent slider.
+
+| key | copy | where |
+|---|---|---|
+| `readout` | `{people} people · {year}` | Visible slider readout at stops 80–750, e.g. `~150 people · 2019`. |
+| `readoutValue` | `About {headcount} people, {year}` | `aria-valuetext` of the slider at stops 80–750, e.g. `About 150 people, 2019`. |
+| `readoutBeyond` | `1,000+ people` | Visible readout at the 1,000+ stop. There is no year: the building stops growing here (D-029). |
+| `readoutBeyondValue` | `1,000 or more people` | `aria-valuetext` at the 1,000+ stop. |
+| `readoutNewFirst` | `{count} to tap` | Second readout line at 80, where everything is new. |
+| `readoutNew` | `+{count} new to tap` | Second readout line at 150–750, e.g. `+4 new to tap`. Not shown at 1,000+, where `beyondButton` takes the line. |
+| `beyondButton` | `What changes past 750 →` | Visible text of the one-line button under the readout at 1,000+; opens the Beyond panel (D-059 item 5). |
+| `beyondButtonName` | `What changes past 750 people` | Accessible name of the same button. |
+| `panelLocation` | `{room} · {label}` | First line of the panel's sticky header, left of Close, e.g. `Floor 2 · Finance corner`. The gag's primary close-up. |
+| `panelLocationRoom` | `{room}` | The same line when the gag has no close-up of its own. |
+| `beyondLocation` | `Past 750` | The same line on the Beyond panel. |
+| `closePanel` | `Close panel` | Accessible name of the 44×44 × in the panel header. |
+| `thumbWithout` | `Without him` | Caption under the panel's thumbnail in the built state; the thumbnail shows the gag. |
+| `thumbWithoutName` | `See this spot without him` | Accessible name of that thumbnail; also the visible label if desktop uses a button instead. Flips the page toggle, panel stays open. |
+| `thumbBuilt` | `What he'd built` | Caption under the thumbnail in the without state; the thumbnail shows the built spot. |
+| `thumbBuiltName` | `See what he'd built here` | Accessible name of that thumbnail, or the desktop button's label. Flips the toggle back. |
+| `panelPrevious` | `Previous` | Visible text of the footer's `‹` button. |
+| `panelPreviousName` | `Previous panel` | Accessible name of the same button. |
+| `panelNext` | `Next` | Visible text of the footer's `›` button. |
+| `panelNextName` | `Next panel` | Accessible name of the same button. |
+| `panelPosition` | `{n} of {total}` | Visible footer text between Previous and Next. |
+| `panelAnnounce` | `{title}, {n} of {total}` | Live region, when Previous or Next opens another gag. |
+| `panelAtStart` | `No earlier panels at this size` | Live region, when Previous is pressed at the first gag. |
+| `panelAtEnd` | `No more panels at this size` | Live region, when Next is pressed at the last gag. |
