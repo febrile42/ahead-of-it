@@ -662,6 +662,35 @@ Rejected:
 - **A larger label (≥18.66 px bold) under the 3:1 rule.** It passes at 3.22:1 with no margin,
   and it makes the toggle bigger on a 390 px phone, next to the thing it must not crowd.
 
+**D-053 · 2026-09-29 · The tagline sits under the toggle in both states; page-state strings;
+the Beyond panel's "below" (DIA-196, from the DIA-194 UX review; Product & Content Lead, for
+CEO sign-off).**
+1. **Tagline (U-18).** TONE.md put the tagline under "the 'What he'd already built' toggle
+   state". That is ambiguous: the button *reads* "What he'd already built" in the without
+   state, but the build shows the tagline in the built state, so the without state has an
+   empty reserved slot. The tagline now shows in **both** states. The nudge takes the slot
+   while it shows, as it does today. The slot is never empty, and the line that states the
+   argument sits under the chaos, next to the way back.
+2. **Page-state strings (U-10, U-11, U-17)** go in TONE.md §Page state copy: the toggle's
+   live announcement, the loading line, the load-failure sentence and "Try again", and a
+   shorter readout when the visitor's number equals the band's. They add no date, headcount
+   or figure of their own. The toggle button keeps its action labels (D-022).
+3. **Beyond panel (open from D-048).** Its Worth it later line changes from "the checklist
+   **below** maps each receipt…" to "the **punch list** maps each receipt…". Since D-048 the
+   list is not below; it is behind the `Punch list (n)` button, which is the name the visitor
+   sees. This is spatial copy, not a receipt: no date, figure or `E-xx` changes.
+No other panel copy, receipt, date or figure changes.
+
+Rejected:
+- **Tagline only in the without state** (the literal reading of TONE.md). The built state's
+  slot would then be empty until the first slider move.
+- **A different line for the without state.** One more string to review, and nothing says
+  the argument better than the tagline does.
+- **Readout "2018 · ~80 people"** (the review's suggestion). It drops the `~N →` shape the
+  readout has at every other value, so the readout would change form mid-drag.
+- **"The checklist" in the Beyond line.** The visitor never sees that word; the button says
+  "Punch list".
+
 **D-054 · 2026-09-29 · A band change keeps the kind of view, not the literal close-up
 (amends D-051 item 3; DIA-194 U-04, accepted on DIA-194; DIA-195).**
 The DIA-194 UX review found the first slider move after D-051's whole-floor landing cuts
