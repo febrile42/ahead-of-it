@@ -113,6 +113,37 @@ test.describe('dark mode contrast (D-046 point 6, WCAG AA)', () => {
     expect(ringDrawn).toBe(true);
     expect(contrastRatio(outlineColor, background)).toBeGreaterThanOrEqual(3);
   });
+
+  test("the toggle's own focus ring is at least 3:1 on the page", async ({ page, browserName }) => {
+    // DIA-214 manual QA pass: .toggle__button has no :focus-visible rule of
+    // its own (unlike .scene-views__button above, .punch-list-button,
+    // .hotspot and .scene-stepper button, which all set an explicit
+    // `outline: 3px solid var(--accent)`), so it falls back to the UA's
+    // `outline-color: auto`. Chromium's auto resolves near-white and passes;
+    // WebKit's auto instead resolves to the button's own --toggle-text ink
+    // (#000, D-046 point 4's fill never rethemes), which measures ~1.14:1
+    // against --page-bg (#171310) — invisible to a Safari/iPhone keyboard
+    // user (R-20) tabbing to the headline toggle in dark mode. Same failure
+    // in both pressed and unpressed state, since both keep black text.
+    // Delete this test.fail() once the Web Engineer adds an explicit
+    // .toggle__button:focus-visible rule (see the sibling test above).
+    test.fail(browserName === 'webkit', "DIA-214: WebKit's default focus ring on .toggle__button is invisible in dark mode (~1.14:1, needs 3:1)");
+
+    await openApp(page, { viewport: PHONE });
+    const button = page.locator('.toggle__button');
+    await button.focus();
+    const { ringDrawn, outlineColor, background } = await page.evaluate(() => {
+      const el = document.activeElement as HTMLElement;
+      const style = getComputedStyle(el);
+      return {
+        ringDrawn: el.matches(':focus-visible') && style.outlineStyle !== 'none',
+        outlineColor: style.outlineColor,
+        background: getComputedStyle(document.body).backgroundColor,
+      };
+    });
+    expect(ringDrawn).toBe(true);
+    expect(contrastRatio(outlineColor, background)).toBeGreaterThanOrEqual(3);
+  });
 });
 
 test.describe('light mode contrast (D-046 point 6, WCAG AA)', () => {
