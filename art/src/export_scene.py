@@ -684,10 +684,34 @@ def export_view_previews(lib: compose.Library) -> list:
 # thumbnails (R-04) — drawn gags only, cut from the view holding the primary
 # ---------------------------------------------------------------------------
 
+# U2-11: every thumb is one of these fixed 3:2 sizes (native px), smallest first, so the
+# web can show it at an integer scale with no `object-fit` (DIA-270)
+THUMB_TIERS = [(96, 64), (120, 80), (144, 96), (168, 112)]
+THUMB_MARGIN = 8
+
+
+def thumb_rect(primary, closeup) -> tuple:
+    """(x0, y0, x1, y1): the smallest THUMB_TIERS size holding `primary` plus
+    THUMB_MARGIN, centred on it and shifted (never shrunk) to stay inside `closeup`."""
+    x0, y0, x1, y1 = primary
+    m = THUMB_MARGIN
+    need_w, need_h = x1 - x0 + 2 * m, y1 - y0 + 2 * m
+    fits = [(w, h) for (w, h) in THUMB_TIERS
+            if w >= need_w and h >= need_h and w <= closeup["w"] and h <= closeup["h"]]
+    if not fits:
+        raise ValueError(f"primary {primary} + {m} px fits no thumb tier in {closeup}")
+    tw, th = fits[0]
+    tx = (x0 + x1 - tw) // 2
+    ty = (y0 + y1 - th) // 2
+    tx = min(max(tx, closeup["x"]), closeup["x"] + closeup["w"] - tw)
+    ty = min(max(ty, closeup["y"]), closeup["y"] + closeup["h"] - th)
+    return (tx, ty, tx + tw, ty + th)
+
+
 def export_thumbs(lib: compose.Library) -> dict:
-    """R-04 / D-042: each gag's primary plus an 8 px margin, cut from the `without`
-    close-up that holds it (never past that close-up's rect), for the earliest drawn band
-    the gag appears in."""
+    """R-04 / D-042 / U2-11: each gag's primary plus an 8 px margin in a fixed 3:2 tier
+    (`thumb_rect`), cut from the `without` close-up that holds it (never past that
+    close-up's rect), for the earliest drawn band the gag appears in."""
     thumbs = {}
     for band in DRAWN_BANDS:
         frames = {v: view_frame(lib, band, v) for v in layout.views(band)}
@@ -700,12 +724,8 @@ def export_thumbs(lib: compose.Library) -> dict:
                 continue
             part = _primary_part(gag, "without", parts)
             view, rect = _primary_closeup[(band, gag)]
-            x0, y0, x1, y1 = groups[(view, gag, part)]
             img = render_view(lib, band, "without", view)
-            m = 8
-            cx0, cy0 = max(x0 - m, rect["x"]), max(y0 - m, rect["y"])
-            cx1 = min(x1 + m, rect["x"] + rect["w"])
-            cy1 = min(y1 + m, rect["y"] + rect["h"])
+            cx0, cy0, cx1, cy1 = thumb_rect(groups[(view, gag, part)], rect)
             crop = Canvas(cx1 - cx0, cy1 - cy0)
             crop.img = img.crop((cx0, cy0, cx1, cy1))
             fname = f"{gag}.png"

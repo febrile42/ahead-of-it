@@ -86,6 +86,9 @@ SPACING_MIN = 24          # D-042: within a close-up
 CLOSEUP_MAX = (180, 120)
 ROOM_MAX = (360, 240)
 LABEL_MAX = 24
+# U2-11 (DIA-258 §2): a thumb is the smallest of these 3:2 sizes holding primary + 8 px
+THUMB_TIERS = [(96, 64), (120, 80), (144, 96), (168, 112)]
+THUMB_MARGIN = 8
 # SCENE-FORMAT.md "Two-part gags": the states in which each is drawn in two places.
 TWO_PART = {"G3.2": ("without", "built"), "G4.1": ("without", "built"),
             "G2.4": ("without", "built"), "G5.1": ("without",)}
@@ -156,6 +159,64 @@ def check_pixel_parity():
                     what = "its room" if v.get("kind") == "room" else "its room cropped at rect"
                     fail(f"{band}-{state}.json:{v['id']} — pixel parity: painted view "
                          f"!= compose.render of {what} ({diffs} pixels differ of {w * h})")
+
+
+def check_thumbs(index: dict):
+    """U2-11: each gag's thumb (from the earliest drawn band holding it) is the smallest
+    THUMB_TIERS size that holds its `without` primary + THUMB_MARGIN, centred on the
+    primary and shifted (not shrunk) inside its close-up's rect, and its pixels are
+    exactly that rect of the room render. Re-derived from the exported scene files."""
+    from PIL import Image
+    lib = compose.Library(SPRITES_DIR)
+    thumbs = index.get("thumbs", {})
+    seen: set = set()
+    for band in export_scene.DRAWN_BANDS:
+        doc = load_json(os.path.join(SCENES_DIR, f"{band}-without.json"))
+        renders: dict = {}
+        for v in doc["views"]:
+            for h_ in v.get("hotspots", []):
+                gag = h_["gagId"]
+                if not h_.get("primary") or gag in seen:
+                    continue
+                seen.add(gag)
+                where = f"thumb {gag} (band {band})"
+                if thumbs.get(gag) != f"thumbs/{gag}.png":
+                    fail(f"{where} — index.json thumbs[{gag!r}] = {thumbs.get(gag)!r}")
+                    continue
+                path = os.path.join(SPRITES_DIR, thumbs[gag])
+                if not os.path.exists(path):
+                    fail(f"{where} — {thumbs[gag]} does not exist")
+                    continue
+                r = v["rect"]
+                x0, y0 = r["x"] + h_["x"], r["y"] + h_["y"]
+                x1, y1 = x0 + h_["w"], y0 + h_["h"]
+                need = (h_["w"] + 2 * THUMB_MARGIN, h_["h"] + 2 * THUMB_MARGIN)
+                fits = [t for t in THUMB_TIERS if t[0] >= need[0] and t[1] >= need[1]
+                        and t[0] <= r["w"] and t[1] <= r["h"]]
+                if not fits:
+                    fail(f"{where} — primary + {THUMB_MARGIN} px ({need}) fits no tier")
+                    continue
+                tw, th = fits[0]
+                tx = min(max((x0 + x1 - tw) // 2, r["x"]), r["x"] + r["w"] - tw)
+                ty = min(max((y0 + y1 - th) // 2, r["y"]), r["y"] + r["h"] - th)
+                if not (tx <= x0 - THUMB_MARGIN or tx == r["x"]) or \
+                        not (tx + tw >= x1 + THUMB_MARGIN or tx + tw == r["x"] + r["w"]) or \
+                        not (ty <= y0 - THUMB_MARGIN or ty == r["y"]) or \
+                        not (ty + th >= y1 + THUMB_MARGIN or ty + th == r["y"] + r["h"]):
+                    fail(f"{where} — {tw}x{th} crop at ({tx},{ty}) loses the margin")
+                img = Image.open(path).convert("RGBA")
+                if img.size != (tw, th):
+                    fail(f"{where} — {img.size[0]}x{img.size[1]}, want tier {tw}x{th}")
+                    continue
+                room = v["parent"]
+                if room not in renders:
+                    renders[room] = export_scene.render_view(lib, band, "without", room)
+                ref = renders[room].crop((tx, ty, tx + tw, ty + th)).convert("RGBA")
+                if img.tobytes() != ref.tobytes():
+                    fail(f"{where} — pixels differ from the close-up crop at ({tx},{ty})")
+    extra = set(thumbs) - seen
+    if extra:
+        fail(f"index.json thumbs — no drawn primary for {sorted(extra)}")
 
 
 MOTION_KEYS = {"start", "rate", "walk"}
@@ -671,6 +732,7 @@ def main():
                  f"labels/order (D-042a)")
 
     check_pixel_parity()
+    check_thumbs(index)
     check_motion(manifest)
     check_moments(manifest, gag_band)
     check_determinism()
@@ -688,7 +750,7 @@ def main():
         sys.exit(1)
     print("PASS — scene export checks (schema 2): rooms + close-ups, skeleton, default, "
           "manifest refs, coverage, bounds, markers (D-049), spacing, beyond alias, pixel parity "
-          "(rooms and close-up crops), motion (PH2-01), moments (PH2-03), determinism.")
+          "(rooms and close-up crops), thumb tiers (U2-11), motion (PH2-01), moments (PH2-03), determinism.")
 
 
 if __name__ == "__main__":
