@@ -33,11 +33,15 @@
     "run_worker_first": ["/"]
   },
 
-  // UMAMI_HOST is deliberately absent: with it unset, /u/* 404s (a real,
-  // tested no-op — src/worker/index.test.ts) rather than guessing at an
-  // infrastructure detail (which Umami host, and whether this Worker or
-  // the existing joshgister.com umami-proxy should own the route) that
-  // needs Josh (DIA-230, DIA-226). Once answered, add:
+  // DIA-226/DIA-254: the website id and proxy-location questions are
+  // answered — Josh gave the id (wired as VITE_UMAMI_WEBSITE_ID, a CI repo
+  // variable, R-33-style, since it's public and ships in the page anyway),
+  // and CEO ruled the proxy stays in this Worker. UMAMI_HOST is still
+  // deliberately absent, though: it's the actual hostname of Josh's
+  // existing joshgister.com `umami-proxy` target, and that repo isn't
+  // reachable from this workspace to read it off — DIA-254 says not to
+  // guess it. With it unset, /u/* still 404s (a real, tested no-op —
+  // src/worker/index.test.ts). Once Josh supplies the host, add:
   //   "vars": { "UMAMI_HOST": "https://<the umami host>" }
   // No code change needed — the proxy already checks for it.
 

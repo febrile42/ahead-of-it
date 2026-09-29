@@ -129,11 +129,12 @@ jobs:
         run: test -x "$CHROME_PATH"
 
       # R-33 / D-014: check:employer runs inside `npm run build` already.
-      # PH3-04 (DIA-230): unset until Josh supplies it (DIA-226) — the
-      # build (src/analytics.ts) treats an empty id as "analytics off", so
-      # an unset repo variable here is what keeps this a no-op, not a
-      # failure. preview/deploy-production reuse this job's dist/ (below),
-      # so this is the only Build step that needs it.
+      # PH3-04/DIA-254: Josh supplied the website id (DIA-226); it's the
+      # `UMAMI_WEBSITE_ID` repo variable (public — it ships in the page —
+      # so a variable, not a secret). If it's ever unset again,
+      # src/analytics.ts treats an empty id as "analytics off", a no-op
+      # rather than a failure. preview/deploy-production reuse this job's
+      # dist/ (below), so this is the only Build step that needs it.
       - name: Build
         env:
           VITE_UMAMI_WEBSITE_ID: ${{ vars.UMAMI_WEBSITE_ID }}

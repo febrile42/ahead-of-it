@@ -1,17 +1,29 @@
-// PH3-04 (DIA-230): the /u/* first-party proxy D-016 calls for ("Via the
-// existing /u/* proxy pattern... same as joshgister.com"). joshgister.com's
-// repo wasn't reachable from this workspace to copy its exact setup from
-// (docs/briefs/PH3-04-analytics.md, notes repo) — this is Umami's own
-// documented reverse-proxy contract instead (docs.umami.is/docs/tracker-
-// configuration, .../bypass-ad-blockers): GET /u/script.js mirrors
-// {UMAMI_HOST}/script.js, POST /u/api/send mirrors {UMAMI_HOST}/api/send
-// (the path src/analytics.ts's `data-host-url` sends events to).
+// PH3-04 (DIA-230) / DIA-254 go-live: the /u/* first-party proxy D-016
+// calls for ("Via the existing /u/* proxy pattern... same as
+// joshgister.com"). joshgister.com's repo wasn't reachable from this
+// workspace to copy its exact setup from (docs/briefs/PH3-04-analytics.md,
+// notes repo) — this is Umami's own documented reverse-proxy contract
+// instead (docs.umami.is/docs/tracker-configuration, .../bypass-ad-
+// blockers): GET /u/script.js mirrors {UMAMI_HOST}/script.js, POST
+// /u/api/send mirrors {UMAMI_HOST}/api/send (the path src/analytics.ts's
+// `data-host-url` sends events to).
 //
-// `UMAMI_HOST` is an unset Worker var today — DIA-230's brief needs Josh
-// for both the Umami website id and *which* Worker should own this route
-// (this one, or the existing joshgister.com `umami-proxy`). Until either
-// question is answered, both routes 404 — a real, verifiable no-op rather
-// than a guess at infrastructure this workspace can't reach or test.
+// DIA-226/DIA-254: Josh gave the website id and left the proxy location to
+// CEO, who ruled this Worker (same-origin on every host served — staging,
+// prod, and the future custom domain — and it deploys/tests with the app,
+// with no cross-repo route coupling). `proxyCollect` forwards the client's
+// `User-Agent` and `CF-Connecting-IP` (as `X-Forwarded-For`) upstream, the
+// pattern in Umami's reverse-proxy docs, so visitor/device/bot counts are
+// right; nothing else (no cookies) is forwarded. Umami derives a salted
+// session hash and a geo lookup from the IP and doesn't store it raw, so
+// D-016's privacy line holds.
+//
+// `UMAMI_HOST` is still an unset Worker var: the actual hostname of Josh's
+// existing joshgister.com `umami-proxy` target isn't reachable from this
+// workspace (repo `joshgister` isn't one this GitHub account can see), and
+// DIA-254 says not to guess it. Until it's set, both routes still 404 — a
+// real, verifiable no-op, not a guess at infrastructure this workspace
+// can't reach or test. See wrangler.jsonc for how to set it once known.
 //
 // Adding a Worker script changes wrangler.jsonc from assets-only
 // (docs/product/03-RESOURCING.md) to assets + this script; everything that
@@ -111,11 +123,28 @@ async function proxyScript(env: Env): Promise<Response> {
   });
 }
 
+// DIA-254: forwards exactly two request-identifying headers upstream —
+// `User-Agent` and the visitor's real IP (Cloudflare's `CF-Connecting-IP`,
+// sent as `X-Forwarded-For` per Umami's reverse-proxy docs) — because
+// without them Umami can't tell visitors, devices or bots apart. Nothing
+// else (cookies included) is read off `request.headers` here, so no other
+// request state crosses this boundary.
+function collectHeaders(request: Request): HeadersInit {
+  const headers: Record<string, string> = {
+    'Content-Type': request.headers.get('Content-Type') ?? 'application/json',
+  };
+  const userAgent = request.headers.get('User-Agent');
+  if (userAgent) headers['User-Agent'] = userAgent;
+  const clientIp = request.headers.get('CF-Connecting-IP');
+  if (clientIp) headers['X-Forwarded-For'] = clientIp;
+  return headers;
+}
+
 async function proxyCollect(request: Request, env: Env): Promise<Response> {
   if (!env.UMAMI_HOST) return new Response('Not found', { status: 404 });
   const upstream = await fetch(`${env.UMAMI_HOST}/api/send`, {
     method: 'POST',
-    headers: { 'Content-Type': request.headers.get('Content-Type') ?? 'application/json' },
+    headers: collectHeaders(request),
     body: await request.text(),
   });
   // Never cached — this is a write, not an asset.
