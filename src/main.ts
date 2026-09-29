@@ -8,6 +8,7 @@
 // `loadScene(band, state)` fetches it, `renderScene` draws its current
 // view's `entries`, and `toSceneLayout` adapts its `hotspots` into the
 // shape src/ui/panel.ts already knows how to turn into real <button>s.
+import { track } from './analytics';
 import { getBands, getGags } from './content';
 import type { BandId } from './content';
 import { chooseScale, renderScene } from './scene/assembler';
@@ -830,6 +831,7 @@ if (
   function openPanel(gagId: string, source: HTMLElement) {
     const fields = panelFieldsFor(gagId);
     if (!fields) return;
+    track('gag_open'); // D-016 — carries no gagId (N-05's "no properties" spirit extends past headcount).
     cancelActiveMoment(); // PH2-03: opening a panel cancels a playing moment at once.
     openPanelGagId = gagId;
     if (source instanceof HTMLButtonElement) setHotspotSelected(source);
@@ -1223,6 +1225,7 @@ if (
   }
 
   slider.onChange((newBand) => {
+    track('band_change'); // D-016 — carries no band value (N-05).
     cancelActiveMoment(); // PH2-03: moving the slider cancels a playing moment at once.
     const wasBeyond = band === 'beyond';
     band = newBand;
@@ -1276,6 +1279,7 @@ if (
   });
 
   toggle.onChange((newState) => {
+    track('switch_flip'); // D-016 — carries no state value (N-05).
     cancelActiveMoment(); // PH2-03: flipping the toggle cancels a playing moment at once.
     state = newState;
     // U-10 (DIA-194/197): the toggle's own name is the action, not the

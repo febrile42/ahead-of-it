@@ -2,14 +2,32 @@
   "name": "ahead-of-it",
   "compatibility_date": "2026-09-24",
 
-  // Static assets only: no Worker script. Only ./dist (Vite's build output)
-  // is uploaded, so .git, docs/ and this file never become public URLs
-  // (R-26). not_found_handling mirrors joshgister; public/404.html backs it.
+  // PH3-04 (DIA-230): a thin Worker script alongside the static assets,
+  // for the /u/* first-party analytics proxy only (src/worker/index.ts).
+  // Only ./dist (Vite's build output) is uploaded as assets, so .git,
+  // docs/ and this file never become public URLs (R-26). Cloudflare
+  // matches a request against a static asset first and only invokes the
+  // Worker for anything that doesn't match (developers.cloudflare.com/
+  // workers/static-assets/binding) — every route except /u/* is served
+  // exactly as it was when this was assets-only, either directly (a real
+  // file) or via the Worker's own env.ASSETS.fetch() fallback, which
+  // re-applies not_found_handling itself (public/404.html backs it, same
+  // as joshgister).
+  "main": "src/worker/index.ts",
   "assets": {
     "directory": "./dist",
+    "binding": "ASSETS",
     "html_handling": "auto-trailing-slash",
     "not_found_handling": "404-page"
   },
+
+  // UMAMI_HOST is deliberately absent: with it unset, /u/* 404s (a real,
+  // tested no-op — src/worker/index.test.ts) rather than guessing at an
+  // infrastructure detail (which Umami host, and whether this Worker or
+  // the existing joshgister.com umami-proxy should own the route) that
+  // needs Josh (DIA-230, DIA-226). Once answered, add:
+  //   "vars": { "UMAMI_HOST": "https://<the umami host>" }
+  // No code change needed — the proxy already checks for it.
 
   // No custom domain / routes yet (Phase 4 — D-005, D-018: noindex until the
   // publicity gate opens). Left on the workers.dev subdomain for now so a

@@ -129,7 +129,14 @@ jobs:
         run: test -x "$CHROME_PATH"
 
       # R-33 / D-014: check:employer runs inside `npm run build` already.
+      # PH3-04 (DIA-230): unset until Josh supplies it (DIA-226) — the
+      # build (src/analytics.ts) treats an empty id as "analytics off", so
+      # an unset repo variable here is what keeps this a no-op, not a
+      # failure. preview/deploy-production reuse this job's dist/ (below),
+      # so this is the only Build step that needs it.
       - name: Build
+        env:
+          VITE_UMAMI_WEBSITE_ID: ${{ vars.UMAMI_WEBSITE_ID }}
         run: npm run build
 
       # DIA-143: preview/deploy-production download this instead of

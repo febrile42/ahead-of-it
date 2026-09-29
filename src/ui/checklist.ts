@@ -6,6 +6,7 @@
 // (index.html); screen readers and print always get it (R-14, R-24). Gains
 // a translation column at the 'beyond' stop (R-14a). "Download" is a print
 // stylesheet, no PDF lib.
+import { track } from '../analytics';
 import type { BandId, Gag } from '../content';
 import { getBeyond, getGags } from '../content';
 import { createContactLine } from './contact';
@@ -214,7 +215,10 @@ export function createChecklist(trigger: HTMLButtonElement, triggerLabel: HTMLEl
   printButton.type = 'button';
   printButton.className = 'checklist__download';
   printButton.textContent = 'Download (print-friendly)';
-  printButton.addEventListener('click', () => window.print());
+  printButton.addEventListener('click', () => {
+    track('punchlist_download'); // D-016
+    window.print();
+  });
 
   const list = document.createElement('ul');
   list.className = 'checklist__list';
