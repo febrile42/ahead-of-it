@@ -69,7 +69,7 @@ describe('POST /u/api/send', () => {
   });
 
   it('forwards User-Agent and CF-Connecting-IP (as X-Forwarded-For), and no cookies (DIA-254)', async () => {
-    const fetchMock = vi.fn(async () => new Response(null, { status: 200 }));
+    const fetchMock = vi.fn(async (_target: string, _init?: RequestInit) => new Response(null, { status: 200 }));
     vi.stubGlobal('fetch', fetchMock);
     const env = makeEnv({ UMAMI_HOST: 'https://stats.example.com' });
 
@@ -95,7 +95,7 @@ describe('POST /u/api/send', () => {
   });
 
   it('omits X-Forwarded-For and User-Agent when the request carries neither', async () => {
-    const fetchMock = vi.fn(async () => new Response(null, { status: 200 }));
+    const fetchMock = vi.fn(async (_target: string, _init?: RequestInit) => new Response(null, { status: 200 }));
     vi.stubGlobal('fetch', fetchMock);
     const env = makeEnv({ UMAMI_HOST: 'https://stats.example.com' });
 
