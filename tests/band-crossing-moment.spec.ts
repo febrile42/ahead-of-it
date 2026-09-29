@@ -69,6 +69,11 @@ test.describe('band-crossing moment: a genuine rising crossing in the built stat
     const golden = await goldenSnapshot(page, 150);
     await openAppAt(page, 80, 'built');
     expect(await momentPlaying(page), 'first load is never a crossing').toBe(false);
+    // D-054/U-04: a band change now keeps view kind (a fresh load's room,
+    // D-051 item 1, would otherwise survive the crossing too) — the moment
+    // only ever fires landing on scene.moment.view, always a close-up, so
+    // get there first, same as goldenSnapshot above already must.
+    await H.ensureCloseup(page);
 
     const atCommit = await canvasSnapshot(page);
     await H.setBand(page, 150); // a genuine rising crossing, built state
@@ -119,6 +124,7 @@ test.describe('band-crossing moment: a genuine rising crossing in the built stat
     // one-frame flash apart from the real thing.
     const golden = await goldenSnapshot(page, 150);
     await openAppAt(page, 80, 'built');
+    await H.ensureCloseup(page); // D-054/U-04: see the previous test's comment.
     await H.setBand(page, 150);
     expect(await momentPlaying(page)).toBe(true);
 
@@ -161,6 +167,7 @@ test.describe('band-crossing moment: a genuine rising crossing in the built stat
       test(`${from} -> ${to} built`, async ({ page }) => {
         await openAppAt(page, from, 'built');
         expect(await momentPlaying(page)).toBe(false);
+        await H.ensureCloseup(page); // D-054/U-04: see the first test's comment.
         await H.setBand(page, to);
         expect(await momentPlaying(page), `${to} should have a moment (docs/content/MOMENTS.md)`).toBe(true);
         await page.waitForFunction(() => document.body.dataset.momentPlaying === 'false', undefined, {
@@ -211,6 +218,7 @@ test.describe('band-crossing moment: every way the brief says nothing plays', ()
 
   test('crossing a band a second time: nothing plays', async ({ page }) => {
     await openAppAt(page, 80, 'built');
+    await H.ensureCloseup(page); // D-054/U-04: see the first test's comment.
     await H.setBand(page, 150);
     expect(await momentPlaying(page), 'the first crossing into 150 should play').toBe(true);
     await page.waitForFunction(() => document.body.dataset.momentPlaying === 'false', undefined, { timeout: 5000 });
@@ -225,6 +233,7 @@ test.describe('band-crossing moment: every way the brief says nothing plays', ()
 test.describe('band-crossing moment: any input cuts it at once', () => {
   test('toggling mid-moment cuts to the without scene in one commit, without losing focus', async ({ page }) => {
     await openAppAt(page, 80, 'built');
+    await H.ensureCloseup(page); // D-054/U-04: see the first test's comment.
     await H.setBand(page, 150);
     expect(await momentPlaying(page)).toBe(true);
     await page.waitForTimeout(300); // well inside the 2000ms moment
@@ -248,6 +257,7 @@ test.describe('band-crossing moment: any input cuts it at once', () => {
 
   test('moving the slider mid-moment cancels it at once', async ({ page }) => {
     await openAppAt(page, 80, 'built');
+    await H.ensureCloseup(page); // D-054/U-04: see the first test's comment.
     await H.setBand(page, 150);
     expect(await momentPlaying(page)).toBe(true);
     await page.waitForTimeout(300);
@@ -261,6 +271,7 @@ test.describe('band-crossing moment: any input cuts it at once', () => {
 
   test('opening a panel mid-moment cancels it at once', async ({ page }) => {
     await openAppAt(page, 80, 'built');
+    await H.ensureCloseup(page); // D-054/U-04: see the first test's comment.
     await H.setBand(page, 150);
     expect(await momentPlaying(page)).toBe(true);
     await page.waitForTimeout(300);
@@ -277,6 +288,7 @@ test.describe('band-crossing moment: any input cuts it at once', () => {
     // canvas — on top of the freshly resized one: a one-frame flash of the
     // wrong picture.
     await openAppAt(page, 80, 'built');
+    await H.ensureCloseup(page); // D-054/U-04: see the first test's comment.
     await H.setBand(page, 150);
     expect(await momentPlaying(page)).toBe(true);
     await page.waitForTimeout(300);
@@ -308,6 +320,7 @@ test.describe('band-crossing moment: reduced motion', () => {
     // ticker stopped but `activeMoment`/`data-moment-playing` never cleared
     // — silently leaving momentPlaying() reporting 'true' forever.
     await openAppAt(page, 80, 'built');
+    await H.ensureCloseup(page); // D-054/U-04: see the first test's comment.
     await H.setBand(page, 150);
     expect(await momentPlaying(page)).toBe(true);
     await page.waitForTimeout(300);

@@ -168,11 +168,16 @@ if (
     document.body.dataset.momentPlaying = 'false';
   }
 
-  // D-051: the lede is static across the whole session (no band/state of
-  // its own to react to), so it is filled once, here, rather than on every
-  // render() — synchronously, before the first paint, same S1 reasoning as
-  // the slider/toggle shell below.
-  introEl.textContent = ui('intro');
+  // D-051/DIA-210: index.html's prerenderIntro Vite plugin already fills
+  // this from the same ui('intro') string at build/dev-serve time, so it
+  // paints at FCP instead of waiting on this module (CI LHR: this was the
+  // #app-intro LCP element's whole render delay). This is only a fallback
+  // for a static-shell context the plugin didn't run against — it must
+  // never overwrite an already-painted lede with an identical string
+  // (that would be a second paint, not a fix).
+  if (!introEl.textContent) {
+    introEl.textContent = ui('intro');
+  }
 
   // S1: slider and toggle markup already lives in index.html's static
   // shell (CLS) — these fill it in rather than creating/appending it.
@@ -181,6 +186,44 @@ if (
 
   const panel = createPanel();
   panelRoot.append(panel.root);
+
+  // U-06 (DIA-194/195): every top-level piece of the page other than the
+  // panel itself, so a modal open (≤767px) can make all of it `inert` —
+  // unreachable by Tab and hidden from the accessibility tree — leaving
+  // only the sheet's own contents behind. `#app`'s own children, not
+  // `#app` itself, because `panelRoot` is one of those children too;
+  // marking `#app` inert would take the panel down with it.
+  const pageContent = Array.from(document.querySelectorAll<HTMLElement>('#app > *')).filter(
+    (el) => el !== panelRoot
+  );
+  panel.onOpen((modal) => {
+    for (const el of pageContent) el.inert = modal;
+  });
+  panel.onClose(() => {
+    for (const el of pageContent) el.inert = false;
+  });
+
+  // U-05: the hotspot whose panel is currently open, so its reticle draws
+  // solid and it announces `aria-expanded="true"` for as long as that's
+  // true (DIA-13: the button itself doesn't survive a re-render, so this is
+  // repointed by syncOpenPanel below, the same way B4's return-focus target is).
+  let selectedHotspotButton: HTMLButtonElement | null = null;
+  function setHotspotSelected(button: HTMLButtonElement | null) {
+    if (selectedHotspotButton && selectedHotspotButton !== button) {
+      selectedHotspotButton.classList.remove('hotspot--selected');
+      selectedHotspotButton.setAttribute('aria-expanded', 'false');
+    }
+    selectedHotspotButton = button;
+    if (button) {
+      button.classList.add('hotspot--selected');
+      button.setAttribute('aria-expanded', 'true');
+    }
+  }
+
+  panel.onClose(() => setHotspotSelected(null));
+  // U-05: undo scrollHotspotAboveSheet's temporary scroll room, whether or
+  // not this particular open actually needed it — harmless no-op either way.
+  panel.onClose(() => document.body.classList.remove('panel-scroll-space'));
 
   // DIA-131: the punch-list button's label span lives inside its own
   // static-shell markup (index.html) — checklist.ts writes `Punch list (n)`
@@ -625,11 +668,41 @@ if (
     return { left: offsetLeft, top: 0, width: cssW, height: cssH };
   }
 
+  // U-05 (DIA-194/195): scrolling the *scene* to the viewport top (the
+  // previous fix) only clears the sheet for a hotspot in the scene's own
+  // top ~50vh — on a tall/busy scene (the review's band-750 repro) a
+  // hotspot further down still ends up under it. Scroll by exactly what
+  // the tapped hotspot itself needs instead, with a small margin so its
+  // reticle isn't flush against the sheet's edge.
+  const PANEL_SHEET_MARGIN_PX = 8;
+
+  function scrollHotspotAboveSheet(source: HTMLElement) {
+    const sheetTop = window.innerHeight / 2; // .panel's own 50vh cap, style.css
+    const needed = source.getBoundingClientRect().bottom - (sheetTop - PANEL_SHEET_MARGIN_PX);
+    if (needed <= 0) return;
+    // The scene can sit close enough to the document's own end (little
+    // checklist/contact-line content below it) that there isn't ~50vh of
+    // real document left to scroll through — pad the document temporarily
+    // so the scroll below actually has room to land, same idea as opening
+    // a mobile keyboard reflowing the page. Removed again on close.
+    const maxScrollY = document.documentElement.scrollHeight - window.innerHeight;
+    if (needed > maxScrollY - window.scrollY) {
+      document.body.classList.add('panel-scroll-space');
+    }
+    window.scrollBy({ top: needed, left: 0 });
+  }
+
   function openPanel(gagId: string, source: HTMLElement) {
     const fields = panelFieldsFor(gagId);
     if (!fields) return;
     cancelActiveMoment(); // PH2-03: opening a panel cancels a playing moment at once.
     openPanelGagId = gagId;
+    if (source instanceof HTMLButtonElement) setHotspotSelected(source);
+    // Desktop's side panel never covers the scene, so this only runs below
+    // the same 767px breakpoint U-06 uses for making the sheet modal.
+    if (window.matchMedia('(max-width: 767px)').matches) {
+      scrollHotspotAboveSheet(source);
+    }
     // R-04: the prevented-beat thumbnail is always the without-state
     // scene. B4: closing returns focus to the hotspot that opened it.
     panel.open(fields, 'without', { returnFocusTo: source });
@@ -730,6 +803,7 @@ if (
     );
     if (button) {
       panel.setReturnFocusTo(button);
+      setHotspotSelected(button); // U-05: repoint the solid-reticle state at the button's freshly rebuilt replacement.
     } else if (viewOnly) {
       panel.setReturnFocusTo(floorButton);
     } else {
@@ -816,17 +890,60 @@ if (
       return;
     }
 
-    // Toggle and re-render keep the current view id (both states share the
-    // skeleton, D-042a); a slider change reset it to null; a missing id
-    // falls back to the band's default close-up — except before this
-    // session's first commit (`lastCommittedBand === null`: a fresh load,
-    // or a `?n=` deep link, D-043), where D-051 item 1 opens on that
-    // close-up's room instead, "Whole floor" pressed. A later slider/toggle
-    // reset keeps today's close-up fallback (D-051 item 3, "as today"),
-    // which the band-crossing moment check below depends on.
+    // Toggle, tab, stepper, whole-floor and resize renders all keep (or, for
+    // a tab/stepper/whole-floor change, already reset by selectView() to)
+    // the id they want — `currentViewId && findView(scene, currentViewId)`
+    // below finds it in the same band's scene every time. A slider change is
+    // the one case `currentViewId` is left holding the *previous* band's
+    // view id (main.ts's slider.onChange, deliberately un-nulled) —
+    // `isBandChange` below is what tells the two apart.
+    //
+    // D-054 (amends D-051 item 3, U-04): a band change keeps the *kind* of
+    // view the visitor is in, not the literal close-up. `previousView`
+    // looks the outgoing id up in `currentScene` (the previous band's scene
+    // — still not yet reassigned below) before anything here decides where
+    // to land: a room-kind exit ("Whole floor" pressed), same as this
+    // session's first commit (`lastCommittedBand === null`: a fresh load or
+    // a `?n=` deep link, D-043), opens the new band's own opening room. A
+    // close-up exit tries that same id in the *new* band's scene first
+    // (D-036 close-up ids are stable across bands), falling back to the new
+    // band's own default close-up only if it isn't there.
+    //
+    // A room id (`ground`, `floor-2`, …) is deliberately never looked up
+    // this way even though D-036 shares those across bands too: the room
+    // that happens to share this band's outgoing room id is not necessarily
+    // its *opening* room (D-051 item 1), so a room-kind exit always uses
+    // `openingView`, never `findView`.
+    const isBandChange = lastCommittedBand !== null && band !== lastCommittedBand;
+    const previousView = isBandChange && currentScene && currentViewId ? findView(currentScene, currentViewId) : undefined;
+    // PH2-03/D-054 item 3: a genuine rising crossing into a moment-bearing
+    // band always lands on the moment's own close-up, overriding the
+    // kind-preserving `view` choice below — real content grows monotonically
+    // (every band's close-up ids are a superset of the previous band's,
+    // content/*.json), so "falling back to the new band's default close-up
+    // only if [the outgoing id] isn't there" (this rule's own original
+    // phrasing) can never actually happen: the outgoing id is always still
+    // there. Gating this on `previousView?.kind !== 'room'` keeps D-054's
+    // actual fix intact — a room-kind exit (U-04's own bug: stranding a
+    // whole-floor visitor in an unrelated close-up) still always lands on
+    // `openingView`, never the moment — since the moment "plays nowhere
+    // else" (SCENE-FORMAT § Band-crossing moment) and a visitor who hasn't
+    // yet drilled into a close-up isn't the audience for one either.
+    const momentEligible =
+      isBandChange &&
+      state === 'built' &&
+      band !== 'beyond' && // D-029: 1,000+ is an alias of 750, never a crossing of its own
+      bandIndex(band) > bandIndex(lastCommittedBand!) &&
+      !motion.isReduced() && // the brief's rule: reduced motion plays no moment at all
+      !playedMomentBands.has(String(band)) &&
+      !!scene.moment &&
+      previousView?.kind !== 'room';
     const view =
-      (currentViewId && findView(scene, currentViewId)) ||
-      (lastCommittedBand === null ? openingView(scene) : defaultView(scene));
+      lastCommittedBand === null || previousView?.kind === 'room'
+        ? openingView(scene)
+        : momentEligible
+          ? findView(scene, scene.moment!.view)!
+          : (currentViewId && findView(scene, currentViewId)) || defaultView(scene);
     currentViewId = view.id;
     currentScene = scene;
     syncTabs(scene, roomOf(scene, view)?.id);
@@ -841,19 +958,9 @@ if (
     // condition here only reads state already settled by this point in the
     // function; the mutations that follow (`playedMomentBands.add`,
     // `activeMoment = ...`) still wait for the stale-render check below,
-    // same as before.
-    const crossingMoment =
-      lastCommittedBand !== null &&
-      band !== lastCommittedBand &&
-      state === 'built' &&
-      band !== 'beyond' && // D-029: 1,000+ is an alias of 750, never a crossing of its own
-      bandIndex(band) > bandIndex(lastCommittedBand) &&
-      !motion.isReduced() && // the brief's rule: reduced motion plays no moment at all
-      !playedMomentBands.has(String(band)) &&
-      scene.moment &&
-      scene.moment.view === view.id // always the default close-up; the art check proves it
-        ? scene.moment
-        : null;
+    // same as before. `momentEligible` already forced `view` onto
+    // `scene.moment.view` above, so this is just that same decision.
+    const crossingMoment = momentEligible ? scene.moment! : null;
     // SCENE-FORMAT § Motion "rest pose = today's export": motion off
     // (reduced-motion, or the tab currently hidden) paints the rest pose,
     // same as a painter with no motion support — every pixel-parity golden
@@ -947,7 +1054,15 @@ if (
     cancelActiveMoment(); // PH2-03: moving the slider cancels a playing moment at once.
     const wasBeyond = band === 'beyond';
     band = newBand;
-    currentViewId = null; // a new band picks its own default view
+    // D-054/U-04: `currentViewId` is deliberately left set, not nulled —
+    // render() below reads it (still holding the view being left, since
+    // nothing else touches it between here and the render() that follows)
+    // to decide whether this band change keeps a close-up's own id or
+    // opens the new band's opening room instead. A visitor dragging fast
+    // across several bands before any of them commits still fires this
+    // listener once per band; leaving `currentViewId` alone here (rather
+    // than nulling it per call) is what keeps that decision correct
+    // regardless of how many intermediate bands never get painted (S5).
     roomFromId = null;
     pendingFocus = null;
     pendingAnnounce = null;
@@ -971,9 +1086,11 @@ if (
       // R-01b: the Beyond band opens its panel automatically. B4: it must
       // not steal focus off the slider at its last stop, and Escape
       // should return focus there too. Not hotspot-sourced, so it is never
-      // syncOpenPanel()'s concern (DIA-13).
+      // syncOpenPanel()'s concern (DIA-13). U-06: `modal: false` — the
+      // "what works" keep-list's own rule is that this one opens without
+      // trapping, so the slider stays usable above the sheet.
       openPanelGagId = null;
-      panel.open(beyondPanelFields(), 'without', { focus: false, returnFocusTo: slider.input });
+      panel.open(beyondPanelFields(), 'without', { focus: false, returnFocusTo: slider.input, modal: false });
     } else if (wasBeyond) {
       // F5 (DIA-12): the auto-opened Beyond panel is only ever true for
       // the 'beyond' band — leaving it must close the panel rather than

@@ -690,3 +690,81 @@ Rejected:
   readout has at every other value, so the readout would change form mid-drag.
 - **"The checklist" in the Beyond line.** The visitor never sees that word; the button says
   "Punch list".
+
+**D-054 · 2026-09-29 · A band change keeps the kind of view, not the literal close-up
+(amends D-051 item 3; DIA-194 U-04, accepted on DIA-194; DIA-195).**
+The DIA-194 UX review found the first slider move after D-051's whole-floor landing cuts
+straight to a close-up — sometimes on a different floor (80 whole floor → 220 "Floor 2 ·
+Conference room 6 of 7"). D-051 item 3 said the slider "keeps the visitor's place" but the
+code's fallback to the band's `default` close-up on every band change (D-042a counter 3, "as
+today") reads that more literally than intended: it strands a visitor who was on the whole
+floor, at the exact moment they're still learning the model is a building at all.
+1. **A band change keeps the *kind* of view the visitor is in.** On the whole floor, the new
+   band opens on its own opening room (`openingView`, D-051 item 1's same landing), "Whole
+   floor" pressed. In a close-up whose id exists in the new band's scene (D-036 close-up ids
+   are stable across bands), stay on it. Otherwise fall back to the new band's `default`
+   close-up, same as before.
+2. **A room id is never used to look up the destination.** D-036 room ids (`ground`,
+   `floor-2`, …) are shared across bands too, but the room sharing the outgoing room's id in
+   the new band is not necessarily that band's *opening* room — a whole-floor exit always
+   uses `openingView`, never a direct id lookup.
+3. **D-045's beats are unchanged.** The band-crossing moment still plays only when the
+   visitor lands on the band's own `default` close-up — now a narrower set of band changes
+   (only those that keep or land on that exact close-up) than before, since a whole-floor
+   exit or a close-up that only exists in the old band no longer forces a cut to it. Fewer
+   first slider moves play a moment; the trade-off the review named and CEO accepted.
+4. **Toggle and same-band navigation (tabs, stepper, whole floor, resize) are unaffected** —
+   D-042a's "both states share the skeleton" and D-051 item 2's tab landing keep their own
+   behaviour; only a slider-driven band change consults this rule.
+No panel copy, receipt, date, figure or scene-format change.
+
+Rejected:
+- **Keep the close-up cut for every band change.** Spends the visitor's orientation to buy
+  a moment on a first move they haven't yet learned to read as a building. UX review finding
+  U-04.
+- **Remember the visitor's exact close-up across every future band change, forever.** Not
+  asked for; the review's own AC only requires the close-up to persist while its id still
+  exists in the new band's scene.
+
+**D-055 · 2026-09-29 · The band-crossing moment overrides D-054's kind-preservation, not the
+other way round (amends D-054 item 3; DIA-195 implementation finding).**
+Implementing D-054 against the real per-band scene files (`public/sprites/scenes/`, not the
+80/750 fixtures) found item 3's premise false: content grows monotonically — every band's
+close-up ids are a strict superset of the previous band's, and a band's `moment.view` is
+always a close-up newly introduced at that band, never one that existed before. Under item
+1's literal rule ("a close-up whose id exists in the new band's scene ... stay on it"), the
+outgoing close-up's id is *always* still there and the fallback to `default` that the moment
+depends on is *never* reached — not "a narrower set of band changes," as item 3 said, but
+zero. D-045's moment would never play again for any real visitor.
+1. **A genuine rising, built-state crossing into a moment-bearing band lands on that band's
+   moment close-up, overriding D-054 item 1's "stay on the outgoing id" branch.** The moment
+   "plays nowhere else" (SCENE-FORMAT § Band-crossing moment) and is the whole reason D-045
+   exists; a rule that can incidentally starve it to zero is a bug in the rule, not a smaller
+   version of the feature.
+2. **Gated on the same `previousView.kind !== 'room'` D-054 already uses**, so D-054's actual
+   fix (U-04: don't strand a whole-floor visitor in an unrelated close-up) is untouched — a
+   room-kind exit still always opens the new band's own opening room, never the moment. Only
+   a visitor already in some close-up is eligible, same audience D-045 always aimed at.
+3. **`playedMomentBands`/reduced-motion/rising/built/not-`beyond` gates are unchanged** — this
+   only changes which `view` the moment lands on when everything else about the crossing
+   already qualifies it.
+No panel copy, receipt, date, figure or scene-format change. Flagged for Senior Software
+Engineer / CEO review in the DIA-195 PR — this reopens something D-054 (with CEO sign-off)
+believed still worked; the fix keeps D-054's own stated intent (fewer moments than before,
+not the feature going away entirely) rather than reverting it.
+
+**U-04's AC is amended accordingly, word for word:** "From Sales pit at 80, moving to 750
+stays on Sales pit, unless that crossing plays 750's moment (first rising, built-state
+crossing, motion allowed). With reduced motion, it stays on Sales pit."
+
+Rejected:
+- **Leave D-045 dark and update its tests to expect `false`.** Matches the code but not
+  D-054's own accepted premise, and quietly ships the removal of a previously signed-off
+  feature (PH2-03) with no decision entry naming it.
+- **Revert D-054 item 1's close-up-persistence rule instead.** Un-fixes U-04's actual bug
+  (the whole-floor stranding) to save a feature that only needs a narrower carve-out.
+- **(C) Play the moment only when the visitor's current close-up already is the moment
+  view.** Keeps the rule but makes the moment vanishingly rare in practice — CEO ruling,
+  DIA-195.
+
+**Signed off by the CEO, 2026-09-29 (DIA-195).**

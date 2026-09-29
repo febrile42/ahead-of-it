@@ -38,7 +38,10 @@ test.describe('drag-to-pan an overflowing view (DIA-122)', () => {
   }) => {
     await H.openApp(page, { viewport: BOTH_OVERFLOW_VIEWPORT });
     await H.setBand(page, BAND);
-    await H.toggleWholeFloor(page);
+    // D-054/U-04: a band change now keeps view kind — a fresh load's room
+    // (D-051 item 1) survives the crossing, so we're on the room already;
+    // only fall back to toggling if a prior state left us on a close-up.
+    if ((await H.currentView(page)) !== (await H.currentRoomId(page))) await H.toggleWholeFloor(page);
 
     const wrap = page.locator('#scene-wrap');
     const geo = await wrap.evaluate((el) => ({
@@ -108,7 +111,8 @@ test.describe('drag-to-pan an overflowing view (DIA-122)', () => {
   }) => {
     await H.openApp(page, { viewport: BOTH_OVERFLOW_VIEWPORT });
     await H.setBand(page, BAND);
-    await H.toggleWholeFloor(page);
+    // D-054/U-04: see the previous test's comment.
+    if ((await H.currentView(page)) !== (await H.currentRoomId(page))) await H.toggleWholeFloor(page);
     const roomId = await H.currentRoomId(page);
 
     const chip = page.locator('.hotspot--zoom').first();
@@ -190,7 +194,8 @@ test.describe('drag-to-pan an overflowing view (DIA-122)', () => {
   }) => {
     await H.openApp(page, { viewport: BOTH_OVERFLOW_VIEWPORT });
     await H.setBand(page, BAND);
-    await H.toggleWholeFloor(page);
+    // D-054/U-04: see the first test's comment.
+    if ((await H.currentView(page)) !== (await H.currentRoomId(page))) await H.toggleWholeFloor(page);
 
     // DIA-165: `.hotspot--zoom.last()` (DOM order, from placeChips's own
     // layout pass) was assumed to always be the chip this room's overflow
@@ -232,7 +237,8 @@ test.describe('drag-to-pan an overflowing view (DIA-122)', () => {
   }) => {
     await H.openApp(page, { viewport: BOTH_OVERFLOW_VIEWPORT });
     await H.setBand(page, BAND);
-    await H.toggleWholeFloor(page);
+    // D-054/U-04: see the first test's comment.
+    if ((await H.currentView(page)) !== (await H.currentRoomId(page))) await H.toggleWholeFloor(page);
     const roomId = await H.currentRoomId(page);
     const wrap = page.locator('#scene-wrap');
 

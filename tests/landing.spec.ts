@@ -59,6 +59,15 @@ test.describe('D-051: a fresh load opens on the whole floor, under an introducti
     expect(await H.currentRoomId(page)).toBe(other);
   });
 
+  test('DIA-210: #app-intro is prerendered static HTML — present with JavaScript disabled', async ({ browser }) => {
+    const context = await browser.newContext({ javaScriptEnabled: false });
+    const page = await context.newPage();
+    await page.setViewportSize(PHONE);
+    await page.goto('/');
+    expect(await page.locator('#app-intro').textContent()).toBe(content.ui.intro);
+    await context.close();
+  });
+
   test('the room hint replaces the stepper text in a room view, and the live region still announces a room switch', async ({
     page,
   }) => {
