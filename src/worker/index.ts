@@ -18,12 +18,8 @@
 // session hash and a geo lookup from the IP and doesn't store it raw, so
 // D-016's privacy line holds.
 //
-// `UMAMI_HOST` is still an unset Worker var: the actual hostname of Josh's
-// existing joshgister.com `umami-proxy` target isn't reachable from this
-// workspace (repo `joshgister` isn't one this GitHub account can see), and
-// DIA-254 says not to guess it. Until it's set, both routes still 404 — a
-// real, verifiable no-op, not a guess at infrastructure this workspace
-// can't reach or test. See wrangler.jsonc for how to set it once known.
+// `UMAMI_HOST` is now set (wrangler.jsonc `vars`) — Josh supplied the
+// tracker host on DIA-254, so both routes proxy for real instead of 404ing.
 //
 // Adding a Worker script changes wrangler.jsonc from assets-only
 // (docs/product/03-RESOURCING.md) to assets + this script; everything that

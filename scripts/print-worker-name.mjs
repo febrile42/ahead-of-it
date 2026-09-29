@@ -10,13 +10,12 @@ const here = dirname(fileURLToPath(import.meta.url));
 const configPath = join(here, '..', 'wrangler.jsonc');
 const raw = readFileSync(configPath, 'utf8');
 
-// Strip JSONC's // and /* */ comments; wrangler.jsonc has no string values
-// containing "//", so a per-line strip is safe here.
-const stripped = raw
-  .split('\n')
-  .map((line) => line.replace(/\/\/.*$/, ''))
-  .join('\n')
-  .replace(/\/\*[\s\S]*?\*\//g, '');
+// Strip JSONC's // and /* */ comments. Matches a string literal or a
+// comment and only strips the comment, so a `//` inside a string value
+// (UMAMI_HOST is a URL, DIA-254) survives.
+const stripped = raw.replace(/"(?:[^"\\]|\\.)*"|\/\/.*|\/\*[\s\S]*?\*\//g, (m) =>
+  m.startsWith('"') ? m : ''
+);
 
 const { name } = JSON.parse(stripped);
 if (!name) {

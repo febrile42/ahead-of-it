@@ -10,15 +10,14 @@ import { describe, expect, it } from 'vitest';
 
 const CONFIG_PATH = path.join(import.meta.dirname, '../../wrangler.jsonc');
 
-// Same strip-comments approach as scripts/print-worker-name.mjs: wrangler.jsonc
-// has no string values containing "//", so a per-line strip is safe here.
+// Same strip-comments approach as scripts/print-worker-name.mjs: match a
+// string literal or a comment and only strip the comment, so a `//` inside
+// a string value (UMAMI_HOST is a URL, DIA-254) survives.
 function readWranglerConfig(): Record<string, unknown> {
   const raw = readFileSync(CONFIG_PATH, 'utf8');
-  const stripped = raw
-    .split('\n')
-    .map((line) => line.replace(/\/\/.*$/, ''))
-    .join('\n')
-    .replace(/\/\*[\s\S]*?\*\//g, '');
+  const stripped = raw.replace(/"(?:[^"\\]|\\.)*"|\/\/.*|\/\*[\s\S]*?\*\//g, (m) =>
+    m.startsWith('"') ? m : ''
+  );
   return JSON.parse(stripped) as Record<string, unknown>;
 }
 
