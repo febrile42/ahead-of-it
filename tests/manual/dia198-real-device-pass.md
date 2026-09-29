@@ -8,7 +8,11 @@ person with a physical iPhone (Safari + VoiceOver) and a physical Android phone
 (Chrome + TalkBack) to run and fill in.
 
 Scope, matching DIA-198's brief: the slider and the toggle only. Not the panel, not
-the checklist, not room/close-up navigation.
+the checklist, not room/close-up navigation. The Back-button section below is DIA-234's
+addition (PH3-01/U-09) — added once Chromium + WebKit verification of that brief was
+green cold (DIA-234's own report has the commands and output); it is the one PH3-01
+acceptance line that needs real hardware, since Playwright's WebKit is an iOS Safari
+*engine* proxy but has no equivalent for a real hardware/gesture Back on either OS.
 
 Run this once against `develop` HEAD before recording a verdict, and once more after
 DIA-195 (the Web P1 fixes for U-01/U-02/U-03) lands, since several of these steps are
@@ -43,6 +47,21 @@ For each device/AT pair, record pass/fail and a one-line note:
 | 2 | Activate it (VoiceOver double-tap / TalkBack double-tap) | The scene flips to the without state; a single announcement names the new state (not "pressed"/"not pressed" alongside a label that already describes the action — DIA-194 U-10) | | |
 | 3 | Activate it again | Flips back to built; announced once, matching step 2's pattern | | |
 | 4 | With the toggle in the without state, swipe to the subtitle/tagline line under it | Either reads real text or is skipped entirely — never announces an empty line | | |
+
+## Back button (PH3-01 / U-09)
+
+No VoiceOver/TalkBack needed for this section — it's about the OS/browser's own Back
+affordance (iOS Safari's edge-swipe or the `<` button; Android Chrome's gesture/hardware
+Back), not screen-reader output. Run it sight-guided, once per device/browser.
+
+| # | Step | Expected | iOS Safari | Android Chrome |
+|---|------|----------|---|---|
+| 1 | Open the app, tap any hotspot to open its gag panel, then Back | The panel closes; the address bar's query (`n=`/`it=`) is unchanged; the tab/app is still on the page — Back did not leave the site | | |
+| 2 | Repeat step 1, then check where focus/highlight landed | The hotspot that opened the panel is focused/highlighted, the same place Esc or the panel's own Close button would leave it | | |
+| 3 | Open a gag panel, close it with the panel's own Close button, then Back once | Back leaves the site (or returns to wherever you came from) in that one press — it does not land back on the app with the panel re-opened or need a second press | | |
+| 4 | Open the punch-list sheet (not a gag panel), then Back | The sheet closes; query unchanged; still on the page | | |
+| 5 | Repeat step 4, but close the sheet with its own Close button first, then Back once | Leaves in one press, same as step 3 | | |
+| 6 | Drag the slider across a few stops and flip the toggle once or twice, with no panel/sheet ever opened, then Back once | Leaves the site in that one press — the drags/flips did not add extra steps to Back through | | |
 
 ## Filing results
 
