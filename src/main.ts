@@ -181,7 +181,7 @@ if (
 
   // S1: slider and toggle markup already lives in index.html's static
   // shell (CLS) — these fill it in rather than creating/appending it.
-  const slider = createSlider(sliderRoot, band);
+  const slider = createSlider(sliderRoot, band, initial.raw);
   const toggle = createToggle(toggleRoot, state);
 
   const panel = createPanel();
@@ -895,6 +895,11 @@ if (
     // DIA-13: captured before anything below touches the DOM — the layers
     // that are about to be rebuilt are exactly the ones that can hold focus.
     const focusCapture = captureFocus();
+    // U-11(c): sceneStatusRetry is outside both layers captureFocus() checks,
+    // so a successful retry's own hideSceneStatus() (below) — which sets
+    // `hidden`, i.e. `display: none` (style.css) — silently blurs it to
+    // <body> unless something refocuses on the other side of the fetch.
+    const retryFocused = document.activeElement === sceneStatusRetry;
     // PH2-04 step 3 (DIA-114, CEO ruling on DIA-88): checklist.render(band)
     // used to run here, ahead of loadScene/renderScene below, to unblock the
     // checklist section's own <h2> — band 750's LCP element at the time.
@@ -1075,6 +1080,13 @@ if (
     }
     updatePanAffordance();
     restoreFocus(focusCapture);
+    if (retryFocused) {
+      // U-11(c): a successful retry hid the button focus was just on — land
+      // on the first room tab (freshest thing to explore), or "Whole floor"
+      // if the scene has none, rather than dropping to <body> (R-24).
+      const firstTab = viewsRow!.querySelector<HTMLButtonElement>('.scene-views__button');
+      (firstTab ?? floorButton!).focus();
+    }
     const paintKey = `${band}/${state}`;
     syncOpenPanel(paintKey === lastPaintKey);
     lastPaintKey = paintKey;

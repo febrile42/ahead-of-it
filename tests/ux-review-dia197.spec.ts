@@ -123,14 +123,34 @@ test.describe('U-11: boot labels, a loading message, and a working failure/retry
     // R-14: the punch list stays usable while the scene has failed.
     expect(await page.locator('.checklist__item').count()).toBeGreaterThan(0);
 
+    // U-11(c), first half: a repeated failure must keep focus on retry — it
+    // is never rebuilt, only re-shown, so this locks in that nothing else
+    // in render() accidentally moves focus off it. `.focus()` + Enter (not
+    // `.click()`) so this is genuinely keyboard-driven on every engine,
+    // including WebKit, which doesn't focus a button from a real click.
+    await retry.focus();
+    let prevToken = await H.currentRenderToken(page);
+    await page.keyboard.press('Enter');
+    await H.waitForNextRender(page, prevToken);
+    await expect(page.locator('.scene-status__message')).toHaveText(content.ui.loadFailed);
+    let focus = await H.settledFocusInfo(page);
+    expect(H.focusIsLost(focus), 'a repeated failure must not drop focus to <body>').toBe(false);
+    expect(focus.className).toContain('scene-status__retry');
+
+    // U-11(c), second half: a successful retry hides the very button focus
+    // is on (hideSceneStatus() -> [hidden] -> display:none) — focus must
+    // land on the first room tab, not silently drop to <body>.
     blocked = false;
-    const prevToken = await H.currentRenderToken(page);
-    await retry.click();
-    await H.waitForNextRender(page, prevToken); // the first, failed render already stamped one token
+    prevToken = await H.currentRenderToken(page);
+    await page.keyboard.press('Enter');
+    await H.waitForNextRender(page, prevToken);
     await expect(page.locator('#scene-status')).toBeHidden();
     expect(await page.locator('.scene-views__button').count(), 'a real scene painted its room tabs').toBeGreaterThan(
       0
     );
+    focus = await H.settledFocusInfo(page);
+    expect(H.focusIsLost(focus), 'a successful retry must not drop focus to <body>').toBe(false);
+    expect(focus.className).toContain('scene-views__button');
   });
 });
 

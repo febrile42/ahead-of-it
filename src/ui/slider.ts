@@ -33,8 +33,14 @@ function percentFor(value: number): number {
   return ((value - SLIDER_MIN) / (SLIDER_MAX - SLIDER_MIN)) * 100;
 }
 
-/** Fills in the static slider shell from index.html and wires its behaviour. Does not create or attach any elements. */
-export function createSlider(container: HTMLElement, initialBand: BandId = 80): SliderHandles {
+/** Fills in the static slider shell from index.html and wires its behaviour. Does not create or attach any elements.
+ * `initialRaw` (U-17, DIA-194/197) is the slider's actual starting value — a `?n=` deep link that doesn't land
+ * exactly on a band (e.g. 600) — defaulting to the band's own raw value when the caller has no finer number. */
+export function createSlider(
+  container: HTMLElement,
+  initialBand: BandId = 80,
+  initialRaw: number = rawValueForBand(initialBand)
+): SliderHandles {
   const labelEl = container.querySelector<HTMLLabelElement>('.slider__label');
   const readoutEl = container.querySelector<HTMLParagraphElement>('.slider__readout');
   const inputEl = container.querySelector<HTMLInputElement>('#headcount-slider');
@@ -59,8 +65,10 @@ export function createSlider(container: HTMLElement, initialBand: BandId = 80): 
   input.min = String(SLIDER_MIN);
   input.max = String(SLIDER_MAX);
   input.step = '1';
-  // U-01 (DIA-194/195): see rawValueForBand's own doc comment.
-  input.value = String(rawValueForBand(initialBand));
+  // U-01 (DIA-194/195): see rawValueForBand's own doc comment. U-17
+  // (DIA-194/197): initialRaw carries a `?n=` deep link's own number when it
+  // doesn't land exactly on initialBand, so the readout below can show it.
+  input.value = String(initialRaw);
 
   ticks.replaceChildren();
   for (const band of NUMERIC_BANDS) {

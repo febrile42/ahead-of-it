@@ -71,6 +71,18 @@ test.describe('U-01: every ?n= band round-trips to the matching slider value and
     await expect(page.locator('#headcount-slider')).toHaveValue('1000');
     await expect(page.locator('.slider__readout')).toHaveText('~1000 → Beyond');
   });
+
+  // U-17 (DIA-197 review): a deep link that only *rounds* to a band (600
+  // isn't itself a band) must keep its own number in the readout, not lose
+  // it to whichever band it snapped to — the AC's own exact string.
+  test('?n=600 snaps the scene to band 610 but the readout and slider keep 600', async ({ page }) => {
+    await openAppAtQuery(page, '?n=600&it=built');
+    expect(await H.currentBand(page), 'the rendered scene snaps to the nearest band').toBe('610');
+    await expect(page.locator('#headcount-slider'), "slider value is the URL's raw n, not the snapped band").toHaveValue(
+      '600'
+    );
+    await expect(page.locator('.slider__readout')).toHaveText('~600 → 2023, ~610');
+  });
 });
 
 // ---------------------------------------------------------------------------
