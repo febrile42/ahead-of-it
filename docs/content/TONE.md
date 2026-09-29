@@ -79,7 +79,25 @@ Two registers, kept strictly apart.
 - **Contact (R-12, D-019; Josh 2026-09-24):** email `joshua.gister@gmail.com` — assembled
   client-side, never a plain `mailto:` in the source. LinkedIn: `https://www.linkedin.com/in/joshgister/`.
 - **OG description / tagline (F-4, D-027):** *Build it, then make sure it doesn't need you.*
-  Also the subtitle under the "What he'd already built" toggle state.
+  Also the subtitle under the toggle, in **both** states (D-053). The nudge takes that slot
+  while it shows; otherwise the tagline is there, so the slot is never empty.
+
+## Page state copy (D-053)
+
+What the page says about its own state: the toggle, loading, a failed load, and the slider
+readout (DIA-194 U-10, U-11, U-17). Plain signposts, like §Navigation copy. They add no
+date, headcount or figure of their own and name no employer (D-014). `{n}` is the visitor's
+number as the readout shows it today, and `{year}` is the band's year. Served as
+`content.json` `ui.<key>` once the pipeline knows the keys.
+
+| key | copy | where |
+|---|---|---|
+| `announceWithout` | `Showing the building without him` | Live region, once, when the toggle switches to "without". The button's own name stays the action (§Toggle and share copy). |
+| `announceBuilt` | `Showing what he'd already built` | Live region, once, when the toggle switches back to built. |
+| `loading` | `Loading the building…` | Centred on the mat colour in the scene box, 300 ms into a load that hasn't painted. Quiet, not a spinner. |
+| `loadFailed` | `The building didn't load. Everything in it is in the punch list.` | In the scene box when the scene or its sprites fail to load. Replaces "not drawn yet" for the visitor. |
+| `retry` | `Try again` | Button under `loadFailed`; re-requests the scene. |
+| `readoutAtBand` | `~{n} → {year}` | The slider readout when the visitor's number equals the band's headcount (first paint at 80 reads `~80 → 2018`, not `~80 → 2018, ~80`). Otherwise the readout is unchanged. |
 
 ## Landing copy (D-051)
 
