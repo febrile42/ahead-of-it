@@ -168,11 +168,16 @@ if (
     document.body.dataset.momentPlaying = 'false';
   }
 
-  // D-051: the lede is static across the whole session (no band/state of
-  // its own to react to), so it is filled once, here, rather than on every
-  // render() — synchronously, before the first paint, same S1 reasoning as
-  // the slider/toggle shell below.
-  introEl.textContent = ui('intro');
+  // D-051/DIA-210: index.html's prerenderIntro Vite plugin already fills
+  // this from the same ui('intro') string at build/dev-serve time, so it
+  // paints at FCP instead of waiting on this module (CI LHR: this was the
+  // #app-intro LCP element's whole render delay). This is only a fallback
+  // for a static-shell context the plugin didn't run against — it must
+  // never overwrite an already-painted lede with an identical string
+  // (that would be a second paint, not a fix).
+  if (!introEl.textContent) {
+    introEl.textContent = ui('intro');
+  }
 
   // S1: slider and toggle markup already lives in index.html's static
   // shell (CLS) — these fill it in rather than creating/appending it.
