@@ -878,9 +878,7 @@ if (
     // a `?n=` deep link, D-043), opens the new band's own opening room. A
     // close-up exit tries that same id in the *new* band's scene first
     // (D-036 close-up ids are stable across bands), falling back to the new
-    // band's own default close-up only if it isn't there — which is also
-    // the only case the band-crossing moment check below ever fires for
-    // (its own `scene.moment.view` is always a default close-up).
+    // band's own default close-up only if it isn't there.
     //
     // A room id (`ground`, `floor-2`, …) is deliberately never looked up
     // this way even though D-036 shares those across bands too: the room
@@ -889,10 +887,34 @@ if (
     // `openingView`, never `findView`.
     const isBandChange = lastCommittedBand !== null && band !== lastCommittedBand;
     const previousView = isBandChange && currentScene && currentViewId ? findView(currentScene, currentViewId) : undefined;
+    // PH2-03/D-054 item 3: a genuine rising crossing into a moment-bearing
+    // band always lands on the moment's own close-up, overriding the
+    // kind-preserving `view` choice below — real content grows monotonically
+    // (every band's close-up ids are a superset of the previous band's,
+    // content/*.json), so "falling back to the new band's default close-up
+    // only if [the outgoing id] isn't there" (this rule's own original
+    // phrasing) can never actually happen: the outgoing id is always still
+    // there. Gating this on `previousView?.kind !== 'room'` keeps D-054's
+    // actual fix intact — a room-kind exit (U-04's own bug: stranding a
+    // whole-floor visitor in an unrelated close-up) still always lands on
+    // `openingView`, never the moment — since the moment "plays nowhere
+    // else" (SCENE-FORMAT § Band-crossing moment) and a visitor who hasn't
+    // yet drilled into a close-up isn't the audience for one either.
+    const momentEligible =
+      isBandChange &&
+      state === 'built' &&
+      band !== 'beyond' && // D-029: 1,000+ is an alias of 750, never a crossing of its own
+      bandIndex(band) > bandIndex(lastCommittedBand!) &&
+      !motion.isReduced() && // the brief's rule: reduced motion plays no moment at all
+      !playedMomentBands.has(String(band)) &&
+      !!scene.moment &&
+      previousView?.kind !== 'room';
     const view =
       lastCommittedBand === null || previousView?.kind === 'room'
         ? openingView(scene)
-        : (currentViewId && findView(scene, currentViewId)) || defaultView(scene);
+        : momentEligible
+          ? findView(scene, scene.moment!.view)!
+          : (currentViewId && findView(scene, currentViewId)) || defaultView(scene);
     currentViewId = view.id;
     currentScene = scene;
     syncTabs(scene, roomOf(scene, view)?.id);
@@ -907,19 +929,9 @@ if (
     // condition here only reads state already settled by this point in the
     // function; the mutations that follow (`playedMomentBands.add`,
     // `activeMoment = ...`) still wait for the stale-render check below,
-    // same as before.
-    const crossingMoment =
-      lastCommittedBand !== null &&
-      band !== lastCommittedBand &&
-      state === 'built' &&
-      band !== 'beyond' && // D-029: 1,000+ is an alias of 750, never a crossing of its own
-      bandIndex(band) > bandIndex(lastCommittedBand) &&
-      !motion.isReduced() && // the brief's rule: reduced motion plays no moment at all
-      !playedMomentBands.has(String(band)) &&
-      scene.moment &&
-      scene.moment.view === view.id // always the default close-up; the art check proves it
-        ? scene.moment
-        : null;
+    // same as before. `momentEligible` already forced `view` onto
+    // `scene.moment.view` above, so this is just that same decision.
+    const crossingMoment = momentEligible ? scene.moment! : null;
     // SCENE-FORMAT § Motion "rest pose = today's export": motion off
     // (reduced-motion, or the tab currently hidden) paints the rest pose,
     // same as a painter with no motion support — every pixel-parity golden

@@ -127,7 +127,13 @@ test.describe('U-04 / D-054: a band change keeps the kind of view', () => {
     // ids are stable across bands) but is neither band's `default` view, so
     // this is exercising D-054's own id-preservation branch, not the
     // pre-existing default-view fallback.
-    await H.openApp(page);
+    // D-055: 80 -> 750 is also a genuine rising crossing into a
+    // moment-bearing band (real export, not the fixture), which would
+    // otherwise redirect this landing onto the moment's own close-up —
+    // reduced motion keeps this test isolated to the id-preservation rule
+    // it actually names, same as band-crossing-moment.spec.ts's own
+    // reduced-motion tests do for a different behaviour.
+    await H.openApp(page, { reducedMotion: 'reduce' });
     await H.setBand(page, 80);
     await H.gotoCloseupView(page, 'ground.1');
 
@@ -159,7 +165,9 @@ test.describe('U-04 / D-054: a band change keeps the kind of view', () => {
     // Cross-check against src/main.ts's syncOpenPanel: D-054 choosing to
     // stay on the same close-up id must not, by itself, invalidate an open
     // panel for a gag that close-up still has in the new band.
-    await H.openApp(page);
+    // D-055: see the previous test's comment — reduced motion keeps this
+    // isolated from the unrelated band-crossing moment.
+    await H.openApp(page, { reducedMotion: 'reduce' });
     await H.setBand(page, 80);
     const view = findGagView(80, 'built', 'G1.1');
     test.skip(view?.id !== 'ground.1', 'fixture layout changed — G1.1 is no longer on ground.1');

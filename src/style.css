@@ -139,15 +139,6 @@
   box-sizing: border-box;
 }
 
-/* U-07 (DIA-194/195): reserves the vertical scrollbar's width unconditionally,
-   whether or not the page is actually tall enough to need one — see the
-   .checklist__panel--collapsed comment below for the regression this
-   prevents (a scrollbar appearing/disappearing used to shift the viewport's
-   own width mid-interaction). */
-html {
-  scrollbar-gutter: stable;
-}
-
 body {
   margin: 0;
   padding: 0 0 2rem;
@@ -963,20 +954,25 @@ h1 {
    this file, so the panel stays in the DOM and the accessibility tree,
    just not sighted.
    U-07 (DIA-194/195): DIA-131 deliberately avoided .sr-only's fixed
-   1x1px box here, because collapsing it (no positioned ancestor of its
-   own, so its containing block was the initial containing block) let the
-   whole page's scrollable height shrink to the viewport once the 26-row
-   list went off-flow — and a real Chromium run at the time showed the
-   vertical scrollbar disappearing with it, which shifted the viewport's
-   own width and moved an open gag panel's hit-testing coordinates out
-   from under a running interaction. Trading that fix for this one instead
-   left the *uncollapsed* box's full natural height (~2,200px) contributing
-   scrollable overflow at every band, which is what the UX review measured
-   as ~2,200px of blank scroll below the contact line. `scrollbar-gutter:
-   stable` on `body` (below) reserves the scrollbar's width unconditionally
-   now, so the width it used to shift on scrollbar disappearance never
-   moves again — the actual regression DIA-131 was routing around — which
-   makes the standard 1x1px pattern safe to use here after all. */
+   1x1px box here at the time, because collapsing it (no positioned
+   ancestor of its own, so its containing block was the initial
+   containing block) let the whole page's scrollable height shrink to the
+   viewport once the 26-row list went off-flow — and a real Chromium run
+   at the time showed the vertical scrollbar disappearing with it, which
+   shifted the viewport's own width and moved an open gag panel's
+   hit-testing coordinates out from under a running interaction. Trading
+   that fix for this one instead left the box's full natural height
+   (~2,200px) contributing scrollable overflow at every band whenever
+   collapsed (the normal state), which is what the UX review measured as
+   ~2,200px of blank scroll below the contact line. That scrollbar-toggle
+   risk no longer applies: `.checklist__panel--open` below is `position:
+   fixed`, out of flow and never contributing to document scroll height,
+   so switching between these two states never changes whether the page
+   needs a vertical scrollbar at all — which makes the standard 1x1px
+   pattern safe to use here after all, with no scrollbar-gutter reservation
+   needed (one was tried and reverted: it cost every layout ~15px of
+   width, enough to drop D-042's close-up scale below its signed-off 1.9x
+   minimum at the 360px boundary). */
 .checklist__panel--collapsed {
   position: absolute;
   width: 1px;

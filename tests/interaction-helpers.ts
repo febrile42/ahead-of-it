@@ -393,9 +393,16 @@ export function hotspots(page: Page): Locator {
  * fresh load can land on a room now, so any spec that wants a gag hotspot
  * (rather than a zoom-in tile, which is also `.hotspot` in the DOM — see
  * src/ui/panel.ts) must call this first instead of assuming one is on
- * screen. */
+ * screen.
+ * R-01b/U-06: the 'beyond' band auto-opens its own (non-modal) panel over
+ * the lower half of the phone screen, which can genuinely cover the
+ * "Whole floor" stepper this needs to click (D-054/U-04 now correctly
+ * keeps a room-kind exit on the room there too, so this isn't a no-op for
+ * 'beyond' the way it used to be by accident). Escape closes any open
+ * panel without changing the view (B4) before the click is attempted. */
 export async function ensureCloseup(page: Page): Promise<void> {
   if ((await currentView(page)) === (await currentRoomId(page))) {
+    if (await panelIsOpen(page)) await page.keyboard.press('Escape');
     await toggleWholeFloor(page);
   }
 }
