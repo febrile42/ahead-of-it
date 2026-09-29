@@ -1,9 +1,17 @@
 // DIA-195 — the seven P1 fixes from the DIA-194 UX review (document
 // `review`, develop@7974c4a). Each U-xx below is that row's own AC; the
 // bug it fixes and the receipts are on the review, not restated here.
+import type { Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
 import * as H from './interaction-helpers';
 import { findGagView, readBandSceneFile } from './scene-source';
+
+/** Same accessor as tests/band-crossing-moment.spec.ts: src/main.ts stamps
+ * this synchronously inside the render() commit that starts or cancels a
+ * moment, never guessed at from the canvas. */
+async function momentPlaying(page: Page): Promise<boolean> {
+  return page.evaluate(() => document.body.dataset.momentPlaying === 'true');
+}
 
 // ---------------------------------------------------------------------------
 // U-01 — the slider's initial raw value comes from the band id, not a parse
@@ -120,6 +128,12 @@ test.describe('U-04 / D-054: a band change keeps the kind of view', () => {
       await H.currentView(page),
       'a whole-floor exit must land on the new band\'s own opening room'
     ).toBe(await H.currentRoomId(page));
+    // D-055 condition 2: a room-kind exit is never eligible for the
+    // band-crossing moment (`previousView?.kind !== 'room'`, src/main.ts),
+    // even though 750 has one and motion is allowed (H.openApp above sets
+    // no reducedMotion) — the audience for D-045's moment is a visitor
+    // already drilled into a close-up, never a whole-floor one.
+    expect(await momentPlaying(page), 'a whole-floor exit must never play the band-crossing moment').toBe(false);
   });
 
   test('a close-up whose id also exists in the new band stays on it', async ({ page }) => {
@@ -178,6 +192,71 @@ test.describe('U-04 / D-054: a band change keeps the kind of view', () => {
 
     expect(await H.panelIsOpen(page)).toBe(true);
     expect(await H.panelTitle(page)).not.toBe('');
+  });
+
+  // D-055 (amends D-054 item 3, CEO ruling 2026-09-29, DIA-195): a genuine
+  // rising, built-state crossing into a moment-bearing band overrides
+  // D-054's own id-preservation branch and lands on that band's moment
+  // close-up instead — 610 and 750 both moment on `ground.3` ("Sales pit",
+  // docs/content/MOMENTS.md), which is also a real id in every band's scene
+  // (D-036), so this is the same "From Sales pit at 80, moving to 750"
+  // example the amended U-04 AC names, word for word.
+  test('with motion allowed, a rising crossing into a moment band lands on the moment close-up, not the outgoing id (D-055)', async ({
+    page,
+  }) => {
+    await H.openApp(page); // motion allowed — no reducedMotion emulation
+    await H.setBand(page, 80);
+    await H.gotoCloseupView(page, 'ground.3');
+
+    await H.setBand(page, 750, 'mouse');
+
+    expect(await momentPlaying(page), '750 has a moment (docs/content/MOMENTS.md)').toBe(true);
+    await page.waitForFunction(() => document.body.dataset.momentPlaying === 'false', undefined, { timeout: 5000 });
+    expect(
+      await H.currentView(page),
+      "the moment's own view (750's moment.view) must win over the outgoing id, even though ground.3 also exists in band 750"
+    ).toBe('ground.3');
+
+    // CEO condition 3 (DIA-195): after the cut, the view label and stepper
+    // are clear about where the visitor landed — src/main.ts's syncStepper
+    // writes content.json's `position` template ("{label} · {n} of
+    // {total}") off the *painted* view, same as any other navigation.
+    const band750Scene = readBandSceneFile(750, 'built');
+    const closeupIds = band750Scene?.views.filter((v) => v.kind === 'closeup').map((v) => v.id) ?? [];
+    const salesPitLabel = band750Scene?.views.find((v) => v.id === 'ground.3')?.label;
+    const stepper = await H.stepperInfo(page);
+    expect(stepper.label).toContain(salesPitLabel);
+    expect(stepper.label).toContain(`${closeupIds.indexOf('ground.3') + 1} of ${closeupIds.length}`);
+    await page.screenshot({ path: 'tests/screenshots/band-crossing-moment-d055-post-cut.png' });
+  });
+
+  test('a band already played this session keeps the outgoing id instead of replaying its moment (D-055)', async ({
+    page,
+  }) => {
+    // 750 -> 610 -> 750, entirely in Sales pit: the first rising crossing
+    // into 750 (played earlier in the same session, via a prior visit) must
+    // not play a second time — D-045's own "once per band per session" gate
+    // (`playedMomentBands`), which D-055 leaves unchanged. Landing at 750
+    // directly via setBand below is itself the first-ever crossing into
+    // 750 this session, so it is the one that seeds playedMomentBands.
+    await H.openApp(page);
+    await H.setBand(page, 80);
+    await H.gotoCloseupView(page, 'ground.3');
+    await H.setBand(page, 750, 'mouse'); // first crossing into 750 — plays the moment
+    expect(await momentPlaying(page)).toBe(true);
+    await page.waitForFunction(() => document.body.dataset.momentPlaying === 'false', undefined, { timeout: 5000 });
+    expect(await H.currentView(page)).toBe('ground.3');
+
+    await H.setBand(page, 610, 'mouse'); // a down-move: never plays regardless
+    expect(await momentPlaying(page)).toBe(false);
+
+    await H.setBand(page, 750, 'mouse'); // a second rising crossing into 750, same session
+
+    expect(await momentPlaying(page), '750 already played once this session — playedMomentBands').toBe(false);
+    expect(
+      await H.currentView(page),
+      'with no moment eligible, D-054\'s own id-preservation rule stays on Sales pit'
+    ).toBe('ground.3');
   });
 });
 

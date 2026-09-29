@@ -753,9 +753,18 @@ Engineer / CEO review in the DIA-195 PR — this reopens something D-054 (with C
 believed still worked; the fix keeps D-054's own stated intent (fewer moments than before,
 not the feature going away entirely) rather than reverting it.
 
+**U-04's AC is amended accordingly, word for word:** "From Sales pit at 80, moving to 750
+stays on Sales pit, unless that crossing plays 750's moment (first rising, built-state
+crossing, motion allowed). With reduced motion, it stays on Sales pit."
+
 Rejected:
 - **Leave D-045 dark and update its tests to expect `false`.** Matches the code but not
   D-054's own accepted premise, and quietly ships the removal of a previously signed-off
   feature (PH2-03) with no decision entry naming it.
 - **Revert D-054 item 1's close-up-persistence rule instead.** Un-fixes U-04's actual bug
   (the whole-floor stranding) to save a feature that only needs a narrower carve-out.
+- **(C) Play the moment only when the visitor's current close-up already is the moment
+  view.** Keeps the rule but makes the moment vanishingly rare in practice — CEO ruling,
+  DIA-195.
+
+**Signed off by the CEO, 2026-09-29 (DIA-195).**
