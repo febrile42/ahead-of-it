@@ -19,6 +19,8 @@ the last bullets of SCENE-FORMAT.md "Views: rooms and close-ups"):
                          `built` and `without` share the skeleton (ids, kinds, parents,
                          labels, order).
   5. hotspot bounds     — every hotspot rect sits inside its view's canvas.
+  5b. marker (D-049)   — an optional hotspot `marker` is exactly {x, y}, each a multiple
+                         of 0.5, inside its own hotspot's rect, on close-up hotspots only.
   6. one primary        — exactly one primary hotspot per gag per file, in a close-up
                          whose parent is the gag's D-036 home room.
   7. spacing            — primary hotspot centres >= 24 native px apart within a close-up
@@ -94,6 +96,25 @@ warnings: list[str] = []
 
 def fail(msg: str):
     failures.append(msg)
+
+
+def check_marker(h_: dict, kind, where: str):
+    """D-049: an optional `marker` is {x, y}, each a multiple of 0.5, inside its own
+    hotspot's rect (edges included), on a close-up hotspot only."""
+    m, tag = h_["marker"], f"{where} — hotspot {h_['gagId']}/{h_['part']} marker"
+    if kind != "closeup":
+        fail(f"{tag} on a {kind!r} view (D-049: close-up hotspots only)")
+    if not isinstance(m, dict) or set(m) != {"x", "y"}:
+        fail(f"{tag} {m!r}, want exactly {{x, y}} (D-049)")
+        return
+    x, y = m["x"], m["y"]
+    if not all(isinstance(q, (int, float)) and not isinstance(q, bool)
+               and (q * 2) == int(q * 2) for q in (x, y)):
+        fail(f"{tag} {m} not on the half-pixel grid (D-049)")
+        return
+    if not (h_["x"] <= x <= h_["x"] + h_["w"] and h_["y"] <= y <= h_["y"] + h_["h"]):
+        fail(f"{tag} {m} outside its rect [{h_['x']},{h_['y']},{h_['x'] + h_['w']},"
+             f"{h_['y'] + h_['h']}] (D-049)")
 
 
 def load_json(path):
@@ -611,6 +632,8 @@ def main():
                     if x0 < 0 or y0 < 0 or x0 + hw > w or y0 + hh > h:
                         fail(f"{fname}:{vid} — hotspot {h_['gagId']}/{h_['part']} "
                              f"[{x0},{y0},{x0+hw},{y0+hh}] out of bounds {w}x{h}")
+                    if "marker" in h_:
+                        check_marker(h_, kind, f"{fname}:{vid}")
                     if h_.get("primary"):
                         primary_pts.append((h_["gagId"], x0 + hw / 2, y0 + hh / 2))
                         doc_primaries.setdefault(h_["gagId"], []).append(v.get("parent"))
@@ -664,7 +687,7 @@ def main():
             print(" -", f)
         sys.exit(1)
     print("PASS — scene export checks (schema 2): rooms + close-ups, skeleton, default, "
-          "manifest refs, coverage, bounds, spacing, beyond alias, pixel parity "
+          "manifest refs, coverage, bounds, markers (D-049), spacing, beyond alias, pixel parity "
           "(rooms and close-up crops), motion (PH2-01), moments (PH2-03), determinism.")
 
 
