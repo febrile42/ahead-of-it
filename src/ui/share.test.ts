@@ -1,9 +1,8 @@
 // D-057 item 7 (DIA-235): canShareFile is the one pure piece of
 // src/ui/share.ts's behaviour (a capability check, no DOM needed); the rest
 // (event wiring, navigator.share's own activation-preserving call, the
-// AbortError/refused split) needs a real browser and is Playwright's job
-// once the control is wired into index.html (blocked on DIA-247's copy —
-// see share.ts's header).
+// AbortError/refused split) needs a real browser and is Playwright's job —
+// see tests/share-control.spec.ts.
 import { describe, expect, it, vi } from 'vitest';
 import { canShareFile } from './share';
 

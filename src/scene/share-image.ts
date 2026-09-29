@@ -1,9 +1,9 @@
 // D-057 items 4-5 (PH3-02, DIA-235): pure selection logic for the share
 // image's picture — which room to paint and which of the band's own gags
-// get a flag mark. No canvas, no manifest lookups (those need the
-// share-flag/-caption/-url sprites the Art Director hasn't exported yet,
-// DIA-246) — this module only reads the same scene files and content.json
-// the painter already reads, so it is fully testable today.
+// get a flag mark. No canvas, no manifest lookups (those are the
+// share-flag/-caption/-url sprites, DIA-246) — this module only reads the
+// same scene files and content.json the painter already reads, so it is
+// fully testable independent of the sprites.
 import { getGagsForBand } from '../content';
 import type { BandId } from '../content';
 import { closeupsOf, rooms } from './scene';
@@ -90,21 +90,35 @@ export interface ShareFlag {
   y: number;
 }
 
+/** `share-flag`'s exported footprint (DIA-246; public/sprites/manifest.json:
+ * `share-flag.w`/`.h`, 14x19 art px) as a single exclusion radius, the
+ * diagonal of its bounding box so a second flag landing in any corner of the
+ * first flag's on-image footprint still counts as an overlap. Room-px and
+ * the sprite's own art-px are the same magnitude once drawn (D-057 item 5:
+ * dev/share-render.ts draws the room at `ROOM_SCALE` 2 and the flag at its
+ * manifest `shareScale` 2 — both scale the same room-local point by the same
+ * factor), so comparing this directly against `pickShareFlags`' room-px
+ * points is apples to apples. Duplicated from the manifest, not read from
+ * it, the same call src/scene/share-image.test.ts's SHARE_STOPS-vs-
+ * render-share-images.mjs duplication makes; a manifest-reading test in
+ * share-image.test.ts is the guard against the two drifting apart. */
+export const SHARE_FLAG_FOOTPRINT_PX = Math.hypot(14, 19);
+
 /** D-057 item 5: up to three flags for `room` — the band's own gags, in
  * content.json order (`orderedGagIds`), first three. A later gag whose
  * point lands within `minSeparation` room-px of an earlier flag's is
  * dropped ("if two flags would overlap, the later gag is dropped").
- * `minSeparation` defaults to 0 (disabled): the real threshold depends on
- * `share-flag`'s exported footprint, which DIA-246 hasn't supplied yet, and
- * no current stop's own gags actually land close enough for it to matter
- * (share-image.test.ts checks all eight against D-057's own table without
- * it). Pass a real value once the sprite's size is known. */
+ * `minSeparation` defaults to `SHARE_FLAG_FOOTPRINT_PX`; no current stop's
+ * own gags land closer than that (the nearest pair is 56.7 room-px apart, at
+ * stop 80 — share-image.test.ts checks all eight against D-057's own table
+ * with this same default, so a future stop that does land two flags this
+ * close drops the later one instead of drawing an overlap). */
 export function pickShareFlags(
   scene: SceneFile,
   room: SceneView,
   ownGagIds: ReadonlySet<string>,
   orderedGagIds: readonly string[],
-  minSeparation = 0
+  minSeparation = SHARE_FLAG_FOOTPRINT_PX
 ): ShareFlag[] {
   const byGag = new Map<string, RoomPrimary>();
   for (const primary of primariesInRoom(scene, room, ownGagIds)) {

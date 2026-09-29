@@ -22,12 +22,6 @@
 // TypeScript imports of src/scene/** resolve exactly as they do for the
 // real app, then drives it with Playwright's Chromium (`@playwright/test`,
 // already installed for the e2e suite — no new dependency either).
-//
-// Blocked today: dev/share-render.ts throws on the first stop that needs a
-// flag ("unknown sprite \"share-flag\""), because DIA-246 (Art Director)
-// hasn't exported share-flag/share-caption/share-url yet. Running this
-// script now (either mode) is expected to fail there — that failure is the
-// real, current state of the build, not a bug in this script.
 import { createServer } from 'vite';
 import { chromium } from '@playwright/test';
 import { createHash } from 'node:crypto';
@@ -76,6 +70,12 @@ async function main() {
   if (!address || typeof address === 'string') throw new Error('render-share-images: dev server did not report a port');
   const baseUrl = `http://localhost:${address.port}`;
 
+  // DIA-248: the committed hash a stop's `?v=` cache-buster derives from
+  // (src/worker/share-og.ts) has to track the committed PNG itself — a
+  // stale entry here would leave a changed image behind the same `?v=`,
+  // so preview services that already cached the old image never refetch.
+  const committedHashes = CHECK_MODE && existsSync(HASHES_PATH) ? JSON.parse(readFileSync(HASHES_PATH, 'utf-8')) : {};
+
   const browser = await chromium.launch();
   const hashes = {};
   try {
@@ -101,6 +101,11 @@ async function main() {
         const committed = existsSync(path) ? readFileSync(path) : null;
         if (!committed || !committed.equals(png)) {
           console.error(`check:share-images — public/share/${stop}.png does not match the painter's current output — run npm run share:render`);
+          mismatched += 1;
+          continue;
+        }
+        if (committedHashes[String(stop)] !== hash) {
+          console.error(`check:share-images — src/worker/share-hashes.json's entry for ${stop} is stale (expected ${hash}) — run npm run share:render`);
           mismatched += 1;
           continue;
         }

@@ -1,14 +1,9 @@
 // D-057 items 1-5 (PH3-02, DIA-235): composes one share image (1200x630)
 // onto #share-canvas for scripts/render-share-images.mjs to capture.
 //
-// Blocked on DIA-246 (Art Director): `share-flag`, `share-caption` and
-// `share-url` don't exist in public/sprites/manifest.json yet, and their
-// manifest entries need a `shareScale` this reads too. Calling this with
-// those sprites missing throws loadEntryImage's own "unknown sprite" error
-// — left as a real, visible failure (not a placeholder/mock sprite; drawing
-// something invented in their place would ship the wrong thing quietly)
-// until the sprites land. Everything else here (room selection, layout,
-// flag points) is real and already covered by
+// `share-flag`, `share-caption` and `share-url` (DIA-246, Art Director) are
+// in public/sprites/manifest.json with the `shareScale` this reads. Room
+// selection, layout and flag points are real and already covered by
 // src/scene/share-image.test.ts.
 import { renderScene } from '../src/scene/assembler';
 import { loadEntryImage, loadManifest } from '../src/scene/sprites';

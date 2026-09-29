@@ -14,17 +14,23 @@
   // re-applies not_found_handling itself (public/404.html backs it, same
   // as joshgister).
   "main": "src/worker/index.ts",
-  // D-057 (PH3-02, DIA-235): `/` matches the static index.html, so without
-  // this it would never reach the Worker and every `?n=` would unfurl as
-  // band 80's og:image forever. Naming only `/` (not every path) keeps
-  // every other static file — sprites, scene JSON, share PNGs, /u/* itself
-  // — on the assets-first path, unchanged.
-  "run_worker_first": ["/"],
   "assets": {
     "directory": "./dist",
     "binding": "ASSETS",
     "html_handling": "auto-trailing-slash",
-    "not_found_handling": "404-page"
+    "not_found_handling": "404-page",
+    // D-057 (PH3-02, DIA-235): `/` matches the static index.html, so
+    // without this it would never reach the Worker and every `?n=` would
+    // unfurl as band 80's og:image forever. Naming only `/` (not every
+    // path) keeps every other static file — sprites, scene JSON, share
+    // PNGs, /u/* itself — on the assets-first path, unchanged. Nested
+    // under `assets`, not top-level (DIA-248): wrangler only reads
+    // `run_worker_first` from here — at the top level it's silently
+    // ignored ("Unexpected fields found in top-level field") and every
+    // link previews as band 80 forever, which the unit tests can't catch
+    // because they call the Worker directly and skip the routing decision
+    // this makes. src/worker/wrangler-config.test.ts guards the nesting.
+    "run_worker_first": ["/"]
   },
 
   // UMAMI_HOST is deliberately absent: with it unset, /u/* 404s (a real,
