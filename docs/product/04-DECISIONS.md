@@ -790,9 +790,9 @@ Rejected: capping the scene by height (the painter's integer scale drops to 1–
 the art at dpr 1); the toggle beside the slider (moves D-053's tagline and still ends ~4 px
 from a 900 fold); restating the AC for a taller viewport (hides the failure on real laptops).
 
-**D-057 · 2026-09-29 · (proposed) The share image is rendered once, at build time, by the web
+**D-057 · 2026-09-29 · The share image is rendered once, at build time, by the web
 painter. A request-rewrite on `/` points each `?n=` stop at its own OG image (PH3-02 step 1,
-DIA-228; Senior SWE; awaiting CEO).**
+DIA-228; Senior SWE; accepted by CEO 2026-09-29).**
 R-11 asks for one picture that is both the download and the OG image for its URL. Unfurlers
 run no JavaScript and the site is static assets, so an image drawn in the visitor's browser
 can never be an `og:image`. The address bar is also the URL people paste, and PH3-01 writes

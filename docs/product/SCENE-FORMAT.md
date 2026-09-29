@@ -340,7 +340,7 @@ Schema stays 2. Without files never carry one.
   10 ms the array-order paint equals the room's depth-sorted render cropped at `rect`;
   the hotspot rule. The contract test can check all but the pixel ones from the JSON.
 
-## Share sprites (PH3-02, D-057 — proposed)
+## Share sprites (PH3-02, D-057)
 
 The share image (R-11) is made of images only, like the scene. Its lettering and flag are
 ordinary manifest sprites in `public/sprites/manifest.json`, exported by the art pipeline and
