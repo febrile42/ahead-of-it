@@ -329,3 +329,21 @@ G5.6 (fold into G5.1) · G6.4 (fold into G6.3) · G2.3 · G6.1.
 
 ## Still wanted from Josh
 Q-23 (a second gag for 220?), and the two or three stories you still tell people.
+
+## Refinement map (R-15)
+PH3-03 (DIA-236)'s "what do you already have?" boxes — data, next to the gags, not a
+table in `src/` (`ahead-of-it-notes` `docs/research/PH3-03-refinement-design.md` §3,
+ruled §3a). A box marks a gag's checklist row — and, where the gag has a hotspot, the
+hotspot's badge — once its visitor ticks it. `gags` is a space-separated list of gag
+ids; a box shows in the refinement fieldset from its earliest-band mapped gag upward
+(both states are cumulative, R-03a), and is hidden (its tick remembered, not lost)
+below that. No gag is marked by two boxes in this map; the build must not assume that
+stays true. The five boxes, R-15's own fixed order:
+
+| box | gags |
+|---|---|
+| sso | G1.2 |
+| securityLead | G4.1 |
+| erp | G4.3 |
+| network | G2.2 G2.3 G5.1 G5.2 |
+| mdm | G3.2 |

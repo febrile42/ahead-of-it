@@ -30,7 +30,8 @@ import { bandIndex } from './scene/bands';
 import { shareStopForBand } from './scene/share-image';
 import { createChecklist, gagsThroughBand } from './ui/checklist';
 import type { CanvasBox } from './ui/panel';
-import { beyondPanelFields, createPanel, panelFieldsFor, renderHotspots, renderZoomTargets } from './ui/panel';
+import { applyHaveState, beyondPanelFields, createPanel, panelFieldsFor, renderHotspots, renderZoomTargets } from './ui/panel';
+import { createRefineFieldset } from './ui/refine';
 import { ui } from './ui/strings';
 import type { SceneState } from './ui/toggle';
 import { createSlider } from './ui/slider';
@@ -241,8 +242,20 @@ if (
   if (!punchListLabel) {
     throw new Error('index.html static shell is missing the punch list button label');
   }
-  const checklist = createChecklist(punchListButton, punchListLabel);
+  // PH3-03 (R-15, DIA-236): created before the checklist so its root can be
+  // handed straight in — createChecklist places it under Download (design
+  // note §2's fixed order), and this file only owns wiring the fieldset's
+  // own onChange to the checklist rows, the hotspot badges and the live
+  // region below, none of which src/ui/refine.ts knows about.
+  const refine = createRefineFieldset();
+  const checklist = createChecklist(punchListButton, punchListLabel, refine.root);
   checklistRoot.append(checklist.root);
+
+  refine.onChange((markedGagIds) => {
+    const unmarked = checklist.applyMarks(markedGagIds);
+    applyHaveState(hotspotsLayer!, markedGagIds);
+    liveRegion!.textContent = ui('haveAnnounce', { n: unmarked });
+  });
 
   // D-057 item 7: label/accessible name are content.json's own
   // ui.shareButton/ui.shareButtonName (Product Lead, DIA-247) — set once,
@@ -1174,6 +1187,7 @@ if (
       // working retry — the punch list (filled above, independent of the
       // scene) stays usable either way.
       showSceneStatus(ui('loadFailed'), () => void render());
+      refine.render(band);
       checklist.render(band);
       document.body.dataset.renderedToken = String(token);
       document.body.dataset.band = String(band);
@@ -1311,6 +1325,10 @@ if (
       );
     } else {
       renderHotspots(hotspotsLayer!, toSceneLayout(view), canvasBox, openPanel);
+      // PH3-03 (R-15, DIA-236): a fresh hotspot layer has none of this
+      // yet — renderHotspots rebuilds every button from the scene layout,
+      // which knows nothing about ticks.
+      applyHaveState(hotspotsLayer!, refine.getMarkedGagIds());
     }
     updatePanAffordance();
     restoreFocus(focusCapture);
@@ -1341,6 +1359,7 @@ if (
       liveRegion!.textContent = pendingAnnounce;
       pendingAnnounce = null;
     }
+    refine.render(band);
     checklist.render(band);
     // Test hooks: tests/scene.spec.ts and the pixel-parity spec await
     // renderedToken changing instead of sleeping a fixed timeout, and

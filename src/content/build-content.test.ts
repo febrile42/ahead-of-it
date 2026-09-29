@@ -47,6 +47,16 @@ Intro paragraph for the fixture band.
 - **Without:** without-state scene text.
 - **Where:** the closet.
 - **Receipt:** E-01.
+
+## Refinement map (R-15) (fixture)
+
+| box | gags |
+|---|---|
+| sso | G1.1 |
+| securityLead |  |
+| erp |  |
+| network |  |
+| mdm |  |
 `;
 
 const VALID_PANELS_MD = `# Panels — fixture
@@ -149,6 +159,22 @@ const VALID_TONE_MD = `# Tone — fixture
 |---|---|---|
 | \`shareButton\` | \`Share it without him\` | fixture. |
 | \`shareButtonName\` | \`Share it without him: a picture of this building\` | fixture. |
+
+## Refinement copy (R-15) (fixture)
+
+| key | copy | where |
+|---|---|---|
+| \`haveLegend\` | \`Fixture: already have some?\` | fixture. |
+| \`haveHelp\` | \`Fixture: nothing is sent or saved.\` | fixture. |
+| \`haveSso\` | \`Fixture SSO\` | fixture. |
+| \`haveSecurityLead\` | \`Fixture security lead\` | fixture. |
+| \`haveErp\` | \`Fixture ERP\` | fixture. |
+| \`haveNetwork\` | \`Fixture network\` | fixture. |
+| \`haveMdm\` | \`Fixture MDM\` | fixture. |
+| \`haveTag\` | \`Fixture ahead of it\` | fixture. |
+| \`punchListLeft\` | \`Punch list ({n} left)\` | fixture. |
+| \`haveAnnounce\` | \`{n} left on the punch list\` | fixture. |
+| \`haveHotspotSuffix\` | \`{title} — fixture ahead of it\` | fixture. |
 `;
 
 const VALID_UI = {
@@ -173,6 +199,17 @@ const VALID_UI = {
   readoutAtBand: '~{n} → {year}',
   shareButton: 'Share it without him',
   shareButtonName: 'Share it without him: a picture of this building',
+  haveLegend: 'Fixture: already have some?',
+  haveHelp: 'Fixture: nothing is sent or saved.',
+  haveSso: 'Fixture SSO',
+  haveSecurityLead: 'Fixture security lead',
+  haveErp: 'Fixture ERP',
+  haveNetwork: 'Fixture network',
+  haveMdm: 'Fixture MDM',
+  haveTag: 'Fixture ahead of it',
+  punchListLeft: 'Punch list ({n} left)',
+  haveAnnounce: '{n} left on the punch list',
+  haveHotspotSuffix: '{title} — fixture ahead of it',
 };
 
 function validInputs(overrides: Partial<BuildInputs> = {}): BuildInputs {
@@ -294,6 +331,17 @@ describe('parsing ui (D-042a)', () => {
       readoutAtBand: '~{n} → {year}',
       shareButton: 'Share it without him',
       shareButtonName: 'Share it without him: a picture of this building',
+      haveLegend: 'What do you already have?',
+      haveHelp: 'Tick what your company has. It stays on this page: nothing is sent or saved.',
+      haveSso: 'SSO',
+      haveSecurityLead: 'A security lead',
+      haveErp: 'An ERP',
+      haveNetwork: 'A real network',
+      haveMdm: 'MDM',
+      haveTag: "You're ahead of it",
+      punchListLeft: 'Punch list ({n} left)',
+      haveAnnounce: '{n} left on the punch list',
+      haveHotspotSuffix: "{title} — you're ahead of it",
     });
   });
 

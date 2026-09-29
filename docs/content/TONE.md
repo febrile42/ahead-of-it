@@ -147,3 +147,25 @@ Wording avoids plurals that break at 1. Served as `content.json` `ui.<key>`.
 | `roomTabName` | `{room}: {count} to tap` | Accessible name of a room tab. |
 | `announce` | `{room}: {label}, {n} of {total}` | Live region, on every close-up change. |
 | `announceRoom` | `{room}: whole floor` | Live region, on entering the room view. |
+
+## Refinement copy (R-15)
+
+The "what do you already have?" boxes at the top of the punch-list sheet (PH3-03). Plain
+signposts, like §Navigation copy. They add no date, headcount or figure, and they name no
+employer (D-014). `{n}` is the number of rows not marked, and `{title}` is the gag's title
+as the hotspot names it today. Ticks never leave the page, so the copy promises exactly
+that and no more. Served as `content.json` `ui.<key>`.
+
+| key | copy | where |
+|---|---|---|
+| `haveLegend` | `What do you already have?` | Fieldset legend, first thing under Download in the sheet. |
+| `haveHelp` | `Tick what your company has. It stays on this page: nothing is sent or saved.` | One muted helper line under the legend. |
+| `haveSso` | `SSO` | Box 1. |
+| `haveSecurityLead` | `A security lead` | Box 2. Shows from 610. |
+| `haveErp` | `An ERP` | Box 3. |
+| `haveNetwork` | `A real network` | Box 4. |
+| `haveMdm` | `MDM` | Box 5. |
+| `haveTag` | `You're ahead of it` | Row tag on a marked row, after an `aria-hidden` ✓. |
+| `punchListLeft` | `Punch list ({n} left)` | Button and sheet title once ≥ 1 row is marked; `Punch list ({n})` otherwise, as today. |
+| `haveAnnounce` | `{n} left on the punch list` | Polite live region, once per tick or untick. |
+| `haveHotspotSuffix` | `{title} — you're ahead of it` | Accessible name of a hotspot whose gag is marked. |

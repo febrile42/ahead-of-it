@@ -32,6 +32,17 @@ export const UI_KEYS = [
   'readoutAtBand',
   'shareButton',
   'shareButtonName',
+  'haveLegend',
+  'haveHelp',
+  'haveSso',
+  'haveSecurityLead',
+  'haveErp',
+  'haveNetwork',
+  'haveMdm',
+  'haveTag',
+  'punchListLeft',
+  'haveAnnounce',
+  'haveHotspotSuffix',
 ] as const;
 
 export type UiKey = (typeof UI_KEYS)[number];

@@ -294,11 +294,18 @@ test.describe('DIA-135: the open sheet gets its own header and close control', (
   // DIA-136 QA re-review: the brief's tab order requirement is close ->
   // Download -> rows' links -> contact. Gag rows carry no links of their
   // own (only a lazy-loaded <img>), so with the sheet's real DOM the
-  // reachable sequence is close -> Download -> the sheet's own contact
-  // line (LinkedIn, then the email link) — this walks it for real with the
-  // keyboard rather than only asserting tabindex attributes (which the
-  // 'tab order: collapsed vs open' describe block above already covers).
-  test('open: real Tab/Shift+Tab order is close, Download, then the sheet\'s contact links', async ({ page }) => {
+  // reachable sequence is close -> Download -> the refinement fieldset's
+  // own boxes (PH3-03, R-15, DIA-236 — design note §6: "Open sheet tab
+  // order: Close → Download → box 1 … box k → rows' links → contact") ->
+  // the sheet's own contact line (LinkedIn, then the email link) — this
+  // walks it for real with the keyboard rather than only asserting
+  // tabindex attributes (which the 'tab order: collapsed vs open' describe
+  // block above already covers). Band 80 (this test's default) shows
+  // exactly two boxes (SSO, a real network) — see src/ui/refine.test.ts
+  // for the full per-band box count.
+  test('open: real Tab/Shift+Tab order is close, Download, the two boxes shown at 80, then the sheet\'s contact links', async ({
+    page,
+  }) => {
     await H.openApp(page, { viewport: PHONE });
     await H.openPunchList(page);
 
@@ -312,13 +319,22 @@ test.describe('DIA-135: the open sheet gets its own header and close control', (
     focus = await H.settledFocusInfo(page);
     expect(focus.className).toBe('checklist__close');
 
-    // Forward from Close: Download, then straight to the sheet's own
-    // contact line's two <a> links (LinkedIn, then "Talk to Josh") — no
-    // gag-row control sits in between, because rows have none.
+    // Forward from Close: Download, then the two boxes shown at band 80,
+    // then straight to the sheet's own contact line's two <a> links
+    // (LinkedIn, then "Talk to Josh") — no gag-row control sits in
+    // between, because rows have none.
     await page.keyboard.press('Tab');
     focus = await H.settledFocusInfo(page);
     expect(focus.tag).toBe('button');
     expect(focus.className).toBe('checklist__download');
+
+    await page.keyboard.press('Tab');
+    focus = await H.settledFocusInfo(page);
+    expect(focus.tag).toBe('input');
+
+    await page.keyboard.press('Tab');
+    focus = await H.settledFocusInfo(page);
+    expect(focus.tag).toBe('input');
 
     await page.keyboard.press('Tab');
     focus = await H.settledFocusInfo(page);

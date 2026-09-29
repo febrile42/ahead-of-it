@@ -680,9 +680,55 @@
     "retry": "Try again",
     "readoutAtBand": "~{n} → {year}",
     "shareButton": "Share it without him",
-    "shareButtonName": "Share it without him: a picture of this building"
+    "shareButtonName": "Share it without him: a picture of this building",
+    "haveLegend": "What do you already have?",
+    "haveHelp": "Tick what your company has. It stays on this page: nothing is sent or saved.",
+    "haveSso": "SSO",
+    "haveSecurityLead": "A security lead",
+    "haveErp": "An ERP",
+    "haveNetwork": "A real network",
+    "haveMdm": "MDM",
+    "haveTag": "You're ahead of it",
+    "punchListLeft": "Punch list ({n} left)",
+    "haveAnnounce": "{n} left on the punch list",
+    "haveHotspotSuffix": "{title} — you're ahead of it"
   },
   "ambient": {
     "hover": "Someone is always on call. In the built state, it's a rotation."
-  }
+  },
+  "have": [
+    {
+      "id": "sso",
+      "gagIds": [
+        "G1.2"
+      ]
+    },
+    {
+      "id": "securityLead",
+      "gagIds": [
+        "G4.1"
+      ]
+    },
+    {
+      "id": "erp",
+      "gagIds": [
+        "G4.3"
+      ]
+    },
+    {
+      "id": "network",
+      "gagIds": [
+        "G2.2",
+        "G2.3",
+        "G5.1",
+        "G5.2"
+      ]
+    },
+    {
+      "id": "mdm",
+      "gagIds": [
+        "G3.2"
+      ]
+    }
+  ]
 }

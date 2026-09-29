@@ -21,9 +21,16 @@ const VIEWPORTS = [
 
 const COLOR_SCHEMES = ['light', 'dark'] as const;
 
-type SweepState = 'landing' | 'without' | 'punch-list-open' | 'gag-panel-open' | 'band-1000-plus';
+type SweepState = 'landing' | 'without' | 'punch-list-open' | 'punch-list-have' | 'gag-panel-open' | 'band-1000-plus';
 
-const STATES: SweepState[] = ['landing', 'without', 'punch-list-open', 'gag-panel-open', 'band-1000-plus'];
+const STATES: SweepState[] = [
+  'landing',
+  'without',
+  'punch-list-open',
+  'punch-list-have',
+  'gag-panel-open',
+  'band-1000-plus',
+];
 
 async function reachState(page: import('@playwright/test').Page, state: SweepState): Promise<void> {
   switch (state) {
@@ -34,6 +41,14 @@ async function reachState(page: import('@playwright/test').Page, state: SweepSta
       return;
     case 'punch-list-open':
       await openPunchList(page);
+      return;
+    case 'punch-list-have':
+      // PH3-03 (R-15, DIA-236): the design note's §4.5 pairs (legend,
+      // option label, tag, row rule, checkbox border, the checked box's
+      // tick) only exist once a box is ticked — nothing else in this
+      // sweep's other states reaches them.
+      await openPunchList(page);
+      await page.locator('.checklist__have-option input[type="checkbox"]').first().check();
       return;
     case 'gag-panel-open':
       await openFirstHotspot(page);

@@ -59,7 +59,7 @@ test.describe('keyboard: slider End and panel Escape (B4)', () => {
     await page.waitForFunction(() => document.body.dataset.renderedToken !== undefined);
     await H.showGag(page, 'G2.1');
 
-    const hotspot = page.locator('[data-gag-id="G2.1"]');
+    const hotspot = page.locator('.hotspot[data-gag-id="G2.1"]');
     await hotspot.focus();
     await page.keyboard.press('Enter');
     await page.waitForTimeout(150);
@@ -81,7 +81,7 @@ test.describe('panel copy (B5): inline beat labels', () => {
     await page.waitForFunction(() => document.body.dataset.renderedToken !== undefined);
     await H.showGag(page, 'G2.1');
 
-    await page.locator('[data-gag-id="G2.1"]').click();
+    await page.locator('.hotspot[data-gag-id="G2.1"]').click();
     await page.waitForTimeout(150);
 
     // "What it prevented" and "Worth it later" are inline <strong> labels
@@ -113,7 +113,7 @@ test.describe('panel thumbnail (fix round item 8 / review fix 5)', () => {
     await page.waitForFunction(() => document.body.dataset.renderedToken !== undefined);
     await H.showGag(page, 'G2.1');
 
-    await page.locator('[data-gag-id="G2.1"]').click();
+    await page.locator('.hotspot[data-gag-id="G2.1"]').click();
     const thumb = page.locator('.panel__thumb');
     const img = thumb.locator('img');
     await expect(img).toHaveAttribute('src', '/sprites/thumbs/G2.1.png');
@@ -142,7 +142,7 @@ test.describe('panel thumbnail (fix round item 8 / review fix 5)', () => {
     await page.waitForFunction(() => document.body.dataset.renderedToken !== undefined);
     await H.showGag(page, 'G2.1');
 
-    await page.locator('[data-gag-id="G2.1"]').click();
+    await page.locator('.hotspot[data-gag-id="G2.1"]').click();
     const thumb = page.locator('.panel__thumb');
     const img = thumb.locator('img');
     await expect(img).toHaveAttribute('src', '/sprites/thumbs/G2.1.png');
@@ -201,7 +201,7 @@ test.describe('panel thumbnail (fix round item 8 / review fix 5)', () => {
     await page.waitForFunction(() => document.body.dataset.renderedToken !== undefined);
     await H.showGag(page, 'G2.1');
 
-    await page.locator('[data-gag-id="G2.1"]').click();
+    await page.locator('.hotspot[data-gag-id="G2.1"]').click();
     const thumb = page.locator('.panel__thumb');
     const img = thumb.locator('img');
 

@@ -382,6 +382,16 @@ function hotspotAriaLabel(title: string, hotspotId: string, gagId: string): stri
   return suffix ? `${title} — ${suffix}` : title;
 }
 
+/** PH3-03 (R-15, DIA-236): a hotspot's base accessible name — the same
+ * DIA-244 title(+part-suffix) computation above — recomputed from a live
+ * button's own `dataset` (rather than cached at render time) so
+ * `applyHaveState` below can toggle `haveHotspotSuffix` on and off without
+ * needing to remember what the "before" label was. */
+export function baseHotspotAriaLabel(gagId: string, hotspotId: string): string {
+  const title = panelFieldsFor(gagId)?.title ?? gagId;
+  return hotspotAriaLabel(title, hotspotId, gagId);
+}
+
 /**
  * Renders one real <button> per hotspot in `layout`, absolutely positioned
  * over the canvas from the same coordinates the assembler drew from, each
@@ -500,4 +510,25 @@ export function renderZoomTargets(
     button.dataset.cx = String(x);
     button.dataset.cy = String(y);
   });
+}
+
+/**
+ * PH3-03 (R-15, DIA-236): applies the "have" state to every real gag
+ * hotspot currently in `container` — `.hotspot--have` (style.css swaps the
+ * bracket reticle for a small badge, design note §4.4) plus the
+ * `haveHotspotSuffix` accessible-name suffix (§6). Called after every
+ * `renderHotspots` (a fresh layer has none of this yet) and again whenever
+ * a box is ticked/unticked (main.ts's refine.onChange) — deliberately a
+ * class/attribute patch, not a re-render: ticking must not move focus or
+ * rebuild the layer (§6). A room view's zoom chips (`.hotspot--zoom`, no
+ * `data-gag-id`) are untouched — §4.4: "Zoom chips... are unchanged". */
+export function applyHaveState(container: HTMLElement, markedGagIds: ReadonlySet<string>): void {
+  for (const button of container.querySelectorAll<HTMLButtonElement>('.hotspot[data-gag-id]')) {
+    const gagId = button.dataset.gagId!;
+    const hotspotId = button.dataset.hotspotId ?? gagId;
+    const marked = markedGagIds.has(gagId);
+    button.classList.toggle('hotspot--have', marked);
+    const base = baseHotspotAriaLabel(gagId, hotspotId);
+    button.setAttribute('aria-label', marked ? ui('haveHotspotSuffix', { title: base }) : base);
+  }
 }
