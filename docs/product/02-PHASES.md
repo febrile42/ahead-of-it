@@ -62,8 +62,7 @@ Exit criteria
 
 ## Phase 2 — The switch and the workers
 
-> **Progress (2026-09-26): starting.** Briefs PH2-01…04 and D-043 are merged (PR #35);
-> PH2-02 (`prefers-reduced-motion`) is dispatched first.
+> **Met 2026-09-29 on `62bcd91` (DIA-226).**
 
 Deliverables
 - Toggle + nudge (R-06, R-06a, R-07) polished; **band-crossing moment**: when the slider crosses into a band, the new threat briefly appears *already handled* (Q-20 item 5). (S, copy by M)
@@ -77,6 +76,8 @@ Exit criteria
 - Gag list locked. **Now** custom art can be commissioned (G-03).
 
 ## Phase 3 — Share, polish, custom art
+
+> **Progress (2026-09-29): started.**
 
 Deliverables
 - URL state (R-10), share image + OG (R-11), refinement checkboxes (R-15), day/night (R-13), analytics events (R-17, D-016). (S)
