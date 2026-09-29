@@ -339,3 +339,23 @@ Schema stays 2. Without files never carry one.
   summing to `ms`; first frame differs; the last 250 ms equal the view at rest; every
   10 ms the array-order paint equals the room's depth-sorted render cropped at `rect`;
   the hotspot rule. The contract test can check all but the pixel ones from the JSON.
+
+## Share sprites (PH3-02, D-057 — proposed)
+
+The share image (R-11) is made of images only, like the scene. Its lettering and flag are
+ordinary manifest sprites in `public/sprites/manifest.json`, exported by the art pipeline and
+palette-checked. Web code references them by key (A2) and never draws text.
+
+| key | frames | rules |
+|---|---|---|
+| `share-flag` | `default` | ≥ 12 × 16 px, `anchor` at the tip. It must read on every room's floor, walls and street. The web draws it at scale 2 with the anchor on a flagged gag's point (D-057 item 5). |
+| `share-caption` | `default` | `copy.shareCaption` from `content.json`, verbatim, pre-wrapped so that at its drawn scale it is ≤ 400 image px wide with a cap height of ≥ 36 image px. The art check asserts the source string equals `copy.shareCaption`. |
+| `share-url` | `80`, `150`, `220`, `360`, `490`, `610`, `750`, `1000` | `resume.joshgister.com/?n=<frame>&it=none`, a cap height of ≥ 10 image px at its drawn scale, and ≤ 400 image px wide. |
+
+- The scale each sprite is drawn at is recorded in its manifest entry as `"shareScale"`
+  (an integer). The web multiplies by it and does no other sizing.
+- A flagged gag's point in room coordinates is its close-up's `rect.x/y` plus the primary
+  hotspot's `marker`, or the hotspot rect's centre when there is no marker. No new scene
+  field is needed.
+- Nothing here changes `<band>-<state>.json`. The share image paints a room's exported
+  `entries` at rest, and ignores motion and moments.
