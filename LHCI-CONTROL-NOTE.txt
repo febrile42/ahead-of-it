@@ -1,0 +1,6 @@
+Throwaway marker for DIA-207's paired Lighthouse control.
+
+This file exists only so the CI workflow's path filter (ci.yml excludes
+docs/** and **/*.md from triggering `check`) sees a matching change and
+runs the check job on this branch. It carries no functional code and is
+deleted along with the branch once the paired-run data is collected.
