@@ -267,7 +267,7 @@ and made the network a function — someone whose job it was.
 router on a filing cabinet, and the people out there are holding their phones in the
 air. `E-06`
 
-### G3.3 · Nine people, four functions, leaders between them and me
+### G3.3 · Nine people, with leaders between them and me
 `2023 · ~610 · a $3B+ clean-energy company`
 **Already:** By 2023, at ~610 people, IT was nine people across Infrastructure,
 Cybersecurity, Network, Automation and Support, and I introduced leadership layers so
@@ -299,7 +299,8 @@ before people arrive. `E-05 E-11`
 `2024 · ~650 → 750 · a $3B+ clean-energy company`
 **Already:** The SaaS portfolio has been a partnership with Sales, Finance, HR and
 Operations leaders since 2018; the major consolidation and integration work landed in
-2024. The renewals and licensing audits of the same year are the next panel.
+2024. The renewals and licensing audits of the same year have their own panel, in the
+finance corner.
 
 **What it prevented:** by now every one of your departments has solved its own problem
 with its own subscription, two of them are nearly the same product, and nobody can say
@@ -309,7 +310,7 @@ what the company pays for twice. `E-08`
 `2024 · ~650 → 750 · a $3B+ clean-energy company`
 **Already:** I owned enterprise IT budgeting and vendor strategy. In 2024 that produced
 over $500,000 in savings, most of it recurring, through renegotiation, renewals and
-licensing audits — the same year as the portfolio consolidation in the previous panel.
+licensing audits — the same year as the portfolio consolidation.
 
 **What it prevented:** by now contracts auto-renew because nobody owns them, and your
 finance corner is under a slope of paper with a hand sticking out. `E-07`
@@ -325,7 +326,7 @@ in 2026, and Claude mid-year.
 assistant on a personal account, and the company card is next. `E-12`
 
 ### G7.2 · A chair at the table
-`2022→ · ~490→750 · a $3B+ clean-energy company`
+`2022→ · ~490 → 750 · a $3B+ clean-energy company`
 **Already:** Since the second half of 2022 I have reported to the SVP of Product &
 Technology and contributed to strategic planning and cross-functional initiatives across
 the company — the technology voice in the room where the three-year plan gets drawn.
@@ -357,7 +358,7 @@ plus a translation column in the checklist.
 ### B · Nobody builds IT from zero at your size
 `1,000+ · your company · every receipt in this building, translated`
 **Already:** Everything in this building was decided ahead of need — at 80, at 150, at
-600 — by one person who stayed long enough to see the 2018 decisions carry 750 people
+610 — by one person who stayed long enough to see the 2018 decisions carry 750 people
 across six cities.
 
 **What it prevented:** nobody builds IT from zero at your size. Except every time you
@@ -372,15 +373,15 @@ yours. `E-01…E-30`
 
 | Receipt | At 1,000+ this is |
 |---|---|
-| Six site builds; three in one year on one playbook (G2.2, G6.3, G6.4) | the site-integration playbook for every acquisition and new region |
-| AI governance shipped *with* the tool, 2025 (G7.1) | the same problem at any size; policy with the rollout, not after it |
-| Dev and Product incubated, then handed off (G7.3, G7.3a) | the internal-startup pattern: stand it up, staff it, give it away |
-| Leadership layers at 610 (G3.3) | org design when a function outgrows its founder |
-| $500,000+ a year back from vendors (G6.2) | the licensing and renewal program every enterprise runs annually |
-| A security function and audit readiness before the ask (G4.1) | the readiness work that precedes any certification |
-| Cloud identity in 2018; passwordless in 2025 (G1.1, G1.2) | identity as the platform; everything else plugs in |
-| JML automation covering 250 contractors (G3.1) | joiner/mover/leaver at the scale of a workforce that churns |
-| Nine functions, one building, eight years (all) | the person you put on the thing that doesn't exist yet |
+| Six site builds; three in one year on one playbook | the site-integration playbook for every acquisition and new region |
+| AI governance shipped with the tool, 2025 | the same problem at any size; policy with the rollout, not after it |
+| Dev and Product incubated, then handed off | the internal-startup pattern: stand it up, staff it, give it away |
+| Leadership layers at 610 | org design when a function outgrows its founder |
+| $500,000+ back from vendors in 2024, most of it recurring | the licensing and renewal program every enterprise runs annually |
+| A security function and audit readiness before the ask | the readiness work that precedes any certification |
+| Cloud identity in 2018; passwordless in 2025 | identity as the platform; everything else plugs in |
+| JML automation covering 250 contractors | joiner/mover/leaver at the scale of a workforce that churns |
+| One person, one building, eight years | the person you put on the thing that doesn't exist yet |
 
 ---
 

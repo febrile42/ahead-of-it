@@ -391,7 +391,7 @@
     },
     {
       "id": "G3.3",
-      "title": "Nine people, four functions, leaders between them and me",
+      "title": "Nine people, with leaders between them and me",
       "strip": {
         "year": "2023",
         "headcount": "~610",
@@ -472,7 +472,7 @@
         "headcount": "~650 → 750",
         "descriptor": "a $3B+ clean-energy company"
       },
-      "already": "The SaaS portfolio has been a partnership with Sales, Finance, HR and Operations leaders since 2018; the major consolidation and integration work landed in 2024. The renewals and licensing audits of the same year are the next panel.",
+      "already": "The SaaS portfolio has been a partnership with Sales, Finance, HR and Operations leaders since 2018; the major consolidation and integration work landed in 2024. The renewals and licensing audits of the same year have their own panel, in the finance corner.",
       "prevented": "by now every one of your departments has solved its own problem with its own subscription, two of them are nearly the same product, and nobody can say what the company pays for twice.",
       "receipts": [
         "E-08"
@@ -490,7 +490,7 @@
         "headcount": "~650 → 750",
         "descriptor": "a $3B+ clean-energy company"
       },
-      "already": "I owned enterprise IT budgeting and vendor strategy. In 2024 that produced over $500,000 in savings, most of it recurring, through renegotiation, renewals and licensing audits — the same year as the portfolio consolidation in the previous panel.",
+      "already": "I owned enterprise IT budgeting and vendor strategy. In 2024 that produced over $500,000 in savings, most of it recurring, through renegotiation, renewals and licensing audits — the same year as the portfolio consolidation.",
       "prevented": "by now contracts auto-renew because nobody owns them, and your finance corner is under a slope of paper with a hand sticking out.",
       "receipts": [
         "E-07"
@@ -523,7 +523,7 @@
       "title": "A chair at the table",
       "strip": {
         "year": "2022→",
-        "headcount": "~490→750",
+        "headcount": "~490 → 750",
         "descriptor": "a $3B+ clean-energy company"
       },
       "already": "Since the second half of 2022 I have reported to the SVP of Product & Technology and contributed to strategic planning and cross-functional initiatives across the company — the technology voice in the room where the three-year plan gets drawn.",
@@ -568,7 +568,7 @@
         "headcount": "your company",
         "descriptor": "every receipt in this building, translated"
       },
-      "already": "Everything in this building was decided ahead of need — at 80, at 150, at 600 — by one person who stayed long enough to see the 2018 decisions carry 750 people across six cities.",
+      "already": "Everything in this building was decided ahead of need — at 80, at 150, at 610 — by one person who stayed long enough to see the 2018 decisions carry 750 people across six cities.",
       "prevented": "nobody builds IT from zero at your size. Except every time you acquire a company, open a region, stand up a business unit, or a new category of tool arrives before anyone owns it. Each of those is a from-zero build inside a big company, with the same failure modes as the closet and the sticky notes — and more at stake.",
       "worthLater": "the punch list maps each receipt to what it looks like at yours.",
       "receipts": [
@@ -606,39 +606,39 @@
     },
     "translation": [
       {
-        "receipt": "Six site builds; three in one year on one playbook (G2.2, G6.3, G6.4)",
+        "receipt": "Six site builds; three in one year on one playbook",
         "atScale": "the site-integration playbook for every acquisition and new region"
       },
       {
-        "receipt": "AI governance shipped *with* the tool, 2025 (G7.1)",
+        "receipt": "AI governance shipped with the tool, 2025",
         "atScale": "the same problem at any size; policy with the rollout, not after it"
       },
       {
-        "receipt": "Dev and Product incubated, then handed off (G7.3, G7.3a)",
+        "receipt": "Dev and Product incubated, then handed off",
         "atScale": "the internal-startup pattern: stand it up, staff it, give it away"
       },
       {
-        "receipt": "Leadership layers at 610 (G3.3)",
+        "receipt": "Leadership layers at 610",
         "atScale": "org design when a function outgrows its founder"
       },
       {
-        "receipt": "$500,000+ a year back from vendors (G6.2)",
+        "receipt": "$500,000+ back from vendors in 2024, most of it recurring",
         "atScale": "the licensing and renewal program every enterprise runs annually"
       },
       {
-        "receipt": "A security function and audit readiness before the ask (G4.1)",
+        "receipt": "A security function and audit readiness before the ask",
         "atScale": "the readiness work that precedes any certification"
       },
       {
-        "receipt": "Cloud identity in 2018; passwordless in 2025 (G1.1, G1.2)",
+        "receipt": "Cloud identity in 2018; passwordless in 2025",
         "atScale": "identity as the platform; everything else plugs in"
       },
       {
-        "receipt": "JML automation covering 250 contractors (G3.1)",
+        "receipt": "JML automation covering 250 contractors",
         "atScale": "joiner/mover/leaver at the scale of a workforce that churns"
       },
       {
-        "receipt": "Nine functions, one building, eight years (all)",
+        "receipt": "One person, one building, eight years",
         "atScale": "the person you put on the thing that doesn't exist yet"
       }
     ]
