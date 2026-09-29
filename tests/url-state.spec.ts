@@ -267,3 +267,60 @@ test('PR #16 review N1: dragging to beyond while a gag panel is open drops that 
   await page.goBack();
   expect(page.url()).toBe('about:blank');
 });
+
+// DIA-234 QA verification of PH3-01 found this while probing combinations the
+// brief's own item 5 doesn't cover: item 5 only names "tapping a second
+// hotspot" (gag panel -> gag panel), where showGag reuses the same DOM panel,
+// so there is never a second overlay to leave open. `openOverlay`/
+// `closeOverlayEntry` (main.ts) track history generically for "an open gag
+// panel or the punch-list sheet" and treat opening either while the other's
+// entry is live as one replace (item 5's own comment: "same push-or-replace
+// rule as a gag panel") — but nothing ever calls panel.close() when the
+// checklist opens, or checklist.close() when a hotspot opens a panel, only
+// at >=768px where U-06 leaves both reachable (a 390px visitor can't reach
+// this: the open panel makes the rest of the page inert, covering the
+// punch-list button). The result: both the gag panel and the punch-list
+// sheet end up simultaneously "open" (panel.isOpen() / checklist.isOpen()
+// both true), the earlier one merely hidden under the later one's fixed-
+// position sheet — and its own Close button stays in the Tab order despite
+// being invisible under the sheet on top of it.
+test.describe('desktop-only gap: opening one overlay does not close the other (found verifying PH3-01)', () => {
+  test('opening the punch-list while a gag panel is open leaves the panel open underneath it', async ({ page }) => {
+    await H.openApp(page, { viewport: H.DESKTOP });
+    await H.openFirstHotspot(page);
+
+    await H.openPunchList(page);
+
+    expect(await H.punchListIsOpen(page)).toBe(true);
+    expect(await H.panelIsOpen(page)).toBe(false); // FAILS today: still true, hidden under the sheet
+  });
+
+  test('opening a gag panel while the punch-list is open leaves the list open underneath it', async ({ page }) => {
+    await H.openApp(page, { viewport: H.DESKTOP });
+    await H.openPunchList(page);
+
+    await H.openFirstHotspot(page);
+
+    expect(await H.panelIsOpen(page)).toBe(true);
+    expect(await H.punchListIsOpen(page)).toBe(false); // FAILS today: still true, hidden under the panel
+  });
+
+  test('the gag panel\'s Close button is not reachable by Tab while the punch-list sheet covers it', async ({
+    page,
+  }) => {
+    await H.openApp(page, { viewport: H.DESKTOP });
+    await H.openFirstHotspot(page);
+    await H.openPunchList(page);
+
+    const tabbedClassNames: string[] = [];
+    for (let i = 0; i < 20; i += 1) {
+      await page.keyboard.press('Tab');
+      tabbedClassNames.push((await page.evaluate(() => (document.activeElement as HTMLElement)?.className)) ?? '');
+    }
+
+    // FAILS today: '.panel__close' shows up in the tab order even though the
+    // checklist sheet visually covers it — a keyboard user lands on a button
+    // they cannot see, for a panel the visitor never closed.
+    expect(tabbedClassNames.some((c) => c.includes('panel__close'))).toBe(false);
+  });
+});
