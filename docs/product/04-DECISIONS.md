@@ -768,3 +768,24 @@ Rejected:
   DIA-195.
 
 **Signed off by the CEO, 2026-09-29 (DIA-195).**
+
+**D-056 · 2026-09-29 · From 1152 px the page is two columns: controls left, picture right
+(DIA-215, U-14; UX Lead; CEO signed off on DIA-215).**
+The DIA-194 review's U-14 asked for slider, toggle, tabs, scene and stepper above the fold at
+1440×900. The single 720 px column needs 986 px. Real laptop inner viewports are 650–790 px
+tall, so trimming rows to clear 900 would still fail most desktop visitors.
+1. **From 1152 px, a two-column layout:** a 368 px rail (h1, lede, slider, toggle + tagline)
+   and the 720 × 480 scene column (tabs row, scene, stepper, contact line). The DOM order is
+   unchanged. The layout needs about 600 px of height.
+2. **The punch-list button shares the tabs row there**, right-aligned. Amends D-048 item 2 for
+   ≥1152 only. On phone and tablet it keeps its own row.
+3. **The tap panel and punch-list sheet dock in the rail under the toggle** at ≥1152, not on
+   the viewport's right edge. This keeps the picture fully visible and keeps the slider and
+   toggle in view, so the visitor can flip the state while reading. Still non-modal (U-06).
+   Below about 610 px of viewport height the rail's own content plus a fully-open panel no
+   longer both fit, so the page scrolls instead of the rail panel assuming a tall viewport.
+4. D-042a's box, tabs, stepper and Whole floor, and D-051/D-053's order, are unchanged. No
+   copy, art, scene or receipt changes.
+Rejected: capping the scene by height (the painter's integer scale drops to 1–1.5×, halving
+the art at dpr 1); the toggle beside the slider (moves D-053's tagline and still ends ~4 px
+from a 900 fold); restating the AC for a taller viewport (hides the failure on real laptops).

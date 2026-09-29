@@ -1286,3 +1286,222 @@ h1 {
     box-shadow: none;
   }
 }
+
+/* --- D-056 (DIA-217/U-14): two columns from 1152px --- */
+/* Only this media query changes; every rule above it (the 768-1151 single
+   720px column and its 360px right-edge side panel included) stays
+   byte-for-byte, so nothing below 1152 moves (U-14g). This block must stay
+   last in the file: `#app`'s max-width/margin here override the >=768px
+   rule earlier by source order, and the panel/checklist docking rules
+   below override the >=768px docking rules the same way.
+
+   #app becomes two columns, 368px rail (left, floated) and 720px main
+   (right, plain in-flow blocks with a matching left margin) — a 32px
+   gutter falls out automatically (368 + 720 = 1088, leaving 32 of #app's
+   1120 unused down the middle) rather than being a track of its own. The
+   DOM order in index.html is unchanged — neither a float nor a margin
+   moves anything in the DOM, so reading order and tab order still follow
+   DOM order (U-14e). `display: flow-root` on #app is this century's
+   clearfix: without it, a container with only floated children has zero
+   height, since floats are removed from normal flow.
+
+   Not a shared grid for both columns, on purpose: a shared grid row sizes
+   to its *tallest* member across both columns, so anything placed in the
+   room tabs' own row-track would inflate every rail row by the same
+   amount (or, spanning multiple rail rows to dodge that, the next
+   main-column item would start only after the *whole span* ends, landing
+   well below the tabs — both dead ends this file's history included
+   before landing here). The rail is floated (`float: left`, `clear:
+   left` on every item after the first, so each stacks under the one
+   before it — without `clear`, an earlier-placed float leaves room a
+   later same-direction item could still fit beside instead of under, and
+   DOM order is float placement order). The main column is deliberately
+   *not* also floated: CSS floats must never sit higher than the top of
+   *any* earlier float regardless of direction (CSS2.1 §9.5.1 rule 5), so
+   a float here would be pinned down to the rail's last float (the
+   toggle) instead of starting right after the room tabs — re-coupling
+   this column to the rail's height the long way round. A plain
+   block-level box has no such rule: floated siblings are simply not
+   part of its flow, so `margin-left: 400px` (368px rail + 32px gutter,
+   both fixed design constants, not measured content) places the main
+   column's own items where the rail's floats end, and they then stack by
+   their own heights alone, unaffected by the rail's. Both columns' first
+   item still lands at y: 0 (U-14c): the rail's float is placed "as high
+   as possible" in its own stack, and the main column's first in-flow
+   block starts at #app's own top because floated siblings don't count as
+   "previous" for a normal block's flow position either.
+
+   The punch-list button (#view-nav) is the one main-column piece that
+   isn't full-width — it comes *after* the room tabs in DOM (index.html)
+   and needs to sit beside them, not under, so a plain in-flow block
+   (which would just push the tabs down onto a new line) doesn't fit
+   either. `position: absolute` sidesteps the ordering problem entirely,
+   pinning the button to the main column's own top-right corner (needs
+   #app's `position: relative` two rules down) independent of the tabs
+   row's own placement. The room tabs' width is then set from src/main.ts's
+   updateDesktopLayout(), not a fixed number here — see the comment there
+   for why.
+
+   The detail slot (the tap panel and the punch-list sheet) is the other
+   piece CSS alone can't place: both need to dock "under the toggle,
+   running to the viewport bottom" — a `position: fixed` box whose `left`
+   is the rail's own left edge and `top` is the toggle's own bottom edge.
+   `left`/`right` can't be pure CSS here: #app's `margin: 0 auto` centring
+   means the rail's left edge is `(100vw - 1120px) / 2`, and `100vw`
+   overcounts by half a scrollbar's width whenever one is present — the
+   short-viewport case, point 5 of the D-056 decision. `top` can't be pure
+   CSS either: the toggle's own bottom depends on real rendered text
+   metrics (line-height, font fallback), the same "normal never equals a
+   hand-computed sum" problem DIA-83/DIA-65 hit before — hand-summing the
+   rail's four reserved heights into a calc() would duplicate that
+   knowledge and drift the moment any of them changes. `updateDesktopLayout`
+   in src/main.ts reads both from the real layout instead
+   (`#app`/`#toggle-root`'s own `getBoundingClientRect()`), gated by
+   `matchMedia('(min-width: 1152px)')` and re-run on the same debounced
+   resize `render()` already uses, mirroring the existing `(max-width:
+   767px)` pattern already in that file. `top` alone is also re-derived on
+   every scroll event (DIA-218: `position: fixed` doesn't track document
+   flow, so a stale `top` either covers the toggle or drifts away from it
+   the moment scrollY changes) — see `applyPanelTop()`/`toggleBottomDoc` in
+   that same file. `bottom: 0` below is plain CSS —
+   with no transformed/positioned ancestor, a fixed box's containing block
+   is the real viewport, so it already reaches the literal window bottom
+   with no extra work, the same as the phone/tablet sheet above it. */
+@media (min-width: 1152px) {
+  #app {
+    max-width: 1120px;
+    margin: 0 auto;
+    display: flow-root;
+    position: relative;
+  }
+
+  /* Rail, top-down: h1, lede, slider, toggle (+ tagline/nudge slot, D-051),
+     then the (usually empty) tap-panel placeholder. */
+  #app > h1,
+  #app > .app__intro,
+  #app > #slider-root,
+  #app > #toggle-root,
+  #app > #panel-root {
+    float: left;
+    clear: left;
+    width: 368px;
+  }
+
+  #app > .app__intro {
+    /* Overrides the >=768px rule's 2-line reserve above, sized for the
+       720px-wide single column — the same copy wraps to 4 lines at the
+       368px rail width (U-14h is the tagline's version of this same
+       "narrower column, more lines" fact). */
+    min-height: calc(1.3em * 4);
+  }
+
+  /* U-14h (DIA-221): the toggle's tagline/nudge text at the 368px rail
+     width is CI's other system-ui-fallback casualty — every local
+     measurement fits it on one line with room to spare, but CI's wider
+     fallback wraps it to two (DIA-65 precedent, same mechanism as the
+     tabs-row fix above). `.toggle__message`'s reserved height is `em`
+     against its own font-size, not this element's, so sizing the text
+     down here doesn't reopen a DIA-176/D-051 CLS gap — it only buys back
+     the ~10% of line width CI's font needs. Both rules get it, not just
+     the subtitle, so neither visibly changes size when one replaces the
+     other in their shared grid slot. */
+  .toggle__subtitle,
+  .toggle__nudge {
+    font-size: 0.9em;
+  }
+
+  /* Main, top-down: the room tabs, the scene, the stepper, the
+     scroll-further hint (main.ts inserts `.scene-scroll-hint` right after
+     #scene-stepper at setup — it is not in index.html's static shell) and
+     the checklist's persistent contact line (D-048 item 1: nothing under
+     the scene but the contact line). Plain in-flow blocks, not floats:
+     CSS floats must never sit higher than the top of *any* earlier float
+     regardless of direction (CSS2.1 §9.5.1 rule 5) — since the rail's own
+     floats (above) come first in DOM order and the last of them (the
+     toggle) sits well below y: 0, a float here would be pinned down to
+     the toggle's own top instead of starting right after the room tabs,
+     re-coupling this column to the rail's height the long way round. A
+     normal block-level box has no such rule: floated siblings are simply
+     not part of its flow, so these stack by their own heights alone,
+     starting at #app's own top (y: 0) because floated rail content
+     doesn't count as this column's "previous sibling" either. `margin-
+     left: 400px` (368px rail + 32px gutter, both fixed design constants,
+     not measured content) places their left edge where the rail's floats
+     end, without needing `clear` (nothing here is floated to clear). */
+  #app > #scene-views,
+  #app > #scene-wrap,
+  #app > #scene-stepper,
+  #app > #checklist-root {
+    margin-left: 400px;
+    width: 720px;
+  }
+
+  /* The room tabs are the one item above narrower than the full 720px —
+     it leaves room for the punch-list button, below. Overrides the width
+     from the shared rule above. */
+  #app > #scene-views {
+    width: 538px; /* overridden from src/main.ts's updateDesktopLayout() once #view-nav's real width is known — see the comment there */
+  }
+
+  /* The "scroll to see the rest" hint's own comment (above its base rule)
+     already says it "only matters below ~360px" — .scene-wrap is a fixed
+     720x480 box at this width (D-042a, unchanged), well above that, so
+     the hint has nothing to say here. Dropping its reserved ~23px (it
+     never renders, but the space was always held open) is what closes
+     the last few px of U-14a's hard "no scroll at 1152x648" gate — see
+     the two rules below it for the rest of that budget. */
+  #app > .scene-scroll-hint {
+    display: none;
+  }
+
+  /* D-048 item 2 (amended for >=1152 only): the punch-list button shares
+     the tabs' row, right-aligned — see the block comment above for why
+     this is `position: absolute` rather than a second float. Padding is
+     dropped here too (DIA-221): `.view-nav`'s base `0 1rem` exists to
+     match the phone/tablet row's own inset, but at this width the button
+     is absolutely positioned by its own box, so that padding only ate
+     into the width `updateDesktopLayout()` computes for #scene-views
+     (width: 720 - this element's real rendered width) — the exact
+     mechanism behind U-14f's CI-only overflow: CI's system-ui fallback
+     renders both the tabs and this button a few px wider than any local
+     measurement (DIA-65 precedent), and the unused 32px of padding here
+     was the difference between fitting and needing to scroll. */
+  #app > #view-nav {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: auto;
+    padding: 0;
+  }
+
+  /* U-14a's hard "no scroll at 1152x648" gate leaves very little room
+     below the stepper once the scene (480px, D-042a) and the tabs row are
+     both fixed: the checklist's own top padding (matching the gap the
+     scene-wrap-to-stepper 8px already sets, not the 1rem used <1152,
+     where there's no such budget) and body's bottom padding (a global
+     end-of-page margin that isn't needed here — this column's own
+     trailing space already reads as intentional) both shrink, on top of
+     the scroll-hint drop above. */
+  body {
+    padding-bottom: 0;
+  }
+
+  .checklist {
+    padding-top: 0.5rem;
+  }
+
+  /* --- Detail slot: the tap panel and the punch-list sheet dock in the
+     rail, under the toggle, instead of the viewport's right edge —
+     `left`/`top` are set from src/main.ts's updateDesktopLayout(), see
+     the block comment above for why. */
+  .panel,
+  .checklist__panel--open {
+    right: auto;
+    bottom: 0;
+    width: 368px;
+    max-height: none;
+    border-left: none;
+    border-top: 2px solid var(--ink);
+    border-radius: 12px 12px 0 0;
+  }
+}
