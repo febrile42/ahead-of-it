@@ -216,6 +216,9 @@ if (
   }
 
   panel.onClose(() => setHotspotSelected(null));
+  // U-05: undo scrollHotspotAboveSheet's temporary scroll room, whether or
+  // not this particular open actually needed it — harmless no-op either way.
+  panel.onClose(() => document.body.classList.remove('panel-scroll-space'));
 
   // DIA-131: the punch-list button's label span lives inside its own
   // static-shell markup (index.html) — checklist.ts writes `Punch list (n)`
@@ -660,19 +663,40 @@ if (
     return { left: offsetLeft, top: 0, width: cssW, height: cssH };
   }
 
+  // U-05 (DIA-194/195): scrolling the *scene* to the viewport top (the
+  // previous fix) only clears the sheet for a hotspot in the scene's own
+  // top ~50vh — on a tall/busy scene (the review's band-750 repro) a
+  // hotspot further down still ends up under it. Scroll by exactly what
+  // the tapped hotspot itself needs instead, with a small margin so its
+  // reticle isn't flush against the sheet's edge.
+  const PANEL_SHEET_MARGIN_PX = 8;
+
+  function scrollHotspotAboveSheet(source: HTMLElement) {
+    const sheetTop = window.innerHeight / 2; // .panel's own 50vh cap, style.css
+    const needed = source.getBoundingClientRect().bottom - (sheetTop - PANEL_SHEET_MARGIN_PX);
+    if (needed <= 0) return;
+    // The scene can sit close enough to the document's own end (little
+    // checklist/contact-line content below it) that there isn't ~50vh of
+    // real document left to scroll through — pad the document temporarily
+    // so the scroll below actually has room to land, same idea as opening
+    // a mobile keyboard reflowing the page. Removed again on close.
+    const maxScrollY = document.documentElement.scrollHeight - window.innerHeight;
+    if (needed > maxScrollY - window.scrollY) {
+      document.body.classList.add('panel-scroll-space');
+    }
+    window.scrollBy({ top: needed, left: 0 });
+  }
+
   function openPanel(gagId: string, source: HTMLElement) {
     const fields = panelFieldsFor(gagId);
     if (!fields) return;
     cancelActiveMoment(); // PH2-03: opening a panel cancels a playing moment at once.
     openPanelGagId = gagId;
     if (source instanceof HTMLButtonElement) setHotspotSelected(source);
-    // U-05: on a phone the sheet is about to cover the scene from ~50vh
-    // down — scroll so the scene's own top meets the viewport top first,
-    // so the tapped hotspot (always inside it) lands above the sheet's
-    // edge instead of under it. Desktop's side panel never covers the
-    // scene, so this only runs below the same 767px breakpoint U-06 uses.
+    // Desktop's side panel never covers the scene, so this only runs below
+    // the same 767px breakpoint U-06 uses for making the sheet modal.
     if (window.matchMedia('(max-width: 767px)').matches) {
-      sceneWrap!.scrollIntoView({ block: 'start', inline: 'nearest' });
+      scrollHotspotAboveSheet(source);
     }
     // R-04: the prevented-beat thumbnail is always the without-state
     // scene. B4: closing returns focus to the hotspot that opened it.

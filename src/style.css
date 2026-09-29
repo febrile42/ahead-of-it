@@ -812,6 +812,18 @@ h1 {
   visibility: visible;
 }
 
+/* U-05 (DIA-194/195): main.ts's scrollHotspotAboveSheet adds this only when
+   the document doesn't already have ~50vh of room below the current scroll
+   position to bring a low-on-screen hotspot above the sheet's top edge —
+   removed again on close. `max-width: 767px` matches `.panel`'s own sheet
+   breakpoint just below; above it the panel is a side panel that never
+   covers the scene, so there's nothing to scroll clear of. */
+@media (max-width: 767px) {
+  body.panel-scroll-space {
+    padding-bottom: calc(50vh + 16px);
+  }
+}
+
 /* --- Panel (3e): bottom sheet on phone, side panel from 768px --- */
 .panel {
   position: fixed;
@@ -937,12 +949,32 @@ h1 {
 }
 
 /* --- Checklist (3f, reworked DIA-131) --- */
+/* U-07 (DIA-194/195): no bottom padding here. `body`'s own 2rem bottom
+   padding (top of this file) is the page's one generic end-of-content
+   allowance; the collapsed `#checklist-panel` sliver is the last in-flow
+   thing in this wrapper, so a second bottom pad here only stacked on top
+   of that and pushed scrollHeight ~32px past the DIA-198 U-07 AC's own
+   +32 tolerance (which already assumes the body-level pad is the only
+   one). The open sheet is `position: fixed`, so it never reads this
+   padding either way. */
 .checklist {
-  padding: 1rem;
+  padding: 1rem 1rem 0;
 }
 
 .checklist > .contact-line {
   margin-top: 0;
+  /* U-07 (DIA-194/195): `<p>`'s user-agent default margin-bottom (~1em)
+     was never reset here (only margin-top was, above) — with this now
+     the last in-flow box in `.checklist` (no bottom padding to contain
+     it), that stray margin escaped into the document's own auto height,
+     the other half of the ~32-48px overshoot measured against the U-07
+     AC alongside `.checklist__panel--collapsed`'s padding, below.
+     -1px rather than 0: with the stray margin gone this box is the
+     document's exact last edge, and Chromium's `scrollHeight` is an
+     integer ceiling of that (sub-pixel, DPR/font-dependent) edge —
+     against the DIA-198 AC's own un-rounded threshold, zero slack ceils
+     past it by <1px on Chromium at 390x844/band 750 specifically. */
+  margin-bottom: -1px;
 }
 
 .checklist__panel {
@@ -972,14 +1004,21 @@ h1 {
    pattern safe to use here after all, with no scrollbar-gutter reservation
    needed (one was tried and reverted: it cost every layout ~15px of
    width, enough to drop D-042's close-up scale below its signed-off 1.9x
-   minimum at the 360px boundary). */
+   minimum at the 360px boundary). Padding/border must be zeroed here too:
+   `.checklist__panel`'s own 1rem padding, under this element's
+   box-sizing:border-box, is not overridden by width/height:1px alone —
+   a border-box can't shrink below its padding+border sum, so it still
+   rendered as a 32px box (measured) until this rule reset them. */
 .checklist__panel--collapsed {
   position: absolute;
   width: 1px;
   height: 1px;
   margin: -1px;
+  padding: 0;
+  border: 0;
   overflow: hidden;
   clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
   white-space: nowrap;
 }
 
@@ -1124,8 +1163,10 @@ h1 {
     width: auto;
     height: auto;
     margin: 0;
+    padding: 1rem;
     overflow: visible;
     clip: auto;
+    clip-path: none;
     white-space: normal;
   }
 
