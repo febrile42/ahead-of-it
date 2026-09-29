@@ -109,6 +109,32 @@ describe('placeChips', () => {
     expect(positions[0]).toEqual({ x: 100, y: 100 }); // first keeps its anchor
   });
 
+  // U-19 (DIA-194/197): the review's own evidence was two 390px room tiles
+  // ("Lobby", "Closet") 5px apart — individually past the 44px minimum, so
+  // the old zero-gap search left them untouched and reading as one cluster.
+  it('pushes a chip apart from a neighbour landing closer than the 8px minimum gap', () => {
+    const chips: Chip[] = [
+      { cx: 100, cy: 100, w: 60, h: 44 },
+      { cx: 165, cy: 100, w: 60, h: 44 }, // 5px gap at its own anchor, no overlap
+    ];
+    const positions = placeChips(chips, { w: 400, h: 200 });
+    expect(positions[0]).toEqual({ x: 100, y: 100 }); // first chip keeps its anchor
+    const gap = positions[1].x - 30 - (positions[0].x + 30); // chip2's left edge minus chip1's right edge
+    expect(gap).toBeGreaterThanOrEqual(8);
+  });
+
+  it('leaves an already >=8px gap alone (no unnecessary nudge)', () => {
+    const chips: Chip[] = [
+      { cx: 100, cy: 100, w: 60, h: 44 },
+      { cx: 168, cy: 100, w: 60, h: 44 }, // exactly 8px gap at its own anchor
+    ];
+    const positions = placeChips(chips, { w: 400, h: 200 });
+    expect(positions).toEqual([
+      { x: 100, y: 100 },
+      { x: 168, y: 100 },
+    ]);
+  });
+
   it('warns and leaves the chip at its clamped anchor when no free position exists', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
     try {

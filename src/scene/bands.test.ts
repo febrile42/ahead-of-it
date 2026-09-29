@@ -78,4 +78,17 @@ describe('formatReadout', () => {
   it('rounds the raw value', () => {
     expect(formatReadout(399.6, 490)).toBe('~400 → 2022, ~490');
   });
+
+  // U-17 (DIA-194/197): the raw value repeating the band right after the
+  // arrow ("~80 → 2018, ~80") was the review's own example of the bug.
+  it('drops the redundant ", ~band" clause when raw is exactly the band (first paint, or a ?n= deep link that lands on it exactly)', () => {
+    expect(formatReadout(80, 80)).toBe('~80 → 2018');
+  });
+
+  it('keeps the full form when raw only rounds/snaps to the band, since the two numbers still differ', () => {
+    // DIA-194 U-17's own worked example: ?n=600 snaps to band 610 but must
+    // still show the visitor's actual 600, not the band's 610, before the
+    // arrow (R-01: "shows the visitor's number").
+    expect(formatReadout(600, 610)).toBe('~600 → 2023, ~610');
+  });
 });

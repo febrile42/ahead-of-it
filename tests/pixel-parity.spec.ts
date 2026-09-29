@@ -194,8 +194,10 @@ async function gotoAtScale1(page: Page, c: ParityCase) {
     await page.waitForFunction((prev) => document.body.dataset.renderedToken !== prev, prevToken);
   }
   if (c.state === 'without') {
-    const pressed = await page.locator('.toggle__button').getAttribute('aria-pressed');
-    if (pressed !== 'true') {
+    // U-10 (DIA-194/197): aria-pressed removed from the toggle; data-state
+    // carries which fill (and now which state) it is in instead.
+    const state = await page.locator('.toggle__button').getAttribute('data-state');
+    if (state !== 'without') {
       const prevToken = await page.evaluate(() => document.body.dataset.renderedToken);
       await page.locator('.toggle__button').click();
       await page.waitForFunction((prev) => document.body.dataset.renderedToken !== prev, prevToken);

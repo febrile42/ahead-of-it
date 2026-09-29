@@ -52,7 +52,9 @@ test.describe('R-06a nudge', () => {
     await load(page);
     await setSlider(page, 360);
     await expectNudgeVisible(page);
-    await expect(page.locator('.toggle__button')).toHaveAttribute('aria-pressed', 'false');
+    // U-10 (DIA-194/197): aria-pressed is gone (a button whose name changes
+    // with state must not also carry pressed state) — data-state replaces it.
+    await expect(page.locator('.toggle__button')).toHaveAttribute('data-state', 'built');
   });
 
   test('is hidden again once the visitor toggles (m2)', async ({ page }) => {
@@ -71,7 +73,7 @@ test.describe('R-06a nudge', () => {
     await load(page);
 
     await page.locator('.toggle__button').click();
-    await expect(page.locator('.toggle__button')).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.locator('.toggle__button')).toHaveAttribute('data-state', 'without');
     await expectNudgeHidden(page);
 
     await setSlider(page, 360);
@@ -100,7 +102,7 @@ test.describe('R-06a nudge', () => {
     const button = page.locator('.toggle__button');
     await button.click();
     await button.click();
-    await expect(button).toHaveAttribute('aria-pressed', 'false');
+    await expect(button).toHaveAttribute('data-state', 'built');
 
     await setSlider(page, 360);
     await expectNudgeHidden(page);

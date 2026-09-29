@@ -73,6 +73,15 @@ export interface ChipPosition {
 
 const CHIP_SEARCH_STEP = 6;
 
+/** U-19 (DIA-194/197): the smallest gap the search below will settle for
+ * between two tile pills' *labels* — the room's own 80-band evidence had
+ * two chips 5px apart (centres 50px, individually still >=44px, so the
+ * touch-target rule alone let them read as one cluster). The hit box
+ * (Chip.w/h) is unchanged; only the placement search's own idea of
+ * "free" gets stricter, via the inflate-one-box Minkowski trick in
+ * `isFree` below. */
+const MIN_CHIP_GAP = 8;
+
 function clampChipCentre(chip: Chip, bounds: { w: number; h: number }): ChipPosition {
   const halfW = chip.w / 2;
   const halfH = chip.h / 2;
@@ -117,6 +126,36 @@ function chipsIntersect(
  * anchor anyway and logs a warning — better an overlap a visitor can still
  * read part of than a chip flung off the picture.
  */
+/** Searches the expanding square ring around `clamped` for the nearest
+ * position clear of every chip in `placed`, at `chip`'s footprint inflated
+ * by `gap` on every side (0 for "no overlap", MIN_CHIP_GAP*2 for U-19's
+ * "no overlap AND 8px clear"). `null` if nothing within `maxRadius`. */
+function search(
+  chip: Chip,
+  clamped: ChipPosition,
+  placed: ReadonlyArray<{ x: number; y: number; w: number; h: number }>,
+  bounds: { w: number; h: number },
+  maxRadius: number,
+  gap: number
+): ChipPosition | null {
+  const isFree = (x: number, y: number) => !placed.some((p) => chipsIntersect(p, x, y, chip.w + gap, chip.h + gap));
+  if (isFree(clamped.x, clamped.y)) return clamped;
+
+  for (let radius = CHIP_SEARCH_STEP; radius <= maxRadius; radius += CHIP_SEARCH_STEP) {
+    for (let dy = -radius; dy <= radius; dy += CHIP_SEARCH_STEP) {
+      const onHorizontalEdge = Math.abs(dy) === radius;
+      const dxs = onHorizontalEdge
+        ? Array.from({ length: Math.floor((2 * radius) / CHIP_SEARCH_STEP) + 1 }, (_, i) => -radius + i * CHIP_SEARCH_STEP)
+        : [-radius, radius];
+      for (const dx of dxs) {
+        const candidate = clampChipCentre({ ...chip, cx: clamped.x + dx, cy: clamped.y + dy }, bounds);
+        if (isFree(candidate.x, candidate.y)) return candidate;
+      }
+    }
+  }
+  return null;
+}
+
 export function placeChips(chips: readonly Chip[], bounds: { w: number; h: number }): ChipPosition[] {
   const placed: Array<{ x: number; y: number; w: number; h: number }> = [];
   const positions: ChipPosition[] = [];
@@ -124,25 +163,14 @@ export function placeChips(chips: readonly Chip[], bounds: { w: number; h: numbe
 
   for (const chip of chips) {
     const clamped = clampChipCentre(chip, bounds);
-    const isFree = (x: number, y: number) => !placed.some((p) => chipsIntersect(p, x, y, chip.w, chip.h));
-
-    let found: ChipPosition | null = isFree(clamped.x, clamped.y) ? clamped : null;
-
-    for (let radius = CHIP_SEARCH_STEP; !found && radius <= maxRadius; radius += CHIP_SEARCH_STEP) {
-      for (let dy = -radius; !found && dy <= radius; dy += CHIP_SEARCH_STEP) {
-        const onHorizontalEdge = Math.abs(dy) === radius;
-        const dxs = onHorizontalEdge
-          ? Array.from({ length: Math.floor((2 * radius) / CHIP_SEARCH_STEP) + 1 }, (_, i) => -radius + i * CHIP_SEARCH_STEP)
-          : [-radius, radius];
-        for (const dx of dxs) {
-          const candidate = clampChipCentre({ ...chip, cx: clamped.x + dx, cy: clamped.y + dy }, bounds);
-          if (isFree(candidate.x, candidate.y)) {
-            found = candidate;
-            break;
-          }
-        }
-      }
-    }
+    // U-19: prefer a position with an 8px gap on every side (the candidate's
+    // own footprint inflated by 2x the gap, tested against every
+    // already-placed chip's *true* size — inflating one side of a pair is
+    // the standard Minkowski-sum way to require a gap between both). A room
+    // too dense for that (the synthetic stress test below, not any real
+    // scene) falls back to the pre-U-19 "just don't overlap" search rather
+    // than forcing a visible overlap where a merely-close placement exists.
+    const found = search(chip, clamped, placed, bounds, maxRadius, MIN_CHIP_GAP * 2) ?? search(chip, clamped, placed, bounds, maxRadius, 0);
 
     const final = found ?? clamped;
     if (!found) {

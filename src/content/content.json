@@ -672,7 +672,13 @@
     "roomTab": "{room} ({count})",
     "roomTabName": "{room}: {count} to tap",
     "announce": "{room}: {label}, {n} of {total}",
-    "announceRoom": "{room}: whole floor"
+    "announceRoom": "{room}: whole floor",
+    "announceWithout": "Showing the building without him",
+    "announceBuilt": "Showing what he'd already built",
+    "loading": "Loading the building…",
+    "loadFailed": "The building didn't load. Everything in it is in the punch list.",
+    "retry": "Try again",
+    "readoutAtBand": "~{n} → {year}"
   },
   "ambient": {
     "hover": "Someone is always on call. In the built state, it's a rotation."

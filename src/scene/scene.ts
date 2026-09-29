@@ -137,7 +137,14 @@ function fetchJson<T>(url: string): Promise<T> {
 
 export function loadSceneIndex(): Promise<SceneIndex> {
   if (!indexPromise) {
-    indexPromise = fetchJson<SceneIndex>('/sprites/scenes/index.json');
+    // U-11(c) (DIA-194/197): a failed fetch must not poison this cache
+    // forever — without clearing it here, the "Try again" button could
+    // never actually try again, since every retry would just replay the
+    // same rejected promise without a new network request.
+    indexPromise = fetchJson<SceneIndex>('/sprites/scenes/index.json').catch((err) => {
+      indexPromise = null;
+      throw err;
+    });
   }
   return indexPromise;
 }
@@ -160,12 +167,20 @@ export async function loadScene(band: BandId, state: 'built' | 'without'): Promi
   }
   let cached = sceneCache.get(fileName);
   if (!cached) {
-    cached = fetchJson<SceneFile>(`/sprites/scenes/${fileName}`).then((scene) => {
-      if (scene.schema !== SCENE_SCHEMA) {
-        throw new Error(`sprites/scenes/${fileName}: schema ${scene.schema}, this painter draws schema ${SCENE_SCHEMA}`);
-      }
-      return scene;
-    });
+    cached = fetchJson<SceneFile>(`/sprites/scenes/${fileName}`)
+      .then((scene) => {
+        if (scene.schema !== SCENE_SCHEMA) {
+          throw new Error(`sprites/scenes/${fileName}: schema ${scene.schema}, this painter draws schema ${SCENE_SCHEMA}`);
+        }
+        return scene;
+      })
+      // U-11(c): same reasoning as loadSceneIndex above — a failed load
+      // must not permanently poison this file's cache entry, or the
+      // failure-state "Try again" button could never actually retry.
+      .catch((err) => {
+        sceneCache.delete(fileName);
+        throw err;
+      });
     sceneCache.set(fileName, cached);
   }
   return cached;

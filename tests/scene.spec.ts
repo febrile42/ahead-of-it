@@ -59,8 +59,9 @@ async function setBand(page: Page, band: BandId) {
 
 async function setState(page: Page, state: 'built' | 'without') {
   const button = page.locator('.toggle__button');
-  const pressed = await button.getAttribute('aria-pressed');
-  const isWithout = pressed === 'true';
+  // U-10 (DIA-194/197): aria-pressed removed from the toggle; data-state
+  // carries which fill it is in instead.
+  const isWithout = (await button.getAttribute('data-state')) === 'without';
   if ((state === 'without') !== isWithout) {
     const prev = await currentRenderToken(page);
     await button.click();
