@@ -160,7 +160,7 @@ test.describe('D-056 U-14d: an open panel docks in the rail, never over the scen
   }
 
   async function assertPanelDocked(page: Page, selector: string): Promise<void> {
-    const [panelBox, sceneBox, sliderCentre, toggleCentre, toggleBottom] = await Promise.all([
+    const [panelBox, sceneBox, sliderCentre, toggleCentre, dockAnchorBottom] = await Promise.all([
       page.locator(selector).boundingBox(),
       page.locator('#scene-wrap').boundingBox(),
       page.locator('#headcount-slider').evaluate((el) => {
@@ -171,11 +171,15 @@ test.describe('D-056 U-14d: an open panel docks in the rail, never over the scen
         const r = el.getBoundingClientRect();
         return { x: r.x + r.width / 2, y: r.y + r.height / 2 };
       }),
-      // #toggle-root, not .toggle__button: the rail item includes the
-      // subtitle/tagline below the button (index.html's .toggle__message),
-      // and updateDesktopLayout() docks under the whole item, not just the
-      // button — matching src/main.ts's own toggleRoot.getBoundingClientRect().
-      page.locator('#toggle-root').evaluate((el) => el.getBoundingClientRect().bottom),
+      // #share-control, not #toggle-root/.toggle__button: D-057 (PH3-02)
+      // added the "Share image" control to the rail directly under the
+      // toggle, and the panel/checklist now dock under *it* instead —
+      // matching src/main.ts's own updateDesktopLayout(), which computes
+      // toggleBottomDoc from the share control's own bottom edge once it's
+      // in the rail. D-057 item 7 explicitly accepts this: "the height
+      // below which a docked panel makes the page scroll moves from about
+      // 610px to about 660px."
+      page.locator('#share-control').evaluate((el) => el.getBoundingClientRect().bottom),
     ]);
     expect(panelBox!.x).toBeLessThanOrEqual(sceneBox!.x);
     expect(panelBox!.x + panelBox!.width).toBeLessThanOrEqual(sceneBox!.x);
@@ -188,11 +192,12 @@ test.describe('D-056 U-14d: an open panel docks in the rail, never over the scen
     ]);
     expect(sliderHit).toBe(true);
     expect(toggleHit).toBe(true);
-    // DIA-218: the docked `top` must track the toggle's *current* viewport-
-    // relative bottom edge (clamped at >=0), not a value cached from the
-    // last resize/layout pass — this is what actually distinguishes "the
-    // panel happens to still overlap nothing" from "the panel is docked".
-    expect(Math.abs(panelBox!.y - Math.max(0, toggleBottom))).toBeLessThanOrEqual(1.5);
+    // DIA-218: the docked `top` must track the dock anchor's *current*
+    // viewport-relative bottom edge (clamped at >=0), not a value cached
+    // from the last resize/layout pass — this is what actually
+    // distinguishes "the panel happens to still overlap nothing" from "the
+    // panel is docked".
+    expect(Math.abs(panelBox!.y - Math.max(0, dockAnchorBottom))).toBeLessThanOrEqual(1.5);
   }
 
   const SHORT_VIEWPORTS = CASES.slice(1); // the two D-056 point 5 short-viewport cases
@@ -275,11 +280,15 @@ test.describe('D-056 U-14d: an open panel docks in the rail, never over the scen
 });
 
 test.describe('D-056 U-14e: tab order at >=1152 follows the rail then the main column', () => {
-  test('slider, toggle, room tab, punch list, hotspots, then the stepper', async ({ page, browserName }) => {
+  test('slider, toggle, share control, room tab, punch list, hotspots, then the stepper', async ({ page, browserName }) => {
     test.skip(browserName !== 'chromium', 'webkit-iphone pins a 390px touch device, not a >=1152 desktop surface');
     await openAt(page, { width: 1440, height: 900 }, '/?n=750');
     const order: string[] = [];
-    for (let i = 0; i < 5; i += 1) {
+    // D-057 (PH3-02): the share control is a rail item (moved there by
+    // updateDesktopLayout(), right after #toggle-root in DOM order — tab
+    // order follows DOM order, not float visual position), so it takes its
+    // place among the rail's own tab stops, before the main column's.
+    for (let i = 0; i < 6; i += 1) {
       await page.keyboard.press('Tab');
       const info = await page.evaluate(() => {
         const el = document.activeElement as HTMLElement | null;
@@ -292,9 +301,10 @@ test.describe('D-056 U-14e: tab order at >=1152 follows the rail then the main c
     }
     expect(order[0]).toBe('#headcount-slider');
     expect(order[1]).toBe('toggle__button');
-    expect(order[2]).toBe('scene-views__button');
-    expect(order[3]).toBe('#punch-list-button');
-    expect(order[4]).toBe('hotspot');
+    expect(order[2]).toBe('#share-control');
+    expect(order[3]).toBe('scene-views__button');
+    expect(order[4]).toBe('#punch-list-button');
+    expect(order[5]).toBe('hotspot');
   });
 });
 

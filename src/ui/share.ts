@@ -1,15 +1,8 @@
 // D-057 item 7 (PH3-02, DIA-235): the "Share image" control's behaviour.
-//
-// Not wired into index.html/main.ts yet — the control's visible label and
-// accessible name are the Product Lead's (new visible text, per the D-057
-// brief's own "Boundaries" section and item 7), and that string doesn't
-// exist in content.json yet (DIA-247, filed alongside this build). Adding
-// the static shell markup ahead of the real copy would mean either
-// inventing a label (the nothing-invented rule) or shipping an unlabeled
-// pill — this module is the ready-to-wire behaviour so that once DIA-247
-// lands, plugging it in is a small, mechanical change: a static `<a>` shell
-// in index.html's #view-nav (same S1 pattern as #punch-list-button) plus
-// one `initShareControl(...)` call from main.ts's render().
+// Wired from src/main.ts onto index.html's static `#share-control` shell
+// (S1 pattern, same as #punch-list-button); the visible label and
+// accessible name are content.json's `ui.shareButton`/`ui.shareButtonName`
+// (Product Lead, DIA-247), set once by main.ts, never invented here.
 //
 // Always hands over the *without* image of the current stop, even from the
 // built state (R-11, D-022) — callers pass the without-state href/filename
@@ -33,6 +26,17 @@ export interface ShareControlOptions {
 
 function shareFileName(stop: ShareStop): string {
   return `ahead-of-it-${stop}.png`;
+}
+
+/** Sets `anchor`'s `href`/`download` to `stop`'s PNG — the no-script
+ * baseline (D-057 item 7: "already a working download link"). Exported so
+ * main.ts can call it on every band change, not just inside
+ * `initShareControl`'s own click handler, so the link is always correct for
+ * a visitor who never triggers a pointerdown/focus prefetch at all (a
+ * screen reader's browse mode, or `curl`ing the page). */
+export function syncShareHref(anchor: HTMLAnchorElement, stop: ShareStop): void {
+  anchor.href = `/share/${stop}.png`;
+  anchor.download = shareFileName(stop);
 }
 
 /** Fetched once per stop, starting on the first `pointerdown`/`focus`
@@ -85,21 +89,15 @@ class SharePrefetch {
  */
 export function initShareControl(anchor: HTMLAnchorElement, getStop: () => ShareStop, options: ShareControlOptions = {}): void {
   const prefetch = new SharePrefetch();
-
-  const syncHref = () => {
-    const stop = getStop();
-    anchor.href = `/share/${stop}.png`;
-    anchor.download = shareFileName(stop);
-  };
-  syncHref();
+  syncShareHref(anchor, getStop());
 
   const startPrefetch = () => prefetch.start(getStop());
   anchor.addEventListener('pointerdown', startPrefetch);
   anchor.addEventListener('focus', startPrefetch);
 
   anchor.addEventListener('click', (event) => {
-    syncHref();
     const stop = getStop();
+    syncShareHref(anchor, stop);
     const file = prefetch.get(stop);
 
     // `preventDefault` and the `navigator.share()` *call* both have to

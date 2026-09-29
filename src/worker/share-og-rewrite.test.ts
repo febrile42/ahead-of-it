@@ -116,7 +116,11 @@ describe('GET / rewrites og:image / twitter:image / og:url (D-057 item 6)', () =
     const html = await res.text();
 
     expect(html).toContain('<meta property="og:title" content="Ahead of It" />');
-    expect(html).toContain('content="https://example.test/share/610.png"');
+    // A trailing `?v=<hash>` is expected once src/worker/share-hashes.json
+    // has a real entry for 610 (written by npm run share:render) — this
+    // only asserts the base URL, not the hash value itself (that's
+    // share-og.test.ts's job), so a re-render never flakes this test.
+    expect(html).toMatch(/content="https:\/\/example\.test\/share\/610\.png(\?v=\w+)?"/);
     expect(html.match(/share\/610\.png/g)).toHaveLength(2); // og:image + twitter:image
     expect(html).toContain('property="og:url" content="https://example.test/?n=610"');
     expect(html).toContain('content="the caption, unaffected by band"');

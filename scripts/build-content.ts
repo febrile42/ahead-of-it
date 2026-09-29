@@ -152,6 +152,8 @@ export interface Ui {
   loadFailed: string;
   retry: string;
   readoutAtBand: string;
+  shareButton: string;
+  shareButtonName: string;
 }
 
 export interface ContentJson {
@@ -637,6 +639,8 @@ const UI_PLACEHOLDERS: Record<keyof Ui, string[]> = {
   loadFailed: [],
   retry: [],
   readoutAtBand: ['n', 'year'],
+  shareButton: [],
+  shareButtonName: [],
 };
 
 // D-051's own section carries `intro`/`roomHint`; every other key still
@@ -665,6 +669,8 @@ const PAGE_STATE_UI_KEYS = [
   'retry',
   'readoutAtBand',
 ] as const;
+// D-057 item 7's share control copy: the visible pill label and its accessible name.
+const SHARE_UI_KEYS = ['shareButton', 'shareButtonName'] as const;
 
 function placeholdersOf(copy: string): string[] {
   return [...new Set([...copy.matchAll(/\{(\w+)\}/g)].map((m) => m[1]))].sort();
@@ -722,12 +728,14 @@ function parseUiSection(toneMd: string, heading: string, keys: readonly (keyof U
   return result;
 }
 
-/** TONE.md's §"Landing copy (D-051)" and §"Navigation copy (D-042a)" tables, merged. */
+/** TONE.md's §"Landing copy (D-051)", §"Navigation copy (D-042a)", §"Page
+ * state copy (D-053)" and §"Share control copy (D-057)" tables, merged. */
 export function parseUi(toneMd: string): Ui {
   return {
     ...parseUiSection(toneMd, '## Landing copy (D-051)', LANDING_UI_KEYS),
     ...parseUiSection(toneMd, '## Navigation copy (D-042a)', NAVIGATION_UI_KEYS),
     ...parseUiSection(toneMd, '## Page state copy (D-053)', PAGE_STATE_UI_KEYS),
+    ...parseUiSection(toneMd, '## Share control copy (D-057)', SHARE_UI_KEYS),
   } as Ui;
 }
 

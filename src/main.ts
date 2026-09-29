@@ -27,6 +27,7 @@ import {
 } from './scene/scene';
 import type { SceneFile, SceneView } from './scene/scene';
 import { bandIndex } from './scene/bands';
+import { shareStopForBand } from './scene/share-image';
 import { createChecklist, gagsThroughBand } from './ui/checklist';
 import type { CanvasBox } from './ui/panel';
 import { beyondPanelFields, createPanel, panelFieldsFor, renderHotspots, renderZoomTargets } from './ui/panel';
@@ -34,6 +35,7 @@ import { ui } from './ui/strings';
 import type { SceneState } from './ui/toggle';
 import { createSlider } from './ui/slider';
 import { createToggle } from './ui/toggle';
+import { initShareControl, syncShareHref, trackShareImage } from './ui/share';
 import { motionGate } from './motion';
 import { parseInitialSceneState } from './url-state';
 import { motionChanged, resolveViewAt } from './scene/motion-playback';
@@ -55,6 +57,7 @@ const hotspotsLayer = document.querySelector<HTMLDivElement>('#hotspots-layer');
 const panelRoot = document.querySelector<HTMLDivElement>('#panel-root');
 const checklistRoot = document.querySelector<HTMLDivElement>('#checklist-root');
 const punchListButton = document.querySelector<HTMLButtonElement>('#punch-list-button');
+const shareControl = document.querySelector<HTMLAnchorElement>('#share-control');
 
 if (
   appRoot &&
@@ -69,7 +72,8 @@ if (
   hotspotsLayer &&
   panelRoot &&
   checklistRoot &&
-  punchListButton
+  punchListButton &&
+  shareControl
 ) {
   // D-043: R-10's read side, pulled forward so a Lighthouse navigation can
   // land on any band (not just 80) — `?n=<headcount>&it=<none|built>`.
@@ -239,6 +243,17 @@ if (
   }
   const checklist = createChecklist(punchListButton, punchListLabel);
   checklistRoot.append(checklist.root);
+
+  // D-057 item 7: label/accessible name are content.json's own
+  // ui.shareButton/ui.shareButtonName (Product Lead, DIA-247) — set once,
+  // like every other static-chrome string that doesn't vary with band/state.
+  // aria-label (not the visible text alone) carries shareButtonName so the
+  // accessible name can say more than the pill shows (WCAG 2.5.3: the
+  // spoken name still starts with the visible label, the Product Lead's own
+  // wording already guarantees that).
+  shareControl.textContent = ui('shareButton');
+  shareControl.setAttribute('aria-label', ui('shareButtonName'));
+  initShareControl(shareControl, () => shareStopForBand(band), { onActivate: trackShareImage });
   // U-11(a) (DIA-194/197): the "Punch list (n)" label is generated from
   // content.json's own gag list, not the scene file, so it does not need to
   // wait on render()'s scene fetch to be correct. Sets *only* the label
@@ -300,8 +315,27 @@ if (
     panel.root.style.top = top;
     if (checklistPanelEl) checklistPanelEl.style.top = top;
   }
+  // D-057 item 7: one #share-control node, moved between #view-nav (below
+  // 1152px) and the rail (from 1152px, right after #toggle-root — a float's
+  // stack position comes from its own place in DOM source order among the
+  // *other* rail floats, not from sitting next to them, so this lands
+  // directly under the toggle regardless of the non-floated siblings
+  // between them; style.css's @media block has the CSS half of this).
+  // `insertAdjacentElement` moves the existing element (same node, same
+  // listeners) rather than creating a new one — the guards just skip the
+  // no-op DOM write on a resize that didn't cross the breakpoint.
+  function placeShareControl() {
+    if (desktopLayoutQuery.matches) {
+      if (shareControl!.parentElement !== appRoot) {
+        toggleRoot!.insertAdjacentElement('afterend', shareControl!);
+      }
+    } else if (shareControl!.parentElement !== viewNav) {
+      punchListButton!.insertAdjacentElement('afterend', shareControl!);
+    }
+  }
   function updateDesktopLayout() {
     if (!desktopLayoutQuery.matches) {
+      placeShareControl();
       panel.root.style.removeProperty('left');
       panel.root.style.removeProperty('top');
       checklistPanelEl?.style.removeProperty('left');
@@ -309,8 +343,16 @@ if (
       viewsRow!.style.removeProperty('width');
       return;
     }
+    // Moved into the rail before any measurement below, so #view-nav's own
+    // rendered width (used to size the room tabs, at the end of this
+    // function) reflects just the punch-list button once this leaves it.
+    placeShareControl();
     const left = `${appRoot!.getBoundingClientRect().left}px`;
-    toggleBottomDoc = toggleRoot!.getBoundingClientRect().bottom + window.scrollY;
+    // The panel/checklist dock *under the share control* now, not directly
+    // under the toggle (D-057 item 7: "the height below which a docked
+    // panel makes the page scroll moves from about 610px to about 660px,
+    // and this proposal accepts that").
+    toggleBottomDoc = shareControl!.getBoundingClientRect().bottom + window.scrollY;
     panel.root.style.left = left;
     if (checklistPanelEl) checklistPanelEl.style.left = left;
     applyPanelTop();
@@ -993,6 +1035,11 @@ if (
   async function render() {
     renderInFlight = true;
     const token = (renderToken += 1);
+    // D-057 item 7: kept in step with `band`, not gated behind the scene
+    // fetch below (same reasoning as the punch-list label's own comment) —
+    // a visitor who shares mid-load, or while a fetch has failed, still
+    // gets the stop they're actually looking at, not a stale one.
+    syncShareHref(shareControl!, shareStopForBand(band));
     // DIA-13: captured before anything below touches the DOM — the layers
     // that are about to be rebuilt are exactly the ones that can hold focus.
     const focusCapture = captureFocus();

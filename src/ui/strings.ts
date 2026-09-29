@@ -30,6 +30,8 @@ export const UI_KEYS = [
   'loadFailed',
   'retry',
   'readoutAtBand',
+  'shareButton',
+  'shareButtonName',
 ] as const;
 
 export type UiKey = (typeof UI_KEYS)[number];
