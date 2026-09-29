@@ -680,7 +680,8 @@
     "retry": "Try again",
     "readoutAtBand": "~{n} → {year}",
     "shareButton": "Share it without him",
-    "shareButtonName": "Share it without him: a picture of this building"
+    "shareButtonName": "Share it without him: a link to this building",
+    "shareCopied": "Link copied"
   },
   "ambient": {
     "hover": "Someone is always on call. In the built state, it's a rotation."

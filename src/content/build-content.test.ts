@@ -148,7 +148,8 @@ const VALID_TONE_MD = `# Tone — fixture
 | key | copy | where |
 |---|---|---|
 | \`shareButton\` | \`Share it without him\` | fixture. |
-| \`shareButtonName\` | \`Share it without him: a picture of this building\` | fixture. |
+| \`shareButtonName\` | \`Share it without him: a link to this building\` | fixture. |
+| \`shareCopied\` | \`Link copied\` | fixture. |
 `;
 
 const VALID_UI = {
@@ -172,7 +173,8 @@ const VALID_UI = {
   retry: 'Try again',
   readoutAtBand: '~{n} → {year}',
   shareButton: 'Share it without him',
-  shareButtonName: 'Share it without him: a picture of this building',
+  shareButtonName: 'Share it without him: a link to this building',
+  shareCopied: 'Link copied',
 };
 
 function validInputs(overrides: Partial<BuildInputs> = {}): BuildInputs {
@@ -293,7 +295,8 @@ describe('parsing ui (D-042a)', () => {
       retry: 'Try again',
       readoutAtBand: '~{n} → {year}',
       shareButton: 'Share it without him',
-      shareButtonName: 'Share it without him: a picture of this building',
+      shareButtonName: 'Share it without him: a link to this building',
+      shareCopied: 'Link copied',
     });
   });
 

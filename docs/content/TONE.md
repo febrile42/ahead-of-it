@@ -101,17 +101,21 @@ number as the readout shows it today, and `{year}` is the band's year. Served as
 
 ## Share control copy (D-057)
 
-The "Share image" control (D-057 item 7): a secondary pill that always hands over the
-**without** picture of the current stop, from either state. The visible label says which
-picture it is, in the toggle's own words, so from the built state it also points at the
-toggle. The accessible name starts with the visible label (WCAG 2.5.3) and adds what the
-visitor gets. It adds no date, headcount or figure and names no employer (D-014). Served as
-`content.json` `ui.<key>`.
+The share control (D-057 item 7, reworked by DIA-262): a secondary pill that always hands
+over a link to the **without** view of the current stop (`/?n=<stop>&it=none`), from either
+state. The link unfurls as that stop's share picture with `copy.shareCaption`, so the
+control passes no text of its own beside the URL. The visible label says which view it is,
+in the toggle's own words, so from the built state it also points at the toggle. The
+accessible name starts with the visible label (WCAG 2.5.3) and adds what the visitor gets,
+worded to be true whether the phone's share sheet opens or the link is copied. It adds no
+date, headcount or figure and names no employer (D-014). Served as `content.json`
+`ui.<key>`.
 
 | key | copy | where |
 |---|---|---|
 | `shareButton` | `Share it without him` | Visible pill text, below 1152 px in `#view-nav` opposite the punch list, from 1152 px in the rail under the toggle's message slot. |
-| `shareButtonName` | `Share it without him: a picture of this building` | Accessible name (`aria-label`) of the same control. |
+| `shareButtonName` | `Share it without him: a link to this building` | Accessible name (`aria-label`) of the same control. |
+| `shareCopied` | `Link copied` | Toast after the link is copied to the clipboard (desktop, or wherever the share sheet is unavailable). Also sent to the live region. Not shown when the share sheet opens. |
 
 ## Landing copy (D-051)
 
