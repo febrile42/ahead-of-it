@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { DEFAULT_INITIAL_STATE, parseInitialSceneState } from './url-state';
+import { DEFAULT_INITIAL_STATE, LIST_HASH, panelHash, parseInitialSceneState, sceneSearchParams } from './url-state';
 
 describe('parseInitialSceneState (D-043 URL read)', () => {
   it('falls back to band 80, built with no params', () => {
@@ -50,5 +50,44 @@ describe('parseInitialSceneState (D-043 URL read)', () => {
 
   it('ignores unrelated params and stray whitespace', () => {
     expect(parseInitialSceneState('?foo=bar&n=220&it=built')).toEqual({ band: 220, state: 'built', raw: 220 });
+  });
+});
+
+describe('sceneSearchParams (PH3-01 URL write)', () => {
+  it('writes a numeric band, built, with the band\'s own canonical n', () => {
+    expect(sceneSearchParams(490, 'built')).toBe('n=490&it=built');
+  });
+
+  it('writes without state as it=none, matching the read side', () => {
+    expect(sceneSearchParams(220, 'without')).toBe('n=220&it=none');
+  });
+
+  it('writes beyond as the slider max, never the literal string', () => {
+    expect(sceneSearchParams('beyond', 'built')).toBe('n=1000&it=built');
+  });
+
+  it('round-trips through parseInitialSceneState for every band and state', () => {
+    const bands = [80, 150, 220, 360, 490, 610, 750, 'beyond'] as const;
+    for (const band of bands) {
+      for (const state of ['built', 'without'] as const) {
+        const written = parseInitialSceneState(`?${sceneSearchParams(band, state)}`);
+        expect(written.band).toBe(band);
+        expect(written.state).toBe(state);
+      }
+    }
+  });
+});
+
+describe('panelHash/LIST_HASH (PH3-01/U-09 overlay hash)', () => {
+  it('builds a panel hash from a gag id', () => {
+    expect(panelHash('G2.1')).toBe('#panel=G2.1');
+  });
+
+  it('encodes a gag id that needs it, so the hash stays a single URL component', () => {
+    expect(panelHash('a b#c')).toBe('#panel=a%20b%23c');
+  });
+
+  it('the punch-list hash is a fixed literal, never employer text', () => {
+    expect(LIST_HASH).toBe('#list');
   });
 });

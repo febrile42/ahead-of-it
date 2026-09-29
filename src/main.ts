@@ -34,7 +34,7 @@ import type { SceneState } from './ui/toggle';
 import { createSlider } from './ui/slider';
 import { createToggle } from './ui/toggle';
 import { motionGate } from './motion';
-import { parseInitialSceneState } from './url-state';
+import { LIST_HASH, panelHash, parseInitialSceneState, sceneSearchParams } from './url-state';
 import { motionChanged, resolveViewAt } from './scene/motion-playback';
 import type { ResolvedFrame } from './scene/motion-playback';
 import { loadManifest } from './scene/sprites';
@@ -246,6 +246,71 @@ if (
   // `loading="lazy"` thumbnails DIA-114 found WebKit fetches all at once if
   // they exist before the page's first layout/paint pass.
   punchListLabel.textContent = `Punch list (${gagsThroughBand(band).length})`;
+
+  // PH3-01 (R-10 write side, U-09 "Back closes an open panel"):
+  //
+  // - `writeSceneQuery()` keeps `n`/`it` (D-043's own names) current with
+  //   `history.replaceState` on every visitor-driven band/state change —
+  //   never `pushState`, so dragging through all eight stops and flipping
+  //   the toggle twice collapses into the one entry already there
+  //   (`history.length` unchanged, brief item 1).
+  // - `overlayHash` tracks the one hash entry *we* pushed or replaced for
+  //   an open gag panel or the punch-list sheet (`openOverlay`, item 2) —
+  //   null when no overlay owns an entry, which is also true for the
+  //   auto-opened Beyond panel (slider.onChange below never calls
+  //   openOverlay for it): that panel must not grow history at all, or
+  //   dragging to 'beyond' would need two Backs to leave, not one.
+  // - Closing that overlay any way other than Back (`panel.onClose` /
+  //   `checklist.onClose`, which fire for the close button, Escape and the
+  //   outside-tap alike, item 4) pops the entry with `history.back()` so
+  //   the stack never holds a stale "panel open" entry once the visitor has
+  //   already closed it themselves.
+  // - A real Back press pops that same entry on its own; the `popstate`
+  //   listener below just has to notice the entry is gone and close
+  //   whichever overlay is still visibly open (item 3) — through the exact
+  //   same `panel.close()`/`checklist.close()` calls Escape already uses,
+  //   so focus-return and the live announcement are identical either way.
+  //   `consumingOwnBack` tells the two triggers (our own `history.back()`
+  //   call vs. a real Back press) apart, so neither one double-acts on the
+  //   other's half of the round trip.
+  function writeSceneQuery() {
+    const query = sceneSearchParams(band, state);
+    history.replaceState(history.state, '', `?${query}${window.location.hash}`);
+  }
+
+  let overlayHash: string | null = null;
+  let consumingOwnBack = false;
+
+  function openOverlay(hash: string) {
+    if (overlayHash) {
+      history.replaceState(history.state, '', hash); // item 5: switching straight to another overlay replaces, no second push
+    } else {
+      history.pushState(null, '', hash);
+    }
+    overlayHash = hash;
+  }
+
+  function closeOverlayEntry() {
+    if (!overlayHash) return;
+    overlayHash = null;
+    consumingOwnBack = true;
+    history.back();
+  }
+
+  panel.onClose(closeOverlayEntry);
+  checklist.onClose(closeOverlayEntry);
+  checklist.onOpen(() => openOverlay(LIST_HASH)); // item 2/5: same push-or-replace rule as a gag panel
+
+  window.addEventListener('popstate', () => {
+    if (consumingOwnBack) {
+      consumingOwnBack = false;
+      return;
+    }
+    if (!overlayHash) return; // Back with nothing of ours open — let the browser leave/navigate normally
+    overlayHash = null;
+    if (panel.isOpen()) panel.close();
+    if (checklist.isOpen()) checklist.close();
+  });
 
   // D-056 (DIA-217/U-14): two things at >=1152 that src/style.css's own
   // `@media (min-width: 1152px)` block can't finish on its own — both
@@ -845,6 +910,7 @@ if (
     // R-04: the prevented-beat thumbnail is always the without-state
     // scene. B4: closing returns focus to the hotspot that opened it.
     panel.open(fields, 'without', { returnFocusTo: source });
+    openOverlay(panelHash(gagId)); // PH3-01/U-09: item 2 (push) or item 5 (replace, switching from another open panel)
   }
 
   // S5: render() is async (it fetches the scene file and awaits sprite
@@ -1272,6 +1338,7 @@ if (
       openPanelGagId = null;
       panel.close();
     }
+    writeSceneQuery(); // R-10 item 1: replaceState only, never a push, however many bands this drag crossed
     void render();
   });
 
@@ -1288,6 +1355,7 @@ if (
     sceneStartTime = performance.now();
     document.body.dataset.sceneStartTime = String(sceneStartTime);
     previousResolved = null;
+    writeSceneQuery(); // R-10 item 1
     void render();
   });
 

@@ -1,12 +1,14 @@
 // D-043: R-10's URL *read* side, pulled forward to Phase 2 so a Lighthouse
 // navigation can land on band 750, not just band 80. `?n=<headcount>&it=<none|built>`
-// are R-10's own parameter names — Phase 3 extends this with the write side
-// (history, sharing, OG), it does not replace it.
+// are R-10's own parameter names. PH3-01 (below) adds the write side: the
+// query string to replaceState with, and the hash an open panel/punch-list
+// pushes — parseInitialSceneState itself is unchanged, still read-only and
+// still never looks at the hash (the brief's own ruling: history-only).
 //
-// Nothing here writes the URL. A missing or invalid value for either
-// parameter falls back to today's default for that parameter alone (band
-// 80, built) with no error shown — the two parameters are independent, so
-// `?it=none` with no `n` still gives band 80, without.
+// A missing or invalid value for either read-side parameter falls back to
+// today's default for that parameter alone (band 80, built) with no error
+// shown — the two parameters are independent, so `?it=none` with no `n`
+// still gives band 80, without.
 import { nearestBand, rawValueForBand, SLIDER_MAX, SLIDER_MIN } from './scene/bands';
 import type { BandId } from './content';
 import type { SceneState } from './ui/toggle';
@@ -53,3 +55,34 @@ export function parseInitialSceneState(search: string): InitialSceneState {
     raw: raw ?? DEFAULT_INITIAL_STATE.raw,
   };
 }
+
+// PH3-01: R-10's *write* side. `sceneSearchParams` is the pure part (unit
+// tested below it in url-state.test.ts) — the actual `history.replaceState`
+// call lives in main.ts, alongside the band/state variables it reads, the
+// same way sizeAndPositionCanvas and friends do for other DOM-only work.
+// Always written with the band's own canonical raw value (`rawValueForBand`,
+// not the slider's continuous drag position) — round, shareable numbers
+// (`n=490`) that `parseInitialSceneState` above round-trips back to the same
+// band exactly, never a mid-drag value nobody asked to share.
+
+/** The exact `n=<headcount>&it=<none|built>` query string for `history.replaceState` to write for `band`/`state` — D-043's own param names, so this round-trips through `parseInitialSceneState` above. */
+export function sceneSearchParams(band: BandId, state: SceneState): string {
+  const params = new URLSearchParams();
+  params.set('n', String(rawValueForBand(band)));
+  params.set('it', state === 'without' ? 'none' : 'built');
+  return params.toString();
+}
+
+// U-09: the hash written while an overlay (a gag panel or the punch-list
+// sheet) is open — history-only, per the CEO's ruling on this brief's open
+// question: never read back on load (parseInitialSceneState above never
+// looks at location.hash), so a forwarded link with one of these still
+// lands on the plain view. R-33: no employer text in either — a gag id
+// never carries one (content/*.json), and 'list' is a fixed literal.
+/** The hash for an open gag panel, e.g. `#panel=G2.1`. */
+export function panelHash(gagId: string): string {
+  return `#panel=${encodeURIComponent(gagId)}`;
+}
+
+/** The hash for the open punch-list sheet (D-048). */
+export const LIST_HASH = '#list';

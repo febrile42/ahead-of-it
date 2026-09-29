@@ -31,6 +31,15 @@ export interface ChecklistHandles {
   open: () => void;
   close: () => void;
   isOpen: () => boolean;
+  /** PH3-01/U-09: fires once per open, after the sheet is visible — main.ts
+   * uses this to push the `#list` history entry (never fired by `render()`,
+   * only by an actual closed->open transition). */
+  onOpen: (listener: () => void) => void;
+  /** PH3-01/U-09: fires once per close, however it happened (the sheet's own
+   * close button, Escape, or the trigger toggling it shut) — main.ts uses
+   * this to pop the history entry `onOpen` pushed, so Back never finds a
+   * stale "sheet open" entry once the sheet is already closed some other way. */
+  onClose: (listener: () => void) => void;
 }
 
 function gagRow(gag: Gag): HTMLElement {
@@ -223,6 +232,8 @@ export function createChecklist(trigger: HTMLButtonElement, triggerLabel: HTMLEl
   root.append(panel);
 
   let open = false;
+  const openListeners: Array<() => void> = [];
+  const closeListeners: Array<() => void> = [];
 
   function render(band: BandId): number {
     list.replaceChildren();
@@ -274,8 +285,10 @@ export function createChecklist(trigger: HTMLButtonElement, triggerLabel: HTMLEl
     if (open) {
       loadPendingThumbs(panel);
       printButton.focus();
+      for (const listener of openListeners) listener();
     } else {
       trigger.focus();
+      for (const listener of closeListeners) listener();
     }
   }
 
@@ -303,5 +316,11 @@ export function createChecklist(trigger: HTMLButtonElement, triggerLabel: HTMLEl
     open: () => setOpen(true),
     close: () => setOpen(false),
     isOpen: () => open,
+    onOpen(listener) {
+      openListeners.push(listener);
+    },
+    onClose(listener) {
+      closeListeners.push(listener);
+    },
   };
 }
