@@ -688,9 +688,11 @@ if (
   /** Adapts a SCENE-FORMAT view's `hotspots[]` into the `Hotspot[]` shape
    * src/ui/panel.ts's `renderHotspots` already draws real <button>s from
    * (the PH1-04 review §b — that seam is why panel.ts didn't
-   * need to change). */
+   * need to change). DIA-257: only primary hotspots get a button — a
+   * two-part gag's other part stays drawn as scenery, so one gag never
+   * shows two reticles that open the same panel. */
   function toSceneLayout(view: SceneView): SceneLayout {
-    const hotspots: Hotspot[] = view.hotspots.map((h) => ({
+    const hotspots: Hotspot[] = view.hotspots.filter((h) => h.primary).map((h) => ({
       hotspotId: h.part ? `${h.gagId}#${h.part}` : h.gagId,
       gagId: h.gagId,
       x: h.x,
