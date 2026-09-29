@@ -330,6 +330,38 @@ test.describe('DIA-135: the open sheet gets its own header and close control', (
   });
 });
 
+test.describe('thumbnails stay deferred until opened (DIA-205)', () => {
+  // The collapsed sheet hides via the standard sr-only pattern (width/
+  // height:1px + overflow:hidden, style.css's `.checklist__panel--
+  // collapsed`). Chromium can't tell how far an image inside a zero-size
+  // clipped ancestor is from the viewport, so it loads it immediately
+  // rather than honouring `loading="lazy"` — that fired every row's
+  // thumbnail fetch on every page load (up to 16 at band 750), competing
+  // with the fetches that gate the intro paragraph's own paint (the LCP
+  // element) for bandwidth and decode time, and pushed LCP over budget on
+  // CI. checklist.ts now assigns each `<img>` its real `src` explicitly
+  // (loadPendingThumbs) instead of trusting that heuristic.
+  test('band 750 requests no /sprites/thumbs/ before the punch list is opened', async ({ page }) => {
+    const thumbRequests: string[] = [];
+    page.on('request', (req) => {
+      const path = new URL(req.url()).pathname;
+      if (path.startsWith('/sprites/thumbs/')) thumbRequests.push(path);
+    });
+
+    await H.openApp(page, { viewport: PHONE });
+    await H.setBand(page, 750);
+    await page.waitForLoadState('networkidle');
+
+    expect(thumbRequests, `unexpected eager thumbnail fetches: ${thumbRequests.join(', ')}`).toEqual([]);
+
+    // Opening the sheet is what should actually load them — proves this
+    // isn't accidentally suppressing every thumbnail fetch outright.
+    await H.openPunchList(page);
+    await page.waitForLoadState('networkidle');
+    expect(thumbRequests.length).toBeGreaterThan(0);
+  });
+});
+
 test.describe('screenshots (acceptance: collapsed, and open at 150 and 1,000+)', () => {
   test('collapsed at 390px', async ({ page }) => {
     await H.openApp(page, { viewport: PHONE });
