@@ -41,10 +41,12 @@ import { loadManifest } from './scene/sprites';
 import type { SpriteManifest } from './scene/sprites';
 import './style.css';
 
+const appRoot = document.querySelector<HTMLDivElement>('#app');
 const introEl = document.querySelector<HTMLParagraphElement>('#app-intro');
 const sliderRoot = document.querySelector<HTMLDivElement>('#slider-root');
 const toggleRoot = document.querySelector<HTMLDivElement>('#toggle-root');
 const viewsRow = document.querySelector<HTMLDivElement>('#scene-views');
+const viewNav = document.querySelector<HTMLDivElement>('#view-nav');
 const sceneWrap = document.querySelector<HTMLDivElement>('#scene-wrap');
 const stepper = document.querySelector<HTMLDivElement>('#scene-stepper');
 let canvas = document.querySelector<HTMLCanvasElement>('#scene-canvas');
@@ -54,10 +56,12 @@ const checklistRoot = document.querySelector<HTMLDivElement>('#checklist-root');
 const punchListButton = document.querySelector<HTMLButtonElement>('#punch-list-button');
 
 if (
+  appRoot &&
   introEl &&
   sliderRoot &&
   toggleRoot &&
   viewsRow &&
+  viewNav &&
   sceneWrap &&
   stepper &&
   canvas &&
@@ -242,6 +246,58 @@ if (
   // `loading="lazy"` thumbnails DIA-114 found WebKit fetches all at once if
   // they exist before the page's first layout/paint pass.
   punchListLabel.textContent = `Punch list (${gagsThroughBand(band).length})`;
+
+  // D-056 (DIA-217/U-14): two things at >=1152 that src/style.css's own
+  // `@media (min-width: 1152px)` block can't finish on its own — both
+  // documented there, restated briefly here:
+  //
+  // 1. The tap panel and the punch-list sheet dock in the rail under the
+  //    toggle instead of the viewport's right edge (CSS sets
+  //    `position: fixed; bottom: 0` there — everything but `left`/`top`).
+  //    `left` is the rail's own left edge, which #app's `margin: 0 auto`
+  //    centring only gives as `(100vw - 1120px) / 2` — a value that
+  //    drifts by half a scrollbar's width whenever one is present (the
+  //    short-viewport case, D-056 point 5). `top` is the toggle's own
+  //    bottom edge, which depends on real rendered text metrics the same
+  //    way DIA-83/DIA-65 found "normal" line-height never quite matches a
+  //    hand-computed sum.
+  // 2. The room tabs (#scene-views, `float: right` in CSS) need to leave
+  //    room for the punch-list button (#view-nav, `position: absolute;
+  //    right: 0` — it comes after the tabs in DOM, so a float on it could
+  //    never make the *earlier* tabs row avoid it, see the CSS comment).
+  //    The button's rendered width isn't a fixed number either — content
+  //    ("Punch list (n)") sizes it, and this codebase has already hit CI
+  //    rendering a fallback font a few px wider than any local measurement
+  //    (DIA-65's `.scene-stepper__floor` reservation).
+  //
+  // Both need the real layout, not a computed guess — reading them here is
+  // the one reliable source for either. Gated by matchMedia so this is a
+  // no-op below 1152 (nothing here overrides that breakpoint's own CSS),
+  // and re-run on the same debounced resize the render() call below
+  // already uses — mirrors the existing `(max-width: 767px)` pattern
+  // already in this file (see isModalWidth in src/ui/panel.ts).
+  const checklistPanelEl = checklistRoot.querySelector<HTMLElement>('#checklist-panel');
+  const desktopLayoutQuery = window.matchMedia('(min-width: 1152px)');
+  function updateDesktopLayout() {
+    if (!desktopLayoutQuery.matches) {
+      panel.root.style.removeProperty('left');
+      panel.root.style.removeProperty('top');
+      checklistPanelEl?.style.removeProperty('left');
+      checklistPanelEl?.style.removeProperty('top');
+      viewsRow!.style.removeProperty('width');
+      return;
+    }
+    const left = `${appRoot!.getBoundingClientRect().left}px`;
+    const top = `${toggleRoot!.getBoundingClientRect().bottom}px`;
+    panel.root.style.left = left;
+    panel.root.style.top = top;
+    if (checklistPanelEl) {
+      checklistPanelEl.style.left = left;
+      checklistPanelEl.style.top = top;
+    }
+    viewsRow!.style.width = `${720 - viewNav!.getBoundingClientRect().width}px`;
+  }
+  updateDesktopLayout();
 
   // The "scroll for more" hint (SCENE-FORMAT: a view wider than the
   // viewport scrolls to `focus`) only matters below ~360px now that a
@@ -1207,6 +1263,7 @@ if (
     // resized one, a one-frame flash of the wrong picture.
     resizeDebounce = setTimeout(() => {
       cancelActiveMoment();
+      updateDesktopLayout();
       void render();
     }, 150);
   });

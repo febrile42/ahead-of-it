@@ -196,24 +196,28 @@ test.describe('U-13: every control in the tab sequence shows the same focus ring
 });
 
 // ---------------------------------------------------------------------------
-// U-14: desktop controls capped at the scene's own 720px, centred (DIA-194 U-14).
+// U-14: at 768-1151, a single column capped at the scene's own 720px,
+// centred (DIA-194 U-14). D-056 (DIA-217) replaces the >=1152 half of this
+// with a two-column layout instead — see tests/desktop-two-column.spec.ts for
+// that AC set (U-14a-h). The 1440x900 case below moved there with it; this
+// file keeps only the still-single-column 768-1151 range.
 // ---------------------------------------------------------------------------
 
-test.describe('U-14: desktop layout caps the controls column at the scene width', () => {
-  test('at 1440x900, the slider is exactly as wide as the scene, and #app is centred', async ({ page }) => {
-    await H.openApp(page, { viewport: { width: 1440, height: 900 } });
+test.describe('U-14: tablet layout (768-1151) caps the controls column at the scene width', () => {
+  test('at 1024x900, the slider is exactly as wide as the scene, and #app is centred', async ({ page }) => {
+    await H.openApp(page, { viewport: { width: 1024, height: 900 } });
     const [appBox, sliderBox, sceneBox] = await Promise.all([
       page.locator('#app').boundingBox(),
       page.locator('.slider').boundingBox(),
       page.locator('.scene-wrap').boundingBox(),
     ]);
     expect(appBox!.width).toBe(720);
-    expect(appBox!.x).toBeCloseTo((1440 - 720) / 2, 0); // centred
+    expect(appBox!.x).toBeCloseTo((1024 - 720) / 2, 0); // centred
     expect(sliderBox!.width).toBeCloseTo(sceneBox!.width, 0);
   });
 
-  test('the lede reserves only what the copy needs at desktop width, not the phone worst case', async ({ page }) => {
-    await H.openApp(page, { viewport: { width: 1440, height: 900 } });
+  test('the lede reserves only what the copy needs at tablet width, not the phone worst case', async ({ page }) => {
+    await H.openApp(page, { viewport: { width: 1024, height: 900 } });
     const introHeight = await page.locator('.app__intro').evaluate((el) => el.getBoundingClientRect().height);
     // The phone reservation (DIA-175) is 5 lines at ~1.3em; the same copy at
     // 720px (post-cap) wraps to 2 — well under half the phone worst case.
