@@ -590,17 +590,21 @@ h1 {
 }
 
 /* D-061 step 4: the "Link copied" toast — fixed/out of flow (S1: no box to
-   reserve, no CLS), so it works the same next to the control whichever
-   container currently holds it (#view-nav below 1152px, the rail from
-   1152px, see .share-control's own comment) without any positioning code
-   in src/main.ts. `[hidden]` (display: none) means a re-`hidden = false`
-   always starts the `toast-in` animation fresh — there is no separate
-   "replay" step needed for the "second click restarts the toast" rule
-   (src/ui/share.ts's own showToast just resets its hide timer). */
+   reserve, no CLS). `top`/`right` are set by src/ui/share.ts from
+   #share-control's own rendered position on each activation, so this reads
+   as "near the control" whichever container currently holds it (#view-nav
+   below 1152px, the rail from 1152px — see .share-control's own comment)
+   without any breakpoint-specific CSS here.
+
+   Shown/hidden with `opacity`, not `hidden`/`display: none` (review,
+   DIA-264): a role="status" region has to already be present and unhidden
+   for most screen readers to announce a text change landing in the same
+   tick — unlike .toggle__nudge's `visibility` toggle above, `opacity: 0`
+   keeps this in the accessibility tree even while invisible.
+   `pointer-events: none` keeps the invisible, always-present box from
+   intercepting taps meant for whatever is underneath it. */
 .toast {
   position: fixed;
-  left: 50%;
-  bottom: 24px;
   z-index: 20;
   padding: 0.5rem 1rem;
   border: 1px solid var(--border);
@@ -610,26 +614,34 @@ h1 {
   font: inherit;
   font-size: 0.9rem;
   box-shadow: 0 2px 8px var(--shadow);
-  transform: translateX(-50%);
+  max-width: calc(100vw - 24px);
+  opacity: 0;
+  pointer-events: none;
 }
 
-.toast:not([hidden]) {
+/* src/ui/share.ts's showToast() adds this a frame after clearing the
+   region's text, so re-adding it on a second, back-to-back activation
+   still restarts the entrance animation (the class was genuinely absent
+   for at least one frame in between). */
+.toast--visible {
+  opacity: 1;
+  pointer-events: auto;
   animation: toast-in 0.2s ease-out;
 }
 
 @keyframes toast-in {
   from {
     opacity: 0;
-    transform: translate(-50%, 6px);
+    transform: translateY(-4px);
   }
   to {
     opacity: 1;
-    transform: translate(-50%, 0);
+    transform: translateY(0);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .toast:not([hidden]) {
+  .toast--visible {
     animation: none;
   }
 }

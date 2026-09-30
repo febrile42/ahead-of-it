@@ -125,23 +125,48 @@ export function initShareControl(
   syncShareHref(anchor, getStop());
 
   let toastTimer: ReturnType<typeof setTimeout> | undefined;
+  let toastFrame: number | undefined;
   /** D-061 step 4: shown near the control for ~2.5s; a second activation
    * resets this same timer rather than stacking a second toast — there is
-   * only ever the one shell element. */
+   * only ever the one shell element. Positions itself from #share-control's
+   * own rendered rect each time, since that element moves between
+   * #view-nav and the rail at 1152px (main.ts's placeShareControl) — review
+   * flagged the old fixed bottom-center spot as far from the control on a
+   * phone.
+   *
+   * Text is cleared, then set a frame later (`requestAnimationFrame`,
+   * cancelling and redoing a still-pending one so a rapid repeat click only
+   * ever lands the last write): review, DIA-264 — most screen readers only
+   * announce a role="status" region's text if that region was already
+   * present/unhidden *before* the text changed, and a repeat click setting
+   * the same text again isn't a change an AT will re-announce unless the
+   * region visibly goes empty first. */
   const showToast = () => {
-    toast.textContent = copiedMessage;
-    // Going from `[hidden]` (display: none) to shown restarts style.css's
-    // `toast-in` animation on its own — no separate "replay" step needed
-    // even when this is the second activation in a row.
-    toast.hidden = false;
+    const rect = anchor.getBoundingClientRect();
+    toast.style.top = `${rect.bottom + 8}px`;
+    toast.style.right = `${Math.max(8, window.innerWidth - rect.right)}px`;
+
     if (toastTimer !== undefined) clearTimeout(toastTimer);
+    if (toastFrame !== undefined) cancelAnimationFrame(toastFrame);
+    toast.textContent = '';
+    toast.classList.remove('toast--visible');
+    toastFrame = requestAnimationFrame(() => {
+      toast.textContent = copiedMessage;
+      toast.classList.add('toast--visible');
+      toastFrame = undefined;
+    });
     toastTimer = setTimeout(() => {
-      toast.hidden = true;
+      toast.classList.remove('toast--visible');
+      toast.textContent = '';
       toastTimer = undefined;
     }, 2500);
   };
 
   anchor.addEventListener('click', (event) => {
+    // A modifier held down is the visitor asking the browser for its own
+    // behaviour (open in a new tab/window) — defer to the href's own
+    // no-script baseline rather than intercepting it.
+    if (event.metaKey || event.ctrlKey || event.shiftKey) return;
     const url = shareUrl(location.origin, getStop());
     const touch = canShareLink(navigator, matchMedia('(pointer: coarse)').matches);
     // `preventDefault` and the `navigator.share()`/`navigator.clipboard`
