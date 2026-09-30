@@ -21,7 +21,7 @@ Change any of these by writing a `04-DECISIONS.md` entry first.
 | R-08 | **Animated workers** (walk cycles, state poses) in both states; built-state workers visibly calmer. Animation is decorative — no requirement depends on it. | 2 |
 | R-09 | ~~Topology fork~~ **Removed (D-015).** Many offices only; band 5+ shows HQ plus an inset office in another city; band 6+ a map with six pins. | — |
 | R-10 | **URL state**: `?n=<headcount>&it=<none|built>` fully reconstructs the view. Shareable and back-button safe. | 3 |
-| R-11 | **Share image** generated client-side: the **without-state** building for the current band with up to three gags flagged, captioned with the credential — *"By the time the company was your size, Josh had already fixed this."* — plus the URL. Downloadable and used as the OG image for that URL (D-022). | 3 |
+| R-11 | **Share image** generated client-side: the **without-state** building for the current band with up to three gags flagged, captioned with the credential — *"By the time the company was your size, Josh had already fixed this."* — plus the URL. Used as the OG image for that URL (D-022); the control shares that URL as a link, so the same picture unfurls wherever it lands (amends "Downloadable", D-061). | 3 |
 | R-12 | **Contact** is visible from every panel and the punch list: a LinkedIn link and a crawler-obfuscated email (assembled client-side, never plain in the source). No form, no calendar, no PDF (D-019). | 1 |
 | R-13 | A **day/night cycle** with the 3:47am on-call window as an ambient gag. | 3 (optional) |
 | R-16 | **`noindex`** meta + no sitemap at launch; not linked from joshgister.com until the Phase 4 publicity gate opens (D-018). | 1 |

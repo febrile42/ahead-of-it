@@ -58,6 +58,7 @@ const panelRoot = document.querySelector<HTMLDivElement>('#panel-root');
 const checklistRoot = document.querySelector<HTMLDivElement>('#checklist-root');
 const punchListButton = document.querySelector<HTMLButtonElement>('#punch-list-button');
 const shareControl = document.querySelector<HTMLAnchorElement>('#share-control');
+const shareToast = document.querySelector<HTMLDivElement>('#share-toast');
 
 if (
   appRoot &&
@@ -73,7 +74,8 @@ if (
   panelRoot &&
   checklistRoot &&
   punchListButton &&
-  shareControl
+  shareControl &&
+  shareToast
 ) {
   // D-043: R-10's read side, pulled forward so a Lighthouse navigation can
   // land on any band (not just 80) — `?n=<headcount>&it=<none|built>`.
@@ -253,7 +255,7 @@ if (
   // wording already guarantees that).
   shareControl.textContent = ui('shareButton');
   shareControl.setAttribute('aria-label', ui('shareButtonName'));
-  initShareControl(shareControl, () => shareStopForBand(band), { onActivate: trackShareImage });
+  initShareControl(shareControl, () => shareStopForBand(band), shareToast, ui('shareCopied'), { onActivate: trackShareImage });
   // U-11(a) (DIA-194/197): the "Punch list (n)" label is generated from
   // content.json's own gag list, not the scene file, so it does not need to
   // wait on render()'s scene fetch to be correct. Sets *only* the label

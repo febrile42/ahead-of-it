@@ -116,19 +116,32 @@
           />
           <span class="punch-list-button__label"></span>
         </button>
-        <!-- D-057 item 7: the "Share image" control. Below 1152px it lives
-             here, right-aligned opposite the punch-list button (.share-control's
+        <!-- D-061 (amends D-057 item 7): the "Share it without him" control
+             shares a link, not a file. Below 1152px it lives here,
+             right-aligned opposite the punch-list button (.share-control's
              margin-left: auto); from 1152px src/main.ts moves this element
              into the rail under the toggle (see style.css's @media block
              and updateDesktopLayout's own comment) — one node, repositioned,
-             never duplicated. href/download start pointed at band 80's
-             image (S1: a real, working link even before src/main.ts runs);
-             src/ui/share.ts's syncShareHref keeps them pointed at the
-             current stop's "without" image, and the label/aria-label are
-             filled from content.json's ui.shareButton/ui.shareButtonName —
-             nothing visitor-read is written here. -->
-        <a href="/share/80.png" download="ahead-of-it-80.png" class="share-control" id="share-control"></a>
+             never duplicated. href starts pointed at band 80's own share
+             URL, no `download` attribute (S1: a real, working link even
+             before src/main.ts runs); src/ui/share.ts's syncShareHref keeps
+             it pointed at the current stop's "without" URL, and the
+             label/aria-label are filled from content.json's
+             ui.shareButton/ui.shareButtonName — nothing visitor-read is
+             written here. -->
+        <a href="/?n=80&amp;it=none" class="share-control" id="share-control"></a>
       </div>
+      <!-- D-061 step 4: the copy-toast shell (S1, no CLS — it is fixed/out
+           of document flow, see .toast in style.css). Starts empty, and
+           stays in the accessibility tree at all times — `opacity`, not
+           `hidden`/`display: none`, is what shows it (see .toast--visible),
+           because a role="status" region that is unhidden in the same tick
+           its text is set often isn't announced (review, DIA-264). Position
+           (top/right, next to whichever container currently holds
+           #share-control) and the visible text are both set by
+           src/ui/share.ts on a successful clipboard copy; this node is
+           never created or appended. -->
+      <div class="toast" id="share-toast" role="status" aria-live="polite"></div>
       <!-- S1: width/height reserve the scene's final box (3:2, D-042a:
            full viewport width up to 430px, so a 180x120 close-up paints at
            >= 1.9 css px per art px on a 360px phone) so the canvas doesn't

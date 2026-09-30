@@ -927,3 +927,48 @@ Rejected:
   painter to keep in parity with the first.
 - **Numbered flags with a legend of gag titles.** It adds 26 lettered titles to maintain,
   and the text is illegible at card size anyway.
+
+**D-061 · 2026-09-29 · The share control shares a link, not a file (amends D-057 item 7;
+DIA-262 decision, DIA-264).**
+D-057 item 7 shipped the control as a download/`navigator.share({ files })` handoff of the
+PNG. A recipient who receives or downloads that file gets a picture with a URL printed on
+it (item 4's "Words, right" region) that they cannot tap — a dead end, not a share. The
+page URL `/?n=<n>&it=none` already unfurls as that exact PNG, pixel for pixel, through item
+6's OG rewrite: handing over the *link* instead gives every recipient the identical
+picture and caption a previewer shows, and a tap opens the live page rather than a static
+image.
+1. **The shared value is `${location.origin}/?n=<stop>&it=none`** — R-10's own query
+   string, built through url-state's own serializer (`sceneSearchParams`) rather than
+   assembled again by hand, so it round-trips through `parseInitialSceneState` exactly like
+   every other write of it. Still always the *without* state of the current stop (R-11,
+   D-022 unchanged), whatever the visible toggle currently shows.
+2. **Touch devices with Web Share** (`matchMedia('(pointer: coarse)')` and
+   `navigator.share` both present) hand the OS share sheet the link directly
+   (`navigator.share({ url })`), called synchronously inside the click handler so it still
+   counts as the same user activation item 7 already relied on for the file path.
+   `AbortError` — the visitor dismissing the sheet — does nothing further, the same
+   deliberate "no" item 7 already treated it as. Any other rejection falls through to the
+   clipboard step below.
+3. **Everywhere else — and the touch path's own non-abort failures — copy to the
+   clipboard** (`navigator.clipboard.writeText`). Success shows a small toast
+   (`ui.shareCopied`, DIA-263) near the control for about 2.5s, `role="status"`/
+   `aria-live="polite"`, respecting `prefers-reduced-motion`; a second activation resets
+   that same toast's hide timer rather than stacking a second one — there is one toast
+   shell element, not one per click. Failure (clipboard unsupported, or its write refused)
+   navigates to the link directly instead, which is harmless: it is the same page the
+   control's own `href` already points at.
+4. **No `download` attribute anywhere.** The anchor's `href` is the link itself, so the
+   no-script baseline — a visitor with no JS, a screen reader's browse mode, `curl` — is a
+   plain, working link to the same URL, not a file offer.
+5. **The eight PNGs (item 1) are unchanged and stay committed.** They are still the OG
+   images the link unfurls as; the control just no longer hands one over directly. The
+   `SharePrefetch`/`File`/`navigator.canShare({ files })` path item 7 introduced for that is
+   removed with it — nothing fetches a PNG on `pointerdown`/`focus` any more.
+6. **Analytics unchanged.** `share_image` (D-016) still fires once per real activation —
+   the share sheet resolving or the clipboard write succeeding — never on a dismissed sheet
+   or a failed copy, and still carries no properties (N-05).
+Rejected:
+- **Keep the file-sharing path as a fallback alongside the link.** Two different things a
+  recipient could receive depending on their device makes item 2's "same pixels both ways"
+  property meaningless again, and doubles the paths this control has to keep correct for no
+  benefit — the link already carries the picture, via the OG rewrite, on every device.

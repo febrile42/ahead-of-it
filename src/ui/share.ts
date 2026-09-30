@@ -1,137 +1,187 @@
-// D-057 item 7 (PH3-02, DIA-235): the "Share image" control's behaviour.
+// D-061 (DIA-262 decision, DIA-264): the "Share image" control's behaviour,
+// amending D-057 item 7 — the control shares a *link*, not a file. The page
+// URL `/?n=<stop>&it=none` already unfurls as the matching PNG through
+// D-057 item 6's OG rewrite, so handing over the link gives the recipient
+// the same picture and caption a downloaded file would, and a tap opens the
+// live page instead of a dead end.
+//
 // Wired from src/main.ts onto index.html's static `#share-control` shell
 // (S1 pattern, same as #punch-list-button); the visible label and
 // accessible name are content.json's `ui.shareButton`/`ui.shareButtonName`
-// (Product Lead, DIA-247), set once by main.ts, never invented here.
+// (Product Lead, DIA-247), and the toast text is `ui.shareCopied`
+// (DIA-263) — set once by main.ts, never invented here.
 //
-// Always hands over the *without* image of the current stop, even from the
-// built state (R-11, D-022) — callers pass the without-state href/filename
-// regardless of the visible toggle state.
+// `shareUrl`/`canShareLink`/`activateShare` below are the pure decision
+// logic (vitest, no DOM — this repo's unit tests run in plain Node,
+// src/ui/checklist.ts's own header/vitest.config.ts's comment explain why),
+// the same split D-057 item 7's original `canShareFile` used. `syncShareHref`
+// and `initShareControl` are the DOM wiring on top of it; tests/share-
+// control.spec.ts (Playwright) is their coverage.
 import { track } from '../analytics';
+import { sceneBandForStop } from '../scene/share-image';
 import type { ShareStop } from '../scene/share-image';
-
-/** D-057 item 7: "a tap first tries `navigator.share({ files: [png] })`
- * where `navigator.canShare` accepts files" — a pure predicate so the
- * capability check itself needs no DOM/fetch to test. */
-export function canShareFile(nav: Pick<Navigator, 'canShare' | 'share'> | undefined, file: File): boolean {
-  return typeof nav?.canShare === 'function' && typeof nav.share === 'function' && nav.canShare({ files: [file] });
-}
+import { sceneSearchParams } from '../url-state';
 
 export interface ShareControlOptions {
-  /** Called once activation actually happens (Web Share accepted, or the
-   * plain link's default download begins) — the only place `track` fires,
-   * so a prefetch or a refused/cancelled share never counts as a share. */
+  /** Called once activation actually happens (Web Share resolved, or the
+   * clipboard write succeeded) — the only place `track` fires, so a
+   * dismissed share sheet or a failed clipboard write never counts as a
+   * share. */
   onActivate?: () => void;
 }
 
-function shareFileName(stop: ShareStop): string {
-  return `ahead-of-it-${stop}.png`;
+/** D-061 step 1: the exact `<origin>/?n=<stop>&it=none` link for `stop` —
+ * R-10's own query string, built from url-state's own serializer
+ * (`sceneSearchParams`) so it round-trips through `parseInitialSceneState`
+ * exactly like every other write of that string. Always the *without*
+ * state (R-11, D-022), whatever `stop` maps to. Takes `origin` as a plain
+ * argument (rather than reading `location.origin` itself), the same reason
+ * `parseInitialSceneState` takes `search` instead of reading
+ * `window.location.search` — it keeps this unit-testable with no DOM. */
+export function shareUrl(origin: string, stop: ShareStop): string {
+  return `${origin}/?${sceneSearchParams(sceneBandForStop(stop), 'without')}`;
 }
 
-/** Sets `anchor`'s `href`/`download` to `stop`'s PNG — the no-script
- * baseline (D-057 item 7: "already a working download link"). Exported so
- * main.ts can call it on every band change, not just inside
- * `initShareControl`'s own click handler, so the link is always correct for
- * a visitor who never triggers a pointerdown/focus prefetch at all (a
- * screen reader's browse mode, or `curl`ing the page). */
+/** D-061 step 2's touch/Web-Share predicate — a pure check so it needs no
+ * DOM/`matchMedia` to test, the same shape as the old `canShareFile(nav,
+ * file)`. `pointerCoarse` is the caller's own
+ * `matchMedia('(pointer: coarse)').matches` read. */
+export function canShareLink(nav: Pick<Navigator, 'share'> | undefined, pointerCoarse: boolean): boolean {
+  return pointerCoarse && typeof nav?.share === 'function';
+}
+
+function isAbort(err: unknown): boolean {
+  return err instanceof Error && err.name === 'AbortError';
+}
+
+export type ShareOutcome = 'shared' | 'copied' | 'aborted' | 'fallback';
+
+/** D-061 steps 2-3, as one pure state machine: try Web Share on a touch
+ * device first (`env.share`), otherwise (or on any non-abort failure) try
+ * the clipboard (`env.copyText`). `'fallback'` covers every case neither
+ * succeeds — clipboard unsupported (`env.copyText` absent) or its write
+ * rejected — and means "the caller should let the link navigate", which is
+ * harmless since it is the same page the anchor already points at.
+ * `env.share`/`env.copyText` are plain functions, not `Navigator`/
+ * `Clipboard` objects, so this needs no DOM to test either. */
+export async function activateShare(
+  url: string,
+  env: { touch: boolean; share?: (opts: { url: string }) => Promise<void>; copyText?: (text: string) => Promise<void> }
+): Promise<ShareOutcome> {
+  if (env.touch && env.share) {
+    try {
+      await env.share({ url });
+      return 'shared';
+    } catch (err) {
+      // AbortError is the visitor dismissing the share sheet — a
+      // deliberate "no", not a failure, so nothing further happens.
+      // Anything else (refused, unsupported at call time) falls through
+      // to the clipboard path below.
+      if (isAbort(err)) return 'aborted';
+    }
+  }
+  if (!env.copyText) return 'fallback';
+  try {
+    await env.copyText(url);
+    return 'copied';
+  } catch {
+    return 'fallback';
+  }
+}
+
+/** Sets `anchor`'s `href` to `stop`'s share link — the no-script baseline
+ * (D-061: "the anchor's href is the share URL, with no download
+ * attribute"), a real working link even before any script runs, and even
+ * for a visitor whose browser never fires the click handler below (a
+ * screen reader's browse mode, `curl`, a middle-click into a new tab).
+ * Exported so main.ts can call it on every band change, not just inside
+ * `initShareControl`'s own click handler. */
 export function syncShareHref(anchor: HTMLAnchorElement, stop: ShareStop): void {
-  anchor.href = `/share/${stop}.png`;
-  anchor.download = shareFileName(stop);
-}
-
-/** Fetched once per stop, starting on the first `pointerdown`/`focus`
- * (D-057 item 7: "fetched on pointerdown/focus so the share call keeps its
- * user activation"). `navigator.share()` must be *called* synchronously
- * within the click handler's own call stack to count as still inside the
- * user gesture — fetching the PNG inside the click handler itself would
- * lose that activation on anything slower than an instant response, so
- * this only ever hands `initShareControl` an already-resolved `File`
- * (`resolved`); a click that lands before the fetch finishes falls through
- * to the plain link instead of waiting. */
-class SharePrefetch {
-  private pending = new Map<ShareStop, Promise<File>>();
-  private resolved = new Map<ShareStop, File>();
-
-  start(stop: ShareStop): void {
-    if (this.pending.has(stop)) return;
-    const request = fetch(`/share/${stop}.png`, { cache: 'force-cache' })
-      .then((res) => {
-        if (!res.ok) throw new Error(`/share/${stop}.png: ${res.status}`);
-        return res.blob();
-      })
-      .then((blob) => {
-        const file = new File([blob], shareFileName(stop), { type: 'image/png' });
-        this.resolved.set(stop, file);
-        return file;
-      });
-    this.pending.set(stop, request);
-  }
-
-  /** The prefetched file for `stop`, or `undefined` if it hasn't resolved
-   * (or hasn't started) yet — never awaited, so a caller checking this from
-   * inside a click handler stays synchronous. */
-  get(stop: ShareStop): File | undefined {
-    return this.resolved.get(stop);
-  }
+  anchor.href = shareUrl(location.origin, stop);
 }
 
 /**
- * Wires an existing `<a href="/share/<stop>.png" download="...">` shell
- * element (S1: index.html reserves it, this only fills in behaviour — no
- * element is created or appended here). `getStop()` reads whatever the
- * caller considers "current" at activation time, so a slider drag between
- * prefetch and click can't hand over a stale image.
+ * Wires an existing `<a href="/?n=<stop>&it=none">` shell element (S1:
+ * index.html reserves it, this only fills in behaviour — no element is
+ * created or appended here). `getStop()` reads whatever the caller
+ * considers "current" at click time, so a slider drag between renders
+ * can't hand over a stale link. `toast` is index.html's own reusable
+ * `#share-toast` shell (S1, no CLS); `copiedMessage` is content.json's
+ * `ui.shareCopied`, read once by main.ts the same way every other
+ * static-chrome string is.
  *
- * With no script this is already a working download link (the shell's own
- * `href`/`download` attributes); every enhancement below only ever adds a
- * faster/better path on top; a caught rejection or an unsupported
- * `navigator.share` always falls through to that plain link, unprevented.
+ * With no script this is already a working link (the shell's own `href`
+ * attribute); every enhancement below only ever adds a faster/better path
+ * on top of `activateShare`'s `'fallback'` outcome, which just navigates
+ * there directly — same destination either way.
  */
-export function initShareControl(anchor: HTMLAnchorElement, getStop: () => ShareStop, options: ShareControlOptions = {}): void {
-  const prefetch = new SharePrefetch();
+export function initShareControl(
+  anchor: HTMLAnchorElement,
+  getStop: () => ShareStop,
+  toast: HTMLElement,
+  copiedMessage: string,
+  options: ShareControlOptions = {}
+): void {
   syncShareHref(anchor, getStop());
 
-  const startPrefetch = () => prefetch.start(getStop());
-  anchor.addEventListener('pointerdown', startPrefetch);
-  anchor.addEventListener('focus', startPrefetch);
+  let toastTimer: ReturnType<typeof setTimeout> | undefined;
+  let toastFrame: number | undefined;
+  /** D-061 step 4: shown near the control for ~2.5s; a second activation
+   * resets this same timer rather than stacking a second toast — there is
+   * only ever the one shell element. Positions itself from #share-control's
+   * own rendered rect each time, since that element moves between
+   * #view-nav and the rail at 1152px (main.ts's placeShareControl) — review
+   * flagged the old fixed bottom-center spot as far from the control on a
+   * phone.
+   *
+   * Text is cleared, then set a frame later (`requestAnimationFrame`,
+   * cancelling and redoing a still-pending one so a rapid repeat click only
+   * ever lands the last write): review, DIA-264 — most screen readers only
+   * announce a role="status" region's text if that region was already
+   * present/unhidden *before* the text changed, and a repeat click setting
+   * the same text again isn't a change an AT will re-announce unless the
+   * region visibly goes empty first. */
+  const showToast = () => {
+    const rect = anchor.getBoundingClientRect();
+    toast.style.top = `${rect.bottom + 8}px`;
+    toast.style.right = `${Math.max(8, window.innerWidth - rect.right)}px`;
+
+    if (toastTimer !== undefined) clearTimeout(toastTimer);
+    if (toastFrame !== undefined) cancelAnimationFrame(toastFrame);
+    toast.textContent = '';
+    toast.classList.remove('toast--visible');
+    toastFrame = requestAnimationFrame(() => {
+      toast.textContent = copiedMessage;
+      toast.classList.add('toast--visible');
+      toastFrame = undefined;
+    });
+    toastTimer = setTimeout(() => {
+      toast.classList.remove('toast--visible');
+      toast.textContent = '';
+      toastTimer = undefined;
+    }, 2500);
+  };
 
   anchor.addEventListener('click', (event) => {
-    const stop = getStop();
-    syncShareHref(anchor, stop);
-    const file = prefetch.get(stop);
-
-    // `preventDefault` and the `navigator.share()` *call* both have to
-    // happen synchronously, right here, to still count as inside this
-    // click's user activation (D-057 item 7) — a file that hasn't resolved
-    // yet (a very fast tap, or a keyboard activation with no prior
-    // pointerdown/focus prefetch) just falls through to the plain link
-    // below, same as `!canShareFile`.
-    if (!file || !canShareFile(navigator, file)) {
-      options.onActivate?.();
-      return;
-    }
-
+    // A modifier held down is the visitor asking the browser for its own
+    // behaviour (open in a new tab/window) — defer to the href's own
+    // no-script baseline rather than intercepting it.
+    if (event.metaKey || event.ctrlKey || event.shiftKey) return;
+    const url = shareUrl(location.origin, getStop());
+    const touch = canShareLink(navigator, matchMedia('(pointer: coarse)').matches);
+    // `preventDefault` and the `navigator.share()`/`navigator.clipboard`
+    // *calls* both have to happen synchronously, right here, to still
+    // count as inside this click's user activation.
     event.preventDefault();
-    navigator
-      .share({ files: [file] })
-      .then(() => options.onActivate?.())
-      .catch((err: unknown) => {
-        // AbortError is the visitor dismissing the share sheet — a
-        // deliberate "no", not a failure, so it does nothing further
-        // (forcing a download after they said no would be its own bad
-        // surprise). Anything else (refused, unsupported at call time) is
-        // D-057's "refused" case: fall back to the plain download.
-        if (err instanceof Error && err.name === 'AbortError') return;
-        // A synthetic click on `anchor` itself would re-enter this same
-        // handler (same element, same listener) and try navigator.share()
-        // again — a fresh, listener-less element gets the plain download
-        // the preventDefault() above blocked, with no risk of looping.
-        const fallback = document.createElement('a');
-        fallback.href = anchor.href;
-        fallback.download = anchor.download;
-        fallback.rel = 'noopener';
-        fallback.click();
-      });
+    activateShare(url, {
+      touch,
+      share: touch ? (opts) => navigator.share(opts) : undefined,
+      copyText: navigator.clipboard?.writeText ? (text) => navigator.clipboard.writeText(text) : undefined,
+    }).then((outcome) => {
+      if (outcome === 'shared' || outcome === 'copied') options.onActivate?.();
+      if (outcome === 'copied') showToast();
+      if (outcome === 'fallback') location.assign(url);
+    });
   });
 }
 

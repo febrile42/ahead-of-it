@@ -32,6 +32,7 @@ export const UI_KEYS = [
   'readoutAtBand',
   'shareButton',
   'shareButtonName',
+  'shareCopied',
 ] as const;
 
 export type UiKey = (typeof UI_KEYS)[number];
