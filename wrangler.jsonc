@@ -33,13 +33,15 @@
     "run_worker_first": ["/"]
   },
 
-  // UMAMI_HOST is deliberately absent: with it unset, /u/* 404s (a real,
-  // tested no-op — src/worker/index.test.ts) rather than guessing at an
-  // infrastructure detail (which Umami host, and whether this Worker or
-  // the existing joshgister.com umami-proxy should own the route) that
-  // needs Josh (DIA-230, DIA-226). Once answered, add:
-  //   "vars": { "UMAMI_HOST": "https://<the umami host>" }
-  // No code change needed — the proxy already checks for it.
+  // DIA-226/DIA-254: the website id and proxy-location questions are
+  // answered — Josh gave the id (wired as VITE_UMAMI_WEBSITE_ID, a CI repo
+  // variable, R-33-style, since it's public and ships in the page anyway),
+  // and CEO ruled the proxy stays in this Worker. Josh supplied the Umami
+  // host on DIA-254 (the tracker embed for resume.joshgister.com), so it's
+  // set below — /u/* now proxies for real instead of 404ing.
+  "vars": {
+    "UMAMI_HOST": "https://umami.febrile.net"
+  },
 
   // No custom domain / routes yet (Phase 4 — D-005, D-018: noindex until the
   // publicity gate opens). Left on the workers.dev subdomain for now so a

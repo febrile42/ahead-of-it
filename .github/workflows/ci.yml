@@ -6,11 +6,24 @@ name: Checks and Deploy
 # deploy a red build. `check` runs on every non-draft PR into develop and on
 # every push to develop/main; `preview` and `deploy-production` are gated on
 # `check` passing and keep their original push-only conditions (never on a
-# pull_request — there is nothing to deploy for a PR). `preview` and
-# `deploy-production` reuse the `dist/` artifact `check` already built and
-# tested instead of rebuilding (DIA-143) — GITHUB_SHA is the same commit for
+# pull_request — there is nothing to deploy for a PR).
+#
+# `preview` and `deploy-production` each run their own `npm ci` + `npm run
+# build` instead of downloading `check`'s dist/ (DIA-277 changed this back
+# from the DIA-143 reuse-the-artifact approach): Vite bakes
+# VITE_UMAMI_WEBSITE_ID into the JS at build time, and `check`'s dist/ is
+# also what the Test step's e2e suite runs against via `vite preview`
+# (playwright.config.ts) — a plain static server with no `/u/*` Worker route
+# behind it. Baking the real id into that shared artifact made every e2e
+# test that asserts no console errors fail, since the tracker script would
+# 404 (see analytics.spec.ts's own "no website id configured" test, which
+# depends on the id being genuinely absent from the build under test, not
+# just untested). So `check` builds and tests with the id unset — analytics
+# off, matching src/analytics.ts's own privacy-first default — and
+# `preview`/`deploy-production` build separately with the real id, only
+# after `check` has passed on the same commit. GITHUB_SHA is identical for
 # every job in a run, so dist/version.json (DIA-103) still carries the
-# pushed SHA either way.
+# pushed SHA either way, and the two builds differ only in that one env var.
 #
 # workflow_dispatch lets `preview` be re-run against `develop` on demand
 # (e.g. after adding secrets, with no new commit to push) — a manual
@@ -129,27 +142,16 @@ jobs:
         run: test -x "$CHROME_PATH"
 
       # R-33 / D-014: check:employer runs inside `npm run build` already.
-      # PH3-04 (DIA-230): unset until Josh supplies it (DIA-226) — the
-      # build (src/analytics.ts) treats an empty id as "analytics off", so
-      # an unset repo variable here is what keeps this a no-op, not a
-      # failure. preview/deploy-production reuse this job's dist/ (below),
-      # so this is the only Build step that needs it.
+      # PH3-04/DIA-277: VITE_UMAMI_WEBSITE_ID is deliberately left unset
+      # here. `preview`/`deploy-production` set the real `UMAMI_WEBSITE_ID`
+      # repo variable on their own separate build (see the top-of-file
+      # comment) — this job's dist/ is also what the Test step below runs
+      # the e2e suite against, and that suite's own contract (analytics.spec.ts,
+      # tests/smoke.spec.ts's R-21 no-third-party-request check) is written
+      # against an unconfigured build. src/analytics.ts treats an empty id
+      # as "analytics off", a no-op, which is exactly the state under test.
       - name: Build
-        env:
-          VITE_UMAMI_WEBSITE_ID: ${{ vars.UMAMI_WEBSITE_ID }}
         run: npm run build
-
-      # DIA-143: preview/deploy-production download this instead of
-      # rebuilding. dist/version.json (DIA-103) was stamped from GITHUB_SHA
-      # during this Build step, and GITHUB_SHA is identical for every job in
-      # this workflow run, so the artifact still carries the pushed commit
-      # when those jobs pick it up.
-      - name: Upload dist for deploy jobs
-        uses: actions/upload-artifact@v4
-        with:
-          name: dist
-          path: dist
-          retention-days: 1
 
       # R-21/R-16/R-26 smoke + unit tests (tests/**, src/**/*.test.ts).
       # e2e runs on both `chromium` and `webkit-iphone` projects (DIA-15) —
@@ -198,15 +200,16 @@ jobs:
         with:
           node-version: 22
 
-      # DIA-143: reuse `check`'s already-built, already-tested dist/ instead
-      # of running `npm ci` + `npm run build` again. scripts/print-worker-name.mjs
-      # (used below on the fallback path) only reads wrangler.jsonc with
-      # Node built-ins, so it needs no `npm ci`.
-      - name: Download dist from check
-        uses: actions/download-artifact@v4
-        with:
-          name: dist
-          path: dist
+      - name: Install dependencies
+        run: npm ci
+
+      # DIA-277: rebuilt here (not `check`'s dist/) so this build carries the
+      # real Umami website id — see the top-of-file comment for why `check`
+      # itself must build and test with the id unset.
+      - name: Build
+        env:
+          VITE_UMAMI_WEBSITE_ID: ${{ vars.UMAMI_WEBSITE_ID }}
+        run: npm run build
 
       - name: Upload version with staging alias (does not touch production)
         id: upload
@@ -302,13 +305,15 @@ jobs:
         with:
           node-version: 22
 
-      # DIA-143: reuse `check`'s dist/ (see the `preview` job's matching
-      # step for why this still carries the pushed SHA in version.json).
-      - name: Download dist from check
-        uses: actions/download-artifact@v4
-        with:
-          name: dist
-          path: dist
+      - name: Install dependencies
+        run: npm ci
+
+      # DIA-277: rebuilt here (not `check`'s dist/) — see the `preview`
+      # job's matching step and the top-of-file comment for why.
+      - name: Build
+        env:
+          VITE_UMAMI_WEBSITE_ID: ${{ vars.UMAMI_WEBSITE_ID }}
+        run: npm run build
 
       # Checked before the deploy, not after: wrangler's own deployment-url
       # output is the common-case source of truth for BASE_URL below and

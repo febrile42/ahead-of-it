@@ -68,6 +68,52 @@ describe('POST /u/api/send', () => {
     expect(res.status).toBe(200);
   });
 
+  it('forwards User-Agent and CF-Connecting-IP (as X-Forwarded-For), and no cookies (DIA-254)', async () => {
+    const fetchMock = vi.fn(async (_target: string, _init?: RequestInit) => new Response(null, { status: 200 }));
+    vi.stubGlobal('fetch', fetchMock);
+    const env = makeEnv({ UMAMI_HOST: 'https://stats.example.com' });
+
+    await worker.fetch(
+      new Request('https://example.test/u/api/send', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'User-Agent': 'Mozilla/5.0 (test)',
+          'CF-Connecting-IP': '203.0.113.7',
+          Cookie: 'session=should-not-cross-the-boundary',
+        },
+        body: '{}',
+      }),
+      env
+    );
+
+    const [, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    const headers = new Headers(init.headers);
+    expect(headers.get('User-Agent')).toBe('Mozilla/5.0 (test)');
+    expect(headers.get('X-Forwarded-For')).toBe('203.0.113.7');
+    expect(headers.get('Cookie')).toBeNull();
+  });
+
+  it('omits X-Forwarded-For and User-Agent when the request carries neither', async () => {
+    const fetchMock = vi.fn(async (_target: string, _init?: RequestInit) => new Response(null, { status: 200 }));
+    vi.stubGlobal('fetch', fetchMock);
+    const env = makeEnv({ UMAMI_HOST: 'https://stats.example.com' });
+
+    await worker.fetch(
+      new Request('https://example.test/u/api/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: '{}',
+      }),
+      env
+    );
+
+    const [, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    const headers = new Headers(init.headers);
+    expect(headers.get('X-Forwarded-For')).toBeNull();
+    expect(headers.get('User-Agent')).toBeNull();
+  });
+
   it('only accepts POST — GET falls through to assets (no GET collect route)', async () => {
     const env = makeEnv();
     const res = await worker.fetch(new Request('https://example.test/u/api/send', { method: 'GET' }), env);
